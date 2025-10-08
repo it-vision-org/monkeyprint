@@ -14,13 +14,66 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #ffffff;
+  color: #171717;
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Utility styles to match the provided desktop mock */
+.mp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mp-gradient-hero {
+  background: linear-gradient(
+    135deg,
+    #5cc6ff 0%,
+    #6b5cff 40%,
+    #c43bff 70%,
+    #ff3aac 100%
+  );
+}
+
+.mp-gradient-cta {
+  background: linear-gradient(90deg, #2fb3ff 0%, #8b3dff 50%, #ff3aac 100%);
+}
+
+.mp-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.mp-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-step-title {
+  font-weight: 800;
+  font-size: 24px;
+}
+.mp-step-text {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.mp-link {
+  color: #11a6a6;
+  text-decoration: none;
+}
+.mp-link:hover {
+  text-decoration: underline;
 }
