@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useCallback } from "react";
 import { useDropzone } from 'react-dropzone';
+import { useRouter } from 'next/navigation';
 
 type StepDotsProps = { step: number; setStep: (s:number)=>void };
 const StepDots = ({ step, setStep }: StepDotsProps) => (
@@ -43,6 +44,8 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
 
             <div className="cs-form-section">
                 <h3 className="cs-section-title">Téléchargez votre logo</h3>
+                <p className="cs-upload-label">Compatible avec les formats PNG et JPEG.</p>
+                <p className="cs-upload-label">Format minimal 500 × 500 px.</p>
                 {logo ? (
                     <div className="cs-logo-preview">
                         <Image src={logo} alt="Logo preview" width={100} height={100} />
@@ -58,7 +61,6 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                         </div>
-                        <p className="cs-upload-info">Compatible avec les formats PNG et JPEG.<br/>Format minimal 500 x 500 px.</p>
                     </div>
                 )}
             </div>
@@ -134,7 +136,7 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep }: any) => (
     </>
 );
 
-const Step3 = ({ shopName, setStep, logo }: any) => {
+const Step3 = ({ shopName, setStep, logo, router }: any) => {
     const [email, setEmail] = useState("GrabMeShoe@gmail.com");
     const [password, setPassword] = useState("123456789@gms");
 
@@ -144,6 +146,7 @@ const Step3 = ({ shopName, setStep, logo }: any) => {
                 <h2 className="cs-title">Créer un compte</h2>
             </div>
             <StepDots step={3} setStep={setStep} />
+            
             <div className="cs-shop-preview">
                 {logo ? 
                     <Image src={logo} alt="Shop Logo" width={48} height={48} className="cs-shop-logo-preview" /> : 
@@ -164,22 +167,23 @@ const Step3 = ({ shopName, setStep, logo }: any) => {
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="cs-input" />
             </div>
 
-            <div className="cs-divider">Ou</div>
+            <div className="cs-divider-standalone">Ou</div>
             
-            <button className="cs-google-signin" type="button">
+            <button className="cs-google-signin-standalone" type="button">
                 <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width={24} height={24} />
                 Sign in with Google
             </button>
 
             <div className="cs-nav-buttons single-next">
                 <button className="cs-back-button" onClick={() => setStep(2)} type="button">Précédent</button>
-                <button className="cs-submit-button" onClick={() => alert("Account Created!")} type="button">S'inscrire</button>
+                <button className="cs-submit-button" onClick={() => router.push('/product-upload')} type="button">S'inscrire</button>
             </div>
         </>
     );
 };
 
 export default function CreateShopPage() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [shopName, setShopName] = useState("GrabMeShoe");
     const [logo, setLogo] = useState<string | null>(null);
@@ -189,6 +193,7 @@ export default function CreateShopPage() {
     const [selectedCategories, setSelectedCategories] = useState(["Streetwear", "Music"]);
     const [categorySearch, setCategorySearch] = useState("");
     const [selectedTheme, setSelectedTheme] = useState<number | null>(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const toggleCategory = (category: string) => {
         setSelectedCategories(prev =>
@@ -219,8 +224,37 @@ export default function CreateShopPage() {
                             <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>CONTACTEZ-NOUS</a>
                         </nav>
                     </div>
+                    <button className="mp-mobile-trigger" onClick={() => setMobileMenuOpen(true)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
             </header>
+
+            {mobileMenuOpen && (
+                <div className="mp-mobile-overlay" onClick={() => setMobileMenuOpen(false)}>
+                    <div className="mp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", color: "white", fontSize: "32px", cursor: "pointer", marginBottom: "20px" }}>×</button>
+                        <nav className="mp-mobile-menu">
+                            <a href="/" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                                <span className="mp-mobile-icon">🏠</span>
+                                ACCUEIL
+                            </a>
+                            <a href="#" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                                <span className="mp-mobile-icon">🛍️</span>
+                                SHOP LIST
+                            </a>
+                            <a href="#" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                                <span className="mp-mobile-icon">✉️</span>
+                                CONTACTEZ-NOUS
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            )}
 
             <main className="cs-main">
                 <div className="cs-form-container">
@@ -240,6 +274,7 @@ export default function CreateShopPage() {
                         shopName={shopName}
                         setStep={setStep}
                         logo={logo}
+                        router={router}
                     />}
                 </div>
             </main>
