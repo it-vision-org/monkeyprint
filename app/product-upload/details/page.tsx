@@ -1,17 +1,25 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function ProductDetailsPage() {
 	const router = useRouter();
-	const [productPrice, setProductPrice] = useState("");
+	const [productPrice, setProductPrice] = useState("25");
 	const [selectedGenders, setSelectedGenders] = useState<string[]>(["Homme"]);
 	const [tags, setTags] = useState([
 		"Sport", "Travel", "Kids", "Streetwear", "Hip hop", "Music", "Brands"
 	]);
 	const [selectedTags, setSelectedTags] = useState<string[]>(["Streetwear", "Music"]);
+	const [design, setDesign] = useState<string | null>(null);
+
+	useEffect(() => {
+		const savedDesign = sessionStorage.getItem('uploadedDesign');
+		if (savedDesign) {
+			setDesign(savedDesign);
+		}
+	}, []);
 
 	const toggleGender = (gender: string) => {
 		setSelectedGenders(prev =>
@@ -31,8 +39,13 @@ export default function ProductDetailsPage() {
 
 	const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
-		if (/^\d*\.?\d*$/.test(value)) {
-			setProductPrice(value);
+		setProductPrice(value);
+	};
+
+	const handlePriceBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = parseFloat(e.target.value);
+		if (value < 25) {
+			setProductPrice("25");
 		}
 	};
 
@@ -73,7 +86,26 @@ export default function ProductDetailsPage() {
 						<div className="pd-title-hr" />
 
 						<div className="pd-image-box">
-							<Image src="/T-Shirt-Design.png" alt="Product" width={360} height={360} style={{ objectFit: 'contain' }} />
+							<div className="pu-design-preview-shirt">
+								<Image 
+									src="/T-Shirt-Design.png" 
+									alt="Shirt Preview" 
+									width={300} 
+									height={350}
+									style={{ objectFit: 'contain' }}
+								/>
+								{design && (
+									<div className="pu-design-overlay">
+										<Image 
+											src={design} 
+											alt="Design" 
+											width={100} 
+											height={100}
+											style={{ objectFit: 'contain' }}
+										/>
+									</div>
+								)}
+							</div>
 						</div>
 
 						<label className="pd-label">Nom du produit :</label>
@@ -84,9 +116,11 @@ export default function ProductDetailsPage() {
 								<label className="pd-label">Prix du produit :</label>
 								<input 
 									className="pd-input" 
-									type="text" 
+									type="number" 
+									min="25"
 									value={productPrice}
 									onChange={handlePriceChange}
+									onBlur={handlePriceBlur}
 									placeholder="e.g., 100"
 								/>
 							</div>

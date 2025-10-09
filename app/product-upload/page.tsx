@@ -91,6 +91,13 @@ export default function ProductUploadPage() {
         setAiImages([]);
     };
 
+    const handleNext = () => {
+        if (uploadedDesign) {
+            sessionStorage.setItem('uploadedDesign', uploadedDesign);
+        }
+        router.push('/product-upload/details');
+    };
+
     return (
         <div className="product-upload-page">
             {/* Header */}
@@ -166,9 +173,8 @@ export default function ProductUploadPage() {
                     <div className="pu-content">
                         {/* Title */}
                         <h1 className="pu-title">Commençons par votre premier téléchargement.</h1>
-
-                        {/* Product Type Selection */}
                         <div className="pu-section">
+                            {/* Product Type Selection */}
                             <h2 className="pu-section-title">Choisissez le type de produit</h2>
                             <div className="pu-products-grid">
                                 {productTypes.map((product) => (
@@ -193,9 +199,8 @@ export default function ProductUploadPage() {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Colors Selection */}
                         <div className="pu-section">
+                            {/* Colors Selection */}
                             <h3 className="pu-section-subtitle">Couleurs disponibles</h3>
                             <div className="pu-colors-container">
                                 <div className="pu-colors-grid">
@@ -226,9 +231,8 @@ export default function ProductUploadPage() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Upload Design */}
                         <div className="pu-section">
+                            {/* Upload Design */}
                             <div {...getRootProps()} className={`pu-upload-zone ${isDragActive ? 'active' : ''}`}>
                                 <input {...getInputProps()} />
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="pu-upload-icon">
@@ -239,7 +243,6 @@ export default function ProductUploadPage() {
                                 <p className="pu-upload-text">Téléchargez votre design</p>
                                 <p className="pu-upload-subtext">Doit être uniquement au format PNG</p>
                             </div>
-
                             {/* AI Generator Button */}
                             <div className="pu-ai-section">
                                 <div className="pu-ai-divider">OU GÉNÉRER AVEC IA</div>
@@ -257,9 +260,8 @@ export default function ProductUploadPage() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Design Preview */}
                         <div className="pu-section">
+                            {/* Design Preview */}
                             <h3 className="pu-section-subtitle">Modifiez votre design</h3>
                             <div className="pu-design-preview">
                                 <div className="pu-design-preview-shirt">
@@ -284,11 +286,8 @@ export default function ProductUploadPage() {
                                 </div>
                             </div>
                         </div>
-
-
-
                         {/* Next Button */}
-                        <button className="pu-next-button" onClick={() => router.push('/product-upload/details')}>
+                        <button className="pu-next-button" onClick={handleNext}>
                             Suivant
                         </button>
                     </div>

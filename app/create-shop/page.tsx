@@ -38,21 +38,18 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
     return (
         <>
             <div className="cs-form-header">
-                <h2 className="cs-title">Commencez par créer votre boutique</h2>
+                <h2 className="cs-title text-center">Commencez par créer votre boutique</h2>
             </div>
             <StepDots step={1} setStep={setStep} />
 
-            <div className="cs-form-section">
-                <h3 className="cs-section-title">Téléchargez votre logo</h3>
-                <p className="cs-upload-label">Compatible avec les formats PNG et JPEG.</p>
-                <p className="cs-upload-label">Format minimal 500 × 500 px.</p>
+            <div className="cs-logo-upload-section">
                 {logo ? (
                     <div className="cs-logo-preview">
                         <Image src={logo} alt="Logo preview" width={100} height={100} />
                         <button onClick={() => setLogo(null)} className="cs-edit-logo-btn" type="button">Modifier</button>
                     </div>
                 ) : (
-                    <div className="cs-upload-container">
+                    <div className="cs-upload-wrapper cs-upload-container-mobile">
                         <div {...getRootProps()} className={`cs-upload-box ${isDragActive ? 'active' : ''}`}>
                             <input {...getInputProps()} />
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="cs-upload-icon-svg">
@@ -61,21 +58,26 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
                         </div>
+                        <div className="cs-upload-text-content">
+                            <h3 className="cs-section-title text-center">Téléchargez votre logo</h3>
+                            <p className="cs-upload-label">Compatible avec les formats PNG et JPEG.</p>
+                            <p className="cs-upload-label">Format minimal 500 × 500 px.</p>
+                        </div>
                     </div>
                 )}
             </div>
 
             <div className="cs-form-section">
-                <h3 className="cs-section-title">Nom de votre boutique</h3>
-                <p className="cs-section-subtitle">Doit être rempli*</p>
+                <h3 className="cs-section-title text-center">Nom de votre boutique</h3>
+                <p className="cs-section-subtitle">Doit être rempli<span className="cs-section-subtitle-red">*</span></p>
                 <input type="text" value={shopName} onChange={(e) => setShopName(e.target.value)} className="cs-input" />
             </div>
 
             <div className="cs-form-section">
-                <h3 className="cs-section-title">Catégorie de magasin</h3>
-                <p className="cs-section-subtitle">Doit être rempli*</p>
-                <div className="cs-search-container">
-                    <div className="cs-search-input-wrapper">
+                <h3 className="cs-section-title text-center">Catégorie de magasin</h3>
+                <p className="cs-section-subtitle">Doit être rempli<span className="cs-section-subtitle-red">*</span></p>
+                <div className="cs-search-container cs-search-container-mobile">
+                    <div className="cs-search-input-wrapper cs-search-input-wrapper-mobile">
                         <svg className="cs-search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -97,14 +99,18 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
     );
 }
 
-const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep }: any) => (
+const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any) => (
     <>
         <div className="cs-form-header">
-            <h2 className="cs-title">Choisissez le thème de votre magasin</h2>
+            <h2 className="cs-title text-center">Choisissez le thème de votre magasin</h2>
         </div>
         <StepDots step={2} setStep={setStep} />
         <div className="cs-shop-preview">
-            <Image src="/logo.png" alt="Shop Logo" width={48} height={48} className="cs-shop-logo-preview" />
+            {logo ? (
+                <Image src={logo} alt="Shop Logo" width={48} height={48} className="cs-shop-logo-preview" />
+            ) : (
+                <Image src="/logo.png" alt="Shop Logo" width={48} height={48} className="cs-shop-logo-preview" />
+            )}
             <span>{shopName}</span>
         </div>
 
@@ -143,7 +149,7 @@ const Step3 = ({ shopName, setStep, logo, router }: any) => {
     return (
         <>
             <div className="cs-form-header">
-                <h2 className="cs-title">Créer un compte</h2>
+                <h2 className="cs-title text-center">Créer un compte</h2>
             </div>
             <StepDots step={3} setStep={setStep} />
             
@@ -156,14 +162,14 @@ const Step3 = ({ shopName, setStep, logo, router }: any) => {
             </div>
 
             <div className="cs-form-section">
-                <h3 className="cs-section-title">Entrez votre adresse e-mail<br/>Ou numéro de téléphone</h3>
-                <p className="cs-section-subtitle">Doit être rempli*</p>
+                <h3 className="cs-section-title text-center">Entrez votre adresse e-mail<br/>Ou numéro de téléphone</h3>
+                <p className="cs-section-subtitle">Doit être rempli<span className="cs-section-subtitle-red">*</span></p>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="cs-input" />
             </div>
 
             <div className="cs-form-section">
-                <h3 className="cs-section-title">Créer un mot de passe</h3>
-                <p className="cs-section-subtitle">Doit être rempli*</p>
+                <h3 className="cs-section-title text-center">Créer un mot de passe</h3>
+                <p className="cs-section-subtitle">Doit être rempli<span className="cs-section-subtitle-red">*</span></p>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="cs-input" />
             </div>
 
@@ -192,7 +198,7 @@ export default function CreateShopPage() {
     ]);
     const [selectedCategories, setSelectedCategories] = useState(["Streetwear", "Music"]);
     const [categorySearch, setCategorySearch] = useState("");
-    const [selectedTheme, setSelectedTheme] = useState<number | null>(null);
+    const [selectedTheme, setSelectedTheme] = useState<number | null>(1);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const toggleCategory = (category: string) => {
@@ -269,6 +275,7 @@ export default function CreateShopPage() {
                         shopName={shopName} 
                         selectedTheme={selectedTheme} setSelectedTheme={setSelectedTheme}
                         setStep={setStep}
+                        logo={logo}
                     />}
                     {step === 3 && <Step3 
                         shopName={shopName}
