@@ -79,7 +79,14 @@ const Step1 = ({ shopName, setShopName, categories, selectedCategories, category
                 <div className="cs-search-container cs-search-container-mobile">
                     <div className="cs-search-input-wrapper cs-search-input-wrapper-mobile">
                         <svg className="cs-search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path
+                d="M10 4.16667V15.8333M4.16667 10H15.8333"
+                stroke="#888"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
                         </svg>
                         <input type="text" placeholder="Ajouter plus..." className="cs-input cs-search-input" value={categorySearch} onChange={e => setCategorySearch(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCategory(); } }} />
                     </div>
