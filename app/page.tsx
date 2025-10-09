@@ -1,59 +1,93 @@
+'use client';
+
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Home() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <div>
       {/* Navbar */}
-      <header style={{ borderBottom: "1px solid #e5e7eb", background: "#ffffff" }}>
+      <header className="mp-header" style={{ borderBottom: "1px solid #e5e7eb", background: "#ffffff" }}>
         <div className="mp-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 80, padding: "0 20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <Image src="/logo.svg" alt="Monkey Print" width={120} height={40} style={{ objectFit: "contain" }} />
-            <nav style={{ display: "flex", gap: 32, fontWeight: 600, color: "#0d9488", fontSize: 15 }}>
+            <Image src="/logo.png" alt="Monkey Print" width={120} height={40} style={{ objectFit: "contain" }} />
+            <nav className="mp-desktop-nav" style={{ display: "flex", gap: 32, fontWeight: 600, color: "#0d9488", fontSize: 15 }}>
               <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>ACCUEIL</a>
               <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>SHOP LIST</a>
               <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>CONTACTEZ-NOUS</a>
             </nav>
           </div>
-          <div>
-            <button style={{ background: "#0ea5a6", color: "white", fontWeight: 700, borderRadius: 8, padding: "12px 24px", border: "none", cursor: "pointer", fontSize: 14 }}>COMMENCER</button>
+          <div className="mp-desktop-nav">
+            <Link href="/create-shop">
+              <button style={{ background: "#0ea5a6", color: "white", fontWeight: 700, borderRadius: 8, padding: "12px 24px", border: "none", cursor: "pointer", fontSize: 14 }}>COMMENCER</button>
+            </Link>
+          </div>
+          <div className="mp-mobile-trigger" style={{ display: 'none' }}>
+            <button onClick={() => setIsMenuOpen(true)} aria-label="Open menu" style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8 }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M4 12H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M4 18H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
         </div>
       </header>
 
+      {isMenuOpen && (
+        <div className="mp-mobile-overlay" onClick={() => setIsMenuOpen(false)}>
+          <div className="mp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => setIsMenuOpen(false)} aria-label="Close menu" style={{ background: 'transparent', border: 'none', color: 'white', fontSize: 32, lineHeight: 1, cursor: 'pointer' }}>&times;</button>
+            </div>
+            <nav className="mp-mobile-menu">
+              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">👤</span>Connexion / S'inscrire</a>
+              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">🔥</span>Découvrez les boutiques</a>
+              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">💬</span>Contactez-nous</a>
+            </nav>
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <section className="mp-container" style={{ paddingTop: 40, paddingBottom: 48, padding: "40px 20px 48px" }}>
-        <div className="mp-gradient-hero" style={{ borderRadius: 24, padding: "48px 56px", minHeight: 320, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div className="mp-gradient-hero mp-hero" style={{ borderRadius: 24, padding: "48px 56px", minHeight: 320, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ textAlign: "center", maxWidth: 700, position: "relative", zIndex: 2 }}>
-            <h1 style={{ fontSize: 44, lineHeight: 1.3, fontWeight: 900, color: "white", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <h1 className="mp-hero-title" style={{ lineHeight: 1.3, fontWeight: 900, color: "white", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               GAGNEZ DE L'<span style={{ color: "#ffeb3b" }}>ARGENT</span>{" "}
               <span style={{ color: "#ffeb3b" }}>GRATUITEMENT</span>, EN VENDANT{" "}
               SIMPLEMENT DES PRODUITS{" "}
               MARCHANDS <em style={{ fontStyle: "italic", fontWeight: 900 }}>EN TUNISIE.</em>
             </h1>
-            <p style={{ color: "white", marginTop: 20, fontSize: 18, lineHeight: 1.5 }}>
+            <p className="mp-hero-text" style={{ color: "white", marginTop: 20, fontSize: 18, lineHeight: 1.5 }}>
               Téléchargez vos œuvres d'art, personnalisez vos produits<br />et démarrez votre propre boutique en ligne.
             </p>
-            <button className="mp-gradient-cta" style={{ marginTop: 32, borderRadius: 9999, color: "white", fontWeight: 800, padding: "16px 40px", border: 0, boxShadow: "0 8px 20px rgba(0,0,0,0.2)", cursor: "pointer", fontSize: 16 }}>
-              COMMENCEZ GRATUITEMENT !
-            </button>
+            <Link href="/create-shop">
+              <button className="mp-gradient-cta mp-hero-button" style={{ marginTop: 32, borderRadius: 9999, color: "white", fontWeight: 800, padding: "16px 40px", border: 0, boxShadow: "0 8px 20px rgba(0,0,0,0.2)", cursor: "pointer", fontSize: 16 }}>
+                COMMENCEZ GRATUITEMENT !
+              </button>
+            </Link>
           </div>
-          <Image src="/mock-shirt.png" alt="T-shirt" width={280} height={280} style={{ position: "absolute", right: 40, bottom: 0, transform: "rotate(12deg)", opacity: 0.95 }} />
+          <Image src="/mock-shirt.png" alt="T-shirt" width={280} height={280} className="mp-hero-image" style={{ position: "absolute", right: 40, bottom: 0, transform: "rotate(12deg)", opacity: 0.95 }} />
         </div>
       </section>
 
       {/* Steps */}
-      <section className="mp-container" style={{ padding: "48px 20px" }}>
+      <section className="mp-container" style={{ padding: "10px 20px" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#000", marginBottom: 8 }}>Comment ça marche</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 8 }}>Comment ça marche</h2>
           <p style={{ color: "#6b7280", fontSize: 17 }}>De la conception à la vente en quelques étapes simples</p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, maxWidth: 1080, margin: "0 auto" }}>
+        <div className="mp-steps-grid">
           {/* Step 1 */}
           <div style={{ background: "#fff0e6", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div style={{ position: "absolute", top: -25, left: -15 }}>
+            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, left: -15 }}>
               <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", position: 'relative' }}>
+              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
                 <Image src="/Paper Plus.png" alt="Téléchargez votre conception" width={36} height={36} />
               </div>
             </div>
@@ -67,9 +101,9 @@ export default function Home() {
 
           {/* Step 2 */}
           <div style={{ background: "#e0f8f4", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div style={{ position: "absolute", top: -25, right: -15 }}>
+            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, right: -15 }}>
               <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", position: 'relative' }}>
+              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
                 <Image src="/Edit.png" alt="Personnaliser les produits" width={36} height={36} />
               </div>
             </div>
@@ -83,9 +117,9 @@ export default function Home() {
 
           {/* Step 3 */}
           <div style={{ background: "#e3f0ff", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div style={{ position: "absolute", top: -25, left: -15 }}>
+            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, left: -15 }}>
               <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", position: 'relative' }}>
+              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
                 <Image src="/Home.png" alt="Créez votre boutique" width={36} height={36} />
               </div>
             </div>
@@ -99,9 +133,9 @@ export default function Home() {
 
           {/* Step 4 */}
           <div style={{ background: "#ffe8e6", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div style={{ position: "absolute", top: -25, right: -15 }}>
+            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, right: -15 }}>
               <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", position: 'relative' }}>
+              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
                 <Image src="/Arrow.png" alt="Commencez à vendre" width={36} height={36} />
               </div>
             </div>
@@ -121,7 +155,7 @@ export default function Home() {
           <h2 style={{ fontSize: 32, fontWeight: 800, color: "#000" }}>Découvrez les boutiques</h2>
           <p style={{ color: "#6b7280", marginTop: 8, fontSize: 16 }}>Voici quelques-uns des magasins les plus populaires</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20, marginTop: 32 }}>
+        <div className="mp-stores-grid">
           {[0,1,2,3].map((i) => (
             <div key={i} style={{ position: "relative" }}>
               <div style={{ border: "3px solid #b6cff5", borderRadius: 16, height: 160, background: "#ffffff" }} />
@@ -132,7 +166,9 @@ export default function Home() {
           ))}
         </div>
         <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
-          <button className="mp-gradient-cta" style={{ borderRadius: 9999, color: "white", fontWeight: 800, padding: "18px 48px", border: 0, cursor: "pointer", fontSize: 16, boxShadow: "0 8px 20px rgba(0,0,0,0.15)" }}>COMMENCEZ GRATUITEMENT !</button>
+          <Link href="/create-shop">
+            <button className="mp-gradient-cta" style={{ borderRadius: 9999, color: "white", fontWeight: 800, padding: "18px 48px", border: 0, cursor: "pointer", fontSize: 16, boxShadow: "0 8px 20px rgba(0,0,0,0.15)" }}>COMMENCEZ GRATUITEMENT !</button>
+          </Link>
         </div>
       </section>
 
