@@ -25,12 +25,12 @@ type QualityOption = {
 };
 
 const PRODUCT_TYPES: ProductCard[] = [
-    { id: "hoodie", name: "Hoodie", image: "/hoodie.png", badge: "30DT" },
-    { id: "tshirt", name: "T-Shirt", image: "/T-shirt.png", badge: "20DT" },
-    { id: "hoodie2", name: "Hoodie", image: "/hoodie.png" },
-    { id: "tshirt2", name: "T-Shirt", image: "/T-shirt.png" },
-    { id: "hoodie3", name: "Hoodie", image: "/hoodie.png" },
-    { id: "tshirt3", name: "T-Shirt", image: "/T-shirt.png" },
+    { id: "hoodie", name: "Hoodie", image: "/Hoodie.png", badge: "30DT" },
+    { id: "tshirt", name: "T-Shirt", image: "/T-Shirt.png", badge: "20DT" },
+    { id: "hoodie2", name: "Hoodie", image: "/Hoodie.png" },
+    { id: "tshirt2", name: "T-Shirt", image: "/T-Shirt.png" },
+    { id: "hoodie3", name: "Hoodie", image: "/Hoodie.png" },
+    { id: "tshirt3", name: "T-Shirt", image: "/T-Shirt.png" },
 ];
 
 const COLOR_SWATCHES: ColorSwatch[] = [
@@ -263,7 +263,7 @@ export default function ProductUploadPage() {
                                             }}
                                         >
                                             <Image
-                                                src="/T-shirt.png"
+                                                src="/T-Shirt.png"
                                                 alt={`T-shirt ${colorId}`}
                                                 width={90}
                                                 height={110}
