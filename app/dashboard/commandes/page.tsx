@@ -1,10 +1,10 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function CommandesPage() {
+function CommandesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -332,5 +332,17 @@ export default function CommandesPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function CommandesPage() {
+    return (
+        <Suspense fallback={
+            <div className="commandes-page commandes-non-confirme">
+                <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>
+            </div>
+        }>
+            <CommandesContent />
+        </Suspense>
     );
 }
