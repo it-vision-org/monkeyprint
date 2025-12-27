@@ -62,8 +62,8 @@ export default function ProductUploadPage() {
     const router = useRouter();
     const [selectedProduct, setSelectedProduct] = useState<string>("tshirt");
     const [selectedColors, setSelectedColors] = useState<string[]>(["white", "blue", "black", "red", "lime"]);
-    const [activeColor, setActiveColor] = useState<string>("white");
-    const [selectedQuality, setSelectedQuality] = useState<string>("normal");
+    const [activeColor, setActiveColor] = useState<string>("black");
+    const [selectedQuality, setSelectedQuality] = useState<string>("cotton");
     const [uploadedDesign, setUploadedDesign] = useState<string | null>(null);
     const [showAIPopup, setShowAIPopup] = useState(false);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -164,7 +164,6 @@ export default function ProductUploadPage() {
                 >
                     <div className="pu-cart-content">
                         <span className="pu-cart-icon">🛒</span>
-                        <span className="pu-cart-label">Détail du panier</span>
                     </div>
                     <div className="pu-cart-total">
                         {totalPrice}DT
@@ -247,27 +246,25 @@ export default function ProductUploadPage() {
                         <h3 className="pu-card-subtitle">Couleurs disponibles :</h3>
                         <div className="pu-color-wrapper">
                             <div className="pu-color-hero">
-                                {selectedColors.map((colorId, index) => {
-                                    const activeIndex = selectedColors.findIndex(c => c === activeColor);
-                                    const offset = (index - (selectedColors.length - 1) / 2) * 25;
-                                    const isActive = colorId === activeColor;
-                                    const zIndex = isActive ? 100 : Math.max(1, selectedColors.length - Math.abs(index - activeIndex));
+                                {COLOR_SWATCHES.map((swatch, index) => {
+                                    const isSelected = selectedColors.includes(swatch.id);
+                                    const isActive = swatch.id === activeColor;
                                     return (
                                         <div 
-                                            key={colorId} 
-                                            className="pu-shirt"
+                                            key={swatch.id} 
+                                            className={`pu-shirt ${isActive ? "active" : ""}`}
                                             style={{
-                                                transform: `translateX(${offset}px) scale(${isActive ? 1 : 0.85})`,
-                                                zIndex: zIndex,
-                                                opacity: isActive ? 1 : 0.6
+                                                transform: isActive ? "scale(1.1)" : "scale(0.9)",
+                                                zIndex: isActive ? 10 : 1,
+                                                opacity: isSelected ? 1 : 0.4
                                             }}
                                         >
                                             <Image
                                                 src="/T-Shirt.png"
-                                                alt={`T-shirt ${colorId}`}
+                                                alt={`T-shirt ${swatch.id}`}
                                                 width={90}
                                                 height={110}
-                                                style={{ filter: COLOR_FILTERS[colorId] ?? "none" }}
+                                                style={{ filter: COLOR_FILTERS[swatch.id] ?? "none" }}
                                             />
                                         </div>
                                     );
@@ -278,9 +275,12 @@ export default function ProductUploadPage() {
                                     <button
                                         key={swatch.id}
                                         type="button"
-                                        className={`pu-color-dot ${selectedColors.includes(swatch.id) ? "active" : ""}`}
+                                        className={`pu-color-dot ${selectedColors.includes(swatch.id) ? "active" : ""} ${activeColor === swatch.id ? "selected" : ""}`}
                                         style={{ background: swatch.hex }}
-                                        onClick={() => toggleColor(swatch.id)}
+                                        onClick={() => {
+                                            toggleColor(swatch.id);
+                                            setActiveColor(swatch.id);
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -311,7 +311,7 @@ export default function ProductUploadPage() {
                         <div className="pu-design-card">
                             <div className="pu-design-figure">
                                 <Image
-                                    src="/T-Shirt-Design.png"
+                                    src="/mock-shirt.png"
                                     alt="Mockup"
                                     width={320}
                                     height={320}
@@ -321,9 +321,33 @@ export default function ProductUploadPage() {
                                     {uploadedDesign ? (
                                         <Image src={uploadedDesign} alt="Design" width={120} height={120} />
                                     ) : (
-                                        <div className="pu-placeholder">+</div>
+                                        <div className="pu-design-grid">
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot active"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                            <div className="pu-grid-dot"></div>
+                                        </div>
                                     )}
                                 </div>
+                                <button className="pu-design-refresh" type="button">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="1 4 1 10 7 10" />
+                                        <polyline points="23 20 23 14 17 14" />
+                                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" />
+                                    </svg>
+                                </button>
+                                <button className="pu-design-resize" type="button">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" />
+                                        <path d="m12 12 4 4 4-4" />
+                                        <path d="M12 12V8" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                         <span className="pu-preview-label">Couleurs d’aperçu</span>
@@ -362,7 +386,7 @@ export default function ProductUploadPage() {
                         </div>
                         <div className="pu-summary">
                             <div className="pu-summary-row">
-                                <span>Articles ( T-shirt )</span>
+                                <span>Articles (T-shirt)</span>
                                 <span>{BASE_PRICE}DT</span>
                             </div>
                             <div className="pu-summary-row">

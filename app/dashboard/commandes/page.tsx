@@ -8,12 +8,17 @@ function CommandesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [commandesOpen, setCommandesOpen] = useState(false);
+    const [commandesOpen, setCommandesOpen] = useState(true);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedCommand, setSelectedCommand] = useState<number | null>(null);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState("11/06/2025");
+    const [currentView, setCurrentView] = useState<'calendar' | 'month'>('calendar');
+    const [currentMonth, setCurrentMonth] = useState(new Date(2023, 3, 1)); // April 2023
+    const [currentYear, setCurrentYear] = useState(2023);
     
-    const status = searchParams.get('status') || 'non-confirme';
+    const status = searchParams.get('status') || null;
 
     const orders = Array(4).fill({
         id: "#1",
@@ -39,10 +44,16 @@ function CommandesContent() {
                     icon: 'none',
                     showAlert: true
                 };
-            default:
+            case 'non-confirme':
                 return {
                     title: 'Liste de commandes non confirmé',
                     bgClass: 'commandes-non-confirme',
+                    icon: 'check'
+                };
+            default:
+                return {
+                    title: 'Liste de commandes',
+                    bgClass: '',
                     icon: 'check'
                 };
         }
@@ -52,29 +63,14 @@ function CommandesContent() {
 
     return (
         <div className={`commandes-page ${config.bgClass}`}>
-            <header className="dash-header">
-                <div className="dash-container">
-                    <div className="dash-logo">
-                        DASHBOARD <span className="dash-pipe">|</span> <span className="dash-section">COMMANDES</span>
+            <header className="commandes-header-mobile">
+                <div className="commandes-header-inner">
+                    <div className="commandes-header-logo">
+                        DASHBOARD <span className="commandes-pipe">|</span> <span className="commandes-section">COMMANDES</span>
                     </div>
-                    <nav className="dash-nav">
-                        <a href="/dashboard/apercu" className="dash-nav-link">APERÇU</a>
-                        <a href="/dashboard/produits" className="dash-nav-link">PRODUITS</a>
-                        <a href="/dashboard/commandes" className="dash-nav-link active">COMMANDES</a>
-                        <a href="/dashboard/portefeuille" className="dash-nav-link">PORTEFEUILLE</a>
-                    </nav>
-                    <div className="dash-actions">
-                        <button className="dash-visit-btn" onClick={() => setThemeModalOpen(true)}>VISITER LE MAGASIN</button>
-                        <button className="dash-user-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <button className="dash-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 12H21M3 6H21M3 18H21" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <button className="commandes-menu-btn" onClick={() => setMobileMenuOpen(true)}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
                 </div>
@@ -84,16 +80,23 @@ function CommandesContent() {
                 <>
                     <div className="dash-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
                     <div className={`dash-mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-                        <button className="dash-visit-btn-mobile" onClick={() => {
-                            setMobileMenuOpen(false);
-                            setThemeModalOpen(true);
-                        }}>VISITER LE MAGASIN</button>
+                        <div className="dash-mobile-menu-header">
+                            <button className="dash-visit-btn-mobile" onClick={() => {
+                                setMobileMenuOpen(false);
+                                setThemeModalOpen(true);
+                            }}>VISITER LE MAGASIN</button>
+                            <button className="dash-mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                         
                         <nav className="dash-mobile-nav">
                             <a href="/dashboard/apercu" className="dash-mobile-nav-item">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M11 3.05493C11.3128 2.89979 11.6533 2.81897 12 2.81897C12.3467 2.81897 12.6872 2.89979 13 3.05493L20.5 6.80493C20.6712 6.88831 20.8192 7.01332 20.9307 7.16843C21.0422 7.32354 21.1139 7.50384 21.1396 7.69324C21.1653 7.88264 21.1443 8.07547 21.0784 8.25531C21.0125 8.43514 20.9036 8.59657 20.761 8.72493L12.761 15.7249C12.5519 15.9131 12.2798 16.0178 12 16.0178C11.7202 16.0178 11.4481 15.9131 11.239 15.7249L3.23902 8.72493C3.09643 8.59657 2.98752 8.43514 2.92162 8.25531C2.85572 8.07547 2.8347 7.88264 2.86037 7.69324C2.88605 7.50384 2.95783 7.32354 3.06932 7.16843C3.18081 7.01332 3.32883 6.88831 3.50002 6.80493L11 3.05493Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M20 12V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21H6C5.46957 21 4.96086 20.7893 4.58579 20.4142C4.21071 20.0391 4 19.5304 4 19V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 Aperçu
                             </a>
@@ -134,7 +137,7 @@ function CommandesContent() {
                                 {commandesOpen && (
                                     <div className="dash-mobile-submenu">
                                         <a href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot red"></span>
+                                            <span className="dash-submenu-dot orange"></span>
                                             Non confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
@@ -142,7 +145,7 @@ function CommandesContent() {
                                             Confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot orange"></span>
+                                            <span className="dash-submenu-dot red"></span>
                                             Retours
                                         </a>
                                     </div>
@@ -215,10 +218,10 @@ function CommandesContent() {
                         </div>
                         <button className="commandes-sort-btn">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 4H21M3 8H21M7 12H17M10 16H14" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M7 8L12 3L17 8M7 16L12 21L17 16" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
-                        <div className="commandes-date">11/06/2025</div>
+                        <div className="commandes-date" onClick={() => setDatePickerOpen(true)}>{selectedDate}</div>
                     </div>
 
                     <div className="commandes-list">
@@ -226,24 +229,28 @@ function CommandesContent() {
                             <div key={index} className="commande-card">
                                 <div className="commande-card-header">
                                     <div className="commande-id">{order.id}</div>
-                                    <div className="commande-date">{order.date}</div>
-                                    <div className="commande-actions">
-                                        <button className="commande-delete-btn" onClick={() => {
-                                            setSelectedCommand(index);
-                                            setDeleteDialogOpen(true);
-                                        }}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 6H5H21" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </button>
-                                        {config.icon === 'check' && (
-                                            <button className={`commande-check-btn ${status === 'confirme' ? 'confirmed' : ''}`}>
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
-                                            </button>
-                                        )}
+                                    <div className="commande-header-right">
+                                        <div className="commande-date">{order.date}</div>
+                                        <div className="commande-actions">
+                                            {status !== 'retours' && (
+                                                <button className="commande-delete-btn" onClick={() => {
+                                                    setSelectedCommand(index);
+                                                    setDeleteDialogOpen(true);
+                                                }}>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M3 6H5H21" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </button>
+                                            )}
+                                            {config.icon === 'check' && (
+                                                <button className={`commande-check-btn ${status === 'confirme' ? 'confirmed' : ''}`}>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="commande-card-body">
@@ -268,23 +275,17 @@ function CommandesContent() {
                         ))}
                     </div>
 
-                    <div className="dash-pagination">
-                        <button className="dash-pagination-btn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            Précédent
+                    <div className="commandes-pagination">
+                        <button className="commandes-pagination-btn">
+                            &lt; Précédent
                         </button>
-                        <div className="dash-pagination-numbers">
-                            <button className="dash-pagination-number">1</button>
-                            <button className="dash-pagination-number active">2</button>
-                            <button className="dash-pagination-number">3</button>
+                        <div className="commandes-pagination-numbers">
+                            <button className="commandes-pagination-number">1</button>
+                            <button className="commandes-pagination-number active">2</button>
+                            <button className="commandes-pagination-number">3</button>
                         </div>
-                        <button className="dash-pagination-btn">
-                            Suivant
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                        <button className="commandes-pagination-btn">
+                            Suivant &gt;
                         </button>
                     </div>
                 </div>
@@ -299,6 +300,146 @@ function CommandesContent() {
                             <button className="delete-dialog-btn confirm" onClick={() => setDeleteDialogOpen(false)}>NON</button>
                             <button className="delete-dialog-btn cancel" onClick={() => setDeleteDialogOpen(false)}>OUI</button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Date Picker Modal */}
+            {datePickerOpen && (
+                <div className="date-picker-overlay" onClick={() => setDatePickerOpen(false)}>
+                    <div className="date-picker-modal" onClick={(e) => e.stopPropagation()}>
+                        {currentView === 'month' ? (
+                            <div className="date-picker-month-view">
+                                <div className="date-picker-year-header">
+                                    <button className="date-picker-nav-btn" onClick={() => setCurrentYear(currentYear - 1)}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <span className="date-picker-year-text">{currentYear}</span>
+                                    <button className="date-picker-nav-btn" onClick={() => setCurrentYear(currentYear + 1)}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="date-picker-month-grid">
+                                    {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].map((month, index) => {
+                                        const isSelected = currentMonth.getMonth() === index && currentMonth.getFullYear() === currentYear;
+                                        const isHighlighted = index === 5; // June highlighted in light blue
+                                        return (
+                                            <button
+                                                key={month}
+                                                className={`date-picker-month-btn ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`}
+                                                onClick={() => {
+                                                    setCurrentMonth(new Date(currentYear, index, 1));
+                                                    setCurrentView('calendar');
+                                                }}
+                                            >
+                                                {month}
+                                                {isSelected && <span className="date-picker-month-dot"></span>}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="date-picker-calendar-view">
+                                <div className="date-picker-calendar-header">
+                                    <button className="date-picker-nav-btn" onClick={() => {
+                                        const newDate = new Date(currentMonth);
+                                        newDate.setMonth(newDate.getMonth() - 1);
+                                        setCurrentMonth(newDate);
+                                        setCurrentYear(newDate.getFullYear());
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <div className="date-picker-month-year" onClick={() => {
+                                        setCurrentYear(currentMonth.getFullYear());
+                                        setCurrentView('month');
+                                    }}>
+                                        <span>{['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][currentMonth.getMonth()]} {currentMonth.getFullYear()}</span>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <button className="date-picker-nav-btn" onClick={() => {
+                                        const newDate = new Date(currentMonth);
+                                        newDate.setMonth(newDate.getMonth() + 1);
+                                        setCurrentMonth(newDate);
+                                        setCurrentYear(newDate.getFullYear());
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="date-picker-weekdays">
+                                    {['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map(day => (
+                                        <div key={day} className="date-picker-weekday">{day}</div>
+                                    ))}
+                                </div>
+                                <div className="date-picker-days">
+                                    {(() => {
+                                        const year = currentMonth.getFullYear();
+                                        const month = currentMonth.getMonth();
+                                        const firstDay = new Date(year, month, 1);
+                                        const startDate = new Date(firstDay);
+                                        // Monday is day 1, so adjust if first day is Sunday (day 0)
+                                        const dayOfWeek = firstDay.getDay();
+                                        const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                                        startDate.setDate(startDate.getDate() - offset);
+                                        
+                                        const days = [];
+                                        const currentDate = new Date(startDate);
+                                        
+                                        for (let i = 0; i < 42; i++) {
+                                            const date = new Date(currentDate);
+                                            const isCurrentMonth = date.getMonth() === month;
+                                            const dateNum = date.getDate();
+                                            
+                                            // Check if this is April 2023 for the specific highlights
+                                            const isApril2023 = year === 2023 && month === 3;
+                                            
+                                            // Selected date (12) - light blue
+                                            const isSelected = dateNum === 12 && isCurrentMonth && isApril2023;
+                                            
+                                            // Range 1: April 26-29 (dark green)
+                                            const isInRange1 = isCurrentMonth && isApril2023 && dateNum >= 26 && dateNum <= 29;
+                                            
+                                            // Range 2: April 30 to May 3 (dark green)
+                                            const isInRange2 = isApril2023 && (
+                                                (isCurrentMonth && dateNum === 30) ||
+                                                (date.getMonth() === 4 && date.getFullYear() === 2023 && dateNum >= 1 && dateNum <= 3)
+                                            );
+                                            
+                                            days.push(
+                                                <button
+                                                    key={i}
+                                                    className={`date-picker-day ${!isCurrentMonth ? 'other-month' : ''} ${isSelected ? 'selected' : ''} ${isInRange1 || isInRange2 ? 'range' : ''}`}
+                                                    onClick={() => {
+                                                        if (isCurrentMonth) {
+                                                            const day = date.getDate();
+                                                            const monthNum = date.getMonth() + 1;
+                                                            const yearNum = date.getFullYear();
+                                                            setSelectedDate(`${day.toString().padStart(2, '0')}/${monthNum.toString().padStart(2, '0')}/${yearNum}`);
+                                                            setDatePickerOpen(false);
+                                                        }
+                                                    }}
+                                                >
+                                                    {dateNum}
+                                                    {isInRange1 && dateNum === 26 && <span className="date-picker-range-dot"></span>}
+                                                </button>
+                                            );
+                                            currentDate.setDate(currentDate.getDate() + 1);
+                                        }
+                                        return days;
+                                    })()}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

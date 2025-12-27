@@ -12,28 +12,15 @@ export default function PortefeuillePage() {
 
     return (
         <div className="dashboard-page">
-            <header className="dash-header">
-                <div className="dash-container">
-                    <div className="dash-logo">
-                        DASHBOARD <span className="dash-pipe">|</span> <span className="dash-section">PORTEFEUILLE</span>
+            <header className="portefeuille-header-mobile">
+                <div className="portefeuille-header-content">
+                    <div className="portefeuille-header-text">
+                        <span className="portefeuille-header-dashboard">DASHBOARD</span>
+                        <span className="portefeuille-header-separator">|</span>
+                        <span className="portefeuille-header-section">PORTEFEUILLE</span>
                     </div>
-                    <nav className="dash-nav">
-                        <a href="/dashboard/apercu" className="dash-nav-link">APERÇU</a>
-                        <a href="/dashboard/produits" className="dash-nav-link">PRODUITS</a>
-                        <a href="/dashboard/commandes" className="dash-nav-link">COMMANDES</a>
-                        <a href="/dashboard/portefeuille" className="dash-nav-link active">PORTEFEUILLE</a>
-                    </nav>
-                    <div className="dash-actions">
-                        <button className="dash-visit-btn" onClick={() => setThemeModalOpen(true)}>VISITER LE MAGASIN</button>
-                        <button className="dash-user-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <button className="dash-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <button className="portefeuille-menu-btn" onClick={() => setMobileMenuOpen(true)}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 12H21M3 6H21M3 18H21" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
@@ -44,16 +31,23 @@ export default function PortefeuillePage() {
                 <>
                     <div className="dash-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
                     <div className={`dash-mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-                        <button className="dash-visit-btn-mobile" onClick={() => {
-                            setMobileMenuOpen(false);
-                            setThemeModalOpen(true);
-                        }}>VISITER LE MAGASIN</button>
+                        <div className="dash-mobile-menu-header">
+                            <button className="dash-visit-btn-mobile" onClick={() => {
+                                setMobileMenuOpen(false);
+                                setThemeModalOpen(true);
+                            }}>VISITER LE MAGASIN</button>
+                            <button className="dash-mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                         
                         <nav className="dash-mobile-nav">
                             <a href="/dashboard/apercu" className="dash-mobile-nav-item">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M11 3.05493C11.3128 2.89979 11.6533 2.81897 12 2.81897C12.3467 2.81897 12.6872 2.89979 13 3.05493L20.5 6.80493C20.6712 6.88831 20.8192 7.01332 20.9307 7.16843C21.0422 7.32354 21.1139 7.50384 21.1396 7.69324C21.1653 7.88264 21.1443 8.07547 21.0784 8.25531C21.0125 8.43514 20.9036 8.59657 20.761 8.72493L12.761 15.7249C12.5519 15.9131 12.2798 16.0178 12 16.0178C11.7202 16.0178 11.4481 15.9131 11.239 15.7249L3.23902 8.72493C3.09643 8.59657 2.98752 8.43514 2.92162 8.25531C2.85572 8.07547 2.8347 7.88264 2.86037 7.69324C2.88605 7.50384 2.95783 7.32354 3.06932 7.16843C3.18081 7.01332 3.32883 6.88831 3.50002 6.80493L11 3.05493Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M20 12V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21H6C5.46957 21 4.96086 20.7893 4.58579 20.4142C4.21071 20.0391 4 19.5304 4 19V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 Aperçu
                             </a>
@@ -94,7 +88,7 @@ export default function PortefeuillePage() {
                                 {commandesOpen && (
                                     <div className="dash-mobile-submenu">
                                         <a href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot red"></span>
+                                            <span className="dash-submenu-dot orange"></span>
                                             Non confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
@@ -102,7 +96,7 @@ export default function PortefeuillePage() {
                                             Confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot orange"></span>
+                                            <span className="dash-submenu-dot red"></span>
                                             Retours
                                         </a>
                                     </div>
@@ -148,112 +142,121 @@ export default function PortefeuillePage() {
 
             <main className="portefeuille-main">
                 <div className="portefeuille-container">
-                    <div className="portefeuille-header">
-                        <h1 className="portefeuille-title">Portefeuille</h1>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div className="portefeuille-page-header">
+                        <h1 className="portefeuille-page-title">Portefeuille</h1>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M21 8H3M21 8V16C21 16.5304 20.7893 17.0391 20.4142 17.4142C20.0391 17.7893 19.5304 18 19 18H5C4.46957 18 3.96086 17.7893 3.58579 17.4142C3.21071 17.0391 3 16.5304 3 16V8M21 8L19 3H5L3 8" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             <circle cx="12" cy="13" r="2" stroke="#1f2937" strokeWidth="2"/>
                         </svg>
                     </div>
 
-                    <div className="portefeuille-card orange-card">
-                        <div className="portefeuille-card-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    {/* Paiement en attente */}
+                    <div className="portefeuille-section">
+                        <div className="portefeuille-section-icon orange-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/>
                                 <path d="M12 6V12L16 14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                             </svg>
                         </div>
-                        <div className="portefeuille-card-content">
-                            <h3 className="portefeuille-card-title">Paiement en attente</h3>
-                            <p className="portefeuille-card-desc">Le montant des ventes en attente d&apos;être déposé dans votre portefeuille !</p>
-                        </div>
-                        <div className="portefeuille-amount">
-                            <span className="portefeuille-value">226</span>
-                            <span className="portefeuille-currency">DT</span>
-                        </div>
-                        <div className="portefeuille-items-list">
-                            <div className="portefeuille-item-label">Articles Vendus :</div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #01234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                        <div className="portefeuille-section-content">
+                            <h3 className="portefeuille-section-title">Paiement en attente</h3>
+                            <p className="portefeuille-section-desc">Le montant des ventes en attente d&apos;être déposé dans votre portefeuille !</p>
+                            <div className="portefeuille-section-amount orange-amount">
+                                <span className="portefeuille-section-value">226</span>
+                                <span className="portefeuille-section-currency">DT</span>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #0234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                            <div className="portefeuille-section-items">
+                                <div className="portefeuille-section-item-label">Articles Vendus :</div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #01234</span>
+                                    <span className="portefeuille-section-item-price orange-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #0234</span>
+                                    <span className="portefeuille-section-item-price orange-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #25234</span>
+                                    <span className="portefeuille-section-item-price orange-price">56 DT</span>
+                                </div>
+                                <a href="#" className="portefeuille-section-link">Voir les commandes confirmées &gt;</a>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #25234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
-                            </div>
-                            <a href="#" className="portefeuille-link">Voir les commandes confirmées →</a>
                         </div>
                     </div>
 
-                    <div className="portefeuille-card green-card">
-                        <div className="portefeuille-card-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    {/* Divider */}
+                    <div className="portefeuille-divider"></div>
+
+                    {/* Paiement prêt */}
+                    <div className="portefeuille-section">
+                        <div className="portefeuille-section-icon green-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2V22M17 7H9.5C8.57174 7 7.6815 7.36875 7.02513 8.02513C6.36875 8.6815 6 9.57174 6 10.5C6 11.4283 6.36875 12.3185 7.02513 12.9749C7.6815 13.6313 8.57174 14 9.5 14H14.5C15.4283 14 16.3185 14.3687 16.9749 15.0251C17.6313 15.6815 18 16.5717 18 17.5C18 18.4283 17.6313 19.3185 16.9749 19.9749C16.3185 20.6313 15.4283 21 14.5 21H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </div>
-                        <div className="portefeuille-card-content">
-                            <h3 className="portefeuille-card-title">Paiement prêt</h3>
-                            <p className="portefeuille-card-desc">Le montant d&apos;argent que vous pouvez retirer !</p>
-                        </div>
-                        <div className="portefeuille-date">11/06/2025</div>
-                        <div className="portefeuille-amount green">
-                            <span className="portefeuille-value">150</span>
-                            <span className="portefeuille-currency">DT</span>
-                        </div>
-                        <div className="portefeuille-items-list">
-                            <div className="portefeuille-item-label">Articles Vendus et traité :</div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #01234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                        <div className="portefeuille-section-content">
+                            <h3 className="portefeuille-section-title">Paiement prêt</h3>
+                            <p className="portefeuille-section-desc">Le montant d&apos;argent que vous pouvez retirer !</p>
+                            <div className="portefeuille-section-date">11/06/2025</div>
+                            <div className="portefeuille-section-amount green-amount">
+                                <span className="portefeuille-section-value">150</span>
+                                <span className="portefeuille-section-currency">DT</span>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #0234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                            <div className="portefeuille-section-items">
+                                <div className="portefeuille-section-item-label">Articles Vendus et traité :</div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #01234</span>
+                                    <span className="portefeuille-section-item-price green-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #0234</span>
+                                    <span className="portefeuille-section-item-price green-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #25234</span>
+                                    <span className="portefeuille-section-item-price green-price">56 DT</span>
+                                </div>
+                                <a href="#" className="portefeuille-section-link">Voir les commandes confirmées &gt;</a>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #25234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
-                            </div>
-                            <a href="#" className="portefeuille-link">Voir les commandes confirmées →</a>
+                            <button className="portefeuille-section-button">Recevez votre paiement</button>
                         </div>
-                        <button className="portefeuille-withdraw-btn">Recevez votre paiement</button>
                     </div>
 
-                    <div className="portefeuille-card purple-card">
-                        <div className="portefeuille-card-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    {/* Divider */}
+                    <div className="portefeuille-divider"></div>
+
+                    {/* Votre dernier paiement */}
+                    <div className="portefeuille-section">
+                        <div className="portefeuille-section-icon purple-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/>
                                 <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </div>
-                        <div className="portefeuille-card-content">
-                            <h3 className="portefeuille-card-title">Votre dernier paiement</h3>
-                            <p className="portefeuille-card-desc">Votre dernier retrait d&apos;argent !</p>
-                        </div>
-                        <div className="portefeuille-date">26/05/2025</div>
-                        <div className="portefeuille-amount purple">
-                            <span className="portefeuille-value">300</span>
-                            <span className="portefeuille-currency">DT</span>
-                        </div>
-                        <div className="portefeuille-items-list">
-                            <div className="portefeuille-item-label">Articles Vendus et retiré :</div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #01234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                        <div className="portefeuille-section-content">
+                            <h3 className="portefeuille-section-title">Votre dernier paiement</h3>
+                            <p className="portefeuille-section-desc">Votre dernier retrait d&apos;argent !</p>
+                            <div className="portefeuille-section-date">26/05/2025</div>
+                            <div className="portefeuille-section-amount purple-amount">
+                                <span className="portefeuille-section-value">300</span>
+                                <span className="portefeuille-section-currency">DT</span>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #0234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
+                            <div className="portefeuille-section-items">
+                                <div className="portefeuille-section-item-label">Articles Vendus et retiré :</div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #01234</span>
+                                    <span className="portefeuille-section-item-price purple-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #0234</span>
+                                    <span className="portefeuille-section-item-price purple-price">56 DT</span>
+                                </div>
+                                <div className="portefeuille-section-item">
+                                    <span>ID #25234</span>
+                                    <span className="portefeuille-section-item-price purple-price">56 DT</span>
+                                </div>
+                                <a href="#" className="portefeuille-section-link">Voir les ordres retirés &gt;</a>
                             </div>
-                            <div className="portefeuille-item-row">
-                                <span>ID #25234</span>
-                                <span className="portefeuille-item-price">56<sup>DT</sup></span>
-                            </div>
-                            <a href="#" className="portefeuille-link">Voir les ordres retirés →</a>
                         </div>
                     </div>
                 </div>

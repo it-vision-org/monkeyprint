@@ -45,16 +45,23 @@ export default function ApercuPage() {
                 <>
                     <div className="dash-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
                     <div className={`dash-mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-                        <button className="dash-visit-btn-mobile" onClick={() => {
-                            setMobileMenuOpen(false);
-                            setThemeModalOpen(true);
-                        }}>VISITER LE MAGASIN</button>
+                        <div className="dash-mobile-menu-header">
+                            <button className="dash-visit-btn-mobile" onClick={() => {
+                                setMobileMenuOpen(false);
+                                setThemeModalOpen(true);
+                            }}>VISITER LE MAGASIN</button>
+                            <button className="dash-mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                         
                         <nav className="dash-mobile-nav">
                             <a href="/dashboard/apercu" className="dash-mobile-nav-item active">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M11 3.05493C11.3128 2.89979 11.6533 2.81897 12 2.81897C12.3467 2.81897 12.6872 2.89979 13 3.05493L20.5 6.80493C20.6712 6.88831 20.8192 7.01332 20.9307 7.16843C21.0422 7.32354 21.1139 7.50384 21.1396 7.69324C21.1653 7.88264 21.1443 8.07547 21.0784 8.25531C21.0125 8.43514 20.9036 8.59657 20.761 8.72493L12.761 15.7249C12.5519 15.9131 12.2798 16.0178 12 16.0178C11.7202 16.0178 11.4481 15.9131 11.239 15.7249L3.23902 8.72493C3.09643 8.59657 2.98752 8.43514 2.92162 8.25531C2.85572 8.07547 2.8347 7.88264 2.86037 7.69324C2.88605 7.50384 2.95783 7.32354 3.06932 7.16843C3.18081 7.01332 3.32883 6.88831 3.50002 6.80493L11 3.05493Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M20 12V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21H6C5.46957 21 4.96086 20.7893 4.58579 20.4142C4.21071 20.0391 4 19.5304 4 19V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
                                 Aperçu
                             </a>
@@ -95,7 +102,7 @@ export default function ApercuPage() {
                                 {commandesOpen && (
                                     <div className="dash-mobile-submenu">
                                         <a href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot red"></span>
+                                            <span className="dash-submenu-dot orange"></span>
                                             Non confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
@@ -103,7 +110,7 @@ export default function ApercuPage() {
                                             Confirmé
                                         </a>
                                         <a href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
-                                            <span className="dash-submenu-dot orange"></span>
+                                            <span className="dash-submenu-dot red"></span>
                                             Retours
                                         </a>
                                     </div>
@@ -229,33 +236,64 @@ export default function ApercuPage() {
                                 <div className="apercu-chart-header">
                                     <div className="apercu-chart-label">Ventes</div>
                                     <div className="apercu-chart-value-row">
-                                        <span className="apercu-chart-value">1024 DT</span>
+                                        <span className="apercu-chart-value">1024</span>
+                                        <span className="apercu-chart-currency"> DT</span>
                                     </div>
                                 </div>
                                 <div className="apercu-chart-subtext">
                                     Dernier 30 Jours <span className="apercu-chart-change">+10%</span>
                                 </div>
 
-                                {/* Simple Chart Visualization */}
+                                {/* Chart Visualization */}
                                 <div className="apercu-chart">
-                                    <svg viewBox="0 0 400 200" className="apercu-chart-svg">
+                                    <svg viewBox="0 0 600 250" className="apercu-chart-svg" preserveAspectRatio="xMidYMid meet">
+                                        {/* Y-axis grid lines */}
+                                        <line x1="50" y1="20" x2="50" y2="220" stroke="#e5e7eb" strokeWidth="1"/>
+                                        {/* Horizontal grid lines */}
+                                        <line x1="50" y1="220" x2="550" y2="220" stroke="#e5e7eb" strokeWidth="1"/>
+                                        <line x1="50" y1="180" x2="550" y2="180" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                        <line x1="50" y1="140" x2="550" y2="140" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                        <line x1="50" y1="100" x2="550" y2="100" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                        <line x1="50" y1="60" x2="550" y2="60" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                        <line x1="50" y1="20" x2="550" y2="20" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5"/>
+                                        
+                                        {/* Y-axis labels */}
+                                        <text x="40" y="225" fontSize="12" fill="#9ca3af" textAnchor="end" alignmentBaseline="middle">0</text>
+                                        <text x="40" y="185" fontSize="12" fill="#9ca3af" textAnchor="end" alignmentBaseline="middle">100</text>
+                                        <text x="40" y="145" fontSize="12" fill="#9ca3af" textAnchor="end" alignmentBaseline="middle">200</text>
+                                        <text x="40" y="105" fontSize="12" fill="#9ca3af" textAnchor="end" alignmentBaseline="middle">500</text>
+                                        <text x="40" y="65" fontSize="12" fill="#9ca3af" textAnchor="end" alignmentBaseline="middle">1000</text>
+                                        
+                                        {/* Chart line - starting low in Jan, peaking around Mar/Apr, declining towards Jun */}
+                                        <defs>
+                                            <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25"/>
+                                                <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.03"/>
+                                            </linearGradient>
+                                        </defs>
+                                        {/* Area under the line - starts at Jan, peaks at Apr, declines to Jun */}
+                                        <path
+                                            d="M 80 200 L 140 180 L 200 140 L 260 100 L 320 120 L 380 160 L 440 180 L 500 190 L 500 220 L 80 220 Z"
+                                            fill="url(#chartGradient)"
+                                        />
+                                        {/* Main line */}
                                         <polyline
-                                            points="0,120 50,80 100,140 150,100 200,130 250,40 300,90 350,50 400,110"
+                                            points="80,200 140,180 200,140 260,100 320,120 380,160 440,180 500,190"
                                             fill="none"
                                             stroke="#0ea5e9"
                                             strokeWidth="3"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                         />
+                                        
+                                        {/* X-axis labels */}
+                                        <text x="80" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">Jan</text>
+                                        <text x="140" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">Feb</text>
+                                        <text x="200" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">Mar</text>
+                                        <text x="260" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">Apr</text>
+                                        <text x="320" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">May</text>
+                                        <text x="380" y="240" fontSize="12" fill="#0ea5e9" textAnchor="middle" fontWeight="600">Jun</text>
                                     </svg>
-                                    <div className="apercu-chart-labels">
-                                        <span>Jan</span>
-                                        <span>Feb</span>
-                                        <span>Mar</span>
-                                        <span>Apr</span>
-                                        <span>May</span>
-                                        <span>Jun</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>

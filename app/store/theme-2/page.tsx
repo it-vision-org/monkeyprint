@@ -12,7 +12,7 @@ export default function Theme2() {
         name: "T-Shirt Circles",
         price: "50dt",
         rating: 4,
-        reviews: 131
+        reviews: 130
     });
 
     return (
@@ -20,26 +20,39 @@ export default function Theme2() {
             <header className="theme-2-header">
                 <div className="theme-2-container">
                     <Image src="/logo.png" alt="GrabMeShoe" width={110} height={36} style={{ objectFit: 'contain' }} />
-                    <button className="theme-2-cart-btn" onClick={() => router.push('/store/theme-2/cart')}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        {cartCount > 0 && <span className="theme-2-cart-badge">{cartCount}</span>}
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="theme-2-cart-btn" onClick={() => router.push('/store/theme-2/cart')}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {cartCount > 0 && <span className="theme-2-cart-badge">{cartCount}</span>}
+                        </button>
+                        <button className="theme-2-menu-btn" onClick={() => router.push('/store/theme-2/all-products')}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M4 12H20M4 18H20" stroke="#1f2937" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </header>
 
             <div className="theme-2-hero">
+                <div className="theme-2-hero-images-left">
+                    <div className="theme-2-hero-image-circle theme-2-hero-img-1">
+                        <Image src="/T-Shirt-Design.png" alt="Child 1" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div className="theme-2-hero-image-circle theme-2-hero-img-2">
+                        <Image src="/T-Shirt-Design.png" alt="Child 2" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div className="theme-2-hero-image-circle theme-2-hero-img-3">
+                        <Image src="/T-Shirt-Design.png" alt="Child 3" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                </div>
                 <div className="theme-2-hero-content">
                     <h1 className="theme-2-hero-title">GrabMeShoe</h1>
                     <p className="theme-2-hero-text">Explore the finest clothes for kids, chez GrabMeShoe</p>
+                    <Image src="/T-Shirt-Design.png" alt="Teddy" width={60} height={60} className="theme-2-hero-teddy" style={{ objectFit: 'contain' }} />
                 </div>
-                <div className="theme-2-hero-images">
-                    <Image src="/T-Shirt-Design.png" alt="Design 1" width={120} height={100} style={{ borderRadius: '12px', objectFit: 'cover' }} />
-                    <Image src="/T-Shirt-Design.png" alt="Design 2" width={120} height={100} style={{ borderRadius: '12px', objectFit: 'cover' }} />
-                    <Image src="/T-Shirt-Design.png" alt="Design 3" width={120} height={100} style={{ borderRadius: '12px', objectFit: 'cover' }} />
-                </div>
-                <Image src="/T-Shirt-Design.png" alt="Teddy" width={80} height={80} className="theme-2-hero-teddy" style={{ objectFit: 'contain' }} />
             </div>
 
             <section className="theme-2-section">
@@ -47,9 +60,11 @@ export default function Theme2() {
                 <div className="theme-2-categories">
                     <div className="theme-2-category theme-2-cat-yellow">
                         <Image src="/T-Shirt-Design.png" alt="Girl" width={200} height={280} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span className="theme-2-category-label">Girl</span>
                     </div>
                     <div className="theme-2-category theme-2-cat-blue">
                         <Image src="/T-Shirt-Design.png" alt="Boy" width={200} height={280} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <span className="theme-2-category-label">Boy</span>
                     </div>
                 </div>
             </section>
@@ -59,7 +74,7 @@ export default function Theme2() {
                 <div className="theme-2-products-scroll">
                     <button className="theme-2-scroll-btn left">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M15 18L9 12L15 6" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
                     <div className="theme-2-products-grid">
@@ -83,7 +98,7 @@ export default function Theme2() {
                     </div>
                     <button className="theme-2-scroll-btn right">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M9 18L15 12L9 6" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M9 18L15 12L9 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </button>
                 </div>

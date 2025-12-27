@@ -90,15 +90,17 @@ export default function ProductDetailsPage() {
                         </svg>
                     </button>
                 </div>
-                <div className="pu-cart-bar">
+                <button className="pu-cart-bar" type="button">
                     <div className="pu-cart-content">
                         <span className="pu-cart-icon">🛒</span>
-                        <span className="pu-cart-total">55DT</span>
                     </div>
-                    <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                        <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </div>
+                    <div className="pu-cart-total">
+                        55DT
+                        <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                            <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                </button>
             </header>
 
             <main className="pd-main">
@@ -113,6 +115,7 @@ export default function ProductDetailsPage() {
                             <div className="pd-label">
                                 Sélectionner le sexe du produit :<span>*</span>
                             </div>
+                            <div className="pd-required-note">Doit être rempli*</div>
                             <div className="pd-gender-row">
                                 {GENDER_OPTIONS.map((option) => (
                                     <label key={option.id} className={`pd-radio-option ${selectedGenders.includes(option.id) ? "active" : ""}`}>
@@ -135,12 +138,22 @@ export default function ProductDetailsPage() {
 
                         <div className="pd-preview-card">
                             <div className="pd-preview-image">
-                                <Image src="/T-Shirt-Design.png" alt="Mockup" width={280} height={320} />
+                                <Image src="/mock-shirt.png" alt="Mockup" width={280} height={320} />
                                 <div className="pd-preview-frame">
                                     {design ? (
                                         <Image src={design} alt="Design" width={110} height={110} />
                                     ) : (
-                                        <div className="pu-placeholder">+</div>
+                                        <div className="pd-design-grid">
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot active"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                            <div className="pd-grid-dot"></div>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -165,6 +178,7 @@ export default function ProductDetailsPage() {
                             <label htmlFor="product-name" className="pd-label">
                                 Nom du produit :<span>*</span>
                             </label>
+                            <div className="pd-required-note">Doit être rempli*</div>
                             <input
                                 id="product-name"
                                 className="pd-input"
@@ -178,6 +192,7 @@ export default function ProductDetailsPage() {
                             <div className="pd-label">
                                 Prix du produit :<span>*</span>
                             </div>
+                            <div className="pd-required-note">Doit être rempli*</div>
                             <div className="pd-price-row">
                                 <div className="pd-input-wrapper">
                                     <input

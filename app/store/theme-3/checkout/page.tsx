@@ -99,24 +99,63 @@ export default function Checkout() {
             </header>
 
             <div className="checkout-container">
-                <button 
-                    className="checkout-summary-toggle"
-                    onClick={() => setShowSummary(!showSummary)}
-                >
-                    <span>Resume de la commande</span>
-                    <div className="checkout-summary-amount">
-                        <span>109DT</span>
-                        <svg 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none"
-                            style={{ transform: showSummary ? 'rotate(180deg)' : 'none' }}
-                        >
-                            <path d="M6 9L12 15L18 9" stroke="#f97316" strokeWidth="2"/>
-                        </svg>
-                    </div>
-                </button>
+                <div className="checkout-summary-wrapper">
+                    <button 
+                        className={`checkout-summary-toggle ${showSummary ? 'checkout-summary-toggle-expanded' : ''}`}
+                        onClick={() => setShowSummary(!showSummary)}
+                    >
+                        <span>Resume de la commande</span>
+                        <div className="checkout-summary-amount">
+                            <span>109DT</span>
+                            <svg 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none"
+                                style={{ transform: showSummary ? 'rotate(180deg)' : 'none' }}
+                            >
+                                <path d="M6 9L12 15L18 9" stroke="#f97316" strokeWidth="2"/>
+                            </svg>
+                        </div>
+                    </button>
+
+                    {showSummary && (
+                        <div className="checkout-summary-expanded">
+                            <div className="checkout-summary-item">
+                                <Image src="/mock-shirt.png" alt="T-Shirt Circles" width={60} height={60} style={{ objectFit: 'contain' }} />
+                                <div className="checkout-summary-item-details">
+                                    <p className="checkout-summary-item-name">T-Shirt Circles</p>
+                                    <div className="checkout-summary-item-badges">
+                                        <span className="checkout-summary-size-badge">L</span>
+                                        <span className="checkout-summary-qty-badge">x10</span>
+                                    </div>
+                                </div>
+                                <span className="checkout-summary-item-price">50dt</span>
+                            </div>
+                            <div className="checkout-summary-item">
+                                <Image src="/mock-shirt.png" alt="T-Shirt Circles" width={60} height={60} style={{ objectFit: 'contain' }} />
+                                <div className="checkout-summary-item-details">
+                                    <p className="checkout-summary-item-name">T-Shirt Circles</p>
+                                    <div className="checkout-summary-item-badges">
+                                        <span className="checkout-summary-size-badge">M</span>
+                                        <span className="checkout-summary-qty-badge">x10</span>
+                                    </div>
+                                </div>
+                                <span className="checkout-summary-item-price">50dt</span>
+                            </div>
+                            <div className="checkout-summary-costs">
+                                <div className="checkout-summary-cost-row">
+                                    <span>Livraison</span>
+                                    <span>9DT</span>
+                                </div>
+                                <div className="checkout-summary-cost-row checkout-summary-total">
+                                    <span>Totale</span>
+                                    <span>109DT</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <form className="checkout-form" onSubmit={handleSubmit}>
                     <div className="checkout-form-group">

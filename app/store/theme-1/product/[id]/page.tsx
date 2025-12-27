@@ -10,17 +10,36 @@ export default function ProductDetail() {
     const [selectedColor, setSelectedColor] = useState('');
 
     const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-    const colors = ['#000000', '#0000FF', '#FF0000', '#FFFFFF', '#FFFF00'];
+    const colors = ['#000000', '#0000FF', '#FF0000', '#FFFFFF', '#00FF00'];
 
     return (
         <div className="product-detail-page">
+            <header className="product-detail-top-header">
+                <div className="product-detail-top-header-inner">
+                    <Image src="/logo.png" alt="GrabMeShoe" width={110} height={36} style={{ objectFit: 'contain' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="product-detail-top-cart-btn" onClick={() => router.push('/store/theme-1/cart')}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span className="product-detail-top-cart-badge">1</span>
+                        </button>
+                        <button className="product-detail-top-menu-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M4 12H20M4 18H20" stroke="#1f2937" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
             <header className="product-detail-header">
                 <button className="product-back-btn" onClick={() => router.back()}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M15 18L9 12L15 6" stroke="#1f2937" strokeWidth="2"/>
                         </svg>
                 </button>
-                <h1 className="product-detail-title">Detail du produit</h1>
+                <h1 className="product-detail-title">Détail du produit</h1>
                 <div style={{ width: '24px' }}></div>
             </header>
 
@@ -33,11 +52,20 @@ export default function ProductDetail() {
                     <div className="product-detail-price-row">
                         <h2 className="product-detail-price">50dt</h2>
                         <div className="product-detail-rating">
-                            {[...Array(5)].map((_, i) => (
-                                <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill={i < 4 ? "#FFA500" : "#E5E7EB"}>
+                            {[...Array(4)].map((_, i) => (
+                                <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill="#FFD700">
                                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                                 </svg>
                             ))}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <defs>
+                                    <linearGradient id="half-star-detail" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="50%" stopColor="#FFD700" />
+                                        <stop offset="50%" stopColor="#E5E7EB" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#half-star-detail)"/>
+                            </svg>
                             <span className="product-detail-reviews">(131)</span>
                         </div>
                     </div>
@@ -67,7 +95,7 @@ export default function ProductDetail() {
                                     className={`product-color-btn ${selectedColor === color ? 'active' : ''}`}
                                     style={{ 
                                         backgroundColor: color,
-                                        border: color === '#FFFFFF' ? '2px solid #e5e7eb' : 'none'
+                                        border: color === '#FFFFFF' || color === '#00FF00' ? '2px solid #000000' : 'none'
                                     }}
                                     onClick={() => setSelectedColor(color)}
                                 />

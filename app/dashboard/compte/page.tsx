@@ -4,32 +4,27 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 
-export default function ProduitsPage() {
+export default function ComptePage() {
     const router = useRouter();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
-    const [menuOpen, setMenuOpen] = useState<number | null>(null);
     const [commandesOpen, setCommandesOpen] = useState(false);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
-
-    const products = Array(9).fill({
-        name: "T-Shirt Circles",
-        price: "50dt",
-        rating: 4,
-        reviews: 131,
-        sold: 51
-    });
+    const [shopName, setShopName] = useState("GrabMeShoe");
+    const [email, setEmail] = useState("GrabMeShoe@gmail.com");
+    const [phone, setPhone] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     return (
         <div className="dashboard-page">
             {/* Header */}
-            <header className="produits-header-mobile">
-                <div className="produits-header-inner">
-                    <div className="produits-header-logo">
-                        DASHBOARD <span className="produits-pipe">|</span> <span className="produits-section">PRODUITS</span>
+            <header className="compte-header-mobile">
+                <div className="compte-header-inner">
+                    <div className="compte-header-logo">
+                        DASHBOARD <span className="compte-pipe">|</span> <span className="compte-section">COMPTE</span>
                     </div>
-                    <button className="produits-menu-btn" onClick={() => setMobileMenuOpen(true)}>
+                    <button className="compte-menu-btn" onClick={() => setMobileMenuOpen(true)}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -62,7 +57,7 @@ export default function ProduitsPage() {
                                 </svg>
                                 Aperçu
                             </a>
-                            <a href="/dashboard/produits" className="dash-mobile-nav-item active">
+                            <a href="/dashboard/produits" className="dash-mobile-nav-item">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -120,7 +115,7 @@ export default function ProduitsPage() {
                                 </svg>
                                 Portefeuille
                             </a>
-                            <a href="/dashboard/compte" className="dash-mobile-nav-item">
+                            <a href="/dashboard/compte" className="dash-mobile-nav-item active">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -152,110 +147,191 @@ export default function ProduitsPage() {
             )}
 
             {/* Main Content */}
-            <main className="produits-main">
-                <div className="produits-container">
-                    <div className="produits-title-row">
-                        <h1 className="produits-page-title">Liste de produits</h1>
-                        <button className="produits-add-btn">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
+            <main className="compte-main">
+                <div className="compte-container">
+                    {/* Page Title */}
+                    <div className="compte-title-row">
+                        <h1 className="compte-page-title">Compte</h1>
                     </div>
 
-                    <div className="produits-grid">
-                        {products.slice(0, 6).map((product, index) => (
-                            <div key={index} className={`produit-card ${index === 1 ? 'selected' : ''}`}>
-                                {/* Three Dots Menu */}
-                                <button className="produit-menu-btn" onClick={() => setMenuOpen(menuOpen === index ? null : index)}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="12" cy="5" r="2" fill="#1f2937"/>
-                                        <circle cx="12" cy="12" r="2" fill="#1f2937"/>
-                                        <circle cx="12" cy="19" r="2" fill="#1f2937"/>
-                                    </svg>
-                                </button>
-
-                                {/* Dropdown Menu */}
-                                {menuOpen === index && (
-                                    <>
-                                        <div className="produit-menu-overlay" onClick={() => setMenuOpen(null)} />
-                                        <div className="produit-menu-dropdown">
-                                            <button className="produit-menu-item modifier">
-                                                Modifier
-                                            </button>
-                                            <button className="produit-menu-item visibilite">
-                                                Visibilité
-                                            </button>
-                                            <button className="produit-menu-item supprimer" onClick={() => {
-                                                setMenuOpen(null);
-                                                setSelectedProduct(index);
-                                                setDeleteDialogOpen(true);
-                                            }}>
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-
-                                <div className="produit-image-container">
-                                    <Image src="/T-Shirt.png" alt={product.name} width={180} height={180} style={{ objectFit: 'contain' }} />
-                                </div>
-
-                                <div className="produit-info">
-                                    <h3 className="produit-name">{product.name}</h3>
-                                    <p className="produit-price">{product.price}</p>
-                                    
-                                    <div className="produit-rating">
-                                        {[...Array(5)].map((_, i) => (
-                                            <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < product.rating ? "#FFD700" : "#E5E7EB"} xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                            </svg>
-                                        ))}
-                                        <span className="produit-reviews">({product.reviews})</span>
-                                    </div>
-
-                                    <div className="produit-sold-badge">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                                            <path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="#92400e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M16 21V11C16 10.4477 15.5523 10 15 10H9C8.44772 10 8 10.4477 8 11V21" stroke="#92400e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M2 7L12 2L22 7" stroke="#92400e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        <span>{product.sold} Vendu</span>
-                                    </div>
-                                </div>
+                    {/* Profile Section */}
+                    <div className="compte-profile-card">
+                        <div className="compte-profile-avatar-wrapper">
+                            <div className="compte-profile-avatar">
+                                <Image src="/logo.png" alt="Profile" width={100} height={100} style={{ objectFit: 'contain' }} />
                             </div>
-                        ))}
+                            <button className="compte-profile-edit-btn" aria-label="Edit profile">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <h2 className="compte-profile-name">{shopName}</h2>
+                        <p className="compte-profile-email">{email}</p>
+                        <div className="compte-profile-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span>Compte vérifié</span>
+                        </div>
                     </div>
 
-                    {/* Pagination */}
-                    <div className="produits-pagination">
-                        <button className="produits-pagination-btn">
-                            &lt; Précédent
-                        </button>
-                        <div className="produits-pagination-numbers">
-                            <button className="produits-pagination-number">1</button>
-                            <button className="produits-pagination-number active">2</button>
-                            <button className="produits-pagination-number">3</button>
+                    {/* Account Information Card */}
+                    <div className="compte-form-section">
+                        <div className="compte-form-section-header">
+                            <div className="compte-form-section-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="compte-form-section-title">Informations du compte</h3>
+                                <p className="compte-form-section-desc">Gérez vos informations personnelles</p>
+                            </div>
                         </div>
-                        <button className="produits-pagination-btn">
-                            Suivant &gt;
-                        </button>
+
+                        <div className="compte-form-body">
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Nom de la boutique</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    className="compte-input" 
+                                    value={shopName}
+                                    onChange={(e) => setShopName(e.target.value)}
+                                    placeholder="Nom de votre boutique"
+                                />
+                            </div>
+
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M22 6L12 13L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Adresse e-mail</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    className="compte-input" 
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="votre@email.com"
+                                />
+                            </div>
+
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M22 16.92V19.92C22 20.9804 21.5786 21.9978 20.8284 22.748C20.0783 23.4981 19.0609 23.92 18 23.92C16.9391 23.92 15.9217 23.4981 15.1716 22.748C14.4214 21.9978 14 20.9804 14 19.92V16.92" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M18 11.92C20.2091 11.92 22 10.1291 22 7.92C22 5.71086 20.2091 3.92 18 3.92C15.7909 3.92 14 5.71086 14 7.92C14 10.1291 15.7909 11.92 18 11.92Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M2 4.92H6L8 10.92L5 13.92C5.5 15.92 6.5 17.92 8 19.92L11 16.92L16 18.92V22.92H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Numéro de téléphone</span>
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    className="compte-input" 
+                                    placeholder="+216 XX XXX XXX"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                />
+                            </div>
+
+                            <button className="compte-submit-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span>Enregistrer les modifications</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Security Card */}
+                    <div className="compte-form-section">
+                        <div className="compte-form-section-header">
+                            <div className="compte-form-section-icon security">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="compte-form-section-title">Sécurité</h3>
+                                <p className="compte-form-section-desc">Modifiez votre mot de passe</p>
+                            </div>
+                        </div>
+
+                        <div className="compte-form-body">
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Mot de passe actuel</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    className="compte-input" 
+                                    placeholder="Entrez votre mot de passe actuel"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Nouveau mot de passe</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    className="compte-input" 
+                                    placeholder="Entrez votre nouveau mot de passe"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="compte-input-wrapper">
+                                <label className="compte-input-label">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>Confirmer le nouveau mot de passe</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    className="compte-input" 
+                                    placeholder="Confirmez votre nouveau mot de passe"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
+
+                            <button className="compte-submit-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span>Changer le mot de passe</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>
-
-            {/* Delete Dialog */}
-            {deleteDialogOpen && (
-                <div className="delete-dialog-overlay" onClick={() => setDeleteDialogOpen(false)}>
-                    <div className="delete-dialog" onClick={(e) => e.stopPropagation()}>
-                        <p className="delete-dialog-text">Êtes-vous sûr de vouloir supprimer ce produit ?</p>
-                        <div className="delete-dialog-actions">
-                            <button className="delete-dialog-btn confirm" onClick={() => setDeleteDialogOpen(false)}>NON</button>
-                            <button className="delete-dialog-btn cancel" onClick={() => setDeleteDialogOpen(false)}>OUI</button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Theme Selection Modal */}
             {themeModalOpen && (
@@ -288,4 +364,3 @@ export default function ProduitsPage() {
         </div>
     );
 }
-

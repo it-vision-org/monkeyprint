@@ -11,7 +11,7 @@ export default function Theme1() {
     const products = Array(6).fill({
         name: "T-Shirt Circles",
         price: "50dt",
-        rating: 4,
+        rating: 5,
         reviews: 131
     });
 
@@ -20,21 +20,28 @@ export default function Theme1() {
             <header className="theme-1-header">
                 <div className="theme-1-container">
                     <Image src="/logo.png" alt="GrabMeShoe" width={110} height={36} style={{ objectFit: 'contain' }} />
-                    <button className="theme-1-cart-btn" onClick={() => router.push('/store/theme-1/cart')}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        {cartCount > 0 && <span className="theme-1-cart-badge">{cartCount}</span>}
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="theme-1-cart-btn" onClick={() => router.push('/store/theme-1/cart')}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {cartCount > 0 && <span className="theme-1-cart-badge">{cartCount}</span>}
+                        </button>
+                        <button className="theme-1-menu-btn" onClick={() => router.push('/store/theme-1/all-products')}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M4 12H20M4 18H20" stroke="#1f2937" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </header>
 
             <div className="theme-1-hero">
+                <Image src="/T-Shirt.png" alt="Shirt" width={280} height={280} className="theme-1-hero-image" />
                 <div className="theme-1-hero-content">
                     <h1 className="theme-1-hero-title">GrabMeShoe</h1>
                     <p className="theme-1-hero-text">Explore the finest clothes chez GrabMeShoe</p>
                 </div>
-                <Image src="/Hoodie.png" alt="Shorts" width={280} height={280} className="theme-1-hero-image" />
             </div>
 
             <section className="theme-1-section theme-1-best-seller-section">

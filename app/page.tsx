@@ -8,210 +8,485 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div>
-      {/* Navbar */}
-      <header className="mp-header" style={{ borderBottom: "1px solid #e5e7eb", background: "#ffffff" }}>
-        <div className="mp-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 80, padding: "0 20px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <Image src="/logo.png" alt="Monkey Print" width={120} height={40} style={{ objectFit: "contain" }} />
-            <nav className="mp-desktop-nav" style={{ display: "flex", gap: 32, fontWeight: 600, color: "#0d9488", fontSize: 15 }}>
-              <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>ACCUEIL</a>
-              <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>SHOP LIST</a>
-              <a href="#" style={{ textDecoration: "none", color: "#0d9488" }}>CONTACTEZ-NOUS</a>
-            </nav>
-          </div>
-          <div className="mp-desktop-nav">
-            <Link href="/create-shop">
-              <button style={{ background: "#0ea5a6", color: "white", fontWeight: 700, borderRadius: 8, padding: "12px 24px", border: "none", cursor: "pointer", fontSize: 14 }}>COMMENCER</button>
-            </Link>
-          </div>
-          <div className="mp-mobile-trigger" style={{ display: 'none' }}>
-            <button onClick={() => setIsMenuOpen(true)} aria-label="Open menu" style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8 }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 6H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 12H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 18H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
+    <div style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Navbar - Mobile Only */}
+      <header style={{ background: "#ffffff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Image src="/logo.png" alt="Monkey Print" width={100} height={32} style={{ objectFit: "contain" }} />
+        <button 
+          onClick={() => setIsMenuOpen(true)} 
+          aria-label="Open menu" 
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M4 12H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M4 18H20" stroke="#0d9488" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
       </header>
 
       {isMenuOpen && (
-        <div className="mp-mobile-overlay" onClick={() => setIsMenuOpen(false)}>
-          <div className="mp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => setIsMenuOpen(false)} aria-label="Close menu" style={{ background: 'transparent', border: 'none', color: 'white', fontSize: 32, lineHeight: 1, cursor: 'pointer' }}>&times;</button>
+        <div 
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(0, 0, 0, 0.25)', 
+            zIndex: 60 
+          }} 
+          onClick={() => setIsMenuOpen(false)}
+        >
+          <div 
+            style={{ 
+              position: 'absolute', 
+              top: 0, 
+              right: 0, 
+              width: '80%', 
+              height: '100%', 
+              background: '#ffffff', 
+              padding: '40px 24px',
+              borderTopLeftRadius: '20px',
+              borderBottomLeftRadius: '20px'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+              <button 
+                onClick={() => setIsMenuOpen(false)} 
+                aria-label="Close menu" 
+                style={{ background: 'transparent', border: 'none', color: '#0d1c23', fontSize: 32, lineHeight: 1, cursor: 'pointer' }}
+              >
+                ×
+              </button>
             </div>
-            <nav className="mp-mobile-menu">
-              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">👤</span>Connexion / S'inscrire</a>
-              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">🔥</span>Découvrez les boutiques</a>
-              <a href="#" className="mp-mobile-link"><span className="mp-mobile-icon">💬</span>Contactez-nous</a>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <a href="#" style={{ color: '#0d1c23', textDecoration: 'none', fontSize: 20, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: 22 }}>👤</span>Connexion / S'inscrire
+              </a>
+              <a href="#" style={{ color: '#0d1c23', textDecoration: 'none', fontSize: 20, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: 22 }}>🔥</span>Découvrez les boutiques
+              </a>
+              <a href="#" style={{ color: '#0d1c23', textDecoration: 'none', fontSize: 20, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: 22 }}>💬</span>Contactez-nous
+              </a>
             </nav>
           </div>
         </div>
       )}
 
-      {/* Hero */}
-      <section className="mp-container" style={{ paddingTop: 40, paddingBottom: 48, padding: "40px 20px 48px" }}>
-        <div className="mp-gradient-hero mp-hero" style={{ borderRadius: 24, padding: "48px 56px", minHeight: 320, position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center", maxWidth: 700, position: "relative", zIndex: 2 }}>
-            <h1 className="mp-hero-title" style={{ lineHeight: 1.3, fontWeight: 900, color: "white", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              GAGNEZ DE L'<span style={{ color: "#ffeb3b" }}>ARGENT</span>{" "}
-              <span style={{ color: "#ffeb3b" }}>GRATUITEMENT</span>, EN VENDANT{" "}
-              SIMPLEMENT DES PRODUITS{" "}
-              MARCHANDS <em style={{ fontStyle: "italic", fontWeight: 900 }}>EN TUNISIE.</em>
+      {/* Hero Banner */}
+      <section style={{ padding: "8px 8px 16px 8px" }}>
+        <div style={{ 
+          borderRadius: 24, 
+          padding: "32px 20px 24px", 
+          position: "relative", 
+          background: "linear-gradient(180deg, #5cc6ff 0%, #2d7fd9 100%)",
+          overflow: 'hidden',
+          minHeight: '280px'
+        }}>
+          {/* Background Monkey SVG */}
+          <div style={{
+            position: 'absolute',
+            bottom: -10,
+            right: -10,
+            width: '180px',
+            height: '180px',
+            opacity: 0.15,
+            zIndex: 1
+          }}>
+            <Image src="/Monkey.svg" alt="" width={180} height={180} style={{ objectFit: 'contain' }} />
+          </div>
+
+          {/* Coins decorations */}
+          <div style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            width: 50,
+            height: 50,
+            zIndex: 1
+          }}>
+            <Image src="/Coins.png" alt="" width={50} height={50} style={{ objectFit: 'contain', opacity: 0.9 }} />
+          </div>
+          <div style={{
+            position: 'absolute',
+            bottom: 40,
+            left: 10,
+            width: 40,
+            height: 40,
+            zIndex: 1
+          }}>
+            <Image src="/Coins.png" alt="" width={40} height={40} style={{ objectFit: 'contain', opacity: 0.8 }} />
+          </div>
+          <div style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 100,
+            width: 35,
+            height: 35,
+            zIndex: 1
+          }}>
+            <Image src="/Coins.png" alt="" width={35} height={35} style={{ objectFit: 'contain', opacity: 0.7 }} />
+          </div>
+
+          {/* Shopping Cart Icon with Plus */}
+          <div style={{
+            position: 'absolute',
+            right: 20,
+            top: 24,
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            background: 'rgba(255, 255, 255, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2
+          }}>
+            <Image src="/shop-add.svg" alt="" width={28} height={28} style={{ filter: 'brightness(0) invert(1)' }} />
+          </div>
+
+          <div style={{ position: "relative", zIndex: 2, paddingRight: '60px' }}>
+            <h1 style={{ 
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: "20px", 
+              fontWeight: 600, 
+              color: "white", 
+              textTransform: "uppercase", 
+              lineHeight: 1.4,
+              marginBottom: "12px",
+              textAlign: "left"
+            }}>
+              GAGNEZ DE <span style={{ color: "#FFEB3B" }}>L'ARGENT</span><br />
+              <span style={{ color: "#FFEB3B" }}>GRATUITEMENT</span>, EN VENDANT<br />
+              SIMPLEMENT DES PRODUITS<br />
+              MARCHANDS <span style={{ color: "#FFEB3B", fontStyle: 'italic' }}>EN TUNISIE</span>.
             </h1>
-            <p className="mp-hero-text" style={{ color: "white", marginTop: 20, fontSize: 18, lineHeight: 1.5 }}>
-              Téléchargez vos œuvres d'art, personnalisez vos produits<br />et démarrez votre propre boutique en ligne.
+            <p style={{ 
+              fontFamily: 'Inter, sans-serif',
+              color: "white", 
+              fontSize: "12px",
+              fontWeight: 400,
+              lineHeight: 1.5,
+              marginBottom: "24px",
+              textAlign: "left"
+            }}>
+              Téléchargez vos œuvres d'art, personnalisez vos produits<br />
+              et démarrez votre propre boutique en ligne.
             </p>
-            <Link href="/create-shop">
-              <button className="mp-gradient-cta mp-hero-button" style={{ marginTop: 32, borderRadius: 9999, color: "white", fontWeight: 800, padding: "16px 40px", border: 0, boxShadow: "0 8px 20px rgba(0,0,0,0.2)", cursor: "pointer", fontSize: 16 }}>
-                COMMENCEZ GRATUITEMENT !
-              </button>
-            </Link>
-          </div>
-          <Image src="/mock-shirt.png" alt="T-shirt" width={280} height={280} className="mp-hero-image" style={{ position: "absolute", right: 40, bottom: 0, transform: "rotate(12deg)", opacity: 0.95 }} />
-        </div>
-      </section>
-
-      {/* Steps */}
-      <section className="mp-container" style={{ padding: "10px 20px" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 8 }}>Comment ça marche</h2>
-          <p style={{ color: "#6b7280", fontSize: 17 }}>De la conception à la vente en quelques étapes simples</p>
-        </div>
-
-        <div className="mp-steps-grid">
-          {/* Step 1 */}
-          <div style={{ background: "#fff0e6", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, left: -15 }}>
-              <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-                <Image src="/Paper Plus.png" alt="Téléchargez votre conception" width={36} height={36} />
-              </div>
-            </div>
-            <div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 12, lineHeight: 1.3 }}>Téléchargez<br />votre conception</h3>
-              <p style={{ color: "#5a5a5a", fontSize: 15, lineHeight: 1.65 }}>
-                Téléchargez facilement vos œuvres et voyez-les prendre vie sur des produits de qualité.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div style={{ background: "#e0f8f4", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, right: -15 }}>
-              <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-                <Image src="/Edit.png" alt="Personnaliser les produits" width={36} height={36} />
-              </div>
-            </div>
-            <div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 12, lineHeight: 1.3 }}>Personnaliser les<br />produits</h3>
-              <p style={{ color: "#5a5a5a", fontSize: 15, lineHeight: 1.65 }}>
-                Choisissez parmi nos t-shirts, sweats à capuche, mugs et plus encore. Choisissez les couleurs, les tailles et l'emplacement.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div style={{ background: "#e3f0ff", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, left: -15 }}>
-              <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-                <Image src="/Home.png" alt="Créez votre boutique" width={36} height={36} />
-              </div>
-            </div>
-            <div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 12, lineHeight: 1.3 }}>Créez votre<br />boutique</h3>
-              <p style={{ color: "#5a5a5a", fontSize: 15, lineHeight: 1.65 }}>
-                Créez votre propre boutique de marque et commencez à vendre vos créations immédiatement.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 4 */}
-          <div style={{ background: "#ffe8e6", padding: "40px 32px", borderRadius: 24, position: "relative", minHeight: 220, overflow: 'visible' }}>
-            <div className="mp-step-icon-wrapper" style={{ position: "absolute", top: -25, right: -15 }}>
-              <div style={{ position: 'absolute', width: 80, height: 80, background: 'rgba(255,255,255,0.5)', borderRadius: '50% 40% 30% 60% / 60% 40% 50% 50%', filter: 'blur(10px)', transform: 'rotate(15deg)' }}></div>
-              <div className="mp-step-icon-container" style={{ width: 72, height: 72, borderRadius: 999, background: "white", display: "flex", alignItems: "center", justifyContent: "center", position: 'relative' }}>
-                <Image src="/Arrow.png" alt="Commencez à vendre" width={36} height={36} />
-              </div>
-            </div>
-            <div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#000", marginBottom: 12, lineHeight: 1.3 }}>Commencez à<br />vendre</h3>
-              <p style={{ color: "#5a5a5a", fontSize: 15, lineHeight: 1.65 }}>
-                Vous partagez, nous nous occupons de vos produits, de l'impression à l'expédition.
-              </p>
+            <div style={{ textAlign: "center" }}>
+              <Link href="/create-shop" style={{ display: 'inline-block' }}>
+                <button style={{ 
+                  fontFamily: 'Inter, sans-serif',
+                  borderRadius: 9999, 
+                  color: "white", 
+                  fontWeight: 900, 
+                  padding: "12px 28px", 
+                  border: 0, 
+                  cursor: "pointer", 
+                  fontSize: 14,
+                  background: "linear-gradient(90deg, #2fb3ff 0%, #8b3dff 50%, #ff3aac 100%)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  textTransform: 'uppercase'
+                }}>
+                  COMMENCEZ GRATUITEMENT !
+                </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stores */}
-      <section className="mp-container" style={{ marginTop: 56, padding: "0 20px" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h2 style={{ fontSize: 32, fontWeight: 800, color: "#000" }}>Découvrez les boutiques</h2>
-          <p style={{ color: "#6b7280", marginTop: 8, fontSize: 16 }}>Voici quelques-uns des magasins les plus populaires</p>
+      {/* How it works */}
+      <section style={{ padding: "32px 20px 40px" }}>
+        <div style={{ textAlign: "center", marginBottom: "8px" }}>
+          <h2 style={{ 
+            fontFamily: 'Inter, sans-serif',
+            fontSize: "16px", 
+            fontWeight: 700, 
+            color: "#000", 
+            marginBottom: "4px" 
+          }}>
+            Comment ça marche
+          </h2>
+          <p style={{ 
+            fontFamily: 'Inter, sans-serif',
+            color: "#6b7280", 
+            fontSize: "14px",
+            fontWeight: 300
+          }}>
+            De la conception à la vente en quelques étapes simples
+          </p>
         </div>
-        <div className="mp-stores-grid">
-          {[0,1,2,3].map((i) => (
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: '32px' }}>
+          {/* Step 1 - Orange */}
+          <div style={{ 
+            background: "#ffdcc8", 
+            padding: "28px 20px", 
+            borderRadius: 20, 
+            position: "relative",
+            minHeight: "160px"
+          }}>
+            <div style={{ 
+              position: "absolute", 
+              top: -18, 
+              left: 16,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+            }}>
+              <Image src="/Paper Plus.png" alt="" width={26} height={26} />
+            </div>
+            <div style={{ marginTop: "20px", textAlign: 'center' }}>
+              <h3 style={{ 
+                fontFamily: 'Inter, sans-serif',
+                fontSize: "24px", 
+                fontWeight: 700, 
+                color: "#000", 
+                marginBottom: "10px", 
+                lineHeight: 1.2 
+              }}>
+                Téléchargez<br />votre conception
+              </h3>
+              <p style={{ 
+                fontFamily: 'Inter, sans-serif',
+                color: "#4b5563", 
+                fontSize: "20px",
+                fontWeight: 200,
+                lineHeight: 1.4 
+              }}>
+                Téléchargez facilement vos<br />
+                œuvres et voyez-les prendre<br />
+                vie sur des produits de<br />
+                qualité.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 - Green */}
+          <div style={{ 
+            background: "#c8f4dd", 
+            padding: "28px 20px", 
+            borderRadius: 20, 
+            position: "relative",
+            minHeight: "160px"
+          }}>
+            <div style={{ 
+              position: "absolute", 
+              top: -18, 
+              right: 16,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+            }}>
+              <Image src="/Edit.png" alt="" width={26} height={26} />
+            </div>
+            <div style={{ marginTop: "20px", textAlign: 'center' }}>
+              <h3 style={{ 
+                fontFamily: 'Inter, sans-serif',
+                fontSize: "24px", 
+                fontWeight: 700, 
+                color: "#000", 
+                marginBottom: "10px", 
+                lineHeight: 1.2 
+              }}>
+                Personnaliser les<br />produits
+              </h3>
+              <p style={{ 
+                fontFamily: 'Inter, sans-serif',
+                color: "#4b5563", 
+                fontSize: "20px",
+                fontWeight: 200,
+                lineHeight: 1.4 
+              }}>
+                Choisissez parmi nos t-shirts,<br />
+                sweats à capuche, mugs et<br />
+                plus encore. Choisissez les<br />
+                couleurs, les tailles et<br />
+                l'emplacement.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 - Blue */}
+          <div style={{ 
+            background: "#d0e8ff", 
+            padding: "28px 20px", 
+            borderRadius: 20, 
+            position: "relative",
+            minHeight: "160px"
+          }}>
+            <div style={{ 
+              position: "absolute", 
+              top: -18, 
+              left: 16,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+            }}>
+              <Image src="/Home.png" alt="" width={26} height={26} />
+            </div>
+            <div style={{ marginTop: "20px", textAlign: 'center' }}>
+              <h3 style={{ 
+                fontFamily: 'Inter, sans-serif',
+                fontSize: "24px", 
+                fontWeight: 700, 
+                color: "#000", 
+                marginBottom: "10px", 
+                lineHeight: 1.2 
+              }}>
+                Créez votre<br />boutique
+              </h3>
+              <p style={{ 
+                fontFamily: 'Inter, sans-serif',
+                color: "#4b5563", 
+                fontSize: "20px",
+                fontWeight: 200,
+                lineHeight: 1.4 
+              }}>
+                Créez votre propre boutique<br />
+                de marque et commencez à<br />
+                vendre vos créations<br />
+                immédiatement.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 4 - Pink */}
+          <div style={{ 
+            background: "#ffc8be", 
+            padding: "28px 20px", 
+            borderRadius: 20, 
+            position: "relative",
+            minHeight: "160px"
+          }}>
+            <div style={{ 
+              position: "absolute", 
+              top: -18, 
+              right: 16,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+            }}>
+              <Image src="/Arrow.png" alt="" width={26} height={26} />
+            </div>
+            <div style={{ marginTop: "20px", textAlign: 'center' }}>
+              <h3 style={{ 
+                fontFamily: 'Inter, sans-serif',
+                fontSize: "24px", 
+                fontWeight: 700, 
+                color: "#000", 
+                marginBottom: "10px", 
+                lineHeight: 1.2 
+              }}>
+                Commencez à<br />vendre
+              </h3>
+              <p style={{ 
+                fontFamily: 'Inter, sans-serif',
+                color: "#4b5563", 
+                fontSize: "20px",
+                fontWeight: 200,
+                lineHeight: 1.4 
+              }}>
+                Vous partagez, nous nous<br />
+                occupons de vos produits, de<br />
+                l'impression à l'expédition.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stores Section */}
+      <section style={{ padding: "0 20px", marginBottom: "40px" }}>
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <h2 style={{ 
+            fontFamily: 'Inter, sans-serif',
+            fontSize: "16px", 
+            fontWeight: 700, 
+            color: "#000", 
+            marginBottom: "4px" 
+          }}>
+            Découvrez les boutiques
+          </h2>
+          <p style={{ 
+            fontFamily: 'Inter, sans-serif',
+            color: "#6b7280", 
+            fontSize: "14px",
+            fontWeight: 300
+          }}>
+            Voici quelques-uns des magasins les plus populaires
+          </p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {[0, 1, 2].map((i) => (
             <div key={i} style={{ position: "relative" }}>
-              <div style={{ border: "3px solid #b6cff5", borderRadius: 16, height: 160, background: "#ffffff" }} />
-              <span style={{ position: "absolute", bottom: -12, right: -12, width: 36, height: 36, borderRadius: 999, background: "#3b82f6", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(59,130,246,0.4)" }}>
-                <span style={{ color: "white", fontSize: 18 }}>✎</span>
-              </span>
+              <div style={{ 
+                border: "2px solid #b6cff5", 
+                borderRadius: 16, 
+                height: "120px", 
+                background: "#ffffff" 
+              }} />
+              <div style={{ 
+                position: "absolute", 
+                bottom: 8, 
+                right: 8, 
+                width: 32, 
+                height: 32, 
+                borderRadius: "50%", 
+                background: "#3b82f6", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(59, 130, 246, 0.3)"
+              }}>
+                <Image src="/Arrow.png" alt="" width={14} height={14} style={{ filter: 'brightness(0) invert(1)' }} />
+              </div>
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
-          <Link href="/create-shop">
-            <button className="mp-gradient-cta" style={{ borderRadius: 9999, color: "white", fontWeight: 800, padding: "18px 48px", border: 0, cursor: "pointer", fontSize: 16, boxShadow: "0 8px 20px rgba(0,0,0,0.15)" }}>COMMENCEZ GRATUITEMENT !</button>
-          </Link>
-        </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ marginTop: 80, background: "#f9f9f9", borderTop: "1px solid #e5e7eb" }}>
-        <div className="mp-container" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 48, padding: "40px 20px" }}>
-          <div>
-            <div style={{ fontWeight: 700, marginBottom: 16, color: "#000", fontSize: 15 }}>Quick Links</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Home</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Create Design</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Browse Stores</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>About Us</a></li>
-            </ul>
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, marginBottom: 16, color: "#000", fontSize: 15 }}>Support</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Help Center</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Contact Us</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Shipping Info</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Returns</a></li>
-            </ul>
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, marginBottom: 16, color: "#000", fontSize: 15 }}>Legal</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Privacy Policy</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Terms of Service</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Cookie Policy</a></li>
-            </ul>
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, marginBottom: 16, color: "#000", fontSize: 15 }}>Social</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Facebook</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Instagram</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>Twitter</a></li>
-              <li><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 14 }}>YouTube</a></li>
-            </ul>
-          </div>
-        </div>
-      </footer>
+      {/* Final CTA */}
+      <section style={{ padding: "0 20px 40px", display: "flex", justifyContent: "center" }}>
+        <Link href="/create-shop" style={{ display: 'inline-block' }}>
+          <button style={{ 
+            fontFamily: 'Inter, sans-serif',
+            borderRadius: 9999, 
+            color: "white", 
+            fontWeight: 900, 
+            padding: "14px 32px", 
+            border: 0, 
+            cursor: "pointer", 
+            fontSize: 14,
+            background: "linear-gradient(90deg, #2fb3ff 0%, #8b3dff 50%, #ff3aac 100%)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            textTransform: 'uppercase'
+          }}>
+            COMMENCEZ GRATUITEMENT !
+          </button>
+        </Link>
+      </section>
     </div>
   );
 }
