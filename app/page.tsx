@@ -74,105 +74,99 @@ export default function Home() {
       )}
 
       {/* Hero Banner */}
-      <section style={{ padding: "8px 8px 16px 8px" }}>
+      <section style={{ padding: "12px" }}>
         <div style={{ 
-          borderRadius: 24, 
-          padding: "32px 20px 24px", 
+          borderRadius: 32, 
+          padding: "28px 20px 24px", 
           position: "relative", 
-          background: "linear-gradient(180deg, #5cc6ff 0%, #2d7fd9 100%)",
+          background: "radial-gradient(circle at center, #93c1ff 0%, #79adff 100%)", // Radial glow
           overflow: 'hidden',
-          minHeight: '280px'
+          minHeight: '340px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.1)'
         }}>
-          {/* Background Monkey SVG */}
+          {/* Background Monkey SVG - faint in the middle */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '320px',
+            height: '320px',
+            opacity: 0.04,
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}>
+            <Image src="/Monkey.svg" alt="" width={320} height={320} style={{ objectFit: 'contain' }} />
+          </div>
+
+          {/* Coins decorations - Matching Screenshot 2 positions */}
+          <div style={{ position: 'absolute', top: '5%', left: '15%', width: 70, height: 70, zIndex: 2, transform: 'rotate(-10deg)' }}>
+            <Image src="/Coins.png" alt="" width={70} height={70} />
+          </div>
+          <div style={{ position: 'absolute', top: '15%', right: '10%', width: 85, height: 85, zIndex: 2, transform: 'rotate(15deg)' }}>
+            <Image src="/Coins.png" alt="" width={85} height={85} />
+          </div>
+          <div style={{ position: 'absolute', top: '45%', left: '5%', width: 80, height: 80, zIndex: 2, transform: 'rotate(-20deg)' }}>
+            <Image src="/Coins.png" alt="" width={80} height={80} />
+          </div>
+          <div style={{ position: 'absolute', top: '48%', right: '5%', width: 65, height: 65, zIndex: 2, transform: 'rotate(30deg)' }}>
+            <Image src="/Coins.png" alt="" width={65} height={65} />
+          </div>
+          <div style={{ position: 'absolute', bottom: '15%', left: '12%', width: 90, height: 90, zIndex: 2, transform: 'rotate(5deg)' }}>
+            <Image src="/Coins.png" alt="" width={90} height={90} />
+          </div>
+          <div style={{ position: 'absolute', bottom: '18%', right: '20%', width: 75, height: 75, zIndex: 2, transform: 'rotate(-15deg)' }}>
+            <Image src="/Coins.png" alt="" width={75} height={75} />
+          </div>
+
+          {/* Shopping Cart Icon with Plus - Bottom Right corner */}
           <div style={{
             position: 'absolute',
             bottom: -10,
             right: -10,
-            width: '180px',
-            height: '180px',
-            opacity: 0.15,
-            zIndex: 1
+            zIndex: 3
           }}>
-            <Image src="/Monkey.svg" alt="" width={180} height={180} style={{ objectFit: 'contain' }} />
+            <Image src="/shop-add.svg" alt="" width={112} height={112} />
           </div>
 
-          {/* Coins decorations */}
-          <div style={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            width: 50,
-            height: 50,
-            zIndex: 1
-          }}>
-            <Image src="/Coins.png" alt="" width={50} height={50} style={{ objectFit: 'contain', opacity: 0.9 }} />
-          </div>
-          <div style={{
-            position: 'absolute',
-            bottom: 40,
-            left: 10,
-            width: 40,
-            height: 40,
-            zIndex: 1
-          }}>
-            <Image src="/Coins.png" alt="" width={40} height={40} style={{ objectFit: 'contain', opacity: 0.8 }} />
-          </div>
-          <div style={{
-            position: 'absolute',
-            bottom: 20,
-            right: 100,
-            width: 35,
-            height: 35,
-            zIndex: 1
-          }}>
-            <Image src="/Coins.png" alt="" width={35} height={35} style={{ objectFit: 'contain', opacity: 0.7 }} />
-          </div>
-
-          {/* Shopping Cart Icon with Plus */}
-          <div style={{
-            position: 'absolute',
-            right: 20,
-            top: 24,
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            background: 'rgba(255, 255, 255, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2
-          }}>
-            <Image src="/shop-add.svg" alt="" width={28} height={28} style={{ filter: 'brightness(0) invert(1)' }} />
-          </div>
-
-          <div style={{ position: "relative", zIndex: 2, paddingRight: '60px' }}>
+          <div style={{ position: "relative", zIndex: 4, width: '100%', maxWidth: 560, textAlign: 'center' }}>
             <h1 style={{ 
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: "20px", 
-              fontWeight: 600, 
+              fontFamily: '"Arial Black", "Arial Bold", sans-serif',
+              fontSize: "clamp(24px, 7.6vw, 34px)", 
+              fontWeight: 900, 
               color: "white", 
               textTransform: "uppercase", 
-              lineHeight: 1.4,
-              marginBottom: "12px",
-              textAlign: "left"
+              fontStyle: 'italic',
+              lineHeight: 1.05,
+              marginBottom: "18px",
+              textAlign: "center",
+              letterSpacing: '-0.02em'
             }}>
-              GAGNEZ DE <span style={{ color: "#FFEB3B" }}>L'ARGENT</span><br />
-              <span style={{ color: "#FFEB3B" }}>GRATUITEMENT</span>, EN VENDANT<br />
+              GAGNEZ DE <span style={{ color: "#f3ff00" }}>L'ARGENT</span>{" "}
+              <span style={{ color: "#f3ff00" }}>GRATUITEMENT</span>, EN VENDANT<br />
               SIMPLEMENT DES PRODUITS<br />
-              MARCHANDS <span style={{ color: "#FFEB3B", fontStyle: 'italic' }}>EN TUNISIE</span>.
+              MARCHANDS <span style={{ color: "black" }}>EN TUNISIE.</span>
             </h1>
+            
             <p style={{ 
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: 'Inter, system-ui, sans-serif',
               color: "white", 
-              fontSize: "12px",
-              fontWeight: 400,
-              lineHeight: 1.5,
-              marginBottom: "24px",
-              textAlign: "left"
+              fontSize: "15px",
+              fontWeight: 500,
+              lineHeight: 1.4,
+              marginBottom: "28px",
+              textAlign: "center",
+              padding: '0 10px',
+              opacity: 0.95
             }}>
               Téléchargez vos œuvres d'art, personnalisez vos produits<br />
               et démarrez votre propre boutique en ligne.
             </p>
+
             <div style={{ textAlign: "center" }}>
               <Link href="/create-shop" style={{ display: 'inline-block' }}>
                 <button style={{ 
@@ -180,12 +174,12 @@ export default function Home() {
                   borderRadius: 9999, 
                   color: "white", 
                   fontWeight: 900, 
-                  padding: "12px 28px", 
-                  border: 0, 
+                  padding: "16px 46px", 
+                  border: "2px solid white",
                   cursor: "pointer", 
-                  fontSize: 14,
-                  background: "linear-gradient(90deg, #2fb3ff 0%, #8b3dff 50%, #ff3aac 100%)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  fontSize: 16,
+                  background: "linear-gradient(90deg, #1b6bff 0%, #8b3dff 50%, #ff3aac 100%)",
+                  boxShadow: "0 8px 18px rgba(0,0,0,0.22)",
                   textTransform: 'uppercase'
                 }}>
                   COMMENCEZ GRATUITEMENT !
