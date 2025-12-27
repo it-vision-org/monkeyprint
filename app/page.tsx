@@ -3,12 +3,256 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import styles from "./homeMobile.module.css";
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Mobile (Figma / 390px absolute layout) */}
+      <div className={styles.mobileOnly}>
+        <div className={styles.landingPage}>
+          {/* NAV BAR */}
+          <header className={styles.navBar}>
+            <Image
+              src="/logo.png"
+              alt="Monkey Print"
+              width={84}
+              height={42}
+              className={styles.logo}
+              priority
+            />
+
+            <div className={styles.menuArea}>
+              <button
+                className={styles.menuButton}
+                onClick={() => setIsMenuOpen(true)}
+                aria-label="Open menu"
+                type="button"
+              >
+                <span className={styles.menuButtonLine} />
+                <span className={styles.menuButtonLine} />
+                <span className={styles.menuButtonLine} />
+              </button>
+            </div>
+          </header>
+
+          {/* Menu overlay */}
+          {isMenuOpen && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.25)",
+                zIndex: 60,
+              }}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: "80%",
+                  height: "100%",
+                  background: "#ffffff",
+                  padding: "40px 24px",
+                  borderTopLeftRadius: "20px",
+                  borderBottomLeftRadius: "20px",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "24px" }}>
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label="Close menu"
+                    type="button"
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#0d1c23",
+                      fontSize: 32,
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <nav style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  <a
+                    href="#"
+                    style={{
+                      color: "#0d1c23",
+                      textDecoration: "none",
+                      fontSize: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: 22 }}>👤</span>Connexion / S&apos;inscrire
+                  </a>
+                  <a
+                    href="#stores"
+                    style={{
+                      color: "#0d1c23",
+                      textDecoration: "none",
+                      fontSize: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: 22 }}>🔥</span>Découvrez les boutiques
+                  </a>
+                  <a
+                    href="#"
+                    style={{
+                      color: "#0d1c23",
+                      textDecoration: "none",
+                      fontSize: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: 22 }}>💬</span>Contactez-nous
+                  </a>
+                </nav>
+              </div>
+            </div>
+          )}
+
+          {/* HERO */}
+          <section className={styles.heroWrap} aria-label="Hero">
+            <div className={styles.heroRect} />
+
+            <div className={styles.heroMonkey}>
+              <Image src="/Monkey.svg" alt="" width={343} height={357} priority />
+            </div>
+
+            <div className={styles.heroCoins}>
+              <Image src="/Coins.png" alt="" width={359} height={247} priority />
+            </div>
+
+            <div className={styles.heroShopAdd}>
+              <Image src="/shop-add.svg" alt="" width={112} height={112} priority />
+            </div>
+
+            <h1 className={styles.heroTitle}>
+              GAGNEZ DE L&apos;ARGENT GRATUITEMENT, EN VENDANT SIMPLEMENT DES PRODUITS
+              MARCHANDS EN TUNISIE.
+            </h1>
+
+            <p className={styles.heroSubtitle}>
+              Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre
+              boutique en ligne.
+            </p>
+
+            <Link href="/create-shop" className={styles.heroCta}>
+              <span className={styles.heroCtaText}>COMMENCEZ GRATUITEMENT !</span>
+            </Link>
+          </section>
+
+          {/* HOW IT WORKS */}
+          <h2 className={styles.howTitle}>Comment ça marche</h2>
+          <p className={styles.howSubtitle}>
+            De la conception à la vente en quelques étapes simples
+          </p>
+
+          {/* CARD 1 */}
+          <div className={`${styles.cardEllipseLeft} ${styles.card1Ellipse}`} />
+          <div className={`${styles.cardRect} ${styles.card1Rect}`} />
+          <div className={`${styles.cardIcon} ${styles.card1Icon}`}>
+            <Image src="/Paper Plus.png" alt="" width={32} height={32} />
+          </div>
+          <div className={`${styles.cardTextWrap} ${styles.card1Text}`}>
+            <div className={styles.cardTitle}>Téléchargez votre conception</div>
+            <div className={styles.cardDesc}>
+              Téléchargez facilement vos œuvres et voyez-les prendre vie sur des produits de qualité.
+            </div>
+          </div>
+
+          {/* CARD 2 */}
+          <div className={`${styles.cardEllipseRight} ${styles.card2Ellipse}`} />
+          <div className={`${styles.cardRect} ${styles.card2Rect}`} />
+          <div className={`${styles.cardIcon} ${styles.card2Icon}`}>
+            <Image src="/Edit.png" alt="" width={32} height={32} />
+          </div>
+          <div className={`${styles.cardTextWrap} ${styles.card2Text}`}>
+            <div className={styles.cardTitle}>Personnaliser les produits</div>
+            <div className={styles.cardDesc}>
+              Choisissez parmi nos t-shirts, sweats à capuche, mugs et plus encore. Choisissez les
+              couleurs, les tailles et l&apos;emplacement.
+            </div>
+          </div>
+
+          {/* CARD 3 */}
+          <div className={`${styles.cardEllipseLeft} ${styles.card3Ellipse}`} />
+          <div className={`${styles.cardRect} ${styles.card3Rect}`} />
+          <div className={`${styles.cardIcon} ${styles.card3Icon}`}>
+            <Image src="/Home.png" alt="" width={32} height={32} />
+          </div>
+          <div className={`${styles.cardTextWrap} ${styles.card3Text}`}>
+            <div className={styles.cardTitle}>Créez votre boutique</div>
+            <div className={styles.cardDesc}>
+              Créez votre propre boutique de marque et commencez à vendre vos créations immédiatement.
+            </div>
+          </div>
+
+          {/* CARD 4 */}
+          <div className={`${styles.cardEllipseRight} ${styles.card4Ellipse}`} />
+          <div className={`${styles.cardRect} ${styles.card4Rect}`} />
+          <div className={`${styles.cardIcon} ${styles.card4Icon}`}>
+            <Image src="/Arrow.png" alt="" width={32} height={32} />
+          </div>
+          <div className={`${styles.cardTextWrap} ${styles.card4Text}`}>
+            <div className={styles.cardTitle}>Commencez à vendre</div>
+            <div className={styles.cardDesc}>
+              Vous partagez, nous nous occupons de vos produits, de l&apos;impression à l&apos;expédition.
+            </div>
+          </div>
+
+          {/* STORES */}
+          <div id="stores" className={styles.storesTitle}>
+            Découvrez les boutiques
+          </div>
+          <div className={styles.storesSubtitle}>
+            Voici quelques-uns des magasins les plus populaires
+          </div>
+
+          <div className={`${styles.storeBox} ${styles.storeBox1}`} aria-label="Theme 1 preview">
+            <Image src="/theme-1.png" alt="Theme 1" width={117} height={117} />
+          </div>
+          <div className={`${styles.storeBox} ${styles.storeBox2}`} aria-label="Theme 2 preview">
+            <Image src="/theme-2.png" alt="Theme 2" width={117} height={117} />
+          </div>
+          <div className={`${styles.storeBox} ${styles.storeBox3}`} aria-label="Theme 3 preview">
+            <Image src="/theme-3.png" alt="Theme 3" width={117} height={117} />
+          </div>
+
+          <div className={`${styles.storeArrowDot} ${styles.storeArrowDot1}`} aria-hidden="true">
+            <span className={styles.storeArrowStroke} />
+          </div>
+          <div className={`${styles.storeArrowDot} ${styles.storeArrowDot2}`} aria-hidden="true">
+            <span className={styles.storeArrowStroke} />
+          </div>
+          <div className={`${styles.storeArrowDot} ${styles.storeArrowDot3}`} aria-hidden="true">
+            <span className={styles.storeArrowStroke} />
+          </div>
+
+          {/* Footer */}
+          <div className={styles.footerBar} aria-hidden="true" />
+          <Link href="/create-shop" className={styles.footerCta}>
+            <span className={styles.footerCtaText}>COMMENCEZ GRATUITEMENT !</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Desktop/Tablet fallback (existing responsive layout) */}
+      <div className={styles.desktopOnly}>
       {/* Navbar - Mobile Only */}
       <header style={{ background: "#ffffff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Image src="/logo.png" alt="Monkey Print" width={100} height={32} style={{ objectFit: "contain" }} />
@@ -481,6 +725,7 @@ export default function Home() {
           </button>
         </Link>
       </section>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,459 @@
+.mobileOnly {
+  display: none;
+}
+
+.desktopOnly {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .mobileOnly {
+    display: block;
+  }
+  .desktopOnly {
+    display: none;
+  }
+}
+
+.landingPage {
+  position: relative;
+  width: 390px;
+  min-height: 1636px;
+  background: #ffffff;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* NAV BAR */
+.navBar {
+  position: absolute;
+  width: 390px;
+  height: 56px;
+  left: 0px;
+  top: 0px;
+  background: #ffffff;
+  box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+
+.logo {
+  position: absolute;
+  left: 8px;
+  top: 7px;
+  width: 84px;
+  height: 42px;
+  object-fit: contain;
+}
+
+/* MENU SLIDE BUTTON */
+.menuArea {
+  position: absolute;
+  left: 317px;
+  top: 0px;
+  width: 73.5px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuButton {
+  width: 28px;
+  height: 20px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.menuButtonLine {
+  height: 2px;
+  background: #414042;
+  border-radius: 2px;
+}
+
+/* WEB SITE HEAD COVER */
+.heroWrap {
+  position: absolute;
+  width: 387.78px;
+  height: 357px;
+  left: 7px;
+  top: 24px;
+}
+
+.heroRect {
+  position: absolute;
+  width: 373px;
+  height: 254px;
+  left: 0px;
+  top: 46px; /* 70 - 24 */
+  background: #69a5ff;
+  border-radius: 20px;
+}
+
+.heroMonkey {
+  position: absolute;
+  width: 343px;
+  height: 357px;
+  left: 24px; /* 31 - 7 */
+  top: 0px; /* 24 - 24 */
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.heroCoins {
+  position: absolute;
+  left: 7px; /* (3.59%*390) - 7 ≈ 7 */
+  top: 47px; /* (4.34%*1636) - 24 ≈ 47 */
+  width: 359px;
+  height: 247px;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.heroShopAdd {
+  position: absolute;
+  right: -10px;
+  bottom: 8px;
+  width: 112px;
+  height: 112px;
+  transform: rotate(20.6deg);
+  pointer-events: none;
+}
+
+.heroTitle {
+  position: absolute;
+  width: 350px;
+  height: 107px;
+  left: 13px; /* 20 - 7 */
+  top: 60px; /* 84 - 24 */
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 27px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.heroSubtitle {
+  position: absolute;
+  width: 343px;
+  height: 42px;
+  left: 24px; /* 31 - 7 */
+  top: 196px; /* 220 - 24 */
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.heroCta {
+  position: absolute;
+  width: 257px;
+  height: 45px;
+  left: 59px; /* 66 - 7 */
+  top: 238px; /* 262 - 24 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
+  border: 1px solid #ffffff;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 21px;
+  text-decoration: none;
+}
+
+.heroCtaText {
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 17px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* Section headings */
+.howTitle {
+  position: absolute;
+  width: 162px;
+  height: 19px;
+  left: 115px;
+  top: 338px;
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 19px;
+  text-align: center;
+  color: #000000;
+}
+
+.howSubtitle {
+  position: absolute;
+  width: 364px;
+  height: 17px;
+  left: 13px;
+  top: 362px;
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 17px;
+  text-align: center;
+  color: #000000;
+}
+
+/* Cards (geometry from Figma, text centered for readability) */
+.cardRect {
+  position: absolute;
+  width: 344px;
+  height: 215px;
+  left: 23px;
+  border-radius: 14px;
+  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.04);
+}
+
+.cardEllipseLeft {
+  position: absolute;
+  width: 99.33px;
+  height: 99.33px;
+  left: -21px;
+  background: #ffffff;
+  transform: rotate(-45deg);
+  border-radius: 999px;
+}
+
+.cardEllipseRight {
+  position: absolute;
+  width: 99.33px;
+  height: 99.33px;
+  left: 266px;
+  background: #ffffff;
+  transform: rotate(-45deg);
+  border-radius: 999px;
+}
+
+.cardIcon {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.cardTextWrap {
+  position: absolute;
+  width: 344px;
+  left: 23px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 26px 18px;
+}
+
+.cardTitle {
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 29px;
+  color: #000000;
+}
+
+.cardDesc {
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 200;
+  font-size: 20px;
+  line-height: 24px;
+  color: #222222;
+}
+
+/* Card positions */
+.card1Ellipse {
+  top: 356px;
+}
+.card1Rect {
+  top: 404px;
+  background: #ffe2d4;
+}
+.card1Text {
+  top: 404px;
+}
+.card1Icon {
+  left: 6px;
+  top: 368px;
+}
+
+.card2Ellipse {
+  top: 589px;
+}
+.card2Rect {
+  top: 637px;
+  background: #bff0e9;
+}
+.card2Text {
+  top: 637px;
+}
+.card2Icon {
+  left: 293px;
+  top: 603px;
+}
+
+.card3Ellipse {
+  top: 821px;
+}
+.card3Rect {
+  top: 869px;
+  background: #95c5fe;
+}
+.card3Text {
+  top: 869px;
+}
+.card3Icon {
+  left: 6px;
+  top: 835px;
+}
+
+.card4Ellipse {
+  top: 1054px;
+}
+.card4Rect {
+  top: 1102px;
+  background: #feb8a9;
+}
+.card4Text {
+  top: 1102px;
+}
+.card4Icon {
+  left: 293px;
+  top: 1068px;
+}
+
+/* Stores section */
+.storesTitle {
+  position: absolute;
+  width: 195px;
+  height: 19px;
+  left: 99px;
+  top: 1338px;
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 19px;
+  text-align: center;
+  color: #000000;
+}
+
+.storesSubtitle {
+  position: absolute;
+  width: 343px;
+  height: 17px;
+  left: 24px;
+  top: 1362px;
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 17px;
+  text-align: center;
+  color: #000000;
+}
+
+.storeBox {
+  position: absolute;
+  width: 117px;
+  height: 117px;
+  top: 1397px;
+  border: 1.5px solid #1e66d1;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.storeBox1 {
+  left: 8px;
+}
+.storeBox2 {
+  left: 135px;
+}
+.storeBox3 {
+  left: 263px;
+}
+
+.storeArrowDot {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  top: 1496px;
+  background: #1e66d1;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+.storeArrowDot1 {
+  left: 107px;
+}
+.storeArrowDot2 {
+  left: 234px;
+}
+.storeArrowDot3 {
+  left: 362px;
+}
+
+.storeArrowStroke {
+  width: 11.31px;
+  height: 0px;
+  border: 1.5px solid #ffffff;
+  transform: rotate(-45deg);
+}
+
+/* Footer CTA */
+.footerBar {
+  position: absolute;
+  width: 276px;
+  height: 64px;
+  left: 58px;
+  top: 1547px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 52px;
+}
+
+.footerCta {
+  position: absolute;
+  width: 257px;
+  height: 45px;
+  left: 68px;
+  top: 1556px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
+  border-radius: 21px;
+  text-decoration: none;
+  z-index: 5;
+}
+
+.footerCtaText {
+  font-family: Inter, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 17px;
+  text-align: center;
+  color: #ffffff;
+}
+
+
