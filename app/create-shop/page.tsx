@@ -295,9 +295,9 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
                 </div>
 
                 <div className={styles.categoryTags}>
-                    {categories.map((category: any) => (
+                    {categories.map((category: any, index: number) => (
                         <button
-                            key={category}
+                            key={`${category}-${index}`}
                             className={`${styles.categoryTag} ${selectedCategories.includes(category) ? styles.active : ""}`}
                             onClick={() => toggleCategory(category)}
                             type="button"
@@ -333,7 +333,7 @@ export default function CreateShopPage() {
     const [shopName, setShopName] = useState("GrabMeShoe");
     const [logo, setLogo] = useState<string | null>(null);
     const [categories, setCategories] = useState([
-        "Sport", "Travel", "Kids", "Streetwear", "Hip hop", "Music", "Kids", "Brands"
+        "Sport", "Travel", "Kids", "Streetwear", "Hip hop", "Music", "Brands"
     ]);
     const [selectedCategories, setSelectedCategories] = useState(["Streetwear", "Music"]);
     const [categorySearch, setCategorySearch] = useState("");

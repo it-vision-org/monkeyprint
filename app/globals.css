@@ -1442,12 +1442,15 @@ body {
 }
 
 /* ==================== Product Details (Step 2) ==================== */
+/* Note: .pd-page is deprecated - use .product-upload-page instead for consistent background */
 .pd-page {
   min-height: 100vh;
-  background-color: #010d16;
-  background-image: radial-gradient(at 0% 0%, #00a99d 0px, transparent 50%),
-    radial-gradient(at 90% 10%, #0072b5 0px, transparent 50%),
-    radial-gradient(at 10% 90%, #0e2a47 0px, transparent 50%);
+  background: linear-gradient(180deg, #226894 0%, #01ab7b 100%);
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  width: 100%;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -1641,6 +1644,32 @@ body {
   background-color: #d1d5db;
 }
 
+.pd-back-button-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+.pd-back-button-top:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pd-back-button-top svg {
+  flex-shrink: 0;
+}
+
 .pd-save {
   width: 100%;
   background: #0d9488;
@@ -1677,8 +1706,7 @@ body {
 
 @media (max-width: 768px) {
   .pd-page {
-    background: #f5f5f5;
-    background-image: none;
+    background: linear-gradient(180deg, #226894 0%, #01ab7b 100%);
   }
   .pd-main {
     padding: 16px;
@@ -1843,7 +1871,10 @@ body {
 }
 
 .pu-cart-icon {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .pu-cart-label {
@@ -1854,12 +1885,19 @@ body {
 .pu-cart-total {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-weight: 700;
 }
 
+.pu-cart-price {
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+}
+
 .pu-cart-total svg {
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .pu-cart-total svg.expanded {
@@ -1867,19 +1905,95 @@ body {
 }
 
 .pu-cart-details {
-  background: rgba(0, 0, 0, 0.35);
-  padding: 14px 18px 18px;
+  background: #ffffff;
+  padding: 20px 38px 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  border-radius: 0 0 18px 18px;
-  color: #ffffff;
-  font-size: 13px;
+  gap: 20px;
+  border-radius: 0 0 32px 32px;
+  color: #1a1a1a;
+  font-size: 14px;
   letter-spacing: 0.01em;
   margin-left: -20px;
   margin-right: -20px;
   width: calc(100% + 40px);
   box-sizing: border-box;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-top: 2px solid #f29c1f;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pu-cart-details-header {
+  margin-bottom: 12px;
+  padding-bottom: 16px;
+  margin-left: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pu-cart-details-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  margin: 0;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+
+.pu-cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pu-cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  background: #f9fafb;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.pu-cart-item:hover {
+  background: #f3f4f6;
+  border-color: #f29c1f;
+  transform: translateX(2px);
+}
+
+.pu-cart-item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.pu-cart-item-info svg {
+  color: #f29c1f;
+  flex-shrink: 0;
+  opacity: 1;
+}
+
+.pu-cart-item-price {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
 }
 
 .pu-cart-line,
@@ -1890,9 +2004,30 @@ body {
 }
 
 .pu-cart-total-line {
+  padding: 16px 20px;
+  margin-top: 6px;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fef3e7;
+  border-radius: 14px;
+  border: 1px solid #f29c1f;
+}
+
+.pu-cart-total-label {
   font-weight: 700;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #1a1a1a;
+}
+
+.pu-cart-total-price {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: #f29c1f;
 }
 
 .pu-mobile-sheet {
@@ -2087,20 +2222,21 @@ body {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 18px;
   padding: 18px;
-  gap: 8px;
+  overflow: visible;
 }
 
 .pu-shirt {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  transition: transform 0.3s ease, z-index 0.3s ease, opacity 0.3s ease;
+  position: absolute;
+  top: 50%;
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s ease;
 }
 
 .pu-shirt.active {
-  transform: scale(1.15) !important;
-  z-index: 10 !important;
+  z-index: 100 !important;
 }
 
 .pu-color-swatches,
@@ -2115,20 +2251,36 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 3px solid transparent;
+  border: 3px solid rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease,
+    box-shadow 0.2s ease;
+  opacity: 0.5;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  font: inherit;
+}
+
+button.pu-color-dot,
+button.pu-mini-dot {
+  padding: 0;
+  border-style: solid;
+  border-width: 3px;
 }
 
 .pu-color-dot.active,
 .pu-mini-dot.active {
   border-color: #41eb5c;
-  transform: scale(1.05);
+  border-width: 4px;
+  transform: scale(1.1);
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(65, 235, 92, 0.4);
 }
 
-.pu-color-dot.selected {
-  border-color: #000000;
-  border-width: 3px;
+.pu-color-dot.active.selected,
+.pu-mini-dot.active.selected {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(65, 235, 92, 0.4);
 }
 
 .pu-upload-card {
@@ -2598,9 +2750,10 @@ body {
 
 .pd-input-wrapper {
   position: relative;
-  width: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .pd-input {
@@ -2633,15 +2786,15 @@ body {
 
 .pd-price-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 12px;
 }
 
 .pd-profit {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -2734,11 +2887,15 @@ body {
     padding: 12px 0;
   }
   .pd-price-row {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
   }
   .pd-profit {
-    align-items: flex-end;
+    align-items: center;
+  }
+  .pd-input-wrapper {
+    flex: 1;
+    min-width: 120px;
   }
 }
 
@@ -5113,7 +5270,7 @@ body {
 /* ==================== Products List (Pixel Perfect) ==================== */
 .produits-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 40px;
 }
@@ -5480,7 +5637,7 @@ body {
 /* Responsive for Products */
 @media (max-width: 768px) {
   .produits-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
 
@@ -7923,10 +8080,9 @@ body {
 }
 
 .portefeuille-section {
-  display: flex;
-  gap: 16px;
   margin-bottom: 0;
   padding: 24px 16px;
+  overflow: hidden;
 }
 
 .portefeuille-section-icon {
@@ -7936,7 +8092,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 8px;
 }
 
 .portefeuille-section-icon svg {
@@ -7957,10 +8115,10 @@ body {
 }
 
 .portefeuille-section-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow: hidden;
 }
 
 .portefeuille-section-title {

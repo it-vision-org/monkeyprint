@@ -142,8 +142,8 @@ export default function Home() {
             </div>
 
             <h1 className={styles.heroTitle}>
-              GAGNEZ DE L&apos;ARGENT GRATUITEMENT, EN VENDANT SIMPLEMENT DES PRODUITS
-              MARCHANDS EN TUNISIE.
+              GAGNEZ DE <span style={{ color: "#f3ff00" }}>L&apos;ARGENT GRATUITEMENT</span>, EN VENDANT SIMPLEMENT DES PRODUITS
+              MARCHANDS <span style={{ color: "black" }}>EN TUNISIE.</span>
             </h1>
 
             <p className={styles.heroSubtitle}>
@@ -394,7 +394,7 @@ export default function Home() {
             <p style={{ 
               fontFamily: 'Inter, system-ui, sans-serif',
               color: "white", 
-              fontSize: "15px",
+              fontSize: "14px",
               fontWeight: 500,
               lineHeight: 1.4,
               marginBottom: "28px",

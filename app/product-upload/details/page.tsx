@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import ProductUploadHeader from "../components/ProductUploadHeader";
 
 type GenderOption = {
     id: string;
@@ -12,7 +13,6 @@ type GenderOption = {
 const GENDER_OPTIONS: GenderOption[] = [
     { id: "homme", label: "Homme" },
     { id: "femme", label: "Femme" },
-    { id: "fille", label: "Fille" },
     { id: "enfant", label: "Enfant" },
 ];
 
@@ -77,34 +77,31 @@ export default function ProductDetailsPage() {
         router.push("/dashboard/apercu");
     };
 
-    return (
-        <div className="pd-page">
-            <header className="pu-header">
-                <div className="pu-header-inner">
-                    <Image src="/logo.png" alt="Monkey Print" width={130} height={42} />
-                    <button className="pu-menu-trigger" type="button" aria-label="Ouvrir le menu">
-                        <svg width={26} height={26} viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="12" x2="21" y2="12" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
-                    </button>
-                </div>
-                <button className="pu-cart-bar" type="button">
-                    <div className="pu-cart-content">
-                        <span className="pu-cart-icon">🛒</span>
-                    </div>
-                    <div className="pu-cart-total">
-                        55DT
-                        <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                            <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-            </header>
+    const handleBack = () => {
+        router.back();
+    };
 
-            <main className="pd-main">
-                <div className="pd-flow">
+    const displayTotalPrice = parseFloat(productPrice) || MIN_PRICE;
+
+    return (
+        <div className="product-upload-page">
+            <ProductUploadHeader 
+                totalPrice={displayTotalPrice}
+                showPriceDetails={true}
+            />
+
+            <main className="pu-mobile-main">
+                <div className="pu-mobile-flow">
+                    <button 
+                        type="button" 
+                        className="pd-back-button-top"
+                        onClick={handleBack}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Retour
+                    </button>
                     <div className="pd-intro">
                         <p className="pd-intro-title">Dernière étape, remplissez la description de votre produit</p>
                         <span className="pd-intro-line" />

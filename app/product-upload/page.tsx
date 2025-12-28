@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
+import ProductUploadHeader from "./components/ProductUploadHeader";
 
 type ProductCard = {
     id: string;
@@ -61,15 +62,13 @@ const DESIGN_FEE = 30;
 export default function ProductUploadPage() {
     const router = useRouter();
     const [selectedProduct, setSelectedProduct] = useState<string>("tshirt");
-    const [selectedColors, setSelectedColors] = useState<string[]>(["white", "blue", "black", "red", "lime"]);
-    const [activeColor, setActiveColor] = useState<string>("black");
+    const [selectedColors, setSelectedColors] = useState<string[]>(["black"]);
+    const [activeColor, setActiveColorState] = useState<string>("black");
     const [selectedQuality, setSelectedQuality] = useState<string>("cotton");
     const [uploadedDesign, setUploadedDesign] = useState<string | null>(null);
     const [showAIPopup, setShowAIPopup] = useState(false);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [aiImages, setAiImages] = useState<string[]>([]);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [priceExpanded, setPriceExpanded] = useState(false);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -116,19 +115,48 @@ export default function ProductUploadPage() {
         setSelectedColors((prev) => {
             const exists = prev.includes(id);
             if (exists) {
+                // Don't allow removing the last color
                 if (prev.length === 1) {
                     return prev;
                 }
-                const next = prev.filter((color) => color !== id);
-                if (activeColor === id) {
-                    setActiveColor(next[0]);
+                // Remove the color - if it was the active one, switch to the first remaining color
+                const filtered = prev.filter((color) => color !== id);
+                if (activeColor === id && filtered.length > 0) {
+                    // If we removed the active color, set the first remaining color as active
+                    setActiveColorState(filtered[0]);
                 }
-                return next;
+                return filtered;
+            } else {
+                // Add the color at the end (so it appears on the side, not center)
+                return [...prev, id];
             }
-            const next = [...prev, id];
-            setActiveColor(id);
-            return next;
         });
+    };
+
+    const setActiveColor = (colorId: string) => {
+        // Only set active if the color is in the selected colors
+        if (selectedColors.includes(colorId)) {
+            setActiveColorState(colorId);
+        }
+    };
+
+    // Get selected colors in order (active color first for centering, rest in original order)
+    const getOrderedColors = () => {
+        // Safety check: if activeColor is not in selectedColors, use first selected color
+        const validActiveColor = selectedColors.includes(activeColor) 
+            ? activeColor 
+            : (selectedColors.length > 0 ? selectedColors[0] : "");
+        
+        const activeSwatch = COLOR_SWATCHES.find(swatch => swatch.id === validActiveColor);
+        const otherColors = selectedColors.filter(id => id !== validActiveColor);
+        const otherSwatches = otherColors
+            .map(id => COLOR_SWATCHES.find(swatch => swatch.id === id))
+            .filter((swatch): swatch is ColorSwatch => swatch !== undefined);
+        
+        // Return active color first (for center), then others in their original order
+        return activeSwatch 
+            ? [activeSwatch, ...otherSwatches]
+            : otherSwatches;
     };
 
     const handleNext = () => {
@@ -138,83 +166,50 @@ export default function ProductUploadPage() {
         router.push("/product-upload/details");
     };
 
+    const cartItems = [
+        {
+            label: "Articles (T-shirt)",
+            price: BASE_PRICE,
+            icon: (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+            ),
+        },
+        {
+            label: "Design",
+            price: DESIGN_FEE,
+            icon: (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            ),
+        },
+        {
+            label: "Qualité",
+            price: qualityPrice,
+            icon: (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 7h-9" />
+                    <path d="M14 17H5" />
+                    <circle cx="17" cy="17" r="3" />
+                    <circle cx="7" cy="7" r="3" />
+                </svg>
+            ),
+        },
+    ];
+
     return (
         <div className="product-upload-page">
-            <header className="pu-header">
-                <div className="pu-header-inner">
-                    <div className="pu-logo-container">
-                        <Image src="/logo.png" alt="Monkey Print" width={84} height={42} />
-                        <span className="pu-logo-text">MONKEY PRINT</span>
-                    </div>
-                    <button
-                        className="pu-menu-trigger"
-                        type="button"
-                        aria-label="Ouvrir le menu"
-                        onClick={() => setMobileMenuOpen(true)}
-                    >
-                        <span className="pu-menu-line"></span>
-                        <span className="pu-menu-line"></span>
-                        <span className="pu-menu-line"></span>
-                    </button>
-                </div>
-                <button
-                    className="pu-cart-bar"
-                    type="button"
-                    aria-expanded={priceExpanded}
-                    onClick={() => setPriceExpanded((prev) => !prev)}
-                >
-                    <div className="pu-cart-content">
-                        <span className="pu-cart-icon">🛒</span>
-                    </div>
-                    <div className="pu-cart-total">
-                        {totalPrice}DT
-                        <svg
-                            width="16"
-                            height="10"
-                            viewBox="0 0 16 10"
-                            fill="none"
-                            className={priceExpanded ? "expanded" : ""}
-                        >
-                            <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                {priceExpanded && (
-                    <div className="pu-cart-details">
-                        <div className="pu-cart-line">
-                            <span>Articles (T-shirt)</span>
-                            <span>{BASE_PRICE}DT</span>
-                        </div>
-                        <div className="pu-cart-line">
-                            <span>Design</span>
-                            <span>{DESIGN_FEE}DT</span>
-                        </div>
-                        <div className="pu-cart-line">
-                            <span>Qualité</span>
-                            <span>{qualityPrice}DT</span>
-                        </div>
-                        <div className="pu-cart-total-line">
-                            <span>Total</span>
-                            <span>{totalPrice}DT</span>
-                        </div>
-                    </div>
-                )}
-            </header>
-
-            {mobileMenuOpen && (
-                <div className="mp-mobile-overlay" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="pu-mobile-sheet" onClick={(event) => event.stopPropagation()}>
-                        <button className="pu-mobile-close" type="button" onClick={() => setMobileMenuOpen(false)}>
-                            ×
-                        </button>
-                        <nav className="pu-mobile-menu">
-                            <a href="/">Accueil</a>
-                            <a href="#">Shop List</a>
-                            <a href="#">Contactez-nous</a>
-                        </nav>
-                    </div>
-                </div>
-            )}
+            <ProductUploadHeader 
+                totalPrice={totalPrice} 
+                cartItems={cartItems}
+                showPriceDetails={true}
+            />
 
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
@@ -247,43 +242,91 @@ export default function ProductUploadPage() {
                         <h3 className="pu-card-subtitle">Couleurs disponibles :</h3>
                         <div className="pu-color-wrapper">
                             <div className="pu-color-hero">
-                                {COLOR_SWATCHES.map((swatch, index) => {
+                                {(() => {
+                                    const orderedColors = getOrderedColors();
+                                    // The first color (index 0) should always be in the center
+                                    const centerIndex = 0;
+                                    return orderedColors.map((swatch, index) => {
+                                        const isActive = index === centerIndex;
+                                        const distanceFromCenter = index; // Distance from center (first item)
+                                        const scale = Math.max(0.6, 1 - (distanceFromCenter * 0.15)); // Decrease by 15% for each step away, min 0.6
+                                        const zIndex = isActive ? 100 : 50 - distanceFromCenter;
+                                        
+                                        // Calculate horizontal offset: center is 0, left is negative, right is positive
+                                        // For items after center, alternate: 1->left, 2->right, 3->left, etc.
+                                        let offset = 0;
+                                        if (index > 0) {
+                                            // Determine if this item should be on left or right
+                                            const sideIndex = Math.floor((index - 1) / 2) + 1;
+                                            const isLeft = (index - 1) % 2 === 0; // First new item goes left
+                                            offset = isLeft ? -sideIndex * 70 : sideIndex * 70;
+                                        }
+                                        
+                                        return (
+                                            <div 
+                                                key={swatch.id} 
+                                                className={`pu-shirt ${isActive ? "active" : ""}`}
+                                                style={{
+                                                    left: '50%',
+                                                    transform: `translate(calc(-50% + ${offset}px), -50%) scale(${scale})`,
+                                                    zIndex: zIndex,
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        width: '90px',
+                                                        height: '110px',
+                                                        backgroundColor: swatch.id === 'white' ? '#f5f5f5' : swatch.hex,
+                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        boxShadow: swatch.id === 'white' ? '0 0 0 1px rgba(0, 0, 0, 0.1)' : 'none',
+                                                    }}
+                                                />
+                                            </div>
+                                        );
+                                    });
+                                })()}
+                            </div>
+                            <div className="pu-color-swatches">
+                                {COLOR_SWATCHES.map((swatch) => {
                                     const isSelected = selectedColors.includes(swatch.id);
                                     const isActive = swatch.id === activeColor;
                                     return (
-                                        <div 
-                                            key={swatch.id} 
-                                            className={`pu-shirt ${isActive ? "active" : ""}`}
-                                            style={{
-                                                transform: isActive ? "scale(1.1)" : "scale(0.9)",
-                                                zIndex: isActive ? 10 : 1,
-                                                opacity: isSelected ? 1 : 0.4
-                                            }}
+                                        <button
+                                            key={swatch.id}
+                                            type="button"
+                                            className={`pu-color-dot ${isSelected ? "active" : ""} ${isActive && isSelected ? "selected" : ""}`}
+                                            style={{ background: swatch.hex }}
+                                            onClick={() => toggleColor(swatch.id)}
+                                            title={swatch.label}
                                         >
-                                            <Image
-                                                src="/T-Shirt.png"
-                                                alt={`T-shirt ${swatch.id}`}
-                                                width={90}
-                                                height={110}
-                                                style={{ filter: COLOR_FILTERS[swatch.id] ?? "none" }}
-                                            />
-                                        </div>
+                                            {isSelected && (
+                                                <svg 
+                                                    width="18" 
+                                                    height="18" 
+                                                    viewBox="0 0 24 24" 
+                                                    fill="none" 
+                                                    stroke={swatch.id === "white" ? "#000000" : "#ffffff"} 
+                                                    strokeWidth="2.5" 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round"
+                                                    style={{ 
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '50%',
+                                                        transform: 'translate(-50%, -50%)',
+                                                        pointerEvents: 'none',
+                                                        filter: swatch.id === "white" 
+                                                            ? 'none' 
+                                                            : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))',
+                                                    }}
+                                                >
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            )}
+                                        </button>
                                     );
                                 })}
-                            </div>
-                            <div className="pu-color-swatches">
-                                {COLOR_SWATCHES.map((swatch) => (
-                                    <button
-                                        key={swatch.id}
-                                        type="button"
-                                        className={`pu-color-dot ${selectedColors.includes(swatch.id) ? "active" : ""} ${activeColor === swatch.id ? "selected" : ""}`}
-                                        style={{ background: swatch.hex }}
-                                        onClick={() => {
-                                            toggleColor(swatch.id);
-                                            setActiveColor(swatch.id);
-                                        }}
-                                    />
-                                ))}
                             </div>
                         </div>
                     </section>
@@ -311,12 +354,15 @@ export default function ProductUploadPage() {
                         </div>
                         <div className="pu-design-card">
                             <div className="pu-design-figure">
-                                <Image
-                                    src="/mock-shirt.png"
-                                    alt="Mockup"
-                                    width={320}
-                                    height={320}
-                                    style={{ filter: COLOR_FILTERS[activeColor] ?? "none" }}
+                                <div
+                                    style={{
+                                        width: '320px',
+                                        height: '320px',
+                                        backgroundColor: activeColor === 'white' ? '#f5f5f5' : (activeColor ? COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'),
+                                        WebkitMask: 'url(/mock-shirt.png) no-repeat center / contain',
+                                        mask: 'url(/mock-shirt.png) no-repeat center / contain',
+                                        boxShadow: activeColor === 'white' ? '0 0 0 2px rgba(0, 0, 0, 0.08)' : 'none',
+                                    }}
                                 />
                                 <div className="pu-design-frame">
                                     {uploadedDesign ? (
@@ -351,17 +397,19 @@ export default function ProductUploadPage() {
                                 </button>
                             </div>
                         </div>
-                        <span className="pu-preview-label">Couleurs d’aperçu</span>
+                        <span className="pu-preview-label">Couleurs d'aperçu</span>
                         <div className="pu-mini-swatches">
                             {selectedColors.map((colorId) => {
                                 const swatch = COLOR_SWATCHES.find((c) => c.id === colorId);
+                                const isActive = colorId === activeColor;
                                 return (
                                     <button
                                         key={colorId}
                                         type="button"
-                                        className={`pu-mini-dot ${activeColor === colorId ? "active" : ""}`}
+                                        className={`pu-mini-dot ${isActive ? "active" : ""}`}
                                         style={{ background: swatch?.hex }}
                                         onClick={() => setActiveColor(colorId)}
+                                        title={swatch?.label}
                                     />
                                 );
                             })}
