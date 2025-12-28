@@ -12,6 +12,14 @@
   box-sizing: border-box;
 }
 
+@media (min-width: 769px) {
+  .createShopContainer {
+    max-width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
 /* Background V4 - Gradient */
 .backgroundV4 {
   box-sizing: border-box;
@@ -294,7 +302,8 @@
   box-sizing: border-box;
   position: absolute;
   width: calc(100% - 36px);
-  height: 127px;
+  min-height: 160px;
+  height: auto;
   left: var(--mobile-padding-x);
   top: 320px;
   background: #ffffff;
@@ -331,24 +340,33 @@
 .storeNameInput {
   width: 100%;
   max-width: 100%;
-  height: 38px;
+  min-height: 56px;
+  height: 56px;
   background: #ffffff;
   box-shadow: 4px 4px 13px rgba(0, 0, 0, 0.25);
-  border-radius: 61px;
-  border: none;
-  padding: 0 20px;
+  border-radius: 16px;
+  border: 2px solid #e5e7eb;
+  padding: 0 24px;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 20px;
   color: #000000;
   box-sizing: border-box;
   margin-top: auto;
+  transition: all 0.2s ease;
 }
 
 .storeNameInput:focus {
   outline: none;
+  border-color: #41eb5c;
+  box-shadow: 4px 4px 13px rgba(65, 235, 92, 0.2), 0 0 0 3px rgba(65, 235, 92, 0.1);
+}
+
+.storeNameInput::placeholder {
+  color: #9ca3af;
+  font-size: 16px;
 }
 
 /* Card 3: Store Category */
@@ -520,16 +538,46 @@
   text-align: center;
 }
 
-/* Step 3 Container */
+/* Step 1, 2, and 3 Containers */
+.step1Container,
+.step2Container,
 .step3Container {
   position: relative;
   width: 100%;
   min-height: calc(100vh - 56px);
   padding-bottom: 120px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Step 3 Button */
+/* Mobile spacing for Step 1 and Step 2 */
+@media (max-width: 768px) {
+  .step1Container .cs-card,
+  .step2Container .cs-card {
+    margin-bottom: 18px;
+  }
+
+  .step1Container .cs-divider-standalone {
+    margin: 18px 0;
+  }
+
+  .step1Container .cs-google-btn {
+    margin-bottom: 18px;
+  }
+
+  .step2Container .cs-theme-label {
+    margin-bottom: 18px;
+  }
+
+  .step2Container .cs-theme-section {
+    margin-bottom: 18px;
+  }
+}
+
+/* Step 1, 2, and 3 Buttons */
+.step1Button,
+.step2Button,
 .step3Button {
   position: absolute;
   left: var(--mobile-padding-x);
@@ -570,11 +618,14 @@
   .createShopContainer {
     max-width: 100%;
     padding-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .backgroundV4 {
     top: 0;
     min-height: 100vh;
+    overflow: hidden;
   }
 
   /* Desktop Navbar */
@@ -678,24 +729,33 @@
     position: static;
     width: 100%;
     max-width: 800px;
-    margin: 80px auto 32px;
+    margin: 0 auto 32px;
+    padding-top: 100px;
     text-align: center;
     font-size: 42px;
     line-height: 1.2;
   }
 
   .stepDots {
-    position: static;
-    transform: none;
-    justify-content: center;
-    margin: 0 auto 60px;
+    position: static !important;
+    transform: none !important;
+    justify-content: center !important;
+    margin: 0 auto 32px !important;
+    left: auto !important;
+    top: auto !important;
   }
 
-  /* Step 3 Desktop Layout */
+  /* Step 1, 2, and 3 Desktop Layout */
+  .step1Container,
+  .step2Container,
   .step3Container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 40px 80px;
+    padding: 100px 40px 80px;
+    min-height: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .card1,
@@ -745,10 +805,17 @@
   }
 
   .storeNameInput {
-    height: 50px;
-    font-size: 16px;
-    padding: 0 24px;
-    border-radius: 61px;
+    min-height: 64px;
+    height: 64px;
+    font-size: 18px;
+    line-height: 24px;
+    padding: 0 28px;
+    border-radius: 18px;
+    border-width: 2px;
+  }
+
+  .storeNameInput::placeholder {
+    font-size: 18px;
   }
 
   .searchContainer {
@@ -770,6 +837,8 @@
     font-size: 14px;
   }
 
+  .step1Button,
+  .step2Button,
   .step3Button {
     position: static;
     width: 100%;
@@ -779,36 +848,48 @@
     height: 56px;
     font-size: 18px;
     border-radius: 28px;
-  }
-
-  /* Step 1 and 2 Desktop */
-  .cs-screen {
-    max-width: 600px;
-    margin: 80px auto;
-    padding: 0 40px 80px;
-  }
-
-  .cs-screen-title {
-    font-size: 36px;
-    margin-bottom: 32px;
-  }
-
-  .cs-card {
-    border-radius: 24px;
-    padding: 40px;
-  }
-
-  .cs-primary-btn {
-    height: 56px;
-    padding: 0 48px;
-    width: auto;
-    min-width: 300px;
-    max-width: 400px;
-    margin: 32px auto 0;
-    display: block;
-    font-size: 18px;
-    border-radius: 28px;
     box-sizing: border-box;
+  }
+
+  /* Step 1 and Step 2 Cards Desktop - Target global classes within containers */
+  .step1Container,
+  .step2Container {
+    gap: 24px;
+  }
+
+  .step1Container .cs-card,
+  .step2Container .cs-card {
+    position: static;
+    width: 100%;
+    margin-bottom: 0;
+    border-radius: 24px;
+    padding: 32px;
+    box-sizing: border-box;
+  }
+
+  .step1Container .cs-card-profile,
+  .step2Container .cs-card-summary {
+    padding: 32px;
+  }
+
+  /* Step 2 Theme Elements Desktop */
+  .step2Container .cs-theme-label {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .step2Container .cs-theme-carousel {
+    height: 400px;
+  }
+
+  .step2Container .cs-theme-card {
+    width: min(600px, 60vw);
+    height: 400px;
+  }
+
+  .step2Container .cs-round-nav {
+    width: 56px;
+    height: 56px;
   }
 
   /* Hide mobile menu on desktop */
@@ -871,6 +952,8 @@
     position: absolute;
   }
 
+  .step1Button,
+  .step2Button,
   .step3Button {
     position: absolute;
     left: var(--mobile-padding-x);
@@ -912,7 +995,13 @@
     line-height: 17px;
   }
 
-  .storeNameInput,
+  .storeNameInput {
+    min-height: 52px;
+    height: 52px;
+    font-size: 14px;
+    padding: 0 20px;
+  }
+
   .searchInput {
     font-size: 12px;
   }
@@ -964,7 +1053,13 @@
     line-height: 16px;
   }
 
-  .storeNameInput,
+  .storeNameInput {
+    min-height: 48px;
+    height: 48px;
+    font-size: 13px;
+    padding: 0 18px;
+  }
+
   .searchInput {
     font-size: 11px;
     padding: 0 15px;
@@ -987,6 +1082,8 @@
     padding: 15px;
   }
 
+  .step1Button,
+  .step2Button,
   .step3Button {
     top: 704px;
   }

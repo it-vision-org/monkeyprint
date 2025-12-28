@@ -29,6 +29,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Prevent horizontal scroll on create-shop page desktop */
+@media (min-width: 769px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
 body {
   background: #ffffff;
   color: #171717;

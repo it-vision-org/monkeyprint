@@ -23,20 +23,18 @@ const Step1 = ({ shopName, logo, setStep, router }: any) => {
     const [password, setPassword] = useState("123456789@gms");
 
     return (
-        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px 18px', paddingTop: '20px', minHeight: 'calc(100vh - 56px)' }}>
-            <div className="cs-screen-header" style={{ position: 'relative' }}>
-                <h2 className="cs-screen-title">Créer un compte</h2>
-                <StepDots
-                    currentStep={1}
-                    totalSteps={3}
-                    onStepClick={(s) => {
-                        if (s <= 1) setStep(s);
-                    }}
-                    className={styles.stepDots}
-                    dotClassName={styles.stepDot}
-                    filledClassName={styles.filled}
-                />
-            </div>
+        <div className={styles.step1Container}>
+            <h2 className={styles.mainTitle}>Créer un compte</h2>
+            <StepDots
+                currentStep={3}
+                totalSteps={3}
+                onStepClick={(s) => {
+                    if (s === 3) setStep(1);
+                }}
+                className={styles.stepDots}
+                dotClassName={styles.stepDot}
+                filledClassName={styles.filled}
+            />
 
             <div className="cs-card cs-card-profile">
                 <div className="cs-profile-picture">
@@ -75,7 +73,7 @@ const Step1 = ({ shopName, logo, setStep, router }: any) => {
                 Sign in with Google
             </button>
 
-            <button className="cs-primary-btn" onClick={() => router.push('/product-upload')} type="button">
+            <button className={`cs-primary-btn ${styles.step1Button}`} onClick={() => router.push('/product-upload')} type="button">
                 S'INSCRIE
             </button>
         </div>
@@ -109,20 +107,19 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
     };
 
     return (
-        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px 18px', paddingTop: '80px', minHeight: 'calc(100vh - 56px)' }}>
-            <div className="cs-screen-header" style={{ position: 'relative' }}>
-                <h2 className="cs-screen-title">Choisissez le thème de votre magasin</h2>
-                <StepDots
-                    currentStep={2}
-                    totalSteps={3}
-                    onStepClick={(s) => {
-                        if (s <= 2) setStep(s);
-                    }}
-                    className={styles.stepDots}
-                    dotClassName={styles.stepDot}
-                    filledClassName={styles.filled}
-                />
-            </div>
+        <div className={styles.step2Container}>
+            <h2 className={styles.mainTitle}>Choisissez le thème de votre magasin</h2>
+            <StepDots
+                currentStep={2}
+                totalSteps={3}
+                onStepClick={(s) => {
+                    if (s === 2) setStep(2);
+                    if (s === 3) setStep(1);
+                }}
+                className={styles.stepDots}
+                dotClassName={styles.stepDot}
+                filledClassName={styles.filled}
+            />
 
             <div className="cs-card cs-card-summary">
                 <div className="cs-shop-badge">
@@ -171,7 +168,7 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
                 </div>
             </div>
 
-            <button className="cs-primary-btn" onClick={() => setStep(1)} disabled={!selectedTheme} type="button">
+            <button className={`cs-primary-btn ${styles.step2Button}`} onClick={() => setStep(1)} disabled={!selectedTheme} type="button">
                 SUIVANT
             </button>
         </div>
@@ -197,10 +194,12 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
         <div className={styles.step3Container}>
             <h2 className={styles.mainTitle}>Commencez par créer votre boutique</h2>
             <StepDots
-                currentStep={3}
+                currentStep={1}
                 totalSteps={3}
                 onStepClick={(s) => {
-                    if (s <= 3) setStep(s);
+                    if (s === 1) setStep(3);
+                    if (s === 2) setStep(2);
+                    if (s === 3) setStep(1);
                 }}
                 className={styles.stepDots}
                 dotClassName={styles.stepDot}
