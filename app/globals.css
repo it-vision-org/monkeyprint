@@ -8082,7 +8082,12 @@ button.pu-mini-dot {
 .portefeuille-section {
   margin-bottom: 0;
   padding: 24px 16px;
-  overflow: hidden;
+}
+
+.portefeuille-section::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 .portefeuille-section-icon {
@@ -8094,7 +8099,7 @@ button.pu-mini-dot {
   justify-content: center;
   float: left;
   margin-right: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .portefeuille-section-icon svg {
@@ -8115,26 +8120,23 @@ button.pu-mini-dot {
 }
 
 .portefeuille-section-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow: hidden;
+  display: block;
 }
 
 .portefeuille-section-title {
   font-size: 19px;
   font-weight: 700;
   color: #1f2937;
-  margin: 0;
+  margin: 0 0 6px 0;
   line-height: 1.3;
+  display: block;
 }
 
 .portefeuille-section-desc {
   font-size: 13px;
   line-height: 1.5;
   color: #6b7280;
-  margin: 0;
-  margin-bottom: 4px;
+  margin: 0 0 10px 0;
 }
 
 .portefeuille-section-date {
@@ -8142,7 +8144,7 @@ button.pu-mini-dot {
   font-weight: 600;
   color: #1f2937;
   margin-top: 2px;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 
 .portefeuille-section-amount {
@@ -8150,7 +8152,7 @@ button.pu-mini-dot {
   align-items: baseline;
   gap: 4px;
   margin-top: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 }
 
 .portefeuille-section-value {
@@ -8184,6 +8186,7 @@ button.pu-mini-dot {
   padding: 16px;
   background: #f9fafb;
   border-radius: 12px;
+  clear: left;
 }
 
 .portefeuille-section-item-label {
@@ -8238,6 +8241,7 @@ button.pu-mini-dot {
   font-weight: 700;
   cursor: pointer;
   margin-top: 20px;
+  clear: left;
 }
 
 .portefeuille-divider {
