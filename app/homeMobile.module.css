@@ -13,24 +13,146 @@
   .desktopOnly {
     display: none;
   }
+
+  .landingPage {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    overflow-x: hidden;
+  }
+
+  .heroWrap {
+    width: 100% !important;
+    left: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .heroRect {
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    left: var(--mobile-padding-x) !important;
+    box-sizing: border-box;
+  }
+
+  .heroMonkey {
+    left: var(--mobile-padding-x) !important;
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    box-sizing: border-box;
+  }
+
+  .heroCoins {
+    left: var(--mobile-padding-x) !important;
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    box-sizing: border-box;
+  }
+
+  .heroTitle {
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    left: var(--mobile-padding-x) !important;
+    box-sizing: border-box;
+  }
+
+  .heroSubtitle {
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    left: var(--mobile-padding-x) !important;
+    box-sizing: border-box;
+  }
+
+  .heroCta {
+    width: 257px !important;
+    min-width: 257px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    white-space: nowrap !important;
+    box-sizing: border-box;
+  }
+
+  .heroShopAdd {
+    right: calc(var(--mobile-padding-x) - 15px) !important;
+    box-sizing: border-box;
+  }
+
+  .cardRect,
+  .cardTextWrap {
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    max-width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    left: var(--mobile-padding-x) !important;
+    box-sizing: border-box;
+  }
+
+  .card2Icon,
+  .card4Icon {
+    left: auto !important;
+    right: calc(var(--mobile-padding-x) - 8px) !important;
+    box-sizing: border-box;
+  }
+
+  .storesTitle {
+    width: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+    box-sizing: border-box;
+  }
+
+  .storesSubtitle {
+    width: calc(100% - calc(var(--mobile-padding-x) * 2)) !important;
+    left: var(--mobile-padding-x) !important;
+    text-align: center !important;
+    box-sizing: border-box;
+  }
+
+  .storeBox {
+    width: calc(
+      (100% - calc(var(--mobile-padding-x) * 2) - 16px) / 3
+    ) !important;
+    box-sizing: border-box;
+  }
+
+  .storeBox1 {
+    left: var(--mobile-padding-x) !important;
+  }
+
+  .storeBox2 {
+    left: calc(
+      var(--mobile-padding-x) +
+        (100% - calc(var(--mobile-padding-x) * 2) - 16px) / 3 + 8px
+    ) !important;
+  }
+
+  .storeBox3 {
+    left: calc(
+      var(--mobile-padding-x) +
+        ((100% - calc(var(--mobile-padding-x) * 2) - 16px) / 3) * 2 + 16px
+    ) !important;
+  }
+
+  .footerBar,
+  .footerCta {
+    max-width: calc(100% - 132px);
+    box-sizing: border-box;
+  }
 }
 
 .landingPage {
   position: relative;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
   min-height: 1636px;
   background: #ffffff;
   margin: 0 auto;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* NAV BAR */
 .navBar {
   position: fixed;
-  width: 100vw;
-  max-width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 56px;
   left: 0;
+  right: 0;
   top: 0px;
   background: #ffffff;
   box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.25);
@@ -38,7 +160,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 var(--mobile-padding-x);
   box-sizing: border-box;
 }
 
@@ -221,9 +343,9 @@
 /* Cards (geometry from Figma, text centered for readability) */
 .cardRect {
   position: absolute;
-  width: 344px;
+  width: calc(100% - calc(var(--mobile-padding-x) * 2));
   height: 215px;
-  left: 23px;
+  left: var(--mobile-padding-x);
   border-radius: 14px;
   box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.04);
 }
@@ -261,14 +383,14 @@
 
 .cardTextWrap {
   position: absolute;
-  width: 344px;
-  left: 23px;
+  width: calc(100% - calc(var(--mobile-padding-x) * 2));
+  left: var(--mobile-padding-x);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 10px;
-  padding: 26px 18px;
+  padding: 26px var(--mobile-padding-x);
   padding-top: 26px;
 }
 

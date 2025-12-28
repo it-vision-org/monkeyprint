@@ -1,13 +1,15 @@
 /* STORE CREATION 1 - Main Container */
 .createShopContainer {
   position: relative;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
   min-height: 100vh;
   background: transparent;
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
   padding-top: 56px;
+  box-sizing: border-box;
 }
 
 /* Background V4 - Gradient */
@@ -114,10 +116,10 @@
 .navBar {
   position: fixed;
   width: 100%;
-  max-width: 390px;
+  max-width: 100%;
   height: 56px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   top: 0px;
   background: #ffffff;
   box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.25);
@@ -125,7 +127,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 var(--mobile-padding-x);
   box-sizing: border-box;
 }
 
@@ -172,9 +174,9 @@
 /* Main Title */
 .mainTitle {
   position: absolute;
-  width: 362px;
-  height: 52px;
-  left: 17px;
+  width: calc(100% - 36px);
+  min-height: 52px;
+  left: var(--mobile-padding-x);
   top: 80px;
   font-family: "DM Sans", sans-serif;
   font-style: normal;
@@ -184,12 +186,15 @@
   text-align: center;
   color: #41eb5c;
   z-index: 5;
+  box-sizing: border-box;
+  word-wrap: break-word;
 }
 
 /* Step Dots */
 .stepDots {
   position: absolute;
-  left: 171px;
+  left: 50%;
+  transform: translateX(-50%);
   top: 149px;
   display: flex;
   gap: 10px;
@@ -213,9 +218,9 @@
 .card1 {
   box-sizing: border-box;
   position: absolute;
-  width: 375px;
+  width: calc(100% - 36px);
   height: 131px;
-  left: 7px;
+  left: var(--mobile-padding-x);
   top: 170px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
@@ -225,12 +230,15 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  overflow: hidden;
 }
 
 .uploadArea {
   box-sizing: border-box;
   width: 102px;
+  min-width: 80px;
   height: 102px;
+  max-width: 102px;
   background: #ffffff;
   border: 1px solid #000000;
   border-radius: 11px;
@@ -256,8 +264,8 @@
 }
 
 .uploadTitle {
-  width: 253px;
-  height: 29px;
+  flex: 1;
+  min-width: 0;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
@@ -265,10 +273,12 @@
   line-height: 24px;
   color: #242424;
   margin: 0;
+  word-wrap: break-word;
 }
 
 .uploadDescription {
-  width: 231px;
+  flex: 1;
+  min-width: 0;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 300;
@@ -276,15 +286,16 @@
   line-height: 19px;
   color: #242424;
   margin: 5px 0 0 0;
+  word-wrap: break-word;
 }
 
 /* Card 2: Store Name */
 .card2 {
   box-sizing: border-box;
   position: absolute;
-  width: 375px;
+  width: calc(100% - 36px);
   height: 127px;
-  left: 7px;
+  left: var(--mobile-padding-x);
   top: 320px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
@@ -296,8 +307,7 @@
 }
 
 .card2Title {
-  width: 221px;
-  height: 24px;
+  width: 100%;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
@@ -308,8 +318,7 @@
 }
 
 .card2Required {
-  width: 123px;
-  height: 19px;
+  width: 100%;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 300;
@@ -320,7 +329,8 @@
 }
 
 .storeNameInput {
-  width: 304px;
+  width: 100%;
+  max-width: 100%;
   height: 38px;
   background: #ffffff;
   box-shadow: 4px 4px 13px rgba(0, 0, 0, 0.25);
@@ -345,9 +355,9 @@
 .card3 {
   box-sizing: border-box;
   position: absolute;
-  width: 375px;
+  width: calc(100% - 36px);
   min-height: 222px;
-  left: 7px;
+  left: var(--mobile-padding-x);
   top: 465px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
@@ -360,8 +370,7 @@
 }
 
 .card3Title {
-  width: 212px;
-  height: 24px;
+  width: 100%;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
@@ -372,8 +381,7 @@
 }
 
 .card3Required {
-  width: 123px;
-  height: 19px;
+  width: 100%;
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 300;
@@ -385,10 +393,12 @@
 
 /* Search Input */
 .searchContainer {
-  width: 304px;
+  width: 100%;
+  max-width: 100%;
   height: 40px;
   filter: drop-shadow(4px 4px 10.4px rgba(0, 0, 0, 0.25));
   margin-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .searchPill {
@@ -397,16 +407,22 @@
   align-items: center;
   padding: 7px 10px;
   gap: 10px;
-  width: 304px;
+  width: 100%;
+  max-width: 100%;
   height: 40px;
   background: #ffffff;
   border-radius: 52px;
+  box-sizing: border-box;
 }
 
 .searchIcon {
   width: 26px;
   height: 26px;
+  min-width: 20px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .searchIcon svg {
@@ -416,6 +432,7 @@
 
 .searchInput {
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   font-family: "Inter", sans-serif;
@@ -425,6 +442,7 @@
   line-height: 16px;
   color: #000000;
   outline: none;
+  box-sizing: border-box;
 }
 
 .searchInput::placeholder {
@@ -459,6 +477,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .categoryTag.active {
@@ -499,6 +520,34 @@
   text-align: center;
 }
 
+/* Step 3 Container */
+.step3Container {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 56px);
+  padding-bottom: 120px;
+  box-sizing: border-box;
+}
+
+/* Step 3 Button */
+.step3Button {
+  position: absolute;
+  left: var(--mobile-padding-x);
+  top: 714px;
+  width: calc(100% - 36px);
+  max-width: 375px;
+  z-index: 6;
+  box-sizing: border-box;
+}
+
+/* Upload Text Container */
+.uploadTextContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Mobile Menu Slide */
 .menuSlide {
   position: fixed;
@@ -520,19 +569,186 @@
 @media (max-width: 480px) {
   .createShopContainer {
     width: 100%;
-    max-width: 390px;
+    max-width: 100%;
     margin: 0 auto;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .backgroundV4 {
     width: 100%;
+    left: 0;
+    right: 0;
   }
 
   .navBar {
-    width: 100vw;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     left: 0;
-    transform: none;
-    padding: 0 16px;
+    right: 0;
+    padding: 0 var(--mobile-padding-x);
+  }
+
+  .card1,
+  .card2,
+  .card3 {
+    width: calc(100% - 36px);
+    left: var(--mobile-padding-x);
+    box-sizing: border-box;
+    position: absolute;
+  }
+
+  .step3Button {
+    position: absolute;
+    left: var(--mobile-padding-x);
+    width: calc(100% - 36px);
+  }
+
+  .mainTitle {
+    width: calc(100% - 36px);
+    left: var(--mobile-padding-x);
+    box-sizing: border-box;
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .stepDots {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .uploadTitle {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .uploadDescription {
+    font-size: 14px;
+    line-height: 17px;
+  }
+
+  .card2Title,
+  .card3Title {
+    font-size: 18px;
+    line-height: 22px;
+  }
+
+  .card2Required,
+  .card3Required {
+    font-size: 14px;
+    line-height: 17px;
+  }
+
+  .storeNameInput,
+  .searchInput {
+    font-size: 12px;
+  }
+
+  .uploadArea {
+    width: 80px;
+    min-width: 70px;
+    height: 80px;
+    max-width: 80px;
+  }
+
+  .searchIcon {
+    width: 22px;
+    height: 22px;
+    min-width: 20px;
+  }
+
+  .searchIcon svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mainTitle {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .uploadTitle {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .uploadDescription {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .card2Title,
+  .card3Title {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .card2Required,
+  .card3Required {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .storeNameInput,
+  .searchInput {
+    font-size: 11px;
+    padding: 0 15px;
+  }
+
+  .uploadArea {
+    width: 70px;
+    min-width: 60px;
+    height: 70px;
+    max-width: 70px;
+  }
+
+  .card1 {
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .card2,
+  .card3 {
+    padding: 15px;
+  }
+
+  .step3Button {
+    top: 704px;
+  }
+
+  .step3Container {
+    padding-bottom: 100px;
+  }
+
+  .card2 {
+    top: 310px;
+  }
+
+  .card3 {
+    top: 455px;
+  }
+
+  .searchIcon {
+    width: 20px;
+    height: 20px;
+    min-width: 18px;
+  }
+
+  .searchIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .searchPill {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .categoryTag {
+    font-size: 11px;
+    padding: 0 10px;
+    height: 23px;
   }
 }

@@ -1,11 +1,30 @@
 'use client';
 
-import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
+import { themeConfigs } from '@/components/themeConfig';
+
+const themeMetadata: Record<string, { name: string; description: string; preview: string }> = {
+    'theme-1': {
+        name: 'Thème 1',
+        description: 'Élégant et moderne',
+        preview: '/theme-1.png'
+    },
+    'theme-2': {
+        name: 'Thème 2',
+        description: 'Coloré et joyeux',
+        preview: '/theme-2.png'
+    },
+    'theme-3': {
+        name: 'Thème 3',
+        description: 'Sombre et sophistiqué',
+        preview: '/theme-3.png'
+    }
+};
 
 export default function StoreThemeSelection() {
     const router = useRouter();
+    const availableThemes = Object.keys(themeConfigs);
 
     return (
         <div className="theme-selection-page">
@@ -18,35 +37,30 @@ export default function StoreThemeSelection() {
                 <p className="theme-selection-subtitle">Sélectionnez le style qui correspond à votre boutique</p>
 
                 <div className="theme-selection-grid">
-                    <div className="theme-card" onClick={() => router.push('/store/theme-1')}>
-                        <div className="theme-preview theme-1-preview">
-                            <Image src="/theme-1.png" alt="Theme 1" width={300} height={500} style={{ objectFit: 'cover' }} />
-                        </div>
-                        <div className="theme-card-info">
-                            <h3>Thème 1</h3>
-                            <p>Élégant et moderne</p>
-                        </div>
-                    </div>
-
-                    <div className="theme-card" onClick={() => router.push('/store/theme-2')}>
-                        <div className="theme-preview theme-2-preview">
-                            <Image src="/theme-2.png" alt="Theme 2" width={300} height={500} style={{ objectFit: 'cover' }} />
-                        </div>
-                        <div className="theme-card-info">
-                            <h3>Thème 2</h3>
-                            <p>Coloré et joyeux</p>
-                        </div>
-                    </div>
-
-                    <div className="theme-card" onClick={() => router.push('/store/theme-3')}>
-                        <div className="theme-preview theme-3-preview">
-                            <Image src="/theme-3.png" alt="Theme 3" width={300} height={500} style={{ objectFit: 'cover' }} />
-                        </div>
-                        <div className="theme-card-info">
-                            <h3>Thème 3</h3>
-                            <p>Sombre et sophistiqué</p>
-                        </div>
-                    </div>
+                    {availableThemes.map((themeId) => {
+                        const metadata = themeMetadata[themeId] || {
+                            name: themeId,
+                            description: 'Thème personnalisé',
+                            preview: '/theme-1.png'
+                        };
+                        return (
+                            <div key={themeId} className="theme-card" onClick={() => router.push(`/store/${themeId}`)}>
+                                <div className={`theme-preview ${themeId}-preview`}>
+                                    <Image 
+                                        src={metadata.preview} 
+                                        alt={metadata.name} 
+                                        width={300} 
+                                        height={500} 
+                                        style={{ objectFit: 'cover' }} 
+                                    />
+                                </div>
+                                <div className="theme-card-info">
+                                    <h3>{metadata.name}</h3>
+                                    <p>{metadata.description}</p>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </main>
         </div>

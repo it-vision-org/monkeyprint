@@ -5,25 +5,16 @@ import { useState, useCallback } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import styles from './createShop.module.css';
+import Navbar from '@/components/Navbar';
+import MobileMenu from '@/components/MobileMenu';
+import StepDots from '@/components/StepDots';
+import type { MenuItem } from '@/components/types';
 
-type StepDotsProps = { step: number; setStep: (s:number)=>void };
-const StepDots = ({ step, setStep }: StepDotsProps) => {
-    return (
-        <div className={styles.stepDots}>
-            {[1, 2, 3].map((s) => (
-                <button
-                    key={s}
-                    className={`${styles.stepDot} ${s <= step ? styles.filled : ''}`}
-                    onClick={() => {
-                        if (s <= step) setStep(s);
-                    }}
-                    aria-label={`Aller à l'étape ${s}`}
-                    type="button"
-                />
-            ))}
-        </div>
-    );
-};
+const createShopMenuItems: MenuItem[] = [
+    { label: "Accueil", href: "/", icon: "🏠" },
+    { label: "Découvrez les boutiques", href: "/#stores", icon: "🔥" },
+    { label: "Contactez-nous", href: "#", icon: "💬" },
+];
 
 // Step 1: Account Creation
 const Step1 = ({ shopName, logo, setStep, router }: any) => {
@@ -31,31 +22,19 @@ const Step1 = ({ shopName, logo, setStep, router }: any) => {
     const [password, setPassword] = useState("123456789@gms");
 
     return (
-        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px', paddingTop: '20px', minHeight: 'calc(100vh - 56px)' }}>
+        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px 18px', paddingTop: '20px', minHeight: 'calc(100vh - 56px)' }}>
             <div className="cs-screen-header" style={{ position: 'relative' }}>
                 <h2 className="cs-screen-title">Créer un compte</h2>
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '16px' }}>
-                    {[1, 2, 3].map((s) => (
-                        <button
-                            key={s}
-                            className={`${styles.stepDot} ${s <= 1 ? styles.filled : ''}`}
-                            onClick={() => {
-                                if (s <= 1) setStep(s);
-                            }}
-                            aria-label={`Aller à l'étape ${s}`}
-                            type="button"
-                            style={{ 
-                                width: '11px', 
-                                height: '11px', 
-                                borderRadius: '50%', 
-                                border: s <= 1 ? '1px solid #41eb5c' : '1px solid #0f8373',
-                                background: s <= 1 ? '#41eb5c' : 'transparent',
-                                cursor: s <= 1 ? 'pointer' : 'default',
-                                padding: 0
-                            }}
-                        />
-                    ))}
-                </div>
+                <StepDots
+                    currentStep={1}
+                    totalSteps={3}
+                    onStepClick={(s) => {
+                        if (s <= 1) setStep(s);
+                    }}
+                    className={styles.stepDots}
+                    dotClassName={styles.stepDot}
+                    filledClassName={styles.filled}
+                />
             </div>
 
             <div className="cs-card cs-card-profile">
@@ -129,31 +108,19 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
     };
 
     return (
-        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px', paddingTop: '80px', minHeight: 'calc(100vh - 56px)' }}>
+        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px 18px', paddingTop: '80px', minHeight: 'calc(100vh - 56px)' }}>
             <div className="cs-screen-header" style={{ position: 'relative' }}>
                 <h2 className="cs-screen-title">Choisissez le thème de votre magasin</h2>
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '16px' }}>
-                    {[1, 2, 3].map((s) => (
-                        <button
-                            key={s}
-                            className={`${styles.stepDot} ${s <= 2 ? styles.filled : ''}`}
-                            onClick={() => {
-                                if (s <= 2) setStep(s);
-                            }}
-                            aria-label={`Aller à l'étape ${s}`}
-                            type="button"
-                            style={{ 
-                                width: '11px', 
-                                height: '11px', 
-                                borderRadius: '50%', 
-                                border: s <= 2 ? '1px solid #41eb5c' : '1px solid #0f8373',
-                                background: s <= 2 ? '#41eb5c' : 'transparent',
-                                cursor: s <= 2 ? 'pointer' : 'default',
-                                padding: 0
-                            }}
-                        />
-                    ))}
-                </div>
+                <StepDots
+                    currentStep={2}
+                    totalSteps={3}
+                    onStepClick={(s) => {
+                        if (s <= 2) setStep(s);
+                    }}
+                    className={styles.stepDots}
+                    dotClassName={styles.stepDot}
+                    filledClassName={styles.filled}
+                />
             </div>
 
             <div className="cs-card cs-card-summary">
@@ -226,9 +193,18 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.svg'] } });
 
     return (
-        <>
+        <div className={styles.step3Container}>
             <h2 className={styles.mainTitle}>Commencez par créer votre boutique</h2>
-            <StepDots step={1} setStep={setStep} />
+            <StepDots
+                currentStep={3}
+                totalSteps={3}
+                onStepClick={(s) => {
+                    if (s <= 3) setStep(s);
+                }}
+                className={styles.stepDots}
+                dotClassName={styles.stepDot}
+                filledClassName={styles.filled}
+            />
 
             {/* Card 1: Logo Upload */}
             <div className={styles.card1}>
@@ -246,7 +222,7 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
                         </div>
                     )}
                 </div>
-                <div>
+                <div className={styles.uploadTextContainer}>
                     <h3 className={styles.uploadTitle}>Téléchargez votre logo</h3>
                     <p className={styles.uploadDescription}>Compatible avec les formats PNG et JPEG. Format minimal 500 x 500 px.</p>
                 </div>
@@ -309,20 +285,13 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
             </div>
 
             <button 
-                className="cs-primary-btn" 
+                className={`cs-primary-btn ${styles.step3Button}`}
                 onClick={() => setStep(2)} 
                 type="button"
-                style={{ 
-                    position: 'absolute',
-                    left: '7px',
-                    top: '714px',
-                    width: '375px',
-                    zIndex: 6
-                }}
             >
                 SUIVANT
             </button>
-        </>
+        </div>
     );
 };
 
@@ -367,7 +336,7 @@ export default function CreateShopPage() {
                 <div className={styles.backgroundGradient4}></div>
             </div>
 
-            {/* Nav Bar */}
+            {/* Nav Bar - Custom implementation due to unique menu styling */}
             <header className={styles.navBar}>
                 <div className={styles.logoContainer}>
                     <Image src="/logo.png" alt="Monkey Print" width={84} height={42} className={styles.logo} />
@@ -385,19 +354,21 @@ export default function CreateShopPage() {
                 </button>
             </header>
 
-            {/* Mobile Menu Slide */}
+            {/* Custom Mobile Menu Slide - unique styling for create-shop page */}
             <div className={`${styles.menuSlide} ${mobileMenuOpen ? styles.open : ''}`}>
                 <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", color: "white", fontSize: "32px", cursor: "pointer", marginBottom: "20px", padding: "20px" }}>×</button>
-                <nav style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px" }}>
-                    <a href="/" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
-                        Connexion / S'inscrire
-                    </a>
-                    <a href="#" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
-                        Découvrez les boutiques
-                    </a>
-                    <a href="#" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
-                        Contactez-nous
-                    </a>
+                <nav style={{ padding: "20px 18px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                    {createShopMenuItems.map((item, index) => (
+                        <a 
+                            key={index}
+                            href={item.href} 
+                            style={{ color: "white", textDecoration: "none", fontSize: "20px", display: "flex", alignItems: "center", gap: "12px" }} 
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            {item.icon && <span style={{ fontSize: 22 }}>{item.icon}</span>}
+                            {item.label}
+                        </a>
+                    ))}
                 </nav>
             </div>
 
