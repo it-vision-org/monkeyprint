@@ -15,27 +15,27 @@ export default function Home() {
         <div className={styles.landingPage}>
           {/* NAV BAR */}
           <header className={styles.navBar}>
-            <Image
-              src="/logo.png"
-              alt="Monkey Print"
-              width={84}
-              height={42}
-              className={styles.logo}
-              priority
-            />
-
-            <div className={styles.menuArea}>
-              <button
-                className={styles.menuButton}
-                onClick={() => setIsMenuOpen(true)}
-                aria-label="Open menu"
-                type="button"
-              >
-                <span className={styles.menuButtonLine} />
-                <span className={styles.menuButtonLine} />
-                <span className={styles.menuButtonLine} />
-              </button>
+            <div className={styles.logoContainer}>
+              <Image
+                src="/logo.png"
+                alt="Monkey Print"
+                width={84}
+                height={42}
+                className={styles.logo}
+                priority
+              />
+              <span className={styles.logoText}>MONKEY PRINT</span>
             </div>
+            <button
+              className={styles.menuButton}
+              onClick={() => setIsMenuOpen(true)}
+              aria-label="Open menu"
+              type="button"
+            >
+              <span className={styles.menuButtonLine} />
+              <span className={styles.menuButtonLine} />
+              <span className={styles.menuButtonLine} />
+            </button>
           </header>
 
           {/* Menu overlay */}

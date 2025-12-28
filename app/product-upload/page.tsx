@@ -142,18 +142,19 @@ export default function ProductUploadPage() {
         <div className="product-upload-page">
             <header className="pu-header">
                 <div className="pu-header-inner">
-                    <Image src="/logo.png" alt="Monkey Print" width={130} height={42} />
+                    <div className="pu-logo-container">
+                        <Image src="/logo.png" alt="Monkey Print" width={84} height={42} />
+                        <span className="pu-logo-text">MONKEY PRINT</span>
+                    </div>
                     <button
                         className="pu-menu-trigger"
                         type="button"
                         aria-label="Ouvrir le menu"
                         onClick={() => setMobileMenuOpen(true)}
                     >
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="12" x2="21" y2="12" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
+                        <span className="pu-menu-line"></span>
+                        <span className="pu-menu-line"></span>
+                        <span className="pu-menu-line"></span>
                     </button>
                 </div>
                 <button
