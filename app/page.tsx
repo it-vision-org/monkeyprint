@@ -138,7 +138,7 @@ export default function Home() {
             </div>
 
             <div className={styles.heroShopAdd}>
-              <Image src="/shop-add.svg" alt="" width={112} height={112} priority />
+              <Image src="/shop-add.svg" alt="" width={80} height={80} priority />
             </div>
 
             <h1 className={styles.heroTitle}>
@@ -163,10 +163,9 @@ export default function Home() {
           </p>
 
           {/* CARD 1 */}
-          <div className={`${styles.cardEllipseLeft} ${styles.card1Ellipse}`} />
           <div className={`${styles.cardRect} ${styles.card1Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card1Icon}`}>
-            <Image src="/Paper Plus.png" alt="" width={32} height={32} />
+            <Image src="/Paper Plus.png" alt="" width={48} height={48} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card1Text}`}>
             <div className={styles.cardTitle}>Téléchargez votre conception</div>
@@ -176,10 +175,9 @@ export default function Home() {
           </div>
 
           {/* CARD 2 */}
-          <div className={`${styles.cardEllipseRight} ${styles.card2Ellipse}`} />
           <div className={`${styles.cardRect} ${styles.card2Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card2Icon}`}>
-            <Image src="/Edit.png" alt="" width={32} height={32} />
+            <Image src="/Edit.png" alt="" width={48} height={48} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card2Text}`}>
             <div className={styles.cardTitle}>Personnaliser les produits</div>
@@ -190,10 +188,9 @@ export default function Home() {
           </div>
 
           {/* CARD 3 */}
-          <div className={`${styles.cardEllipseLeft} ${styles.card3Ellipse}`} />
           <div className={`${styles.cardRect} ${styles.card3Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card3Icon}`}>
-            <Image src="/Home.png" alt="" width={32} height={32} />
+            <Image src="/Home.png" alt="" width={48} height={48} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card3Text}`}>
             <div className={styles.cardTitle}>Créez votre boutique</div>
@@ -203,10 +200,9 @@ export default function Home() {
           </div>
 
           {/* CARD 4 */}
-          <div className={`${styles.cardEllipseRight} ${styles.card4Ellipse}`} />
           <div className={`${styles.cardRect} ${styles.card4Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card4Icon}`}>
-            <Image src="/Arrow.png" alt="" width={32} height={32} />
+            <Image src="/Arrow.png" alt="" width={48} height={48} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card4Text}`}>
             <div className={styles.cardTitle}>Commencez à vendre</div>

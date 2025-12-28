@@ -116,11 +116,10 @@
 
 .heroShopAdd {
   position: absolute;
-  right: -10px;
-  bottom: 8px;
-  width: 112px;
-  height: 112px;
-  transform: rotate(20.6deg);
+  right: -5px;
+  bottom: 40px;
+  width: 80px;
+  height: 80px;
   pointer-events: none;
 }
 
@@ -243,11 +242,13 @@
 
 .cardIcon {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
   border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cardTextWrap {
@@ -455,5 +456,3 @@
   text-align: center;
   color: #ffffff;
 }
-
-
