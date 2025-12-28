@@ -565,6 +565,279 @@
   left: 0px;
 }
 
+/* Desktop Styles */
+@media (min-width: 769px) {
+  .createShopContainer {
+    max-width: 100%;
+    padding-top: 0;
+  }
+
+  .backgroundV4 {
+    top: 0;
+    min-height: 100vh;
+  }
+
+  /* Desktop Navbar */
+  .navBar {
+    height: 90px;
+    padding: 0 80px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .logo {
+    height: 56px;
+    width: auto;
+  }
+
+  .logoText {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .menuButton {
+    display: none;
+  }
+
+  /* Desktop Menu */
+  .navBar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(30, 102, 209, 0.2) 50%, transparent 100%);
+  }
+
+  .navBar {
+    justify-content: space-between;
+  }
+
+  .desktopNavMenu {
+    display: flex !important;
+    align-items: center;
+    gap: 48px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 768px) {
+    .desktopNavMenu {
+      display: none !important;
+    }
+  }
+
+  .desktopNavMenuItem {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #242424;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    padding: 8px 0;
+  }
+
+  .desktopNavMenuItem::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
+    transition: width 0.3s ease;
+  }
+
+  .desktopNavMenuItem:hover {
+    color: #1e66d1;
+  }
+
+  .desktopNavMenuItem:hover::after {
+    width: 100%;
+  }
+
+  .desktopNavMenuItem span {
+    margin-right: 10px;
+    font-size: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .desktopNavMenuItem:hover span {
+    transform: scale(1.15);
+  }
+
+  /* Desktop Content Layout */
+  .mainTitle {
+    position: static;
+    width: 100%;
+    max-width: 800px;
+    margin: 80px auto 32px;
+    text-align: center;
+    font-size: 42px;
+    line-height: 1.2;
+  }
+
+  .stepDots {
+    position: static;
+    transform: none;
+    justify-content: center;
+    margin: 0 auto 60px;
+  }
+
+  /* Step 3 Desktop Layout */
+  .step3Container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .card1,
+  .card2,
+  .card3 {
+    position: static;
+    width: 100%;
+    margin-bottom: 32px;
+    border-radius: 24px;
+  }
+
+  .card1 {
+    padding: 32px;
+    height: auto;
+    min-height: 160px;
+  }
+
+  .card2,
+  .card3 {
+    padding: 32px;
+  }
+
+  .uploadArea {
+    width: 120px;
+    height: 120px;
+    max-width: 120px;
+    min-width: 120px;
+    border-radius: 16px;
+  }
+
+  .uploadTitle {
+    font-size: 24px;
+  }
+
+  .uploadDescription {
+    font-size: 18px;
+  }
+
+  .card2Title,
+  .card3Title {
+    font-size: 24px;
+  }
+
+  .card2Required,
+  .card3Required {
+    font-size: 16px;
+  }
+
+  .storeNameInput {
+    height: 50px;
+    font-size: 16px;
+    padding: 0 24px;
+    border-radius: 61px;
+  }
+
+  .searchContainer {
+    height: 50px;
+  }
+
+  .searchPill {
+    height: 50px;
+    padding: 12px 16px;
+  }
+
+  .searchInput {
+    font-size: 16px;
+  }
+
+  .categoryTag {
+    height: 32px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .step3Button {
+    position: static;
+    width: 100%;
+    max-width: 400px;
+    margin: 48px auto 0;
+    display: block;
+    height: 56px;
+    font-size: 18px;
+    border-radius: 28px;
+  }
+
+  /* Step 1 and 2 Desktop */
+  .cs-screen {
+    max-width: 600px;
+    margin: 80px auto;
+    padding: 0 40px 80px;
+  }
+
+  .cs-screen-title {
+    font-size: 36px;
+    margin-bottom: 32px;
+  }
+
+  .cs-card {
+    border-radius: 24px;
+    padding: 40px;
+  }
+
+  .cs-primary-btn {
+    height: 56px;
+    padding: 0 48px;
+    width: auto;
+    min-width: 300px;
+    max-width: 400px;
+    margin: 32px auto 0;
+    display: block;
+    font-size: 18px;
+    border-radius: 28px;
+    box-sizing: border-box;
+  }
+
+  /* Hide mobile menu on desktop */
+  .menuSlide {
+    display: none !important;
+  }
+
+  .menuButton {
+    display: none !important;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .desktopNavMenu {
+    display: none !important;
+  }
+
+  .menuButton {
+    display: flex !important;
+  }
+
+  .menuSlide {
+    display: block !important;
+  }
+}
+
+/* Responsive adjustments */
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .createShopContainer {

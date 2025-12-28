@@ -23,7 +23,30 @@ export default function ProduitsPage() {
 
     return (
         <div className="dashboard-page">
-            {/* Header */}
+            {/* Desktop Header */}
+            <header className="dash-header" style={{ display: 'none' }}>
+                <div className="dash-container">
+                    <div className="dash-logo">DASHBOARD</div>
+                    <nav className="dash-nav">
+                        <a href="/dashboard/apercu" className="dash-nav-link">APERÇU</a>
+                        <a href="/dashboard/produits" className="dash-nav-link active">PRODUITS</a>
+                        <a href="/dashboard/commandes" className="dash-nav-link">COMMANDES</a>
+                        <a href="/dashboard/portefeuille" className="dash-nav-link">PORTEFEUILLE</a>
+                        <a href="/dashboard/compte" className="dash-nav-link">COMPTE</a>
+                    </nav>
+                    <div className="dash-actions">
+                        <button className="dash-visit-btn" onClick={() => setThemeModalOpen(true)}>VISITER LE MAGASIN</button>
+                        <button className="dash-user-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Mobile Header */}
             <header className="produits-header-mobile">
                 <div className="produits-header-inner">
                     <div className="produits-header-logo">

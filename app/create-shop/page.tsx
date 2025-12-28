@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useCallback } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
@@ -342,6 +343,20 @@ export default function CreateShopPage() {
                     <Image src="/logo.png" alt="Monkey Print" width={84} height={42} className={styles.logo} />
                     <span className={styles.logoText}>MONKEY PRINT</span>
                 </div>
+                {/* Desktop Navigation */}
+                <nav className={styles.desktopNavMenu}>
+                    {createShopMenuItems.map((item, index) => (
+                        <Link 
+                            key={index}
+                            href={item.href} 
+                            className={styles.desktopNavMenuItem}
+                        >
+                            {item.icon && <span style={{ marginRight: '10px', fontSize: '20px' }}>{item.icon}</span>}
+                            {item.label}
+                        </Link>
+                    ))}
+                </nav>
+                {/* Mobile Menu Button */}
                 <button 
                     className={styles.menuButton} 
                     onClick={() => setMobileMenuOpen(true)} 
