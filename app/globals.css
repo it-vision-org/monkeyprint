@@ -20,7 +20,8 @@
   }
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -269,9 +270,16 @@ body {
     #1a3a2e 70%,
     #0d1c23 100%
   );
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(34, 104, 148, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(1, 171, 123, 0.15) 0%, transparent 50%);
+  background-image: radial-gradient(
+      circle at 20% 50%,
+      rgba(34, 104, 148, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(1, 171, 123, 0.15) 0%,
+      transparent 50%
+    );
   display: flex;
   flex-direction: column;
   position: relative;
@@ -401,6 +409,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.cs-card:not(.cs-card-profile):not(.cs-card-summary) {
+  min-height: 140px;
 }
 
 .cs-card.cs-card-upload {
@@ -682,6 +694,12 @@ body {
   flex-shrink: 0;
 }
 
+.cs-shop-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .cs-profile-picture {
   width: 96px;
   height: 96px;
@@ -698,7 +716,7 @@ body {
 .cs-profile-picture img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .cs-profile-username {
@@ -727,7 +745,7 @@ body {
 .cs-theme-carousel {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -744,7 +762,7 @@ body {
   top: 50%;
   left: 50%;
   width: min(280px, 75vw);
-  height: 500px;
+  height: 220px;
   transform: translate(-50%, -50%) scale(0.85);
   border-radius: 20px;
   overflow: hidden;
@@ -753,7 +771,8 @@ body {
   box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.35s ease, border-color 0.35s ease, z-index 0.35s ease;
+  transition: transform 0.35s ease, opacity 0.35s ease, border-color 0.35s ease,
+    z-index 0.35s ease;
   z-index: 1;
 }
 
@@ -1705,9 +1724,16 @@ body {
 .pd-page {
   min-height: 100vh;
   background: #0d2e1a;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(34, 104, 148, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(1, 171, 123, 0.12) 0%, transparent 50%),
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(34, 104, 148, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(1, 171, 123, 0.12) 0%,
+      transparent 50%
+    ),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
   display: flex;
   flex-direction: column;
@@ -3091,7 +3117,8 @@ body {
   color: #ffffff;
   margin: 0 0 28px 0;
   line-height: 1.5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 
 .delete-dialog-actions {
@@ -3111,7 +3138,8 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   color: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   text-align: center;
   min-width: 0;
 }
@@ -3247,7 +3275,7 @@ body {
 
 .all-products-title::before,
 .all-products-title::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 60px;
@@ -3420,7 +3448,7 @@ body {
 
 .filter-divider {
   height: 1px;
-  background: #E5E7EB;
+  background: #e5e7eb;
   margin: 8px 0;
 }
 
@@ -3465,9 +3493,9 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #D1D5DB;
+  border: 1px solid #d1d5db;
   background: white;
-  color: #6B7280;
+  color: #6b7280;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -3494,7 +3522,7 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #D1D5DB;
+  border: 1px solid #d1d5db;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3514,7 +3542,7 @@ body {
 }
 
 .filter-color-btn.selected::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -6px;
   left: 50%;
@@ -3528,10 +3556,10 @@ body {
   margin-top: auto;
   margin-bottom: 32px;
   padding: 14px 24px;
-  background: #FFE5E5;
-  border: 1px solid #FFC1CC;
+  background: #ffe5e5;
+  border: 1px solid #ffc1cc;
   border-radius: 8px;
-  color: #C2185B;
+  color: #c2185b;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -4289,7 +4317,7 @@ body {
 }
 
 .dash-mobile-submenu::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 40px;
   top: 0;
@@ -4688,7 +4716,8 @@ body {
   font-weight: 500;
   color: #1f2937;
   margin: 0 0 16px 0;
-  font-family: var(--font-dm-sans), 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-dm-sans), "DM Sans", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
 .apercu-card-value {
@@ -4754,7 +4783,8 @@ body {
   font-size: 12px;
   color: #6b7280;
   font-weight: 300;
-  font-family: var(--font-dm-sans), 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-dm-sans), "DM Sans", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
 /* Paiement en cours specific styles */
@@ -4915,7 +4945,7 @@ body {
     gap: 16px;
     max-width: 100%;
   }
-  
+
   .apercu-paiement-attente,
   .apercu-paiement-cours,
   .apercu-retournees,
@@ -5450,7 +5480,9 @@ body {
   background: #ffe4e1;
 }
 
-.commandes-page:not(.commandes-non-confirme):not(.commandes-confirme):not(.commandes-retourne) {
+.commandes-page:not(.commandes-non-confirme):not(.commandes-confirme):not(
+    .commandes-retourne
+  ) {
   background: #e0e7ff;
 }
 
@@ -6172,7 +6204,7 @@ body {
   font-weight: 700;
   color: white;
   margin: 0 0 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .theme-1-hero-text {
@@ -6206,7 +6238,7 @@ body {
 
 .theme-1-section-title::before,
 .theme-1-section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 80px;
@@ -6428,7 +6460,7 @@ body {
 }
 
 .theme-2-hero::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -25px;
   left: 0;
@@ -6482,7 +6514,7 @@ body {
   font-weight: 700;
   color: white;
   margin: 0 0 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .theme-2-hero-text {
@@ -6516,7 +6548,7 @@ body {
 
 .theme-2-section-title::before,
 .theme-2-section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 80px;
@@ -6544,7 +6576,7 @@ body {
 
 .theme-2-section-title-white::before,
 .theme-2-section-title-white::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 80px;
@@ -6605,13 +6637,17 @@ body {
 }
 
 .theme-2-best-seller::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -20px;
   left: 0;
   right: 0;
   height: 40px;
-  background: radial-gradient(circle at 50% 100%, transparent 20px, #a855f7 20px);
+  background: radial-gradient(
+    circle at 50% 100%,
+    transparent 20px,
+    #a855f7 20px
+  );
   background-size: 40px 40px;
   background-position: 0 0;
   background-repeat: repeat-x;
@@ -6786,18 +6822,37 @@ body {
 }
 
 .theme-3-hero::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.6) 0%, transparent 50%),
-    radial-gradient(circle at 60% 20%, rgba(59, 130, 246, 0.6) 0%, transparent 50%),
-    radial-gradient(circle at 40% 70%, rgba(16, 185, 129, 0.6) 0%, transparent 50%),
-    radial-gradient(circle at 80% 60%, rgba(245, 158, 11, 0.6) 0%, transparent 50%),
-    radial-gradient(circle at 30% 80%, rgba(239, 68, 68, 0.6) 0%, transparent 50%);
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(236, 72, 153, 0.6) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 60% 20%,
+      rgba(59, 130, 246, 0.6) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 70%,
+      rgba(16, 185, 129, 0.6) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 60%,
+      rgba(245, 158, 11, 0.6) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 30% 80%,
+      rgba(239, 68, 68, 0.6) 0%,
+      transparent 50%
+    );
   background-size: 200% 200%;
   background-position: 0% 0%;
   z-index: 1;
@@ -6827,7 +6882,7 @@ body {
   font-weight: 700;
   color: white;
   margin: 0 0 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .theme-3-hero-text {
@@ -6854,7 +6909,7 @@ body {
 
 .theme-3-section-title::before,
 .theme-3-section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 80px;

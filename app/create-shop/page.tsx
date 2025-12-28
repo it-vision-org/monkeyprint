@@ -4,15 +4,16 @@ import Image from "next/image";
 import { useState, useCallback } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
+import styles from './createShop.module.css';
 
 type StepDotsProps = { step: number; setStep: (s:number)=>void };
 const StepDots = ({ step, setStep }: StepDotsProps) => {
     return (
-        <div className="cs-stepper">
+        <div className={styles.stepDots}>
             {[1, 2, 3].map((s) => (
                 <button
                     key={s}
-                    className={`cs-step ${s <= step ? 'filled' : ''} ${s === step ? 'active' : ''}`}
+                    className={`${styles.stepDot} ${s <= step ? styles.filled : ''}`}
                     onClick={() => {
                         if (s <= step) setStep(s);
                     }}
@@ -30,10 +31,31 @@ const Step1 = ({ shopName, logo, setStep, router }: any) => {
     const [password, setPassword] = useState("123456789@gms");
 
     return (
-        <div className="cs-screen">
-            <div className="cs-screen-header">
+        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px', paddingTop: '20px', minHeight: 'calc(100vh - 56px)' }}>
+            <div className="cs-screen-header" style={{ position: 'relative' }}>
                 <h2 className="cs-screen-title">Créer un compte</h2>
-                <StepDots step={1} setStep={setStep} />
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '16px' }}>
+                    {[1, 2, 3].map((s) => (
+                        <button
+                            key={s}
+                            className={`${styles.stepDot} ${s <= 1 ? styles.filled : ''}`}
+                            onClick={() => {
+                                if (s <= 1) setStep(s);
+                            }}
+                            aria-label={`Aller à l'étape ${s}`}
+                            type="button"
+                            style={{ 
+                                width: '11px', 
+                                height: '11px', 
+                                borderRadius: '50%', 
+                                border: s <= 1 ? '1px solid #41eb5c' : '1px solid #0f8373',
+                                background: s <= 1 ? '#41eb5c' : 'transparent',
+                                cursor: s <= 1 ? 'pointer' : 'default',
+                                padding: 0
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
 
             <div className="cs-card cs-card-profile">
@@ -53,10 +75,8 @@ const Step1 = ({ shopName, logo, setStep, router }: any) => {
                     <span>Doit être rempli<span>*</span></span>
                 </div>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="cs-pill-input" />
-            </div>
-
-            <div className="cs-card">
-                <div className="cs-card-heading">
+                
+                <div className="cs-card-heading" style={{ marginTop: '8px' }}>
                     <h3>Créer un mot de passe</h3>
                     <span>Doit être rempli<span>*</span></span>
                 </div>
@@ -109,10 +129,31 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
     };
 
     return (
-        <div className="cs-screen">
-            <div className="cs-screen-header">
+        <div className="cs-screen" style={{ position: 'relative', zIndex: 5, padding: '20px', paddingTop: '80px', minHeight: 'calc(100vh - 56px)' }}>
+            <div className="cs-screen-header" style={{ position: 'relative' }}>
                 <h2 className="cs-screen-title">Choisissez le thème de votre magasin</h2>
-                <StepDots step={2} setStep={setStep} />
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '16px' }}>
+                    {[1, 2, 3].map((s) => (
+                        <button
+                            key={s}
+                            className={`${styles.stepDot} ${s <= 2 ? styles.filled : ''}`}
+                            onClick={() => {
+                                if (s <= 2) setStep(s);
+                            }}
+                            aria-label={`Aller à l'étape ${s}`}
+                            type="button"
+                            style={{ 
+                                width: '11px', 
+                                height: '11px', 
+                                borderRadius: '50%', 
+                                border: s <= 2 ? '1px solid #41eb5c' : '1px solid #0f8373',
+                                background: s <= 2 ? '#41eb5c' : 'transparent',
+                                cursor: s <= 2 ? 'pointer' : 'default',
+                                padding: 0
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
 
             <div className="cs-card cs-card-summary">
@@ -185,65 +226,79 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.svg'] } });
 
     return (
-        <div className="cs-screen">
-            <div className="cs-screen-header">
-                <h2 className="cs-screen-title">Commencez par créer votre boutique</h2>
-                <StepDots step={3} setStep={setStep} />
-            </div>
+        <>
+            <h2 className={styles.mainTitle}>Commencez par créer votre boutique</h2>
+            <StepDots step={1} setStep={setStep} />
 
-            <div className="cs-card cs-card-upload">
-                <div className="cs-upload-body" {...getRootProps()}>
+            {/* Card 1: Logo Upload */}
+            <div className={styles.card1}>
+                <div className={styles.uploadArea} {...getRootProps()}>
                     <input {...getInputProps()} />
-                    <div className={`cs-upload-icon ${isDragActive ? "active" : ""}`}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                    </div>
-                    <div className="cs-upload-copy">
-                        <h3>Téléchargez votre logo</h3>
-                        <p>Compatible avec les formats PNG et JPEG. Format minimal 500 x 500 px.</p>
-                    </div>
+                    {logo ? (
+                        <Image src={logo} alt="Logo" width={98} height={98} style={{ borderRadius: '9px', objectFit: 'cover' }} />
+                    ) : (
+                        <div className={styles.uploadIcon}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <h3 className={styles.uploadTitle}>Téléchargez votre logo</h3>
+                    <p className={styles.uploadDescription}>Compatible avec les formats PNG et JPEG. Format minimal 500 x 500 px.</p>
                 </div>
             </div>
 
-            <div className="cs-card">
-                <div className="cs-card-heading">
-                    <h3>Nom de votre boutique</h3>
-                    <span>Doit être rempli<span>*</span></span>
-                </div>
-                <input type="text" value={shopName} onChange={(e) => setShopName(e.target.value)} className="cs-pill-input" />
+            {/* Card 2: Store Name */}
+            <div className={styles.card2}>
+                <h3 className={styles.card2Title}>Nom de votre boutique</h3>
+                <p className={styles.card2Required}>Doit être rempli*</p>
+                <input 
+                    type="text" 
+                    value={shopName} 
+                    onChange={(e) => setShopName(e.target.value)} 
+                    className={styles.storeNameInput}
+                    placeholder="GrabMeShoe"
+                />
             </div>
 
-            <div className="cs-card">
-                <div className="cs-card-heading">
-                    <h3>Catégorie de magasin</h3>
-                    <span>Doit être rempli<span>*</span></span>
+            {/* Card 3: Store Category */}
+            <div className={styles.card3}>
+                <h3 className={styles.card3Title}>Catégorie de magasin</h3>
+                <p className={styles.card3Required}>Doit être rempli*</p>
+                
+                <div className={styles.searchContainer}>
+                    <div className={styles.searchPill}>
+                        <div className={styles.searchIcon}>
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Ajouter plus..."
+                            value={categorySearch}
+                            onChange={(e) => setCategorySearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleAddCategory();
+                                }
+                            }}
+                            className={styles.searchInput}
+                        />
+                    </div>
                 </div>
-                <div className="cs-search-pill">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                        <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                        <path d="M14 14l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Ajouter plus..."
-                        value={categorySearch}
-                        onChange={(e) => setCategorySearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleAddCategory();
-                            }
-                        }}
-                    />
-                </div>
-                <div className="cs-tags-grid">
+
+                <div className={styles.categoryTags}>
                     {categories.map((category: any) => (
                         <button
                             key={category}
-                            className={`cs-chip ${selectedCategories.includes(category) ? "active" : ""}`}
+                            className={`${styles.categoryTag} ${selectedCategories.includes(category) ? styles.active : ""}`}
                             onClick={() => toggleCategory(category)}
                             type="button"
                         >
@@ -253,10 +308,21 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
                 </div>
             </div>
 
-            <button className="cs-primary-btn" onClick={() => setStep(2)} type="button">
+            <button 
+                className="cs-primary-btn" 
+                onClick={() => setStep(2)} 
+                type="button"
+                style={{ 
+                    position: 'absolute',
+                    left: '7px',
+                    top: '714px',
+                    width: '375px',
+                    zIndex: 6
+                }}
+            >
                 SUIVANT
             </button>
-        </div>
+        </>
     );
 };
 
@@ -292,83 +358,84 @@ export default function CreateShopPage() {
     };
 
     return (
-        <div className="create-shop-page">
-            <header className="cs-topbar">
-                <div className="cs-topbar-inner">
-                    <Image src="/logo.png" alt="Monkey Print" width={120} height={40} />
-                    <button className="cs-menu-trigger" onClick={() => setMobileMenuOpen(true)} type="button" aria-label="Ouvrir le menu">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="4" y1="6" x2="20" y2="6" />
-                            <line x1="4" y1="12" x2="20" y2="12" />
-                            <line x1="4" y1="18" x2="20" y2="18" />
-                        </svg>
-                    </button>
+        <div className={styles.createShopContainer}>
+            {/* Background with gradients */}
+            <div className={styles.backgroundV4}>
+                <div className={styles.backgroundGradient1}></div>
+                <div className={styles.backgroundGradient2}></div>
+                <div className={styles.backgroundGradient3}></div>
+                <div className={styles.backgroundGradient4}></div>
+            </div>
+
+            {/* Nav Bar */}
+            <header className={styles.navBar}>
+                <div className={styles.logoContainer}>
+                    <Image src="/logo.png" alt="Monkey Print" width={84} height={42} className={styles.logo} />
+                    <span className={styles.logoText}>MONKEY PRINT</span>
                 </div>
-                <nav className="cs-desktop-nav">
-                    <a href="/">ACCUEIL</a>
-                    <a href="#">SHOP LIST</a>
-                    <a href="#">CONTACTEZ-NOUS</a>
-                </nav>
+                <button 
+                    className={styles.menuButton} 
+                    onClick={() => setMobileMenuOpen(true)} 
+                    type="button" 
+                    aria-label="Ouvrir le menu"
+                >
+                    <div className={styles.menuButtonLine}></div>
+                    <div className={styles.menuButtonLine}></div>
+                    <div className={styles.menuButtonLine}></div>
+                </button>
             </header>
 
-            {mobileMenuOpen && (
-                <div className="mp-mobile-overlay" onClick={() => setMobileMenuOpen(false)}>
-                    <div className="mp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", color: "white", fontSize: "32px", cursor: "pointer", marginBottom: "20px" }}>×</button>
-                        <nav className="mp-mobile-menu">
-                            <a href="/" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-                                <span className="mp-mobile-icon">🏠</span>
-                                ACCUEIL
-                            </a>
-                            <a href="#" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-                                <span className="mp-mobile-icon">🛍️</span>
-                                SHOP LIST
-                            </a>
-                            <a href="#" className="mp-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-                                <span className="mp-mobile-icon">✉️</span>
-                                CONTACTEZ-NOUS
-                            </a>
-                        </nav>
-                    </div>
-                </div>
-            )}
+            {/* Mobile Menu Slide */}
+            <div className={`${styles.menuSlide} ${mobileMenuOpen ? styles.open : ''}`}>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", color: "white", fontSize: "32px", cursor: "pointer", marginBottom: "20px", padding: "20px" }}>×</button>
+                <nav style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <a href="/" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
+                        Connexion / S'inscrire
+                    </a>
+                    <a href="#" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
+                        Découvrez les boutiques
+                    </a>
+                    <a href="#" style={{ color: "white", textDecoration: "none", fontSize: "20px" }} onClick={() => setMobileMenuOpen(false)}>
+                        Contactez-nous
+                    </a>
+                </nav>
+            </div>
 
-            <main className="cs-main">
-                <div className="cs-flow">
-                    {step === 3 && (
-                        <Step3
-                            shopName={shopName}
-                            setShopName={setShopName}
-                            categories={categories}
-                            selectedCategories={selectedCategories}
-                            categorySearch={categorySearch}
-                            setCategorySearch={setCategorySearch}
-                            toggleCategory={toggleCategory}
-                            handleAddCategory={handleAddCategory}
-                            setStep={setStep}
-                            logo={logo}
-                            setLogo={setLogo}
-                            router={router}
-                        />
-                    )}
-                    {step === 2 && (
-                        <Step2
-                            shopName={shopName}
-                            selectedTheme={selectedTheme}
-                            setSelectedTheme={setSelectedTheme}
-                            setStep={setStep}
-                            logo={logo}
-                        />
-                    )}
-                    {step === 1 && (
-                        <Step1
-                            shopName={shopName}
-                            logo={logo}
-                            setStep={setStep}
-                            router={router}
-                        />
-                    )}
-                </div>
+            {/* Main Content */}
+            <main>
+                {step === 3 && (
+                    <Step3
+                        shopName={shopName}
+                        setShopName={setShopName}
+                        categories={categories}
+                        selectedCategories={selectedCategories}
+                        categorySearch={categorySearch}
+                        setCategorySearch={setCategorySearch}
+                        toggleCategory={toggleCategory}
+                        handleAddCategory={handleAddCategory}
+                        setStep={setStep}
+                        logo={logo}
+                        setLogo={setLogo}
+                        router={router}
+                    />
+                )}
+                {step === 2 && (
+                    <Step2
+                        shopName={shopName}
+                        selectedTheme={selectedTheme}
+                        setSelectedTheme={setSelectedTheme}
+                        setStep={setStep}
+                        logo={logo}
+                    />
+                )}
+                {step === 1 && (
+                    <Step1
+                        shopName={shopName}
+                        logo={logo}
+                        setStep={setStep}
+                        router={router}
+                    />
+                )}
             </main>
         </div>
     );
