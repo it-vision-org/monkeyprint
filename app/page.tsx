@@ -165,10 +165,10 @@ export default function Home() {
           {/* CARD 1 */}
           <div className={`${styles.cardRect} ${styles.card1Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card1Icon}`}>
-            <Image src="/Paper Plus.png" alt="" width={48} height={48} />
+            <Image src="/Paper Plus.png" alt="" width={56} height={56} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card1Text}`}>
-            <div className={styles.cardTitle}>Téléchargez votre conception</div>
+            <div className={`${styles.cardTitle} ${styles.cardTitle1}`}>Téléchargez votre conception</div>
             <div className={styles.cardDesc}>
               Téléchargez facilement vos œuvres et voyez-les prendre vie sur des produits de qualité.
             </div>
@@ -177,23 +177,22 @@ export default function Home() {
           {/* CARD 2 */}
           <div className={`${styles.cardRect} ${styles.card2Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card2Icon}`}>
-            <Image src="/Edit.png" alt="" width={48} height={48} />
+            <Image src="/Edit.png" alt="" width={56} height={56} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card2Text}`}>
-            <div className={styles.cardTitle}>Personnaliser les produits</div>
+            <div className={`${styles.cardTitle} ${styles.cardTitle2}`}>Personnaliser les <br/>produits</div>
             <div className={styles.cardDesc}>
-              Choisissez parmi nos t-shirts, sweats à capuche, mugs et plus encore. Choisissez les
-              couleurs, les tailles et l&apos;emplacement.
+              Choisissez parmi nos t-shirts, sweats à capuche, mugs et plus encore. Choisissez les couleurs, les tailles et l&apos;emplacement.
             </div>
           </div>
 
           {/* CARD 3 */}
           <div className={`${styles.cardRect} ${styles.card3Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card3Icon}`}>
-            <Image src="/Home.png" alt="" width={48} height={48} />
+            <Image src="/Home.png" alt="" width={56} height={56} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card3Text}`}>
-            <div className={styles.cardTitle}>Créez votre boutique</div>
+            <div className={`${styles.cardTitle} ${styles.cardTitle3}`}>Créez votre <br/>boutique</div>
             <div className={styles.cardDesc}>
               Créez votre propre boutique de marque et commencez à vendre vos créations immédiatement.
             </div>
@@ -202,10 +201,10 @@ export default function Home() {
           {/* CARD 4 */}
           <div className={`${styles.cardRect} ${styles.card4Rect}`} />
           <div className={`${styles.cardIcon} ${styles.card4Icon}`}>
-            <Image src="/Arrow.png" alt="" width={48} height={48} />
+            <Image src="/Arrow.png" alt="" width={56} height={56} />
           </div>
           <div className={`${styles.cardTextWrap} ${styles.card4Text}`}>
-            <div className={styles.cardTitle}>Commencez à vendre</div>
+            <div className={`${styles.cardTitle} ${styles.cardTitle4}`}>Commencez à <br/>vendre</div>
             <div className={styles.cardDesc}>
               Vous partagez, nous nous occupons de vos produits, de l&apos;impression à l&apos;expédition.
             </div>

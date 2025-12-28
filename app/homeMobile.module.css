@@ -242,13 +242,13 @@
 
 .cardIcon {
   position: absolute;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   background: #ffffff;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
 .cardTextWrap {
@@ -261,6 +261,7 @@
   text-align: center;
   gap: 10px;
   padding: 26px 18px;
+  padding-top: 26px;
 }
 
 .cardTitle {
@@ -270,14 +271,33 @@
   font-size: 24px;
   line-height: 29px;
   color: #000000;
+  text-align: left;
+  width: 100%;
 }
+.cardTitle1 {
+  margin-top: -15px;
 
+  margin-left: 100px;
+}
+.cardTitle2 {
+  margin-top: -15px;
+  margin-left: 10px;
+}
+.cardTitle3 {
+  margin-top: -15px;
+  margin-left: 100px;
+}
+.cardTitle4 {
+  margin-top: -15px;
+  margin-left: 10px;
+}
 .cardDesc {
   font-family: Inter, system-ui, sans-serif;
   font-style: normal;
   font-weight: 200;
   font-size: 20px;
   line-height: 24px;
+  margin: 10px;
   color: #222222;
 }
 
@@ -293,8 +313,8 @@
   top: 404px;
 }
 .card1Icon {
-  left: 6px;
-  top: 368px;
+  left: 4px;
+  top: 388px;
 }
 
 .card2Ellipse {
@@ -308,8 +328,8 @@
   top: 637px;
 }
 .card2Icon {
-  left: 293px;
-  top: 603px;
+  left: 310px;
+  top: 621px;
 }
 
 .card3Ellipse {
@@ -323,8 +343,8 @@
   top: 869px;
 }
 .card3Icon {
-  left: 6px;
-  top: 835px;
+  left: 4px;
+  top: 853px;
 }
 
 .card4Ellipse {
@@ -338,8 +358,8 @@
   top: 1102px;
 }
 .card4Icon {
-  left: 293px;
-  top: 1068px;
+  left: 310px;
+  top: 1086px;
 }
 
 /* Stores section */
