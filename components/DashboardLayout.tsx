@@ -33,8 +33,57 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [commandesOpen, setCommandesOpen] = useState(false);
   const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
   const commandesDropdownRef = useRef<HTMLDivElement | null>(null);
+  const navIndicatorRef = useRef<HTMLDivElement | null>(null);
+  const navWrapperRef = useRef<HTMLDivElement | null>(null);
+  const navItemRefs = useRef<(HTMLAnchorElement | HTMLDivElement | null)[]>([]);
 
   const commandesStatus = (searchParams.get("status") as CommandesStatus | null) ?? null;
+
+  // Update indicator position based on active nav item
+  useEffect(() => {
+    const updateIndicatorPosition = () => {
+      if (!navIndicatorRef.current || !navWrapperRef.current) return;
+
+      const activeIndex = (() => {
+        if (isActivePath(pathname, "/dashboard/apercu")) return 0;
+        if (isActivePath(pathname, "/dashboard/produits")) return 1;
+        if (pathname.startsWith("/dashboard/commandes")) return 2;
+        if (isActivePath(pathname, "/dashboard/portefeuille")) return 3;
+        if (isActivePath(pathname, "/dashboard/compte")) return 4;
+        return -1;
+      })();
+
+      if (activeIndex === -1) {
+        navIndicatorRef.current.style.opacity = "0";
+        return;
+      }
+
+      const activeItem = navItemRefs.current[activeIndex];
+      if (!activeItem) return;
+
+      const wrapperRect = navWrapperRef.current.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      
+      const left = itemRect.left - wrapperRect.left;
+      const width = itemRect.width;
+
+      navIndicatorRef.current.style.opacity = "1";
+      navIndicatorRef.current.style.left = `${left}px`;
+      navIndicatorRef.current.style.width = `${width}px`;
+    };
+
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    const rafId = requestAnimationFrame(() => {
+      updateIndicatorPosition();
+    });
+
+    // Update on window resize
+    window.addEventListener("resize", updateIndicatorPosition);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateIndicatorPosition);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     function onDocMouseDown(e: MouseEvent) {
@@ -58,73 +107,98 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="dashboard-page">
       <header className="dash-header">
         <div className="dash-container">
-          <div className="dash-logo">
-            DASHBOARD
-            <span className="dash-pipe">|</span>
-            <span className="dash-section">{sectionLabel}</span>
+          <div className="dash-logo" title={sectionLabel}>
+            <span 
+              className="dash-section" 
+              title={sectionLabel}
+            >
+              {sectionLabel}
+            </span>
           </div>
 
           <nav className="dash-nav">
-            <Link href="/dashboard/apercu" className={`dash-nav-link ${isActivePath(pathname, "/dashboard/apercu") ? "active" : ""}`}>
-              APERÇU
-            </Link>
-            <Link href="/dashboard/produits" className={`dash-nav-link ${isActivePath(pathname, "/dashboard/produits") ? "active" : ""}`}>
-              PRODUITS
-            </Link>
-
-            <div className="dash-nav-dropdown" ref={commandesDropdownRef}>
-              <button
-                type="button"
-                className={`dash-nav-link dash-nav-link-button ${pathname.startsWith("/dashboard/commandes") ? "active" : ""}`}
-                onClick={() => setCommandesDropdownOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={commandesDropdownOpen}
+            <div className="dash-nav-indicator-wrapper" ref={navWrapperRef}>
+              <Link 
+                href="/dashboard/apercu" 
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/apercu") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[0] = el; }}
               >
-                COMMANDES
-                <span className={`dash-nav-caret ${commandesDropdownOpen ? "open" : ""}`} aria-hidden="true">
-                  ▾
-                </span>
-              </button>
+                APERÇU
+              </Link>
+              <Link 
+                href="/dashboard/produits" 
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/produits") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[1] = el; }}
+              >
+                PRODUITS
+              </Link>
 
-              {commandesDropdownOpen && (
-                <div className="dash-nav-dropdown-menu" role="menu">
-                  <Link
-                    href="/dashboard/commandes?status=non-confirme"
-                    className={`dash-nav-dropdown-item ${commandesStatus === "non-confirme" ? "active" : ""}`}
-                    role="menuitem"
-                  >
-                    <span className="dash-submenu-dot orange" aria-hidden="true"></span>
-                    Non confirmé
-                  </Link>
-                  <Link
-                    href="/dashboard/commandes?status=confirme"
-                    className={`dash-nav-dropdown-item ${commandesStatus === "confirme" ? "active" : ""}`}
-                    role="menuitem"
-                  >
-                    <span className="dash-submenu-dot green" aria-hidden="true"></span>
-                    Confirmé
-                  </Link>
-                  <Link
-                    href="/dashboard/commandes?status=retours"
-                    className={`dash-nav-dropdown-item ${commandesStatus === "retours" ? "active" : ""}`}
-                    role="menuitem"
-                  >
-                    <span className="dash-submenu-dot red" aria-hidden="true"></span>
-                    Retours
-                  </Link>
-                </div>
-              )}
+              <div 
+                className="dash-nav-dropdown" 
+                ref={(el) => { 
+                  commandesDropdownRef.current = el;
+                  if (el) navItemRefs.current[2] = el;
+                }}
+              >
+                <button
+                  type="button"
+                  className={`dash-nav-link dash-nav-link-button ${pathname.startsWith("/dashboard/commandes") ? "active" : ""}`}
+                  onClick={() => setCommandesDropdownOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={commandesDropdownOpen}
+                >
+                  COMMANDES
+                  <span className={`dash-nav-caret ${commandesDropdownOpen ? "open" : ""}`} aria-hidden="true">
+                    ▾
+                  </span>
+                </button>
+
+                {commandesDropdownOpen && (
+                  <div className="dash-nav-dropdown-menu" role="menu">
+                    <Link
+                      href="/dashboard/commandes?status=non-confirme"
+                      className={`dash-nav-dropdown-item ${commandesStatus === "non-confirme" ? "active" : ""}`}
+                      role="menuitem"
+                    >
+                      <span className="dash-submenu-dot orange" aria-hidden="true"></span>
+                      Non confirmé
+                    </Link>
+                    <Link
+                      href="/dashboard/commandes?status=confirme"
+                      className={`dash-nav-dropdown-item ${commandesStatus === "confirme" ? "active" : ""}`}
+                      role="menuitem"
+                    >
+                      <span className="dash-submenu-dot green" aria-hidden="true"></span>
+                      Confirmé
+                    </Link>
+                    <Link
+                      href="/dashboard/commandes?status=retours"
+                      className={`dash-nav-dropdown-item ${commandesStatus === "retours" ? "active" : ""}`}
+                      role="menuitem"
+                    >
+                      <span className="dash-submenu-dot red" aria-hidden="true"></span>
+                      Retours
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              <Link
+                href="/dashboard/portefeuille"
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/portefeuille") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[3] = el; }}
+              >
+                PORTEFEUILLE
+              </Link>
+              <Link 
+                href="/dashboard/compte" 
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[4] = el; }}
+              >
+                COMPTE
+              </Link>
+              <div className="dash-nav-indicator" ref={navIndicatorRef}></div>
             </div>
-
-            <Link
-              href="/dashboard/portefeuille"
-              className={`dash-nav-link ${isActivePath(pathname, "/dashboard/portefeuille") ? "active" : ""}`}
-            >
-              PORTEFEUILLE
-            </Link>
-            <Link href="/dashboard/compte" className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}>
-              COMPTE
-            </Link>
           </nav>
 
           <div className="dash-actions">
@@ -368,5 +442,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 
 

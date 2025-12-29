@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import styles from './createShop.module.css';
@@ -308,6 +308,19 @@ export default function CreateShopPage() {
     const [categorySearch, setCategorySearch] = useState("");
     const [selectedTheme, setSelectedTheme] = useState<number | null>(1);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Prevent body scrolling on mobile - container handles scrolling internally
+    useEffect(() => {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+
+            return () => {
+                document.body.style.overflow = originalOverflow;
+            };
+        }
+    }, []);
 
     const toggleCategory = (category: string) => {
         setSelectedCategories(prev =>

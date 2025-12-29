@@ -3,11 +3,11 @@
   position: relative;
   width: 100%;
   max-width: 390px;
-  min-height: 100vh;
+  height: 100vh;
   background: transparent;
   margin: 0 auto;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding-top: 56px;
   box-sizing: border-box;
 }
@@ -15,8 +15,16 @@
 @media (min-width: 769px) {
   .createShopContainer {
     max-width: 100%;
-    overflow-y: auto;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: visible;
     overflow-x: hidden;
+    padding-top: 0;
+  }
+
+  .createShopContainer main {
+    height: auto;
+    overflow-y: visible;
   }
 }
 
@@ -181,32 +189,31 @@
 
 /* Main Title */
 .mainTitle {
-  position: absolute;
-  width: calc(100% - 36px);
+  position: static;
+  width: 100%;
   min-height: 52px;
-  left: var(--mobile-padding-x);
-  top: 80px;
   font-family: "DM Sans", sans-serif;
   font-style: normal;
   font-weight: 700;
-  font-size: 20px;
-  line-height: 26px;
+  font-size: 28px;
+  line-height: 34px;
   text-align: center;
   color: #41eb5c;
-  z-index: 5;
+  z-index: 10;
   box-sizing: border-box;
   word-wrap: break-word;
+  margin: 0 0 0px 0;
+  scroll-margin-top: 0;
 }
 
 /* Step Dots */
 .stepDots {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 149px;
+  position: static;
   display: flex;
   gap: 10px;
-  z-index: 5;
+  z-index: 10;
+  justify-content: center;
+  margin: 0 0 4px 0;
 }
 
 .stepDot {
@@ -225,15 +232,13 @@
 /* Card 1: Logo Upload */
 .card1 {
   box-sizing: border-box;
-  position: absolute;
-  width: calc(100% - 36px);
-  height: 131px;
-  left: var(--mobile-padding-x);
-  top: 170px;
+  position: static;
+  width: 100%;
+  min-height: 131px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
   border-radius: 22px;
-  z-index: 5;
+  z-index: 10;
   padding: 20px;
   display: flex;
   align-items: center;
@@ -300,16 +305,14 @@
 /* Card 2: Store Name */
 .card2 {
   box-sizing: border-box;
-  position: absolute;
-  width: calc(100% - 36px);
+  position: static;
+  width: 100%;
   min-height: 160px;
   height: auto;
-  left: var(--mobile-padding-x);
-  top: 320px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
   border-radius: 22px;
-  z-index: 5;
+  z-index: 10;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -361,7 +364,8 @@
 .storeNameInput:focus {
   outline: none;
   border-color: #41eb5c;
-  box-shadow: 4px 4px 13px rgba(65, 235, 92, 0.2), 0 0 0 3px rgba(65, 235, 92, 0.1);
+  box-shadow: 4px 4px 13px rgba(65, 235, 92, 0.2),
+    0 0 0 3px rgba(65, 235, 92, 0.1);
 }
 
 .storeNameInput::placeholder {
@@ -372,15 +376,13 @@
 /* Card 3: Store Category */
 .card3 {
   box-sizing: border-box;
-  position: absolute;
-  width: calc(100% - 36px);
+  position: static;
+  width: 100%;
   min-height: 222px;
-  left: var(--mobile-padding-x);
-  top: 465px;
   background: #ffffff;
   border: 2px solid #d9d9d9;
   border-radius: 22px;
-  z-index: 5;
+  z-index: 10;
   padding: 20px;
   padding-bottom: 24px;
   display: flex;
@@ -538,54 +540,54 @@
   text-align: center;
 }
 
+/* Main element */
+.createShopContainer main {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+  padding-top: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+/* Ensure content in main doesn't scroll under navbar */
+@media (max-width: 768px) {
+  .createShopContainer main {
+    scroll-padding-top: 0;
+    padding-top: 20px;
+  }
+}
+
 /* Step 1, 2, and 3 Containers */
 .step1Container,
 .step2Container,
 .step3Container {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 56px);
-  padding-bottom: 120px;
+  min-height: auto;
+  padding: 25px var(--mobile-padding-x) 120px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-}
-
-/* Mobile spacing for Step 1 and Step 2 */
-@media (max-width: 768px) {
-  .step1Container .cs-card,
-  .step2Container .cs-card {
-    margin-bottom: 18px;
-  }
-
-  .step1Container .cs-divider-standalone {
-    margin: 18px 0;
-  }
-
-  .step1Container .cs-google-btn {
-    margin-bottom: 18px;
-  }
-
-  .step2Container .cs-theme-label {
-    margin-bottom: 18px;
-  }
-
-  .step2Container .cs-theme-section {
-    margin-bottom: 18px;
-  }
+  gap: 18px;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 /* Step 1, 2, and 3 Buttons */
 .step1Button,
 .step2Button,
 .step3Button {
-  position: absolute;
-  left: var(--mobile-padding-x);
-  top: 714px;
-  width: calc(100% - 36px);
-  max-width: 375px;
+  position: static;
+  width: 100%;
+  max-width: 100%;
   z-index: 6;
   box-sizing: border-box;
+  margin-top: 8px;
 }
 
 /* Upload Text Container */
@@ -654,13 +656,18 @@
 
   /* Desktop Menu */
   .navBar::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(30, 102, 209, 0.2) 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(30, 102, 209, 0.2) 50%,
+      transparent 100%
+    );
   }
 
   .navBar {
@@ -696,7 +703,7 @@
   }
 
   .desktopNavMenuItem::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
@@ -915,6 +922,80 @@
   .menuSlide {
     display: block !important;
   }
+
+  /* Ensure all step containers use normal flow */
+  .step1Container,
+  .step2Container,
+  .step3Container {
+    position: relative;
+    padding: 25px var(--mobile-padding-x) 120px;
+    gap: 18px;
+    min-height: auto;
+  }
+
+  /* Ensure cards don't overlap */
+  .step1Container .cs-card,
+  .step2Container .cs-card {
+    position: static !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    left: auto !important;
+    top: auto !important;
+  }
+
+  .step1Container .cs-divider-standalone {
+    margin: 0 !important;
+    width: 100% !important;
+    position: static !important;
+  }
+
+  .step1Container .cs-google-btn {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* Step 2 specific elements */
+  .step2Container .cs-theme-label {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    text-align: center !important;
+    position: static !important;
+  }
+
+  .step2Container .cs-theme-section {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* Ensure buttons are in flow */
+  .step1Button,
+  .step2Button,
+  .step3Button {
+    position: static !important;
+    width: 100% !important;
+    left: auto !important;
+    top: auto !important;
+    margin-top: 8px;
+  }
+
+  /* Ensure title and dots are in flow */
+  .mainTitle {
+    position: static !important;
+    width: 100% !important;
+    left: auto !important;
+    top: auto !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .stepDots {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
 }
 
 /* Responsive adjustments */
@@ -946,31 +1027,29 @@
   .card1,
   .card2,
   .card3 {
-    width: calc(100% - 36px);
-    left: var(--mobile-padding-x);
+    width: 100%;
     box-sizing: border-box;
-    position: absolute;
+    position: static;
   }
 
   .step1Button,
   .step2Button,
   .step3Button {
-    position: absolute;
-    left: var(--mobile-padding-x);
-    width: calc(100% - 36px);
+    position: static;
+    width: 100%;
   }
 
   .mainTitle {
-    width: calc(100% - 36px);
-    left: var(--mobile-padding-x);
+    width: 100%;
     box-sizing: border-box;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 26px;
+    line-height: 32px;
   }
 
   .stepDots {
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
+    transform: none;
+    justify-content: center;
   }
 
   .uploadTitle {
@@ -1027,8 +1106,8 @@
 
 @media (max-width: 360px) {
   .mainTitle {
-    font-size: 16px;
-    line-height: 22px;
+    font-size: 24px;
+    line-height: 30px;
   }
 
   .uploadTitle {
@@ -1085,19 +1164,11 @@
   .step1Button,
   .step2Button,
   .step3Button {
-    top: 704px;
+    position: static;
   }
 
   .step3Container {
     padding-bottom: 100px;
-  }
-
-  .card2 {
-    top: 310px;
-  }
-
-  .card3 {
-    top: 455px;
   }
 
   .searchIcon {

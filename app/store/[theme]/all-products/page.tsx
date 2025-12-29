@@ -13,3 +13,4 @@ export default function AllProductsPageRoute() {
     return <AllProductsPage theme={theme} />;
 }
 
+
