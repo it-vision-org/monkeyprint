@@ -1,0 +1,1097 @@
+/* Design Editor - Fully Overhauled with Mobile-First Responsive Design */
+
+.designEditor {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    isolation: isolate;
+}
+
+/* Mobile optimizations */
+.designEditor.mobile {
+    border-radius: 16px;
+    min-height: 400px;
+}
+
+/* Loading Overlay */
+.loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 10000;
+    border-radius: inherit;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(13, 148, 136, 0.1);
+    border-top-color: #0d9488;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loadingOverlay p {
+    font-size: 16px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Mobile Menu Toggle */
+.mobileMenuToggle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 100;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(13, 148, 136, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.mobileMenuToggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mobileMenuToggle:active {
+    transform: scale(0.95);
+}
+
+/* Editor Header */
+.editorHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    gap: 12px;
+    position: relative;
+    z-index: 10;
+}
+
+.designEditor.mobile .editorHeader {
+    padding: 10px 12px;
+    padding-left: 60px; /* Space for mobile menu toggle */
+}
+
+/* View Switcher */
+.viewSwitcher {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.viewButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    min-height: 44px;
+    position: relative;
+}
+
+.viewButton:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.viewButton.active {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    color: white;
+    border-color: #0d9488;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.viewButton:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.viewButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.viewButton.switching {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.viewButton.switching::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+.designEditor.mobile .viewButton {
+    padding: 10px 12px;
+    font-size: 13px;
+    min-height: 40px;
+}
+
+.designEditor.mobile .viewButton svg {
+    width: 18px;
+    height: 18px;
+}
+
+.fullscreenButton {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid rgba(13, 148, 136, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.fullscreenButton:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fullscreenButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Toolbar - Mobile Optimized */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(13, 148, 136, 0.3) transparent;
+}
+
+.toolbar::-webkit-scrollbar {
+    height: 4px;
+}
+
+.toolbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.toolbar::-webkit-scrollbar-thumb {
+    background: rgba(13, 148, 136, 0.3);
+    border-radius: 2px;
+}
+
+.designEditor.mobile .toolbar {
+    padding: 12px;
+    gap: 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: 0 0 16px 16px;
+}
+
+.designEditor.mobile .toolbar.mobileOpen {
+    transform: translateY(0);
+}
+
+.toolbarGroup {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.designEditor.mobile .toolbarGroup {
+    gap: 6px;
+}
+
+.toolButton {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid rgba(13, 148, 136, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    touch-action: manipulation;
+}
+
+.toolButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(13, 148, 136, 0.2);
+}
+
+.toolButton:active:not(:disabled) {
+    transform: scale(0.92);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolButton.active {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    color: white;
+    border-color: #0d9488;
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+    transform: translateY(-2px);
+}
+
+.toolButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.designEditor.mobile .toolButton {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+}
+
+.designEditor.mobile .toolButton svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Canvas Container */
+.canvasContainer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: auto;
+    position: relative;
+    min-height: 400px;
+    background: transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.designEditor.mobile .canvasContainer {
+    padding: 12px;
+    min-height: 300px;
+}
+
+.productPreview {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 500px;
+    gap: 16px;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+}
+
+.designEditor.mobile .productPreview {
+    max-width: 100%;
+    gap: 12px;
+}
+
+.canvasWrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.canvas {
+    max-width: 100%;
+    max-height: 100%;
+    border: 3px solid rgba(13, 148, 136, 0.2);
+    border-radius: 16px;
+    background: transparent;
+    cursor: crosshair;
+    touch-action: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.canvas:hover {
+    border-color: rgba(13, 148, 136, 0.4);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.designEditor.mobile .canvas {
+    border-width: 2px;
+    border-radius: 12px;
+    touch-action: pan-x pan-y pinch-zoom;
+}
+
+/* Preview Canvas */
+.previewWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.previewLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.previewCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    border: 2px solid rgba(13, 148, 136, 0.15);
+    border-radius: 12px;
+    background: transparent;
+    opacity: 0.7;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.previewCanvas:hover {
+    opacity: 0.9;
+    border-color: rgba(13, 148, 136, 0.3);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Property Panel - Mobile Bottom Sheet, Desktop Sidebar */
+.propertyPanel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1001;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.designEditor.fullscreen .propertyPanel {
+    z-index: 10000;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+.designEditor.mobile .panelHeader {
+    padding: 16px 20px;
+}
+
+.panelHeader h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: -0.3px;
+}
+
+.designEditor.mobile .panelHeader h3 {
+    font-size: 16px;
+}
+
+.closeButton {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #666;
+    transition: all 0.2s ease;
+    font-weight: 300;
+    touch-action: manipulation;
+}
+
+.closeButton:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.closeButton:active {
+    background: rgba(0, 0, 0, 0.15);
+    transform: scale(0.9);
+}
+
+.designEditor.mobile .closeButton {
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+}
+
+.propertyContent {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.designEditor.mobile .propertyContent {
+    padding: 20px;
+    gap: 20px;
+}
+
+.propertyGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.propertyGroup label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.input,
+.select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    font-size: 16px;
+    background: white;
+    min-height: 48px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+    transform: translateY(-1px);
+}
+
+.designEditor.mobile .input,
+.designEditor.mobile .select {
+    min-height: 52px;
+    font-size: 16px; /* Prevents zoom on iOS */
+}
+
+.slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.6);
+}
+
+.slider::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.6);
+}
+
+.slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
+    transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb:active {
+    transform: scale(1.2);
+}
+
+.designEditor.mobile .slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+}
+
+.designEditor.mobile .slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+}
+
+.colorPickerWrapper {
+    position: relative;
+}
+
+.colorButton {
+    width: 100%;
+    min-height: 52px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    touch-action: manipulation;
+}
+
+.colorButton:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.colorButton:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.colorPickerPopover {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 12px;
+    z-index: 1002;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.designEditor.mobile .colorPickerPopover {
+    position: fixed;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+.colorPickerCover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+/* Button Row for Icon Buttons */
+.buttonRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.iconButton {
+    flex: 1;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.iconButton:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.iconButton:active {
+    transform: scale(0.95);
+}
+
+.iconButton.active {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    color: white;
+    border-color: #0d9488;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.designEditor.mobile .iconButton {
+    min-height: 52px;
+}
+
+/* Save Button */
+.saveButton {
+    margin: 20px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 56px;
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    touch-action: manipulation;
+}
+
+.saveButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5);
+}
+
+.saveButton:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+}
+
+.saveButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.designEditor.mobile .saveButton {
+    margin: 12px;
+    padding: 14px 24px;
+    font-size: 15px;
+    min-height: 52px;
+    border-radius: 14px;
+}
+
+/* Fullscreen Styles */
+.designEditor.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.designEditor.fullscreen .canvasContainer {
+    padding: 20px;
+    min-height: auto;
+}
+
+.designEditor.fullscreen .productPreview {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+    .designEditor {
+        flex-direction: row;
+        height: 600px;
+        min-height: 600px;
+        border-radius: 20px;
+    }
+
+    .designEditor.mobile {
+        flex-direction: column;
+    }
+
+    .editorHeader {
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        border: none;
+    }
+
+    .viewSwitcher {
+        padding: 0;
+        background: transparent;
+        border: none;
+    }
+
+    .viewButton {
+        min-width: 100px;
+        padding: 10px 20px;
+    }
+
+    .fullscreenButton {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 8px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        width: 80px;
+        padding: 20px 12px;
+        border-right: 1px solid rgba(0, 0, 0, 0.08);
+        border-bottom: none;
+        justify-content: flex-start;
+        gap: 16px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        transform: none;
+    }
+
+    .designEditor.mobile .toolbar {
+        flex-direction: row;
+        width: auto;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        justify-content: flex-start;
+    }
+
+    .toolbarGroup {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .designEditor.mobile .toolbarGroup {
+        flex-direction: row;
+        width: auto;
+    }
+
+    .toolButton {
+        width: 100%;
+        min-width: 56px;
+        min-height: 56px;
+    }
+
+    .designEditor.mobile .toolButton {
+        width: auto;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    .canvasContainer {
+        flex: 1;
+        padding: 60px 40px 40px;
+    }
+
+    .designEditor.mobile .canvasContainer {
+        padding: 12px;
+    }
+
+    .propertyPanel {
+        position: relative;
+        width: 360px;
+        max-height: 100%;
+        border-radius: 0;
+        border-left: 1px solid rgba(0, 0, 0, 0.08);
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        box-shadow: none;
+        animation: none;
+        bottom: auto;
+        left: auto;
+        right: auto;
+    }
+
+    .designEditor.mobile .propertyPanel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: auto;
+        border-left: none;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .saveButton {
+        position: absolute;
+        bottom: 24px;
+        right: 24px;
+        margin: 0;
+        z-index: 10;
+        width: auto;
+    }
+
+    .designEditor.mobile .saveButton {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin: 12px;
+        width: auto;
+    }
+
+    .mobileMenuToggle {
+        display: none;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+    .designEditor {
+        height: 700px;
+        min-height: 700px;
+    }
+
+    .toolbar {
+        width: 90px;
+        padding: 24px 14px;
+    }
+
+    .toolButton {
+        min-width: 64px;
+        min-height: 64px;
+    }
+
+    .propertyPanel {
+        width: 400px;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 640px) and (max-width: 767px) {
+    .toolbar {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .canvasContainer {
+        padding: 30px;
+    }
+}
+
+/* Touch Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .toolButton {
+        min-width: 52px;
+        min-height: 52px;
+    }
+
+    .canvas {
+        touch-action: pan-x pan-y pinch-zoom;
+    }
+
+    .input,
+    .select {
+        min-height: 52px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .iconButton {
+        min-height: 52px;
+    }
+
+    .viewButton {
+        min-height: 48px;
+    }
+}
+
+/* Enhanced animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Loading state */
+.canvas.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Hover effects for desktop */
+@media (hover: hover) and (pointer: fine) {
+    .toolButton:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+
+    .viewButton:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .iconButton:hover {
+        transform: translateY(-1px);
+    }
+}
+
+/* Accessibility improvements */
+.toolButton:focus-visible,
+.viewButton:focus-visible,
+.iconButton:focus-visible,
+.closeButton:focus-visible,
+.fullscreenButton:focus-visible,
+.saveButton:focus-visible,
+.mobileMenuToggle:focus-visible {
+    outline: 3px solid #0d9488;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .toolbar,
+    .viewSwitcher,
+    .propertyPanel,
+    .saveButton,
+    .mobileMenuToggle {
+        display: none;
+    }
+
+    .designEditor {
+        background: white;
+    }
+
+    .canvasContainer {
+        padding: 0;
+    }
+}

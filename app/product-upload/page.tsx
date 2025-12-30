@@ -1,10 +1,11 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import ProductUploadHeader from "./components/ProductUploadHeader";
+import DesignEditor from "./components/DesignEditor";
 
 type ProductCard = {
     id: string;
@@ -69,6 +70,7 @@ export default function ProductUploadPage() {
     const [showAIPopup, setShowAIPopup] = useState(false);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [aiImages, setAiImages] = useState<string[]>([]);
+    const [designEditorData, setDesignEditorData] = useState<string | null>(null);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -163,8 +165,28 @@ export default function ProductUploadPage() {
         if (uploadedDesign) {
             sessionStorage.setItem("uploadedDesign", uploadedDesign);
         }
+        if (designEditorData) {
+            sessionStorage.setItem("designEditorData", designEditorData);
+        }
         router.push("/product-upload/details");
     };
+
+    const handleDesignChange = (designData: string) => {
+        setDesignEditorData(designData);
+    };
+
+    const handleDesignSave = (designData: string) => {
+        setDesignEditorData(designData);
+        sessionStorage.setItem("designEditorData", designData);
+    };
+
+    // Load saved design on mount
+    useEffect(() => {
+        const savedDesign = sessionStorage.getItem("designEditorData");
+        if (savedDesign) {
+            setDesignEditorData(savedDesign);
+        }
+    }, []);
 
     const cartItems = [
         {
@@ -347,72 +369,38 @@ export default function ProductUploadPage() {
                         </button>
                     </section>
 
-                    <section className="pu-card">
-                        <div className="pu-card-header">
+                    <section className="pu-card" style={{ padding: '0', overflow: 'hidden' }}>
+                        <div className="pu-card-header" style={{ padding: '20px 18px 0' }}>
                             <h3 className="pu-card-subtitle">Modifiez votre design</h3>
                             <span className="pu-price-tag">Price Range 30DT</span>
                         </div>
-                        <div className="pu-design-card">
-                            <div className="pu-design-figure">
-                                <div
-                                    style={{
-                                        width: '320px',
-                                        height: '320px',
-                                        backgroundColor: activeColor === 'white' ? '#f5f5f5' : (activeColor ? COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'),
-                                        WebkitMask: 'url(/mock-shirt.png) no-repeat center / contain',
-                                        mask: 'url(/mock-shirt.png) no-repeat center / contain',
-                                        boxShadow: activeColor === 'white' ? '0 0 0 2px rgba(0, 0, 0, 0.08)' : 'none',
-                                    }}
-                                />
-                                <div className="pu-design-frame">
-                                    {uploadedDesign ? (
-                                        <Image src={uploadedDesign} alt="Design" width={120} height={120} />
-                                    ) : (
-                                        <div className="pu-design-grid">
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot active"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                            <div className="pu-grid-dot"></div>
-                                        </div>
-                                    )}
-                                </div>
-                                <button className="pu-design-refresh" type="button">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="1 4 1 10 7 10" />
-                                        <polyline points="23 20 23 14 17 14" />
-                                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" />
-                                    </svg>
-                                </button>
-                                <button className="pu-design-resize" type="button">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" />
-                                        <path d="m12 12 4 4 4-4" />
-                                        <path d="M12 12V8" />
-                                    </svg>
-                                </button>
-                            </div>
+                        <div style={{ height: '600px', minHeight: '500px' }}>
+                            <DesignEditor
+                                productType={selectedProduct}
+                                productColor={activeColor ? COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'}
+                                initialDesign={designEditorData}
+                                onDesignChange={handleDesignChange}
+                                onSave={handleDesignSave}
+                            />
                         </div>
-                        <span className="pu-preview-label">Couleurs d'aperçu</span>
-                        <div className="pu-mini-swatches">
-                            {selectedColors.map((colorId) => {
-                                const swatch = COLOR_SWATCHES.find((c) => c.id === colorId);
-                                const isActive = colorId === activeColor;
-                                return (
-                                    <button
-                                        key={colorId}
-                                        type="button"
-                                        className={`pu-mini-dot ${isActive ? "active" : ""}`}
-                                        style={{ background: swatch?.hex }}
-                                        onClick={() => setActiveColor(colorId)}
-                                        title={swatch?.label}
-                                    />
-                                );
-                            })}
+                        <div style={{ padding: '16px 18px' }}>
+                            <span className="pu-preview-label">Couleurs d'aperçu</span>
+                            <div className="pu-mini-swatches">
+                                {selectedColors.map((colorId) => {
+                                    const swatch = COLOR_SWATCHES.find((c) => c.id === colorId);
+                                    const isActive = colorId === activeColor;
+                                    return (
+                                        <button
+                                            key={colorId}
+                                            type="button"
+                                            className={`pu-mini-dot ${isActive ? "active" : ""}`}
+                                            style={{ background: swatch?.hex }}
+                                            onClick={() => setActiveColor(colorId)}
+                                            title={swatch?.label}
+                                        />
+                                    );
+                                })}
+                            </div>
                         </div>
                     </section>
 
