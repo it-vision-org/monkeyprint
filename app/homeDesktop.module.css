@@ -792,18 +792,22 @@
   position: relative;
   width: 100%;
   max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .desktopFooterCtaBar {
   position: absolute;
-  width: 100%;
-  height: 90px;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 70px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  backdrop-filter: blur(10px);
+  width: 580px;
+  max-width: 100%;
+  height: 90px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 70px;
+  box-sizing: border-box;
 }
 
 .desktopFooterCta {
@@ -817,6 +821,8 @@
   height: 72px;
   background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
   background-size: 200% 100%;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3),
+    0px 0px 40px rgba(255, 41, 195, 0.3);
   border-radius: 36px;
   text-decoration: none;
   transition: all 0.3s ease;
@@ -829,9 +835,6 @@
   color: #ffffff;
   text-transform: uppercase;
   margin: 0 auto;
-  display: flex;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2),
-    0px 0px 40px rgba(255, 41, 195, 0.2);
   overflow: hidden;
 }
 
