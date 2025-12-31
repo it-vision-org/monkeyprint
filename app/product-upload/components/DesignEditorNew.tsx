@@ -20,7 +20,7 @@ type DesignEditorProps = {
     productColor: string;
     initialDesign?: string | null;
     onDesignChange?: (designData: string) => void;
-    onSave?: (designData: string) => void;
+    // onSave prop removed - auto-save is now automatic
 };
 
 type HistoryState = string; // Serialized design for one side
@@ -390,7 +390,25 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         isUndoingRef.current = false;
     }, []);
 
-    // Debounced save
+    // Force save function - saves immediately without debounce
+    const forceSaveDesign = useCallback(() => {
+        if (!mainCanvas.current || isInitializing.current) return;
+        
+        designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+        const designData = JSON.stringify(designsRef.current);
+        
+        console.log('Force saving design:', designData.substring(0, 200));
+        
+        // Update parent state
+        onDesignChange?.(designData);
+        
+        // Auto-save to sessionStorage
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem("designEditorData", designData);
+        }
+    }, [onDesignChange]);
+
+    // Auto-save function - saves to both parent state and sessionStorage (debounced)
     const saveCurrentDesign = useCallback(() => {
         if (!mainCanvas.current || isInitializing.current) return;
 
@@ -401,7 +419,18 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         saveTimeoutRef.current = setTimeout(() => {
             if (mainCanvas.current) {
                 designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
-                onDesignChange?.(JSON.stringify(designsRef.current));
+                const designData = JSON.stringify(designsRef.current);
+                
+                console.log('Auto-saving design:', designData.substring(0, 200));
+                
+                // Update parent state
+                onDesignChange?.(designData);
+                
+                // Auto-save to sessionStorage
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem("designEditorData", designData);
+                }
+                
                 pushToHistory();
             }
         }, 300);
@@ -644,12 +673,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                         sendBackward();
                     }
                     break;
-                case 's':
-                    if (e.ctrlKey || e.metaKey) {
-                        e.preventDefault();
-                        handleSave();
-                    }
-                    break;
+                // Removed Ctrl+S save shortcut - auto-save is now automatic
             }
         };
 
@@ -724,6 +748,15 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             historyIndexRef.current.front = 0;
             historyIndexRef.current.back = designsRef.current.back ? 0 : -1;
 
+            // Save initial state to sessionStorage (even if empty)
+            designsRef.current.front = serialize(canvas);
+            const initialDesignData = JSON.stringify(designsRef.current);
+            console.log('Initial design state saved:', initialDesignData.substring(0, 200));
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem("designEditorData", initialDesignData);
+            }
+            onDesignChange?.(initialDesignData);
+
             setReady(true);
             setIsLoading(false);
             isInitializing.current = false;
@@ -732,6 +765,25 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         initCanvas();
 
         return () => {
+            // Save design before unmounting (force save, no debounce)
+            if (mainCanvas.current && !isInitializing.current) {
+                // Clear any pending debounced saves
+                if (saveTimeoutRef.current) {
+                    clearTimeout(saveTimeoutRef.current);
+                }
+                
+                // Force immediate save
+                designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+                const designData = JSON.stringify(designsRef.current);
+                
+                console.log('Unmounting, force saving design:', designData.substring(0, 200));
+                
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem("designEditorData", designData);
+                }
+                onDesignChange?.(designData);
+            }
+            
             if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
             try { canvas.dispose(); } catch { }
             mainCanvas.current = null;
@@ -782,7 +834,19 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
     const switchSide = async (side: Side) => {
         if (side === currentSideRef.current || !mainCanvas.current) return;
+        
+        // Save current side before switching (immediate, no debounce)
         designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+        const designData = JSON.stringify(designsRef.current);
+        
+        console.log('Switching side, saving design:', designData.substring(0, 200));
+        
+        // Auto-save to sessionStorage when switching sides
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem("designEditorData", designData);
+        }
+        onDesignChange?.(designData);
+        
         setCurrentSide(side);
         currentSideRef.current = side;
         await loadDesign(mainCanvas.current, designsRef.current[side], side);
@@ -890,13 +954,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         setIsFullscreen(!isFullscreen);
     };
 
-    const handleSave = () => {
-        if (mainCanvas.current) {
-            designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
-        }
-        onSave?.(JSON.stringify(designsRef.current));
-        alert('Design saved!');
-    };
+    // Removed handleSave - auto-save is now handled automatically
 
     const selectFont = (fontName: string) => {
         setFontFamily(fontName);
@@ -1125,7 +1183,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             )}
 
             <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
-            <button className={styles.saveBtn} onClick={handleSave}>💾 Save Design</button>
         </div>
     );
 }

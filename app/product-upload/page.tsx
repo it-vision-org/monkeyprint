@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import ProductUploadHeader from "./components/ProductUploadHeader";
@@ -162,23 +162,45 @@ export default function ProductUploadPage() {
     };
 
     const handleNext = () => {
+        // Save uploaded design if exists
         if (uploadedDesign) {
             sessionStorage.setItem("uploadedDesign", uploadedDesign);
         }
-        if (designEditorData) {
-            sessionStorage.setItem("designEditorData", designEditorData);
+        
+        // Save product type and color for rendering background
+        sessionStorage.setItem("productType", selectedProduct);
+        const activeColorHex = COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff';
+        sessionStorage.setItem("productColor", activeColorHex);
+        
+        // Force save design editor data before navigation
+        // Get the latest from sessionStorage first (in case auto-save already happened)
+        const latestDesignData = sessionStorage.getItem("designEditorData") || designEditorData;
+        
+        if (latestDesignData) {
+            console.log('Saving design data before navigation:', latestDesignData.substring(0, 200));
+            sessionStorage.setItem("designEditorData", latestDesignData);
+        } else {
+            // If no design data exists, save empty structure to ensure consistency
+            const emptyDesign = JSON.stringify({ front: null, back: null });
+            console.log('No design data, saving empty structure');
+            sessionStorage.setItem("designEditorData", emptyDesign);
         }
+        
+        // Verify it was saved
+        const verify = sessionStorage.getItem("designEditorData");
+        console.log('Verified saved design data:', verify?.substring(0, 200));
+        
+        // Navigate immediately - sessionStorage is synchronous
         router.push("/product-upload/details");
     };
 
     const handleDesignChange = (designData: string) => {
         setDesignEditorData(designData);
+        // Auto-save is now handled in the DesignEditor component
+        // This just updates the local state for immediate UI updates
     };
 
-    const handleDesignSave = (designData: string) => {
-        setDesignEditorData(designData);
-        sessionStorage.setItem("designEditorData", designData);
-    };
+    // Removed handleDesignSave - auto-save is now automatic in DesignEditor
 
     // Load saved design on mount
     useEffect(() => {
@@ -380,7 +402,6 @@ export default function ProductUploadPage() {
                                 productColor={activeColor ? COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'}
                                 initialDesign={designEditorData}
                                 onDesignChange={handleDesignChange}
-                                onSave={handleDesignSave}
                             />
                         </div>
                         <div style={{ padding: '16px 18px' }}>
