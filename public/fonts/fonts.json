@@ -1,0 +1,35 @@
+{
+    "fonts": [
+        {
+            "name": "Arial",
+            "file": null,
+            "system": true
+        },
+        {
+            "name": "Helvetica",
+            "file": null,
+            "system": true
+        },
+        {
+            "name": "Times New Roman",
+            "file": null,
+            "system": true
+        },
+        {
+            "name": "Georgia",
+            "file": null,
+            "system": true
+        },
+        {
+            "name": "Verdana",
+            "file": null,
+            "system": true
+        },
+        {
+            "name": "Courier New",
+            "file": null,
+            "system": true
+        }
+    ],
+    "instructions": "To add custom fonts: 1) Add your .ttf or .woff2 file to this folder, 2) Add an entry here with 'name' and 'file' pointing to your font file"
+}

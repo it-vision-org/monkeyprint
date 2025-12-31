@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import ProductUploadHeader from "./components/ProductUploadHeader";
-import DesignEditor from "./components/DesignEditor";
+import DesignEditor from "./components/DesignEditorNew";
 
 type ProductCard = {
     id: string;
@@ -145,18 +145,18 @@ export default function ProductUploadPage() {
     // Get selected colors in order (active color first for centering, rest in original order)
     const getOrderedColors = () => {
         // Safety check: if activeColor is not in selectedColors, use first selected color
-        const validActiveColor = selectedColors.includes(activeColor) 
-            ? activeColor 
+        const validActiveColor = selectedColors.includes(activeColor)
+            ? activeColor
             : (selectedColors.length > 0 ? selectedColors[0] : "");
-        
+
         const activeSwatch = COLOR_SWATCHES.find(swatch => swatch.id === validActiveColor);
         const otherColors = selectedColors.filter(id => id !== validActiveColor);
         const otherSwatches = otherColors
             .map(id => COLOR_SWATCHES.find(swatch => swatch.id === id))
             .filter((swatch): swatch is ColorSwatch => swatch !== undefined);
-        
+
         // Return active color first (for center), then others in their original order
-        return activeSwatch 
+        return activeSwatch
             ? [activeSwatch, ...otherSwatches]
             : otherSwatches;
     };
@@ -227,8 +227,8 @@ export default function ProductUploadPage() {
 
     return (
         <div className="product-upload-page">
-            <ProductUploadHeader 
-                totalPrice={totalPrice} 
+            <ProductUploadHeader
+                totalPrice={totalPrice}
                 cartItems={cartItems}
                 showPriceDetails={true}
             />
@@ -273,7 +273,7 @@ export default function ProductUploadPage() {
                                         const distanceFromCenter = index; // Distance from center (first item)
                                         const scale = Math.max(0.6, 1 - (distanceFromCenter * 0.15)); // Decrease by 15% for each step away, min 0.6
                                         const zIndex = isActive ? 100 : 50 - distanceFromCenter;
-                                        
+
                                         // Calculate horizontal offset: center is 0, left is negative, right is positive
                                         // For items after center, alternate: 1->left, 2->right, 3->left, etc.
                                         let offset = 0;
@@ -283,10 +283,10 @@ export default function ProductUploadPage() {
                                             const isLeft = (index - 1) % 2 === 0; // First new item goes left
                                             offset = isLeft ? -sideIndex * 70 : sideIndex * 70;
                                         }
-                                        
+
                                         return (
-                                            <div 
-                                                key={swatch.id} 
+                                            <div
+                                                key={swatch.id}
                                                 className={`pu-shirt ${isActive ? "active" : ""}`}
                                                 style={{
                                                     left: '50%',
@@ -323,23 +323,23 @@ export default function ProductUploadPage() {
                                             title={swatch.label}
                                         >
                                             {isSelected && (
-                                                <svg 
-                                                    width="18" 
-                                                    height="18" 
-                                                    viewBox="0 0 24 24" 
-                                                    fill="none" 
-                                                    stroke={swatch.id === "white" ? "#000000" : "#ffffff"} 
-                                                    strokeWidth="2.5" 
-                                                    strokeLinecap="round" 
+                                                <svg
+                                                    width="18"
+                                                    height="18"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke={swatch.id === "white" ? "#000000" : "#ffffff"}
+                                                    strokeWidth="2.5"
+                                                    strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    style={{ 
+                                                    style={{
                                                         position: 'absolute',
                                                         top: '50%',
                                                         left: '50%',
                                                         transform: 'translate(-50%, -50%)',
                                                         pointerEvents: 'none',
-                                                        filter: swatch.id === "white" 
-                                                            ? 'none' 
+                                                        filter: swatch.id === "white"
+                                                            ? 'none'
                                                             : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))',
                                                     }}
                                                 >

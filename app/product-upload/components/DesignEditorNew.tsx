@@ -1,0 +1,1131 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import * as fabric from 'fabric';
+// @ts-ignore - react-color types
+import { SketchPicker, ColorResult } from 'react-color';
+import styles from './DesignEditorNew.module.css';
+
+type Side = 'front' | 'back';
+type Tool = 'select' | 'text' | 'image' | 'draw';
+
+type FontConfig = {
+    name: string;
+    file: string | null;
+    system: boolean;
+};
+
+type DesignEditorProps = {
+    productType: string;
+    productColor: string;
+    initialDesign?: string | null;
+    onDesignChange?: (designData: string) => void;
+    onSave?: (designData: string) => void;
+};
+
+type HistoryState = string; // Serialized design for one side
+
+const PRESET_COLORS = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'];
+const MOVE_STEP = 5;
+const MOVE_STEP_SHIFT = 20;
+const MAX_HISTORY = 50;
+const PRINT_AREA_RATIO = 0.8; // 80% of the t-shirt size
+// TODO: This should be configurable from the admin dashboard in the future
+
+// Helper: Get inverse/contrasting color
+const getContrastColor = (hexColor: string): string => {
+    if (!hexColor) return '#000000';
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+};
+
+export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange, onSave }: DesignEditorProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const previewRef = useRef<HTMLCanvasElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const mainCanvas = useRef<fabric.Canvas | null>(null);
+    const previewCanvas = useRef<fabric.StaticCanvas | null>(null);
+    const productImgs = useRef<{ front: HTMLImageElement | null; back: HTMLImageElement | null }>({ front: null, back: null });
+    const designsRef = useRef<Record<Side, string | null>>({ front: null, back: null });
+    const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isInitializing = useRef(true);
+    const currentSideRef = useRef<Side>('front');
+    const clipboardRef = useRef<fabric.Object[] | null>(null);
+
+    // Undo/Redo history (per side)
+    const historyRef = useRef<Record<Side, HistoryState[]>>({ front: [], back: [] });
+    const historyIndexRef = useRef<Record<Side, number>>({ front: -1, back: -1 });
+    const isUndoingRef = useRef(false);
+    const printAreaGuideRef = useRef<fabric.Rect | null>(null);
+    const clipPathRef = useRef<fabric.Rect | null>(null);
+
+    // Dynamic canvas dimensions
+    const [canvasSize, setCanvasSize] = useState({ w: 400, h: 500 });
+    const lastSizeRef = useRef({ w: 400, h: 500 });
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [ready, setReady] = useState(false);
+    const [currentSide, setCurrentSide] = useState<Side>('front');
+    const [activeTool, setActiveTool] = useState<Tool>('select');
+    const [selected, setSelected] = useState<fabric.Object | null>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [fonts, setFonts] = useState<FontConfig[]>([]);
+    const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
+
+    // Text props
+    const [textContent, setTextContent] = useState('Your text');
+    const [fontFamily, setFontFamily] = useState('Arial');
+    const [fontSize, setFontSize] = useState(32);
+    const [currentColor, setCurrentColor] = useState(() => getContrastColor(productColor));
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [isBold, setIsBold] = useState(false);
+    const [isItalic, setIsItalic] = useState(false);
+
+    // Draw props
+    const [brushSize, setBrushSize] = useState(10);
+
+    // Mobile & responsive
+    const [isMobile, setIsMobile] = useState(false);
+    const [showPanel, setShowPanel] = useState(false);
+
+    // Image & Object props
+    const [imageOpacity, setImageOpacity] = useState(1);
+    const [isRemovingBg, setIsRemovingBg] = useState(false);
+    const [hasRemovedBg, setHasRemovedBg] = useState<Record<string, boolean>>({}); // Track by object id or ref
+
+    // Undo/Redo state for UI
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
+
+    // Keep currentSideRef in sync
+    useEffect(() => {
+        currentSideRef.current = currentSide;
+    }, [currentSide]);
+
+    // Update default color when product color changes
+    useEffect(() => {
+        const contrastColor = getContrastColor(productColor);
+        setCurrentColor(contrastColor);
+        if (mainCanvas.current?.freeDrawingBrush) {
+            mainCanvas.current.freeDrawingBrush.color = contrastColor;
+        }
+    }, [productColor]);
+
+    // Load fonts
+    useEffect(() => {
+        fetch('/fonts/fonts.json')
+            .then(r => r.json())
+            .then((data: { fonts: FontConfig[] }) => {
+                const fontList = data.fonts || [{ name: 'Arial', file: null, system: true }];
+                setFonts(fontList);
+                fontList.forEach(f => {
+                    if (f.file) {
+                        const font = new FontFace(f.name, `url(/fonts/${f.file})`);
+                        font.load().then(loaded => document.fonts.add(loaded)).catch(() => { });
+                    }
+                });
+            })
+            .catch(() => setFonts([{ name: 'Arial', file: null, system: true }]));
+    }, []);
+
+    // Detect mobile and calculate dynamic canvas size
+    const calculateSize = useCallback(() => {
+        const mobile = window.innerWidth < 768;
+        setIsMobile(mobile);
+
+        // Calculate available space for canvas
+        if (mobile) {
+            // Mobile: leave room for toolbar (70px) and header (60px), some padding
+            const availableWidth = window.innerWidth - 40;
+            const availableHeight = window.innerHeight - 220;
+            const w = Math.min(availableWidth, 380);
+            const h = Math.min(availableHeight, w * 1.25);
+            setCanvasSize({ w: Math.floor(w), h: Math.floor(h) });
+        } else {
+            // Desktop: standard size within constraints
+            setCanvasSize({ w: 400, h: 500 });
+        }
+    }, []);
+
+    useEffect(() => {
+        calculateSize();
+        window.addEventListener('resize', calculateSize);
+        return () => window.removeEventListener('resize', calculateSize);
+    }, [calculateSize, isFullscreen]);
+
+    // Load product images
+    useEffect(() => {
+        const base = productType.toLowerCase().includes('hoodie') ? 'Hoodie' : 'T-Shirt';
+        const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => res(img);
+            img.onerror = () => res(null);
+            img.src = src;
+        });
+
+        Promise.all([loadImg(`/${base}.png`), loadImg(`/${base}-Back.png`)]).then(([front, back]) => {
+            productImgs.current = { front, back: back || front };
+            if (mainCanvas.current) {
+                setBackground(mainCanvas.current, currentSideRef.current);
+            }
+            if (previewCanvas.current) {
+                setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front');
+            }
+        });
+    }, [productType]);
+
+    // Update background when color changes
+    useEffect(() => {
+        if (mainCanvas.current && productImgs.current.front) {
+            setBackground(mainCanvas.current, currentSideRef.current);
+        }
+        if (previewCanvas.current && productImgs.current.front) {
+            setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front');
+        }
+    }, [productColor]);
+
+    const setBackground = useCallback(async (canvas: fabric.StaticCanvas, side: Side) => {
+        const imgElement = side === 'front' ? productImgs.current.front : productImgs.current.back;
+        if (!imgElement) {
+            canvas.renderAll();
+            return;
+        }
+
+        try {
+            const bgImg = new fabric.FabricImage(imgElement, {
+                originX: 'center',
+                originY: 'center',
+            });
+
+            const scale = Math.min(
+                (canvas.getWidth() * 0.88) / (bgImg.width || 1),
+                (canvas.getHeight() * 0.88) / (bgImg.height || 1)
+            );
+
+            bgImg.set({
+                left: canvas.getWidth() / 2,
+                top: canvas.getHeight() / 2,
+                scaleX: scale,
+                scaleY: scale,
+                selectable: false,
+                evented: false,
+            });
+
+            if (productColor && productColor !== '#FFFFFF') {
+                try {
+                    const blendFilter = new fabric.filters.BlendColor({
+                        color: productColor,
+                        mode: 'multiply',
+                        alpha: 0.6
+                    });
+                    bgImg.filters = [blendFilter];
+                    bgImg.applyFilters();
+                } catch (e) {
+                    console.warn('Could not apply color filter:', e);
+                }
+            }
+
+            canvas.backgroundImage = bgImg;
+
+            const printW = (bgImg.width! * scale) * PRINT_AREA_RATIO;
+            const printH = (bgImg.height! * scale) * PRINT_AREA_RATIO;
+
+            const clipRect = new fabric.Rect({
+                left: canvas.getWidth() / 2,
+                top: canvas.getHeight() / 2,
+                width: printW,
+                height: printH,
+                originX: 'center',
+                originY: 'center',
+                absolutePositioned: true
+            });
+
+            // Add Printable Area Guide (Visible only in editor, not in export)
+            if (canvas instanceof fabric.Canvas) {
+                if (printAreaGuideRef.current) {
+                    canvas.remove(printAreaGuideRef.current);
+                }
+
+                const guide = new fabric.Rect({
+                    left: canvas.getWidth() / 2,
+                    top: canvas.getHeight() / 2,
+                    width: printW,
+                    height: printH,
+                    fill: 'transparent',
+                    stroke: 'rgba(20, 184, 166, 0.3)',
+                    strokeDashArray: [5, 5],
+                    strokeWidth: 2,
+                    selectable: false,
+                    evented: false,
+                    originX: 'center',
+                    originY: 'center',
+                    // @ts-ignore
+                    isGuide: true
+                });
+
+                printAreaGuideRef.current = guide;
+                canvas.add(guide);
+                canvas.sendObjectToBack(guide);
+
+                // Update global ref for new objects being added to main canvas
+                clipPathRef.current = clipRect;
+            }
+
+            // Apply clipping to all existing objects on this specific canvas
+            canvas.getObjects().forEach(obj => {
+                if (!(obj as any).isGuide && obj !== canvas.backgroundImage) {
+                    obj.set({ clipPath: clipRect });
+                }
+            });
+
+            canvas.renderAll();
+            return clipRect;
+        } catch (e) {
+            console.error('Error setting background:', e);
+            canvas.renderAll();
+            return null;
+        }
+    }, [productColor]);
+
+    // Resize canvas when size changes
+    useEffect(() => {
+        if (mainCanvas.current && ready) {
+            const oldW = lastSizeRef.current.w;
+            const oldH = lastSizeRef.current.h;
+            const newW = canvasSize.w;
+            const newH = canvasSize.h;
+
+            if (oldW !== newW || oldH !== newH) {
+                const sx = newW / oldW;
+                const sy = newH / oldH;
+
+                mainCanvas.current.getObjects().forEach(obj => {
+                    obj.set({
+                        left: (obj.left || 0) * sx,
+                        top: (obj.top || 0) * sy,
+                        scaleX: (obj.scaleX || 1) * sx,
+                        scaleY: (obj.scaleY || 1) * sy
+                    });
+                    obj.setCoords();
+                });
+
+                mainCanvas.current.setDimensions({ width: newW, height: newH });
+                setBackground(mainCanvas.current, currentSideRef.current);
+                lastSizeRef.current = { w: newW, h: newH };
+                mainCanvas.current.renderAll();
+            }
+        }
+    }, [canvasSize, ready, setBackground]);
+
+    const serialize = (canvas: fabric.StaticCanvas) => {
+        const objects = canvas.getObjects().filter(o => !(o as any).isGuide);
+        return JSON.stringify({
+            w: canvas.getWidth(),
+            h: canvas.getHeight(),
+            objects: objects.map(o => o.toObject())
+        });
+    };
+
+    // History management
+    const pushToHistory = useCallback(() => {
+        if (isUndoingRef.current || !mainCanvas.current || isInitializing.current) return;
+
+        const side = currentSideRef.current;
+        const serialized = serialize(mainCanvas.current);
+
+        // Remove any redo states for this side
+        historyRef.current[side] = historyRef.current[side].slice(0, historyIndexRef.current[side] + 1);
+
+        // Add new state
+        historyRef.current[side].push(serialized);
+
+        // Limit history size
+        if (historyRef.current[side].length > MAX_HISTORY) {
+            historyRef.current[side].shift();
+        } else {
+            historyIndexRef.current[side]++;
+        }
+
+        setCanUndo(historyIndexRef.current[side] > 0);
+        setCanRedo(false);
+    }, []);
+
+    const undo = useCallback(async () => {
+        const side = currentSideRef.current;
+        if (historyIndexRef.current[side] <= 0 || !mainCanvas.current) return;
+
+        isUndoingRef.current = true;
+        historyIndexRef.current[side]--;
+
+        const state = historyRef.current[side][historyIndexRef.current[side]];
+        designsRef.current[side] = state;
+
+        await loadDesign(mainCanvas.current, state, side);
+
+        setCanUndo(historyIndexRef.current[side] > 0);
+        setCanRedo(historyIndexRef.current[side] < historyRef.current[side].length - 1);
+        isUndoingRef.current = false;
+    }, []);
+
+    const redo = useCallback(async () => {
+        const side = currentSideRef.current;
+        if (historyIndexRef.current[side] >= historyRef.current[side].length - 1 || !mainCanvas.current) return;
+
+        isUndoingRef.current = true;
+        historyIndexRef.current[side]++;
+
+        const state = historyRef.current[side][historyIndexRef.current[side]];
+        designsRef.current[side] = state;
+
+        await loadDesign(mainCanvas.current, state, side);
+
+        setCanUndo(historyIndexRef.current[side] > 0);
+        setCanRedo(historyIndexRef.current[side] < historyRef.current[side].length - 1);
+        isUndoingRef.current = false;
+    }, []);
+
+    // Debounced save
+    const saveCurrentDesign = useCallback(() => {
+        if (!mainCanvas.current || isInitializing.current) return;
+
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        saveTimeoutRef.current = setTimeout(() => {
+            if (mainCanvas.current) {
+                designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+                onDesignChange?.(JSON.stringify(designsRef.current));
+                pushToHistory();
+            }
+        }, 300);
+    }, [onDesignChange, pushToHistory]);
+
+    const loadDesign = useCallback(async (canvas: fabric.StaticCanvas, design: string | null, side: Side) => {
+        canvas.getObjects().forEach(o => canvas.remove(o));
+        const clipRect = await setBackground(canvas, side);
+        if (!design) return canvas.renderAll();
+
+        try {
+            const { objects, w, h } = JSON.parse(design);
+            const sx = canvas.getWidth() / w, sy = canvas.getHeight() / h;
+
+            fabric.util.enlivenObjects(objects).then((objs: any[]) => {
+                objs.forEach(o => {
+                    o.set({
+                        left: (o.left || 0) * sx,
+                        top: (o.top || 0) * sy,
+                        scaleX: (o.scaleX || 1) * sx,
+                        scaleY: (o.scaleY || 1) * sy,
+                        clipPath: clipRect || undefined
+                    });
+                    canvas.add(o);
+                });
+                canvas.renderAll();
+            });
+        } catch { canvas.renderAll(); }
+    }, [setBackground]);
+
+    const deleteSelected = useCallback(() => {
+        if (!mainCanvas.current) return;
+        const activeObjects = mainCanvas.current.getActiveObjects();
+        if (activeObjects.length === 0) return;
+        activeObjects.forEach(obj => { mainCanvas.current!.remove(obj); });
+        mainCanvas.current.discardActiveObject();
+        mainCanvas.current.renderAll();
+        setSelected(null);
+        setShowPanel(false);
+        saveCurrentDesign();
+    }, [saveCurrentDesign]);
+
+    const duplicateSelected = useCallback(async () => {
+        if (!mainCanvas.current) return;
+        const activeObjects = mainCanvas.current.getActiveObjects();
+        if (activeObjects.length === 0) return;
+
+        const clonedObjects: fabric.Object[] = [];
+        for (const obj of activeObjects) {
+            const cloned = await obj.clone();
+            cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20 });
+            mainCanvas.current!.add(cloned);
+            clonedObjects.push(cloned);
+        }
+
+        if (clonedObjects.length === 1) {
+            mainCanvas.current.setActiveObject(clonedObjects[0]);
+            setSelected(clonedObjects[0]);
+        } else if (clonedObjects.length > 1) {
+            const selection = new fabric.ActiveSelection(clonedObjects, { canvas: mainCanvas.current });
+            mainCanvas.current.setActiveObject(selection);
+        }
+
+        mainCanvas.current.renderAll();
+        saveCurrentDesign();
+    }, [saveCurrentDesign]);
+
+    const copySelected = useCallback(async () => {
+        if (!mainCanvas.current) return;
+        const activeObjects = mainCanvas.current.getActiveObjects();
+        if (activeObjects.length === 0) return;
+
+        const clones: fabric.Object[] = [];
+        for (const obj of activeObjects) {
+            const cloned = await obj.clone();
+            clones.push(cloned);
+        }
+        clipboardRef.current = clones;
+    }, []);
+
+    const pasteClipboard = useCallback(async () => {
+        if (!mainCanvas.current || !clipboardRef.current || clipboardRef.current.length === 0) return;
+
+        const pastedObjects: fabric.Object[] = [];
+        for (const obj of clipboardRef.current) {
+            const cloned = await obj.clone();
+            cloned.set({ left: (cloned.left || 0) + 20, top: (cloned.top || 0) + 20 });
+            mainCanvas.current!.add(cloned);
+            pastedObjects.push(cloned);
+        }
+
+        clipboardRef.current = await Promise.all(
+            clipboardRef.current.map(async obj => {
+                const c = await obj.clone();
+                c.set({ left: (c.left || 0) + 20, top: (c.top || 0) + 20 });
+                return c;
+            })
+        );
+
+        if (pastedObjects.length === 1) {
+            mainCanvas.current.setActiveObject(pastedObjects[0]);
+        } else if (pastedObjects.length > 1) {
+            const selection = new fabric.ActiveSelection(pastedObjects, { canvas: mainCanvas.current });
+            mainCanvas.current.setActiveObject(selection);
+        }
+
+        mainCanvas.current.renderAll();
+        saveCurrentDesign();
+    }, [saveCurrentDesign]);
+
+    const moveSelected = useCallback((dx: number, dy: number) => {
+        if (!mainCanvas.current) return;
+        const activeObjects = mainCanvas.current.getActiveObjects();
+        if (activeObjects.length === 0) return;
+
+        activeObjects.forEach(obj => {
+            obj.set({ left: (obj.left || 0) + dx, top: (obj.top || 0) + dy });
+            obj.setCoords();
+        });
+
+        mainCanvas.current.renderAll();
+        saveCurrentDesign();
+    }, [saveCurrentDesign]);
+
+    const bringForward = useCallback(() => {
+        if (!mainCanvas.current) return;
+        const active = mainCanvas.current.getActiveObject();
+        if (active) {
+            mainCanvas.current.bringObjectForward(active);
+            mainCanvas.current.renderAll();
+            saveCurrentDesign();
+        }
+    }, [saveCurrentDesign]);
+
+    const sendBackward = useCallback(() => {
+        if (!mainCanvas.current) return;
+        const active = mainCanvas.current.getActiveObject();
+        if (active) {
+            mainCanvas.current.sendObjectBackwards(active);
+            mainCanvas.current.renderAll();
+            saveCurrentDesign();
+        }
+    }, [saveCurrentDesign]);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (mainCanvas.current && (mainCanvas.current.getActiveObject() as any)?.isEditing) return;
+
+            const step = e.shiftKey ? MOVE_STEP_SHIFT : MOVE_STEP;
+
+            switch (e.key) {
+                case 'Delete':
+                case 'Backspace':
+                    e.preventDefault();
+                    deleteSelected();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    moveSelected(0, -step);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    moveSelected(0, step);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    moveSelected(-step, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    moveSelected(step, 0);
+                    break;
+                case 'c':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        copySelected();
+                    }
+                    break;
+                case 'v':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        pasteClipboard();
+                    }
+                    break;
+                case 'd':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        duplicateSelected();
+                    }
+                    break;
+                case 'a':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        if (mainCanvas.current) {
+                            const objects = mainCanvas.current.getObjects();
+                            if (objects.length > 0) {
+                                const selection = new fabric.ActiveSelection(objects, { canvas: mainCanvas.current });
+                                mainCanvas.current.setActiveObject(selection);
+                                mainCanvas.current.renderAll();
+                            }
+                        }
+                    }
+                    break;
+                case 'z':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            redo();
+                        } else {
+                            undo();
+                        }
+                    }
+                    break;
+                case 'y':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        redo();
+                    }
+                    break;
+                case 'Escape':
+                    if (mainCanvas.current) {
+                        mainCanvas.current.discardActiveObject();
+                        mainCanvas.current.renderAll();
+                    }
+                    setShowPanel(false);
+                    setFontDropdownOpen(false);
+                    setShowColorPicker(false);
+                    break;
+                case ']':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        bringForward();
+                    }
+                    break;
+                case '[':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        sendBackward();
+                    }
+                    break;
+                case 's':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        handleSave();
+                    }
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [deleteSelected, duplicateSelected, copySelected, pasteClipboard, moveSelected, bringForward, sendBackward, undo, redo]);
+
+    // Init canvas
+    useEffect(() => {
+        if (!canvasRef.current) return;
+        setIsLoading(true);
+        isInitializing.current = true;
+
+        const canvas = new fabric.Canvas(canvasRef.current, {
+            width: canvasSize.w,
+            height: canvasSize.h,
+            backgroundColor: 'transparent',
+            preserveObjectStacking: true
+        });
+        mainCanvas.current = canvas;
+
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.width = brushSize;
+        canvas.freeDrawingBrush.color = getContrastColor(productColor);
+
+        canvas.on('selection:created', (e: any) => {
+            const obj = e.selected?.[0];
+            setSelected(obj);
+            setShowPanel(true);
+            if (obj && (obj.type === 'image' || obj instanceof fabric.FabricImage)) {
+                setImageOpacity(obj.opacity || 1);
+            }
+        });
+        canvas.on('selection:updated', (e: any) => {
+            const obj = e.selected?.[0];
+            setSelected(obj);
+            setShowPanel(true);
+            if (obj && (obj.type === 'image' || obj instanceof fabric.FabricImage)) {
+                setImageOpacity(obj.opacity || 1);
+            }
+        });
+        canvas.on('selection:cleared', () => { setSelected(null); setShowPanel(false); setIsRemovingBg(false); });
+
+        canvas.on('object:modified', saveCurrentDesign);
+        canvas.on('path:created', (e: any) => {
+            if (clipPathRef.current) {
+                e.path.set({ clipPath: clipPathRef.current });
+            }
+            saveCurrentDesign();
+        });
+
+        const initCanvas = async () => {
+            let attempts = 0;
+            while (!productImgs.current.front && attempts < 20) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+
+            await setBackground(canvas, 'front');
+
+            if (initialDesign) {
+                try {
+                    const d = JSON.parse(initialDesign);
+                    designsRef.current = { front: d.front || null, back: d.back || null };
+                    await loadDesign(canvas, d.front, 'front');
+                } catch { }
+            }
+
+            // Initialize history with current state (per side)
+            historyRef.current.front = [designsRef.current.front || serialize(canvas)];
+            historyRef.current.back = [designsRef.current.back || ''];
+            historyIndexRef.current.front = 0;
+            historyIndexRef.current.back = designsRef.current.back ? 0 : -1;
+
+            setReady(true);
+            setIsLoading(false);
+            isInitializing.current = false;
+        };
+
+        initCanvas();
+
+        return () => {
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            try { canvas.dispose(); } catch { }
+            mainCanvas.current = null;
+        };
+    }, []);
+
+    // Init preview canvas
+    useEffect(() => {
+        if (!previewRef.current || previewCanvas.current) return;
+
+        const preview = new fabric.StaticCanvas(previewRef.current, {
+            width: 120,
+            height: 150,
+            backgroundColor: 'transparent',
+        });
+        previewCanvas.current = preview;
+
+        const initPreview = async () => {
+            let attempts = 0;
+            while (!productImgs.current.front && attempts < 20) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            await setBackground(preview, 'back');
+        };
+
+        initPreview();
+
+        return () => { try { preview.dispose(); } catch { } previewCanvas.current = null; };
+    }, [setBackground]);
+
+    // Update preview when side changes
+    useEffect(() => {
+        if (!previewCanvas.current || !ready) return;
+        const oppositeSide = currentSide === 'front' ? 'back' : 'front';
+        loadDesign(previewCanvas.current, designsRef.current[oppositeSide], oppositeSide);
+    }, [currentSide, ready, loadDesign]);
+
+    // Tool mode
+    useEffect(() => {
+        if (!mainCanvas.current) return;
+        mainCanvas.current.isDrawingMode = activeTool === 'draw';
+        if (activeTool === 'draw' && mainCanvas.current.freeDrawingBrush) {
+            mainCanvas.current.freeDrawingBrush.width = brushSize;
+            mainCanvas.current.freeDrawingBrush.color = currentColor;
+        }
+    }, [activeTool, brushSize, currentColor]);
+
+    const switchSide = async (side: Side) => {
+        if (side === currentSideRef.current || !mainCanvas.current) return;
+        designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+        setCurrentSide(side);
+        currentSideRef.current = side;
+        await loadDesign(mainCanvas.current, designsRef.current[side], side);
+
+        // Update Undo/Redo availability for the new side
+        setCanUndo(historyIndexRef.current[side] > 0);
+        setCanRedo(historyIndexRef.current[side] < historyRef.current[side].length - 1);
+    };
+
+    const addText = () => {
+        if (!mainCanvas.current) return;
+
+        // Calculate fitting font size based on printable area
+        const bgImg = mainCanvas.current.backgroundImage as fabric.FabricImage;
+        let scale = 1;
+        if (bgImg) {
+            scale = bgImg.scaleX || 1;
+        }
+
+        const printW = (bgImg?.width || canvasSize.w) * scale * PRINT_AREA_RATIO;
+
+        const text = new fabric.IText(textContent, {
+            left: canvasSize.w / 2,
+            top: canvasSize.h / 2,
+            fontFamily,
+            fontSize: isMobile ? Math.min(fontSize, 24) : fontSize,
+            fill: currentColor,
+            originX: 'center',
+            originY: 'center',
+            fontWeight: isBold ? 'bold' : 'normal',
+            fontStyle: isItalic ? 'italic' : 'normal',
+            clipPath: clipPathRef.current || undefined
+        });
+
+        // Ensure text isn't wider than print area
+        if (text.width! > printW) {
+            text.scaleToWidth(printW * 0.9);
+        }
+
+        mainCanvas.current.add(text);
+        mainCanvas.current.setActiveObject(text);
+        mainCanvas.current.renderAll();
+        setSelected(text);
+        setShowPanel(true);
+        saveCurrentDesign();
+    };
+
+    const addImage = (file: File) => {
+        if (!mainCanvas.current) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const url = e.target?.result as string;
+            fabric.FabricImage.fromURL(url).then((img: fabric.FabricImage) => {
+                const bgImg = mainCanvas.current?.backgroundImage as fabric.FabricImage;
+                let s = 1;
+                if (bgImg) {
+                    s = bgImg.scaleX || 1;
+                }
+
+                const printW = (bgImg?.width || canvasSize.w) * s * PRINT_AREA_RATIO;
+                const printH = (bgImg?.height || canvasSize.h) * s * PRINT_AREA_RATIO;
+
+                const scale = Math.min((printW * 0.8) / (img.width || 1), (printH * 0.8) / (img.height || 1), 1);
+
+                img.set({
+                    left: canvasSize.w / 2,
+                    top: canvasSize.h / 2,
+                    originX: 'center',
+                    originY: 'center',
+                    scaleX: scale,
+                    scaleY: scale,
+                    clipPath: clipPathRef.current || undefined
+                });
+
+                mainCanvas.current!.add(img);
+                mainCanvas.current!.setActiveObject(img);
+                mainCanvas.current!.renderAll();
+                setSelected(img);
+                setShowPanel(true);
+                saveCurrentDesign();
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleFiles = (files: FileList | null) => {
+        if (!files) return;
+        Array.from(files).forEach(f => { if (f.type.startsWith('image/')) addImage(f); });
+    };
+
+    const updateTextProp = (prop: string, val: any) => {
+        if (!mainCanvas.current || !selected) return;
+        (selected as any).set(prop, val);
+        mainCanvas.current.renderAll();
+        saveCurrentDesign();
+    };
+
+    const toggleFullscreen = () => {
+        if (!containerRef.current) return;
+        if (!isFullscreen) {
+            containerRef.current.requestFullscreen?.();
+        } else {
+            document.exitFullscreen?.();
+        }
+        setIsFullscreen(!isFullscreen);
+    };
+
+    const handleSave = () => {
+        if (mainCanvas.current) {
+            designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+        }
+        onSave?.(JSON.stringify(designsRef.current));
+        alert('Design saved!');
+    };
+
+    const selectFont = (fontName: string) => {
+        setFontFamily(fontName);
+        updateTextProp('fontFamily', fontName);
+        setFontDropdownOpen(false);
+    };
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (fontDropdownOpen && !(e.target as HTMLElement).closest(`.${styles.fontDropdown}`)) {
+                setFontDropdownOpen(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [fontDropdownOpen]);
+
+    return (
+        <div ref={containerRef} className={`${styles.editor} ${isFullscreen ? styles.fullscreen : ''} ${isMobile ? styles.mobile : ''}`} tabIndex={0}>
+            {isLoading && <div className={styles.loading}><div className={styles.spinner} /><p>Loading editor...</p></div>}
+
+            {/* Header */}
+            <div className={styles.header}>
+                <div className={styles.sideTabs}>
+                    <button className={`${styles.sideTab} ${currentSide === 'front' ? styles.active : ''}`} onClick={() => switchSide('front')}>
+                        <span>👕</span> Front
+                    </button>
+                    <button className={`${styles.sideTab} ${currentSide === 'back' ? styles.active : ''}`} onClick={() => switchSide('back')}>
+                        <span>🔄</span> Back
+                    </button>
+                </div>
+                <div className={styles.headerActions}>
+                    <button className={styles.undoBtn} onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7v6h6" /><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13" /></svg>
+                    </button>
+                    <button className={styles.undoBtn} onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 7v6h-6" /><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13" /></svg>
+                    </button>
+                    <button className={styles.fullscreenBtn} onClick={toggleFullscreen} title="Fullscreen">
+                        {isFullscreen ? '✕' : '⛶'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className={styles.content}>
+                {/* Toolbar */}
+                <div className={styles.toolbar}>
+                    <div className={styles.toolGroup}>
+                        <button className={`${styles.tool} ${activeTool === 'select' ? styles.active : ''}`} onClick={() => setActiveTool('select')} title="Select">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" /></svg>
+                        </button>
+                        <button className={`${styles.tool} ${activeTool === 'text' ? styles.active : ''}`} onClick={() => { setActiveTool('text'); addText(); }} title="Add Text">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>
+                        </button>
+                        <button className={`${styles.tool} ${activeTool === 'image' ? styles.active : ''}`} onClick={() => { setActiveTool('image'); fileInputRef.current?.click(); }} title="Add Images">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                        </button>
+                        <button className={`${styles.tool} ${activeTool === 'draw' ? styles.active : ''}`} onClick={() => setActiveTool('draw')} title="Draw">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3z" /><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /></svg>
+                        </button>
+                    </div>
+
+                    {selected && (
+                        <div className={styles.toolGroup}>
+                            <button className={styles.tool} onClick={duplicateSelected} title="Duplicate (Ctrl+D)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
+                            </button>
+                            <button className={styles.tool} onClick={deleteSelected} title="Delete">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Canvas Area */}
+                <div className={styles.canvasArea} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}>
+                    <div className={styles.canvasWrap}>
+                        <canvas ref={canvasRef} />
+                    </div>
+
+                    <div className={styles.preview}>
+                        <span className={styles.previewLabel}>{currentSide === 'front' ? 'Back' : 'Front'}</span>
+                        <canvas ref={previewRef} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Property Panel */}
+            {(showPanel || activeTool === 'draw') && (
+                <div className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <h3>{activeTool === 'draw' ? 'Draw Settings' : selected?.type === 'i-text' ? 'Text Properties' : 'Properties'}</h3>
+                        <button onClick={() => setShowPanel(false)}>×</button>
+                    </div>
+                    <div className={styles.panelBody}>
+                        {activeTool === 'draw' && (
+                            <>
+                                <label>Brush Size: {brushSize}px</label>
+                                <input type="range" min="2" max="50" value={brushSize} onChange={e => setBrushSize(+e.target.value)} />
+                                <label>Brush Color</label>
+                                <button className={styles.colorBtn} style={{ background: currentColor }} onClick={() => setShowColorPicker(!showColorPicker)} />
+                            </>
+                        )}
+
+                        {selected?.type === 'i-text' && (
+                            <>
+                                <label>Your Text</label>
+                                <textarea
+                                    className={styles.textArea}
+                                    value={textContent}
+                                    onChange={e => { setTextContent(e.target.value); updateTextProp('text', e.target.value); }}
+                                    placeholder="Enter your text here..."
+                                    rows={3}
+                                />
+
+                                <label>Font Family</label>
+                                <div className={styles.fontDropdown}>
+                                    <button
+                                        className={styles.fontDropdownTrigger}
+                                        style={{ fontFamily }}
+                                        onClick={(e) => { e.stopPropagation(); setFontDropdownOpen(!fontDropdownOpen); }}
+                                    >
+                                        <span style={{ fontFamily }}>{fontFamily}</span>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </button>
+                                    {fontDropdownOpen && (
+                                        <div className={styles.fontDropdownMenu}>
+                                            {fonts.map(f => (
+                                                <button
+                                                    key={f.name}
+                                                    className={`${styles.fontDropdownItem} ${f.name === fontFamily ? styles.selected : ''}`}
+                                                    style={{ fontFamily: f.name }}
+                                                    onClick={(e) => { e.stopPropagation(); selectFont(f.name); }}
+                                                >
+                                                    <span className={styles.fontName}>{f.name}</span>
+                                                    <span className={styles.fontSample} style={{ fontFamily: f.name }}>Aa Bb Cc 123</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <label>Size: {fontSize}px</label>
+                                <input type="range" min="12" max="120" value={fontSize} onChange={e => { setFontSize(+e.target.value); updateTextProp('fontSize', +e.target.value); }} />
+
+                                <div className={styles.styleRow}>
+                                    <button className={isBold ? styles.active : ''} onClick={() => { setIsBold(!isBold); updateTextProp('fontWeight', !isBold ? 'bold' : 'normal'); }}><b>B</b></button>
+                                    <button className={isItalic ? styles.active : ''} onClick={() => { setIsItalic(!isItalic); updateTextProp('fontStyle', !isItalic ? 'italic' : 'normal'); }}><i>I</i></button>
+                                </div>
+
+                                <label>Text Color</label>
+                                <button className={styles.colorBtn} style={{ background: currentColor }} onClick={() => setShowColorPicker(!showColorPicker)} />
+                            </>
+                        )}
+
+                        {(selected?.type === 'image' || (selected && selected instanceof fabric.FabricImage)) && (
+                            <div className={styles.imageProps}>
+                                <label>Opacity: {Math.round(imageOpacity * 100)}%</label>
+                                <input
+                                    type="range"
+                                    min="0" max="1" step="0.01"
+                                    value={imageOpacity}
+                                    onChange={e => {
+                                        const val = +e.target.value;
+                                        setImageOpacity(val);
+                                        updateTextProp('opacity', val);
+                                    }}
+                                />
+
+                                {!((selected as any).id && hasRemovedBg[(selected as any).id]) && (
+                                    <button
+                                        className={`${styles.removeBgBtn} ${isRemovingBg ? styles.loading : ''}`}
+                                        onClick={() => {
+                                            if (isRemovingBg) return;
+                                            setIsRemovingBg(true);
+                                            // Fake removing bg animation
+                                            setTimeout(() => {
+                                                setIsRemovingBg(false);
+                                                // Pretend we did something
+                                                if (selected) {
+                                                    const id = (selected as any).id || Math.random().toString();
+                                                    (selected as any).id = id;
+                                                    setHasRemovedBg(prev => ({ ...prev, [id]: true }));
+                                                    saveCurrentDesign();
+                                                }
+                                            }, 2000);
+                                        }}
+                                        disabled={isRemovingBg}
+                                    >
+                                        {isRemovingBg ? (
+                                            <>
+                                                <span className={styles.miniSpinner}></span>
+                                                Removing...
+                                            </>
+                                        ) : (
+                                            <>✨ Remove Background</>
+                                        )}
+                                    </button>
+                                )}
+
+                                {selected && (selected as any).id && hasRemovedBg[(selected as any).id] && (
+                                    <div className={styles.bgRemovedBadge}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                        Background Removed
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {showColorPicker && (
+                <div className={styles.colorPickerWrap}>
+                    <div className={styles.colorPickerOverlay} onClick={() => setShowColorPicker(false)} />
+                    <div className={styles.colorPicker}>
+                        <SketchPicker color={currentColor} onChange={(c: ColorResult) => { setCurrentColor(c.hex); if (selected?.type === 'i-text') updateTextProp('fill', c.hex); if (mainCanvas.current?.freeDrawingBrush) mainCanvas.current.freeDrawingBrush.color = c.hex; }} presetColors={PRESET_COLORS} />
+                    </div>
+                </div>
+            )}
+
+            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
+            <button className={styles.saveBtn} onClick={handleSave}>💾 Save Design</button>
+        </div>
+    );
+}

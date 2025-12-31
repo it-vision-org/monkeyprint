@@ -18,10 +18,10 @@ type ProductUploadHeaderProps = {
 const BASE_PRICE = 20;
 const DESIGN_FEE = 30;
 
-export default function ProductUploadHeader({ 
-    totalPrice, 
+export default function ProductUploadHeader({
+    totalPrice,
     cartItems,
-    showPriceDetails = true 
+    showPriceDetails = true
 }: ProductUploadHeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [priceExpanded, setPriceExpanded] = useState(false);
@@ -71,64 +71,66 @@ export default function ProductUploadHeader({
                         <span className="pu-menu-line"></span>
                     </button>
                 </div>
-                <button
-                    className="pu-cart-bar"
-                    type="button"
-                    aria-expanded={priceExpanded}
-                    onClick={() => showPriceDetails && setPriceExpanded((prev) => !prev)}
-                >
-                    <div className="pu-cart-content">
-                        <svg 
-                            className="pu-cart-icon" 
-                            width="22" 
-                            height="22" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="white" 
-                            strokeWidth="2.5" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                        >
-                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
-                        </svg>
-                    </div>
-                    <div className="pu-cart-total">
-                        <span className="pu-cart-price">{totalPrice}DT</span>
-                        {showPriceDetails && (
+                <div className="pu-cart-container">
+                    <button
+                        className="pu-cart-bar"
+                        type="button"
+                        aria-expanded={priceExpanded}
+                        onClick={() => showPriceDetails && setPriceExpanded((prev) => !prev)}
+                    >
+                        <div className="pu-cart-content">
                             <svg
-                                width="16"
-                                height="10"
-                                viewBox="0 0 16 10"
+                                className="pu-cart-icon"
+                                width="22"
+                                height="22"
+                                viewBox="0 0 24 24"
                                 fill="none"
-                                className={priceExpanded ? "expanded" : ""}
+                                stroke="white"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                             >
-                                <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
                             </svg>
-                        )}
-                    </div>
-                </button>
-                {showPriceDetails && priceExpanded && (
-                    <div className="pu-cart-details">
-                        <div className="pu-cart-details-header">
-                            <h3 className="pu-cart-details-title">Détails du prix</h3>
                         </div>
-                        <div className="pu-cart-items">
-                            {defaultCartItems.map((item, index) => (
-                                <div key={index} className="pu-cart-item">
-                                    <div className="pu-cart-item-info">
-                                        {item.icon}
-                                        <span>{item.label}</span>
+                        <div className="pu-cart-total">
+                            <span className="pu-cart-price">{totalPrice}DT</span>
+                            {showPriceDetails && (
+                                <svg
+                                    width="16"
+                                    height="10"
+                                    viewBox="0 0 16 10"
+                                    fill="none"
+                                    className={priceExpanded ? "expanded" : ""}
+                                >
+                                    <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            )}
+                        </div>
+                    </button>
+                    {showPriceDetails && priceExpanded && (
+                        <div className="pu-cart-details">
+                            <div className="pu-cart-details-header">
+                                <h3 className="pu-cart-details-title">Détails du prix</h3>
+                            </div>
+                            <div className="pu-cart-items">
+                                {defaultCartItems.map((item, index) => (
+                                    <div key={index} className="pu-cart-item">
+                                        <div className="pu-cart-item-info">
+                                            {item.icon}
+                                            <span>{item.label}</span>
+                                        </div>
+                                        <span className="pu-cart-item-price">{item.price}DT</span>
                                     </div>
-                                    <span className="pu-cart-item-price">{item.price}DT</span>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                            <div className="pu-cart-total-line">
+                                <span className="pu-cart-total-label">Total</span>
+                                <span className="pu-cart-total-price">{totalPrice}DT</span>
+                            </div>
                         </div>
-                        <div className="pu-cart-total-line">
-                            <span className="pu-cart-total-label">Total</span>
-                            <span className="pu-cart-total-price">{totalPrice}DT</span>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </header>
 
             {mobileMenuOpen && (
