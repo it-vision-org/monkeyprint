@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  stores    Store[]
+}
+
+model Store {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  logoUrl     String?
+  theme       String    @default("theme-1")
+  status      String    @default("ACTIVE") // ACTIVE, PENDING, SUSPENDED
+  ownerId     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  owner       User      @relation(fields: [ownerId], references: [id])
+  products    Product[]
+  orders      Order[]
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  basePrice      Float
+  type           String   // 'tshirt' | 'hoodie'
+  
+  // Design Data
+  designData     String   @db.Text // JSON string of fabric.js state
+  previewFront   String?  // R2 URL
+  previewBack    String?  // R2 URL
+  
+  storeId        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  store          Store    @relation(fields: [storeId], references: [id])
+  orderItems     OrderItem[]
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  phoneNumber String   @unique // Primary Identifier
+  name        String?
+  address     String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  orders      Order[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  status      String      @default("PENDING") // PENDING, PAID, SHIPPED, COMPLETED
+  totalAmount Float
+  
+  customerId  String
+  storeId     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  store       Store       @relation(fields: [storeId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  price     Float   // Price at time of purchase
+  size      String?
+  color     String?
+  
+  productId String
+  orderId   String
+  
+  // Relations
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+}

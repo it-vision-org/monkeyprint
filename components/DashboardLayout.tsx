@@ -63,7 +63,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       const wrapperRect = navWrapperRef.current.getBoundingClientRect();
       const itemRect = activeItem.getBoundingClientRect();
-      
+
       const left = itemRect.left - wrapperRect.left;
       const width = itemRect.width;
 
@@ -108,8 +108,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <header className="dash-header">
         <div className="dash-container">
           <div className="dash-logo" title={sectionLabel}>
-            <span 
-              className="dash-section" 
+            <span
+              className="dash-section"
               title={sectionLabel}
             >
               {sectionLabel}
@@ -118,24 +118,24 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           <nav className="dash-nav">
             <div className="dash-nav-indicator-wrapper" ref={navWrapperRef}>
-              <Link 
-                href="/dashboard/apercu" 
+              <Link
+                href="/dashboard/apercu"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/apercu") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[0] = el; }}
               >
                 APERÇU
               </Link>
-              <Link 
-                href="/dashboard/produits" 
+              <Link
+                href="/dashboard/produits"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/produits") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[1] = el; }}
               >
                 PRODUITS
               </Link>
 
-              <div 
-                className="dash-nav-dropdown" 
-                ref={(el) => { 
+              <div
+                className="dash-nav-dropdown"
+                ref={(el) => {
                   commandesDropdownRef.current = el;
                   if (el) navItemRefs.current[2] = el;
                 }}
@@ -190,13 +190,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               >
                 PORTEFEUILLE
               </Link>
-              <Link 
-                href="/dashboard/compte" 
+              <Link
+                href="/dashboard/compte"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[4] = el; }}
               >
                 COMPTE
               </Link>
+              {/* Optional Admin Link can be added here once useSession is integrated */}
               <div className="dash-nav-indicator" ref={navIndicatorRef}></div>
             </div>
           </nav>

@@ -47,10 +47,10 @@ export default function ProductDetailsPage() {
     useEffect(() => {
         const savedDesign = sessionStorage.getItem("uploadedDesign");
         const savedEditorData = sessionStorage.getItem("designEditorData");
-        
+
         console.log('Details page loading - savedEditorData:', savedEditorData?.substring(0, 200));
         console.log('Details page loading - savedDesign:', savedDesign);
-        
+
         if (savedEditorData) {
             setDesignEditorData(savedEditorData);
             // Render the designs to display them
@@ -60,7 +60,7 @@ export default function ProductDetailsPage() {
             const emptyDesignData = JSON.stringify({ front: null, back: null });
             setDesignEditorData(emptyDesignData);
             renderUserDesigns(emptyDesignData);
-            
+
             // Fallback to saved design if no editor data but there's a saved design
             if (savedDesign) {
                 setSelectedMockup(savedDesign);
@@ -78,10 +78,10 @@ export default function ProductDetailsPage() {
                 return null;
             }
         }
-        
+
         try {
             let combined: string;
-            
+
             if (frontDesignImage && backDesignImage) {
                 // Combine the preview images side by side
                 const canvas = document.createElement('canvas');
@@ -89,7 +89,7 @@ export default function ProductDetailsPage() {
                 canvas.width = 800; // 400 * 2
                 canvas.height = 500;
                 const ctx = canvas.getContext('2d');
-                
+
                 if (ctx) {
                     // Load and draw front image (left side)
                     const frontImageEl = document.createElement('img');
@@ -102,7 +102,7 @@ export default function ProductDetailsPage() {
                         };
                         frontImageEl.onerror = reject;
                     });
-                    
+
                     // Load and draw back image (right side)
                     const backImageEl = document.createElement('img');
                     backImageEl.crossOrigin = 'anonymous';
@@ -114,7 +114,7 @@ export default function ProductDetailsPage() {
                         };
                         backImageEl.onerror = reject;
                     });
-                    
+
                     combined = canvas.toDataURL('image/png', 1.0);
                 } else {
                     return null;
@@ -128,7 +128,7 @@ export default function ProductDetailsPage() {
             } else {
                 return null;
             }
-            
+
             setCombinedDesignImage(combined);
             return combined;
         } catch (error) {
@@ -139,17 +139,17 @@ export default function ProductDetailsPage() {
 
     const downloadCombinedImage = async () => {
         let imageToDownload = combinedDesignImage;
-        
+
         // Generate if not already generated
         if (!imageToDownload) {
             imageToDownload = await generateCombinedImage();
         }
-        
+
         if (!imageToDownload) {
             alert('Impossible de générer l\'image combinée');
             return;
         }
-        
+
         // Create download link
         const link = document.createElement('a');
         link.download = `design-combine-${Date.now()}.png`;
@@ -161,17 +161,17 @@ export default function ProductDetailsPage() {
 
     const useCombinedAsPreview = async () => {
         let imageToUse = combinedDesignImage;
-        
+
         // Generate if not already generated
         if (!imageToUse) {
             imageToUse = await generateCombinedImage();
         }
-        
+
         if (!imageToUse) {
             alert('Impossible de générer l\'image combinée');
             return;
         }
-        
+
         setSelectedMockup(imageToUse);
         sessionStorage.setItem("uploadedDesign", imageToUse);
     };
@@ -179,11 +179,11 @@ export default function ProductDetailsPage() {
     const renderUserDesigns = async (editorData: string) => {
         try {
             setIsRenderingDesign(true);
-            
+
             // Create empty design structure for default rendering
             const emptyDesign = JSON.stringify({ objects: [], w: 400, h: 500 });
             let designData: { front?: string | null; back?: string | null };
-            
+
             if (!editorData || editorData.trim() === '') {
                 console.log('No editor data provided, using empty designs');
                 designData = { front: null, back: null };
@@ -199,18 +199,18 @@ export default function ProductDetailsPage() {
                 frontLength: designData.front?.length,
                 backLength: designData.back?.length
             });
-            
+
             const frontDesign = designData.front || null;
             const backDesign = designData.back || null;
-            
+
             console.log('Front design:', frontDesign ? `${frontDesign.substring(0, 100)}...` : 'null');
             console.log('Back design:', backDesign ? `${backDesign.substring(0, 100)}...` : 'null');
-            
+
             // Always render both front and back, even when empty
             // Render front design (always)
             try {
-                const frontDesignToRender = (frontDesign && frontDesign.trim() !== '' && frontDesign !== 'null') 
-                    ? frontDesign 
+                const frontDesignToRender = (frontDesign && frontDesign.trim() !== '' && frontDesign !== 'null')
+                    ? frontDesign
                     : emptyDesign;
                 console.log('Rendering front design...');
                 const frontImg = await renderDesignToImage(frontDesignToRender, 400, 500, 'front');
@@ -219,11 +219,11 @@ export default function ProductDetailsPage() {
             } catch (error) {
                 console.error('Error rendering front design:', error);
             }
-            
+
             // Render back design (always)
             try {
-                const backDesignToRender = (backDesign && backDesign.trim() !== '' && backDesign !== 'null') 
-                    ? backDesign 
+                const backDesignToRender = (backDesign && backDesign.trim() !== '' && backDesign !== 'null')
+                    ? backDesign
                     : emptyDesign;
                 console.log('Rendering back design...');
                 const backImg = await renderDesignToImage(backDesignToRender, 400, 500, 'back');
@@ -232,7 +232,7 @@ export default function ProductDetailsPage() {
             } catch (error) {
                 console.error('Error rendering back design:', error);
             }
-            
+
             // Generate combined image for download/preview after images are set
             // Use setTimeout to ensure state is updated first
             setTimeout(() => {
@@ -254,18 +254,18 @@ export default function ProductDetailsPage() {
     ): Promise<string> => {
         // Import fabric correctly - when using dynamic import, fabric is the namespace
         const fabric = await import('fabric');
-        
+
         // Get product type and color from sessionStorage
         const productType = sessionStorage.getItem("productType") || "tshirt";
         const productColor = sessionStorage.getItem("productColor") || "#ffffff";
-        
+
         return new Promise((resolve, reject) => {
             try {
                 if (!fabric || !fabric.StaticCanvas) {
                     console.error('Fabric module structure:', Object.keys(fabric));
                     throw new Error('Fabric.js StaticCanvas not available');
                 }
-                
+
                 const canvas = new fabric.StaticCanvas(undefined, {
                     width,
                     height,
@@ -278,7 +278,7 @@ export default function ProductDetailsPage() {
                 // Load product background image
                 const base = productType.toLowerCase().includes('hoodie') ? 'Hoodie' : 'T-Shirt';
                 const imagePath = side === 'front' ? `/${base}.png` : `/${base}-Back.png`;
-                
+
                 const loadProductImage = (): Promise<HTMLImageElement> => {
                     return new Promise((resolve, reject) => {
                         // Use HTMLImageElement constructor to avoid conflict with Next.js Image
@@ -371,9 +371,9 @@ export default function ProductDetailsPage() {
                                         }
                                     });
                                 });
-                            
+
                             await Promise.all(imagePromises);
-                            
+
                             objs.forEach((obj) => {
                                 obj.set({
                                     left: (obj.left || 0) * scaleX,
@@ -386,10 +386,10 @@ export default function ProductDetailsPage() {
 
                             // Ensure everything is rendered before exporting
                             canvas.renderAll();
-                            
+
                             // Wait a bit more to ensure all images are rendered
                             await new Promise(resolve => setTimeout(resolve, 100));
-                            
+
                             // Use requestAnimationFrame to ensure everything is rendered
                             requestAnimationFrame(() => {
                                 const dataUrl = canvas.toDataURL({
@@ -449,9 +449,9 @@ export default function ProductDetailsPage() {
                                         }
                                     });
                                 });
-                            
+
                             await Promise.all(imagePromises);
-                            
+
                             objs.forEach((obj) => {
                                 obj.set({
                                     left: (obj.left || 0) * scaleX,
@@ -464,7 +464,7 @@ export default function ProductDetailsPage() {
 
                             canvas.renderAll();
                             await new Promise(resolve => setTimeout(resolve, 100));
-                            
+
                             const dataUrl = canvas.toDataURL({
                                 format: 'png',
                                 quality: 1,
@@ -525,9 +525,9 @@ export default function ProductDetailsPage() {
             if (!frontDesignImage && !backDesignImage) {
                 throw new Error('Les images de prévisualisation ne sont pas encore prêtes. Veuillez attendre un instant.');
             }
-            
+
             let combinedImage: string;
-            
+
             if (frontDesignImage && backDesignImage) {
                 // Combine the preview images side by side (same as generateCombinedImage)
                 const canvas = document.createElement('canvas');
@@ -535,7 +535,7 @@ export default function ProductDetailsPage() {
                 canvas.width = 800; // 400 * 2
                 canvas.height = 500;
                 const ctx = canvas.getContext('2d');
-                
+
                 if (ctx) {
                     // Load and draw front image (left side)
                     const frontImageEl = document.createElement('img');
@@ -548,7 +548,7 @@ export default function ProductDetailsPage() {
                         };
                         frontImageEl.onerror = reject;
                     });
-                    
+
                     // Load and draw back image (right side)
                     const backImageEl = document.createElement('img');
                     backImageEl.crossOrigin = 'anonymous';
@@ -560,7 +560,7 @@ export default function ProductDetailsPage() {
                         };
                         backImageEl.onerror = reject;
                     });
-                    
+
                     combinedImage = canvas.toDataURL('image/png', 1.0);
                 } else {
                     throw new Error('Impossible de créer le contexte canvas');
@@ -574,7 +574,7 @@ export default function ProductDetailsPage() {
             } else {
                 throw new Error('Aucune image de design disponible');
             }
-            
+
             console.log('Combined image length:', combinedImage.length);
             console.log('Combined image preview:', combinedImage.substring(0, 100));
             console.log('Sending to API - using preview images:', !!frontDesignImage && !!backDesignImage);
@@ -598,9 +598,9 @@ export default function ProductDetailsPage() {
             }
 
             const data = await response.json();
-            
+
             console.log('API Response:', { success: data.success, imagesCount: data.images?.length });
-            
+
             if (data.success && data.images && data.images.length > 0) {
                 console.log('Setting mockups:', data.images.length, 'images');
                 setGeneratedMockups(data.images);
@@ -627,8 +627,36 @@ export default function ProductDetailsPage() {
         closeMockupModal();
     };
 
-    const handleSubmit = () => {
-        router.push("/dashboard/apercu");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!productName || !productPrice) {
+            alert("Veuillez remplir le nom et le prix du produit.");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('name', productName);
+            formData.append('description', description);
+            formData.append('price', productPrice);
+            formData.append('type', sessionStorage.getItem("productType") || 'tshirt');
+            formData.append('designData', designEditorData || '{}');
+
+            if (frontDesignImage) formData.append('frontImage', frontDesignImage);
+            if (backDesignImage) formData.append('backImage', backDesignImage);
+
+            const { createProduct } = await import('../actions'); // Dynamic import to avoid server/client issues if any, or just import at top
+            await createProduct(formData);
+
+            // Redirect is handled by the server action
+        } catch (error) {
+            console.error(error);
+            alert("Une erreur est survenue lors de la création du produit.");
+            setIsSubmitting(false);
+        }
     };
 
     const handleBack = () => {
@@ -639,22 +667,32 @@ export default function ProductDetailsPage() {
 
     return (
         <div className="product-upload-page">
-            <ProductUploadHeader 
+            <ProductUploadHeader
                 totalPrice={displayTotalPrice}
                 showPriceDetails={true}
             />
 
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
-                    <button 
-                        type="button" 
-                        className="pd-back-button-top"
-                        onClick={handleBack}
+                    <button
+                        className="pd-submit-button"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || isRenderingDesign}
                     >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 12H5M12 19l-7-7 7-7"/>
-                        </svg>
-                        Retour
+                        {isSubmitting ? (
+                            <>
+                                <div className="pu-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
+                                Public...
+                            </>
+                        ) : (
+                            <>
+                                Publier le produit
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </>
+                        )}
                     </button>
                     <div className="pd-intro">
                         <p className="pd-intro-title">Dernière étape, remplissez la description de votre produit</p>
@@ -665,8 +703,8 @@ export default function ProductDetailsPage() {
                         <h3 className="pu-card-subtitle" style={{ marginBottom: '20px', fontSize: '16px', fontWeight: 700, color: '#000' }}>
                             Aperçu de votre design
                         </h3>
-                        
-                        <div className="pd-preview-card" style={{ 
+
+                        <div className="pd-preview-card" style={{
                             background: 'linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%)',
                             borderRadius: '20px',
                             padding: '24px',
@@ -674,10 +712,10 @@ export default function ProductDetailsPage() {
                             border: '2px solid rgba(65, 235, 92, 0.2)',
                         }}>
                             {isRenderingDesign ? (
-                                <div style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     minHeight: '300px',
                                     flexDirection: 'column',
                                     gap: '12px'
@@ -703,9 +741,9 @@ export default function ProductDetailsPage() {
                                         alignItems: 'center',
                                         gap: '12px',
                                     }}>
-                                        <span style={{ 
-                                            fontSize: '13px', 
-                                            fontWeight: 700, 
+                                        <span style={{
+                                            fontSize: '13px',
+                                            fontWeight: 700,
                                             color: '#0d1c23',
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.5px'
@@ -724,18 +762,18 @@ export default function ProductDetailsPage() {
                                             border: '2px solid #e5e7eb',
                                         }}>
                                             {frontDesignImage ? (
-                                                <img 
-                                                    src={frontDesignImage} 
-                                                    alt="Front Design" 
-                                                    style={{ 
-                                                        width: '100%', 
-                                                        height: '100%', 
+                                                <img
+                                                    src={frontDesignImage}
+                                                    alt="Front Design"
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
                                                         objectFit: 'contain',
-                                                    }} 
+                                                    }}
                                                 />
                                             ) : (
-                                                <div style={{ 
-                                                    color: '#9ca3af', 
+                                                <div style={{
+                                                    color: '#9ca3af',
                                                     fontSize: '12px',
                                                     textAlign: 'center',
                                                     padding: '20px'
@@ -757,9 +795,9 @@ export default function ProductDetailsPage() {
                                         alignItems: 'center',
                                         gap: '12px',
                                     }}>
-                                        <span style={{ 
-                                            fontSize: '13px', 
-                                            fontWeight: 700, 
+                                        <span style={{
+                                            fontSize: '13px',
+                                            fontWeight: 700,
                                             color: '#0d1c23',
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.5px'
@@ -778,18 +816,18 @@ export default function ProductDetailsPage() {
                                             border: '2px solid #e5e7eb',
                                         }}>
                                             {backDesignImage ? (
-                                                <img 
-                                                    src={backDesignImage} 
-                                                    alt="Back Design" 
-                                                    style={{ 
-                                                        width: '100%', 
-                                                        height: '100%', 
+                                                <img
+                                                    src={backDesignImage}
+                                                    alt="Back Design"
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
                                                         objectFit: 'contain',
-                                                    }} 
+                                                    }}
                                                 />
                                             ) : (
-                                                <div style={{ 
-                                                    color: '#9ca3af', 
+                                                <div style={{
+                                                    color: '#9ca3af',
                                                     fontSize: '12px',
                                                     textAlign: 'center',
                                                     padding: '20px'
@@ -848,14 +886,14 @@ export default function ProductDetailsPage() {
                                     border: '2px solid #e5e7eb',
                                     background: '#fff',
                                 }}>
-                                    <img 
-                                        src={selectedMockup} 
-                                        alt="Selected Mockup" 
-                                        style={{ 
-                                            width: '100%', 
+                                    <img
+                                        src={selectedMockup}
+                                        alt="Selected Mockup"
+                                        style={{
+                                            width: '100%',
                                             height: 'auto',
                                             display: 'block',
-                                        }} 
+                                        }}
                                     />
                                 </div>
                                 <p style={{
@@ -875,9 +913,9 @@ export default function ProductDetailsPage() {
                             <button type="button" className="pd-action-primary" onClick={openGenderSelectionModal} style={{ flex: '1', minWidth: '200px' }}>
                                 GÉNÉRER UNE MAQUETTE
                             </button>
-                            <button 
-                                type="button" 
-                                className="pd-action-refresh" 
+                            <button
+                                type="button"
+                                className="pd-action-refresh"
                                 onClick={() => designEditorData && renderUserDesigns(designEditorData)}
                                 title="Actualiser l'aperçu"
                             >
@@ -888,7 +926,7 @@ export default function ProductDetailsPage() {
                                 </svg>
                             </button>
                         </div>
-                        
+
                         {/* Combined Image Actions */}
                         {(frontDesignImage || backDesignImage) && (
                             <div style={{
@@ -1084,17 +1122,17 @@ export default function ProductDetailsPage() {
             {/* Gender Selection Modal - Overhauled */}
             {genderSelectionModalOpen && (
                 <div className="pu-popup-overlay" onClick={closeGenderSelectionModal}>
-                    <div 
-                        className="pu-popup" 
+                    <div
+                        className="pu-popup"
                         onClick={(event) => event.stopPropagation()}
                         style={{
                             maxWidth: '600px',
                             padding: '32px',
                         }}
                     >
-                        <button 
-                            className="pu-popup-close" 
-                            type="button" 
+                        <button
+                            className="pu-popup-close"
+                            type="button"
                             onClick={closeGenderSelectionModal}
                             style={{
                                 top: '20px',
@@ -1105,18 +1143,18 @@ export default function ProductDetailsPage() {
                         >
                             ×
                         </button>
-                        
+
                         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                            <h2 className="pu-popup-title" style={{ 
-                                fontSize: '28px', 
-                                fontWeight: 700, 
+                            <h2 className="pu-popup-title" style={{
+                                fontSize: '28px',
+                                fontWeight: 700,
                                 color: '#0d1c23',
                                 marginBottom: '12px',
                             }}>
                                 Sélectionnez le type de maquette
                             </h2>
-                            <p style={{ 
-                                fontSize: '15px', 
+                            <p style={{
+                                fontSize: '15px',
                                 color: '#6b7280',
                                 margin: 0,
                                 lineHeight: '1.5',
@@ -1151,8 +1189,8 @@ export default function ProductDetailsPage() {
                                             gap: '8px',
                                             position: 'relative',
                                             overflow: 'hidden',
-                                            boxShadow: isSelected 
-                                                ? '0 8px 24px rgba(65, 235, 92, 0.15)' 
+                                            boxShadow: isSelected
+                                                ? '0 8px 24px rgba(65, 235, 92, 0.15)'
                                                 : '0 2px 8px rgba(0, 0, 0, 0.05)',
                                         }}
                                         onMouseEnter={(e) => {
@@ -1206,11 +1244,11 @@ export default function ProductDetailsPage() {
                                                 fontSize: '24px',
                                                 color: isSelected ? '#ffffff' : '#6b7280',
                                             }}>
-                                                {option.id === 'homme' ? '👨' : 
-                                                 option.id === 'femme' ? '👩' :
-                                                 option.id === 'enfant' ? '👶' :
-                                                 option.id === 'famille' ? '👨‍👩‍👧‍👦' :
-                                                 option.id === 'custom' ? '✏️' : '👤'}
+                                                {option.id === 'homme' ? '👨' :
+                                                    option.id === 'femme' ? '👩' :
+                                                        option.id === 'enfant' ? '👶' :
+                                                            option.id === 'famille' ? '👨‍👩‍👧‍👦' :
+                                                                option.id === 'custom' ? '✏️' : '👤'}
                                             </span>
                                         </div>
                                         <span style={{
@@ -1298,9 +1336,9 @@ export default function ProductDetailsPage() {
                             </div>
                         )}
 
-                        <div style={{ 
-                            display: 'flex', 
-                            gap: '12px', 
+                        <div style={{
+                            display: 'flex',
+                            gap: '12px',
                             justifyContent: 'center',
                             paddingTop: '8px',
                         }}>
