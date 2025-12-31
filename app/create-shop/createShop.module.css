@@ -13,18 +13,22 @@
 }
 
 @media (min-width: 769px) {
+  /* Prevent any scrolling on desktop - make it exactly like other steps */
   .createShopContainer {
     max-width: 100%;
     min-height: 100vh;
-    height: auto;
-    overflow-y: visible;
-    overflow-x: hidden;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
     padding-top: 0;
   }
 
   .createShopContainer main {
-    height: auto;
-    overflow-y: visible;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
   }
 }
 
@@ -621,12 +625,13 @@
     max-width: 100%;
     padding-top: 0;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
   }
 
   .backgroundV4 {
     top: 0;
     min-height: 100vh;
+    height: 100vh;
     overflow: hidden;
   }
 
@@ -752,7 +757,7 @@
     top: auto !important;
   }
 
-  /* Step 1, 2, and 3 Desktop Layout */
+  /* Step 1, 2, and 3 Desktop Layout - EXACTLY THE SAME */
   .step1Container,
   .step2Container,
   .step3Container {
@@ -760,29 +765,29 @@
     margin: 0 auto;
     padding: 100px 40px 80px;
     min-height: auto;
+    height: 100vh;
+    max-height: 100vh;
     position: relative;
     display: flex;
     flex-direction: column;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    justify-content: flex-start;
   }
 
-  .card1,
-  .card2,
-  .card3 {
+  /* Step 3 Cards Desktop - EXACTLY like Step 1 and 2 cards - no special treatment */
+  .step3Container .card1,
+  .step3Container .card2,
+  .step3Container .card3 {
     position: static;
     width: 100%;
-    margin-bottom: 32px;
+    margin-bottom: 0;
     border-radius: 24px;
-  }
-
-  .card1 {
     padding: 32px;
-    height: auto;
-    min-height: 160px;
-  }
-
-  .card2,
-  .card3 {
-    padding: 32px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    overflow: visible;
   }
 
   .uploadArea {
@@ -858,9 +863,10 @@
     box-sizing: border-box;
   }
 
-  /* Step 1 and Step 2 Cards Desktop - Target global classes within containers */
+  /* Step 1, 2, and 3 Cards Desktop - Target global classes within containers - EXACTLY THE SAME */
   .step1Container,
-  .step2Container {
+  .step2Container,
+  .step3Container {
     gap: 24px;
   }
 

@@ -55,13 +55,16 @@ export default function ProductDetailsPage() {
             setDesignEditorData(savedEditorData);
             // Render the designs to display them
             renderUserDesigns(savedEditorData);
-        } else if (savedDesign) {
-            // Fallback to saved design if no editor data
-            setSelectedMockup(savedDesign);
-            setIsRenderingDesign(false);
         } else {
-            console.log('No design data found in sessionStorage');
-            setIsRenderingDesign(false);
+            // Always render empty designs if no editor data exists
+            const emptyDesignData = JSON.stringify({ front: null, back: null });
+            setDesignEditorData(emptyDesignData);
+            renderUserDesigns(emptyDesignData);
+            
+            // Fallback to saved design if no editor data but there's a saved design
+            if (savedDesign) {
+                setSelectedMockup(savedDesign);
+            }
         }
     }, []);
 
@@ -177,14 +180,17 @@ export default function ProductDetailsPage() {
         try {
             setIsRenderingDesign(true);
             
-            if (!editorData || editorData.trim() === '') {
-                console.log('No editor data provided');
-                setIsRenderingDesign(false);
-                return;
-            }
+            // Create empty design structure for default rendering
+            const emptyDesign = JSON.stringify({ objects: [], w: 400, h: 500 });
+            let designData: { front?: string | null; back?: string | null };
             
-            console.log('Parsing design data:', editorData.substring(0, 300));
-            const designData = JSON.parse(editorData);
+            if (!editorData || editorData.trim() === '') {
+                console.log('No editor data provided, using empty designs');
+                designData = { front: null, back: null };
+            } else {
+                console.log('Parsing design data:', editorData.substring(0, 300));
+                designData = JSON.parse(editorData);
+            }
             console.log('Parsed design data structure:', {
                 hasFront: !!designData.front,
                 hasBack: !!designData.back,
@@ -200,31 +206,31 @@ export default function ProductDetailsPage() {
             console.log('Front design:', frontDesign ? `${frontDesign.substring(0, 100)}...` : 'null');
             console.log('Back design:', backDesign ? `${backDesign.substring(0, 100)}...` : 'null');
             
-            // Render front and back separately
-            if (frontDesign && frontDesign.trim() !== '' && frontDesign !== 'null') {
-                try {
-                    console.log('Rendering front design...');
-                    const frontImg = await renderDesignToImage(frontDesign, 400, 500, 'front');
-                    console.log('Front design rendered successfully, length:', frontImg.length);
-                    setFrontDesignImage(frontImg);
-                } catch (error) {
-                    console.error('Error rendering front design:', error);
-                }
-            } else {
-                console.log('Skipping front design - empty or null');
+            // Always render both front and back, even when empty
+            // Render front design (always)
+            try {
+                const frontDesignToRender = (frontDesign && frontDesign.trim() !== '' && frontDesign !== 'null') 
+                    ? frontDesign 
+                    : emptyDesign;
+                console.log('Rendering front design...');
+                const frontImg = await renderDesignToImage(frontDesignToRender, 400, 500, 'front');
+                console.log('Front design rendered successfully, length:', frontImg.length);
+                setFrontDesignImage(frontImg);
+            } catch (error) {
+                console.error('Error rendering front design:', error);
             }
             
-            if (backDesign && backDesign.trim() !== '' && backDesign !== 'null') {
-                try {
-                    console.log('Rendering back design...');
-                    const backImg = await renderDesignToImage(backDesign, 400, 500, 'back');
-                    console.log('Back design rendered successfully, length:', backImg.length);
-                    setBackDesignImage(backImg);
-                } catch (error) {
-                    console.error('Error rendering back design:', error);
-                }
-            } else {
-                console.log('Skipping back design - empty or null');
+            // Render back design (always)
+            try {
+                const backDesignToRender = (backDesign && backDesign.trim() !== '' && backDesign !== 'null') 
+                    ? backDesign 
+                    : emptyDesign;
+                console.log('Rendering back design...');
+                const backImg = await renderDesignToImage(backDesignToRender, 400, 500, 'back');
+                console.log('Back design rendered successfully, length:', backImg.length);
+                setBackDesignImage(backImg);
+            } catch (error) {
+                console.error('Error rendering back design:', error);
             }
             
             // Generate combined image for download/preview after images are set
