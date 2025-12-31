@@ -1864,6 +1864,29 @@ body {
   border-radius: 2px;
 }
 
+/* Desktop Navigation */
+.pu-desktop-nav {
+  display: none;
+  align-items: center;
+  gap: 32px;
+}
+
+.pu-desktop-nav-link {
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: #242424;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.pu-desktop-nav-link:hover {
+  color: #f29c1f;
+}
+
 /* --- Product Upload Header Cart --- */
 .pu-cart-container {
   display: flex;
@@ -2958,8 +2981,13 @@ button.pu-mini-dot {
      padding: 24px;
   }
   .pu-header-inner {
-    max-width: 960px;
-    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .pu-menu-trigger {
+    display: none;
+  }
+  .pu-desktop-nav {
+    display: flex;
   }
 }
 

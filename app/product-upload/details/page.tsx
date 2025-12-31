@@ -16,12 +16,8 @@ const GENDER_OPTIONS: GenderOption[] = [
     { id: "homme", label: "Homme" },
     { id: "femme", label: "Femme" },
     { id: "enfant", label: "Enfant" },
-    { id: "groupe", label: "Groupe" },
     { id: "famille", label: "Famille" },
-    { id: "couple", label: "Couple" },
-    { id: "unisexe", label: "Unisexe" },
-    { id: "sport", label: "Sport" },
-    { id: "corporate", label: "Corporate" },
+    { id: "custom", label: "Personnaliser ou autre" },
 ];
 
 const MIN_PRICE = 55;
@@ -45,6 +41,7 @@ export default function ProductDetailsPage() {
     const [generatedMockups, setGeneratedMockups] = useState<string[]>([]);
     const [isRenderingDesign, setIsRenderingDesign] = useState(true);
     const [combinedDesignImage, setCombinedDesignImage] = useState<string | null>(null);
+    const [customPrompt, setCustomPrompt] = useState<string>("");
 
     // Load design data on mount
     useEffect(() => {
@@ -69,57 +66,62 @@ export default function ProductDetailsPage() {
     }, []);
 
     const generateCombinedImage = async () => {
-        if (!designEditorData) return null;
+        // Use the already-rendered preview images which are correctly displayed
+        // This ensures the combined image matches exactly what the user sees
+        if (!frontDesignImage && !backDesignImage) {
+            // If preview images aren't ready, wait a bit and try again
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (!frontDesignImage && !backDesignImage) {
+                return null;
+            }
+        }
         
         try {
-            const designData = JSON.parse(designEditorData);
-            const frontDesign = designData.front || null;
-            const backDesign = designData.back || null;
-            
-            if (!frontDesign && !backDesign) return null;
-            
             let combined: string;
             
-            if (frontDesign && backDesign) {
-                // Render both with backgrounds
-                const frontImg = await renderDesignToImage(frontDesign, 800, 1000, 'front');
-                const backImg = await renderDesignToImage(backDesign, 800, 1000, 'back');
-                
-                // Combine them side by side
+            if (frontDesignImage && backDesignImage) {
+                // Combine the preview images side by side
                 const canvas = document.createElement('canvas');
-                canvas.width = 1600; // 800 * 2
-                canvas.height = 1000;
+                // Each preview is 400x500, so combined is 800x500
+                canvas.width = 800; // 400 * 2
+                canvas.height = 500;
                 const ctx = canvas.getContext('2d');
                 
                 if (ctx) {
-                    // Load and draw front image
+                    // Load and draw front image (left side)
                     const frontImageEl = document.createElement('img');
-                    frontImageEl.src = frontImg;
-                    await new Promise((resolve) => {
+                    frontImageEl.crossOrigin = 'anonymous';
+                    frontImageEl.src = frontDesignImage;
+                    await new Promise((resolve, reject) => {
                         frontImageEl.onload = () => {
-                            ctx.drawImage(frontImageEl, 0, 0, 800, 1000);
+                            ctx.drawImage(frontImageEl, 0, 0, 400, 500);
                             resolve(null);
                         };
+                        frontImageEl.onerror = reject;
                     });
                     
-                    // Load and draw back image
+                    // Load and draw back image (right side)
                     const backImageEl = document.createElement('img');
-                    backImageEl.src = backImg;
-                    await new Promise((resolve) => {
+                    backImageEl.crossOrigin = 'anonymous';
+                    backImageEl.src = backDesignImage;
+                    await new Promise((resolve, reject) => {
                         backImageEl.onload = () => {
-                            ctx.drawImage(backImageEl, 800, 0, 800, 1000);
+                            ctx.drawImage(backImageEl, 400, 0, 400, 500);
                             resolve(null);
                         };
+                        backImageEl.onerror = reject;
                     });
                     
-                    combined = canvas.toDataURL('image/png');
+                    combined = canvas.toDataURL('image/png', 1.0);
                 } else {
                     return null;
                 }
-            } else if (frontDesign) {
-                combined = await renderDesignToImage(frontDesign, 800, 1000, 'front');
-            } else if (backDesign) {
-                combined = await renderDesignToImage(backDesign, 800, 1000, 'back');
+            } else if (frontDesignImage) {
+                // Only front design
+                combined = frontDesignImage;
+            } else if (backDesignImage) {
+                // Only back design
+                combined = backDesignImage;
             } else {
                 return null;
             }
@@ -225,8 +227,11 @@ export default function ProductDetailsPage() {
                 console.log('Skipping back design - empty or null');
             }
             
-            // Generate combined image for download/preview
-            await generateCombinedImage();
+            // Generate combined image for download/preview after images are set
+            // Use setTimeout to ensure state is updated first
+            setTimeout(() => {
+                generateCombinedImage();
+            }, 100);
         } catch (error) {
             console.error('Error rendering designs:', error);
             console.error('Editor data:', editorData?.substring(0, 200));
@@ -335,7 +340,34 @@ export default function ProductDetailsPage() {
                         const scaleX = width / w;
                         const scaleY = height / h;
 
-                        fabric.util.enlivenObjects(objects).then((objs: any[]) => {
+                        fabric.util.enlivenObjects(objects).then(async (objs: any[]) => {
+                            console.log('Enlivened objects:', objs.length, 'objects');
+                            console.log('Object types:', objs.map(o => o.type || o.constructor.name));
+                            // Wait for all images to be fully loaded
+                            const imagePromises = objs
+                                .filter(obj => obj.type === 'image' || obj instanceof fabric.FabricImage)
+                                .map((imgObj: any) => {
+                                    return new Promise<void>((resolve) => {
+                                        if (imgObj.getElement) {
+                                            const imgEl = imgObj.getElement() as HTMLImageElement;
+                                            if (imgEl) {
+                                                if (imgEl.complete && imgEl.naturalHeight !== 0) {
+                                                    resolve();
+                                                } else {
+                                                    imgEl.onload = () => resolve();
+                                                    imgEl.onerror = () => resolve(); // Continue even if image fails
+                                                }
+                                            } else {
+                                                resolve();
+                                            }
+                                        } else {
+                                            resolve();
+                                        }
+                                    });
+                                });
+                            
+                            await Promise.all(imagePromises);
+                            
                             objs.forEach((obj) => {
                                 obj.set({
                                     left: (obj.left || 0) * scaleX,
@@ -349,6 +381,9 @@ export default function ProductDetailsPage() {
                             // Ensure everything is rendered before exporting
                             canvas.renderAll();
                             
+                            // Wait a bit more to ensure all images are rendered
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            
                             // Use requestAnimationFrame to ensure everything is rendered
                             requestAnimationFrame(() => {
                                 const dataUrl = canvas.toDataURL({
@@ -361,6 +396,7 @@ export default function ProductDetailsPage() {
                                 resolve(dataUrl);
                             });
                         }).catch((error) => {
+                            console.error('Error enlivening objects:', error);
                             canvas.dispose();
                             reject(error);
                         });
@@ -384,7 +420,32 @@ export default function ProductDetailsPage() {
                         const scaleX = width / w;
                         const scaleY = height / h;
 
-                        fabric.util.enlivenObjects(objects).then((objs: any[]) => {
+                        fabric.util.enlivenObjects(objects).then(async (objs: any[]) => {
+                            // Wait for all images to be fully loaded
+                            const imagePromises = objs
+                                .filter(obj => obj.type === 'image' || obj instanceof fabric.FabricImage)
+                                .map((imgObj: any) => {
+                                    return new Promise<void>((resolve) => {
+                                        if (imgObj.getElement) {
+                                            const imgEl = imgObj.getElement() as HTMLImageElement;
+                                            if (imgEl) {
+                                                if (imgEl.complete && imgEl.naturalHeight !== 0) {
+                                                    resolve();
+                                                } else {
+                                                    imgEl.onload = () => resolve();
+                                                    imgEl.onerror = () => resolve();
+                                                }
+                                            } else {
+                                                resolve();
+                                            }
+                                        } else {
+                                            resolve();
+                                        }
+                                    });
+                                });
+                            
+                            await Promise.all(imagePromises);
+                            
                             objs.forEach((obj) => {
                                 obj.set({
                                     left: (obj.left || 0) * scaleX,
@@ -396,6 +457,8 @@ export default function ProductDetailsPage() {
                             });
 
                             canvas.renderAll();
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            
                             const dataUrl = canvas.toDataURL({
                                 format: 'png',
                                 quality: 1,
@@ -404,6 +467,7 @@ export default function ProductDetailsPage() {
                             canvas.dispose();
                             resolve(dataUrl);
                         }).catch((error) => {
+                            console.error('Error enlivening objects (fallback):', error);
                             canvas.dispose();
                             reject(error);
                         });
@@ -450,68 +514,64 @@ export default function ProductDetailsPage() {
         setGeneratedMockups([]);
 
         try {
-            // Combine front and back designs
-            const designData = JSON.parse(designEditorData);
-            const frontDesign = designData.front || null;
-            const backDesign = designData.back || null;
-            
-            // Check if we have at least one design
-            if (!frontDesign && !backDesign) {
-                throw new Error('Aucun design trouvé (ni recto ni verso)');
+            // Use the same preview images that are correctly displayed
+            // This ensures we send exactly what the user sees to Gemini
+            if (!frontDesignImage && !backDesignImage) {
+                throw new Error('Les images de prévisualisation ne sont pas encore prêtes. Veuillez attendre un instant.');
             }
             
-            // Use the same renderDesignToImage that includes backgrounds
-            // This ensures we send the full canvas (background + design) to Gemini
             let combinedImage: string;
             
-            if (frontDesign && backDesign) {
-                // Render both with backgrounds
-                const frontImg = await renderDesignToImage(frontDesign, 800, 1000, 'front');
-                const backImg = await renderDesignToImage(backDesign, 800, 1000, 'back');
-                
-                // Combine them side by side
+            if (frontDesignImage && backDesignImage) {
+                // Combine the preview images side by side (same as generateCombinedImage)
                 const canvas = document.createElement('canvas');
-                canvas.width = 1600; // 800 * 2
-                canvas.height = 1000;
+                // Each preview is 400x500, so combined is 800x500
+                canvas.width = 800; // 400 * 2
+                canvas.height = 500;
                 const ctx = canvas.getContext('2d');
                 
                 if (ctx) {
-                    // Load and draw front image
+                    // Load and draw front image (left side)
                     const frontImageEl = document.createElement('img');
-                    frontImageEl.src = frontImg;
-                    await new Promise((resolve) => {
+                    frontImageEl.crossOrigin = 'anonymous';
+                    frontImageEl.src = frontDesignImage;
+                    await new Promise((resolve, reject) => {
                         frontImageEl.onload = () => {
-                            ctx.drawImage(frontImageEl, 0, 0, 800, 1000);
+                            ctx.drawImage(frontImageEl, 0, 0, 400, 500);
                             resolve(null);
                         };
+                        frontImageEl.onerror = reject;
                     });
                     
-                    // Load and draw back image
+                    // Load and draw back image (right side)
                     const backImageEl = document.createElement('img');
-                    backImageEl.src = backImg;
-                    await new Promise((resolve) => {
+                    backImageEl.crossOrigin = 'anonymous';
+                    backImageEl.src = backDesignImage;
+                    await new Promise((resolve, reject) => {
                         backImageEl.onload = () => {
-                            ctx.drawImage(backImageEl, 800, 0, 800, 1000);
+                            ctx.drawImage(backImageEl, 400, 0, 400, 500);
                             resolve(null);
                         };
+                        backImageEl.onerror = reject;
                     });
                     
-                    combinedImage = canvas.toDataURL('image/png');
+                    combinedImage = canvas.toDataURL('image/png', 1.0);
                 } else {
-                    // Fallback to old method
-                    combinedImage = await combineDesigns(frontDesign, backDesign);
+                    throw new Error('Impossible de créer le contexte canvas');
                 }
-            } else if (frontDesign) {
-                combinedImage = await renderDesignToImage(frontDesign, 800, 1000, 'front');
-            } else if (backDesign) {
-                combinedImage = await renderDesignToImage(backDesign, 800, 1000, 'back');
+            } else if (frontDesignImage) {
+                // Only front design
+                combinedImage = frontDesignImage;
+            } else if (backDesignImage) {
+                // Only back design
+                combinedImage = backDesignImage;
             } else {
-                throw new Error('No design found');
+                throw new Error('Aucune image de design disponible');
             }
             
             console.log('Combined image length:', combinedImage.length);
             console.log('Combined image preview:', combinedImage.substring(0, 100));
-            console.log('Sending to API - image includes background:', combinedImage.includes('data:image'));
+            console.log('Sending to API - using preview images:', !!frontDesignImage && !!backDesignImage);
 
             // Call API to generate mockups
             const response = await fetch('/api/generate-mockup', {
@@ -522,6 +582,7 @@ export default function ProductDetailsPage() {
                 body: JSON.stringify({
                     designImageBase64: combinedImage,
                     gender: selectedGenderForMockup,
+                    customPrompt: selectedGenderForMockup === 'custom' ? customPrompt : undefined,
                 }),
             });
 
@@ -1142,11 +1203,8 @@ export default function ProductDetailsPage() {
                                                 {option.id === 'homme' ? '👨' : 
                                                  option.id === 'femme' ? '👩' :
                                                  option.id === 'enfant' ? '👶' :
-                                                 option.id === 'groupe' ? '👥' :
                                                  option.id === 'famille' ? '👨‍👩‍👧‍👦' :
-                                                 option.id === 'couple' ? '💑' :
-                                                 option.id === 'sport' ? '⚽' :
-                                                 option.id === 'corporate' ? '💼' : '👤'}
+                                                 option.id === 'custom' ? '✏️' : '👤'}
                                             </span>
                                         </div>
                                         <span style={{
@@ -1161,6 +1219,78 @@ export default function ProductDetailsPage() {
                                 );
                             })}
                         </div>
+
+                        {/* Custom Prompt Input */}
+                        {selectedGenderForMockup === 'custom' && (
+                            <div style={{
+                                marginBottom: '24px',
+                                padding: '20px',
+                                background: '#f9fafb',
+                                borderRadius: '12px',
+                                border: '2px solid #e5e7eb',
+                            }}>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    color: '#0d1c23',
+                                    marginBottom: '8px',
+                                }}>
+                                    Décrivez votre maquette personnalisée
+                                </label>
+                                <textarea
+                                    value={customPrompt}
+                                    onChange={(e) => {
+                                        if (e.target.value.length <= 200) {
+                                            setCustomPrompt(e.target.value);
+                                        }
+                                    }}
+                                    placeholder="Ex: Un groupe d'amis portant des t-shirts lors d'un événement sportif..."
+                                    style={{
+                                        width: '100%',
+                                        minHeight: '100px',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        border: '2px solid #e5e7eb',
+                                        fontSize: '14px',
+                                        fontFamily: 'inherit',
+                                        resize: 'vertical',
+                                        outline: 'none',
+                                        transition: 'border-color 0.2s',
+                                        backgroundColor: '#ffffff',
+                                        color: '#0d1c23',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = '#41eb5c';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.currentTarget.style.borderColor = '#e5e7eb';
+                                    }}
+                                />
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: '8px',
+                                }}>
+                                    <p style={{
+                                        margin: 0,
+                                        fontSize: '12px',
+                                        color: '#6b7280',
+                                        fontStyle: 'italic',
+                                    }}>
+                                        Maximum 200 caractères
+                                    </p>
+                                    <span style={{
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        color: customPrompt.length >= 200 ? '#ef4444' : '#6b7280',
+                                    }}>
+                                        {customPrompt.length}/200
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
                         <div style={{ 
                             display: 'flex', 
@@ -1197,27 +1327,37 @@ export default function ProductDetailsPage() {
                             <button
                                 type="button"
                                 onClick={handleGenerateMockup}
+                                disabled={selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0)}
                                 className="pd-action-primary"
                                 style={{
                                     padding: '14px 32px',
                                     borderRadius: '12px',
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: (selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0)) ? 'not-allowed' : 'pointer',
                                     fontSize: '15px',
                                     fontWeight: 700,
                                     color: '#ffffff',
-                                    background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
-                                    boxShadow: '0 4px 16px rgba(65, 235, 92, 0.3)',
+                                    background: (selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0))
+                                        ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
+                                        : 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
+                                    boxShadow: (selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0))
+                                        ? 'none'
+                                        : '0 4px 16px rgba(65, 235, 92, 0.3)',
                                     transition: 'all 0.2s',
                                     minWidth: '140px',
+                                    opacity: (selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0)) ? 0.6 : 1,
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(65, 235, 92, 0.4)';
+                                    if (!(selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0))) {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(65, 235, 92, 0.4)';
+                                    }
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(65, 235, 92, 0.3)';
+                                    if (!(selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0))) {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(65, 235, 92, 0.3)';
+                                    }
                                 }}
                             >
                                 Générer la maquette

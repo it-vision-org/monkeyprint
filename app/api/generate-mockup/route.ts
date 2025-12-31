@@ -21,7 +21,7 @@ const GENDER_PROMPTS: Record<string, string> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { designImageBase64, gender } = body;
+    const { designImageBase64, gender, customPrompt } = body;
 
     if (!designImageBase64) {
       return NextResponse.json(
@@ -30,7 +30,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!gender || !GENDER_PROMPTS[gender]) {
+    if (!gender) {
+      return NextResponse.json(
+        { error: 'Gender option is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate custom prompt if custom option is selected
+    if (gender === 'custom') {
+      if (!customPrompt || customPrompt.trim().length === 0) {
+        return NextResponse.json(
+          { error: 'Custom prompt is required when selecting custom option' },
+          { status: 400 }
+        );
+      }
+      if (customPrompt.length > 200) {
+        return NextResponse.json(
+          { error: 'Custom prompt must be 200 characters or less' },
+          { status: 400 }
+        );
+      }
+    } else if (!GENDER_PROMPTS[gender]) {
       return NextResponse.json(
         { error: 'Valid gender option is required' },
         { status: 400 }
@@ -43,7 +64,15 @@ export async function POST(request: NextRequest) {
       : designImageBase64;
 
     // Build prompt for image editing
-    const prompt = `${GENDER_PROMPTS[gender]} a t-shirt with the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting.`;
+    let prompt: string;
+    
+    if (gender === 'custom' && customPrompt) {
+      // Use custom prompt with warning that it's user input and not sanitized
+      prompt = `[USER INPUT - NOT SANITIZED] The user has asked for a custom design. Their request is: ${customPrompt.trim()}. The t-shirt should have the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
+    } else {
+      // Use predefined prompt
+      prompt = `${GENDER_PROMPTS[gender]} a t-shirt with the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
+    }
 
     console.log('\n=== Starting Mockup Generation ===');
     console.log('Gender:', gender);

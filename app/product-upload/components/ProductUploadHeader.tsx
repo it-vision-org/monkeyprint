@@ -60,6 +60,11 @@ export default function ProductUploadHeader({
                         <Image src="/logo.png" alt="Monkey Print" width={84} height={42} />
                         <span className="pu-logo-text">MONKEY PRINT</span>
                     </div>
+                    <nav className="pu-desktop-nav">
+                        <a href="/" className="pu-desktop-nav-link">Accueil</a>
+                        <a href="#" className="pu-desktop-nav-link">Shop List</a>
+                        <a href="#" className="pu-desktop-nav-link">Contactez-nous</a>
+                    </nav>
                     <button
                         className="pu-menu-trigger"
                         type="button"
