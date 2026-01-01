@@ -49,8 +49,7 @@ export default function LoginPage() {
                 menuItems={[
                     { label: "Accueil", href: "/", icon: "🏠" },
                     { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
-                    { label: "Contactez-nous", href: "/contact", icon: "💬" },
-                    { label: "Créer une boutique", href: "/create-shop", icon: "➕" }
+                    { label: "Contactez-nous", href: "/contact", icon: "💬" }
                 ]}
             />
             <div className={styles.backgroundV4}>

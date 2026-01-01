@@ -6,7 +6,8 @@ import Link from "next/link";
 import { getR2Url } from "@/lib/storage";
 import StoreDetailActions from "./StoreDetailActions";
 
-export default async function AdminStoreDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminStoreDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -15,7 +16,7 @@ export default async function AdminStoreDetailPage({ params }: { params: { id: s
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
     const store = await prisma.store.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             owner: true,
             _count: {
@@ -75,7 +76,7 @@ export default async function AdminStoreDetailPage({ params }: { params: { id: s
     const revenueResult = await prisma.order.aggregate({
         where: {
             storeId: store.id,
-            status: { in: ['PAID', 'COMPLETED', 'SHIPPED'] }
+            status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] }
         },
         _sum: { totalAmount: true }
     });
@@ -158,7 +159,7 @@ export default async function AdminStoreDetailPage({ params }: { params: { id: s
                                 {getStatusLabel(store.status)}
                             </div>
                             <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-                                Slug: /{store.slug}
+                                Slug: /shop/{store.slug}
                             </div>
                         </div>
                     </div>
@@ -182,7 +183,7 @@ export default async function AdminStoreDetailPage({ params }: { params: { id: s
                         </div>
                         <div>
                             <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Slug</div>
-                            <div style={{ fontSize: '16px', fontWeight: 500 }}>/{store.slug}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 500 }}>/shop/{store.slug}</div>
                         </div>
                         <div>
                             <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Thème</div>
@@ -370,8 +371,24 @@ export default async function AdminStoreDetailPage({ params }: { params: { id: s
                                     onMouseLeave={(e) => e.currentTarget.style.background = '#f9fafb'}
                                 >
                                     <div>
-                                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
-                                            Commande #{order.id.slice(0, 8)}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                            <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                                                Commande #{order.id.slice(0, 8)}
+                                            </div>
+                                            {order.deletionRequested && (
+                                                <span style={{ 
+                                                    fontSize: '10px', 
+                                                    color: '#f59e0b', 
+                                                    padding: '2px 6px',
+                                                    background: '#fef3c7',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 600,
+                                                    border: '1px solid #fde68a',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    Suppression demandée
+                                                </span>
+                                            )}
                                         </div>
                                         <div style={{ fontSize: '14px', color: '#6b7280' }}>
                                             {order.customer.name || order.customer.phoneNumber}

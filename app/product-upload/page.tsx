@@ -375,21 +375,6 @@ export default function ProductUploadPage() {
                         </div>
                     </section>
 
-                    <section className="pu-card">
-                        <div className={`pu-upload-card ${isDragActive ? "active" : ""}`} {...getRootProps()}>
-                            <input {...getInputProps()} />
-                            <svg width="45" height="45" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="17 8 12 3 7 8" />
-                                <line x1="12" y1="3" x2="12" y2="15" />
-                            </svg>
-                            <p>Téléchargez votre design</p>
-                            <span>Doit être uniquement au format PNG</span>
-                        </div>
-                        <button className="pu-ai-button" type="button" onClick={handleGenerateAI}>
-                            OU GÉNÉRER AVEC IA
-                        </button>
-                    </section>
 
                     <section className="pu-card" style={{ padding: '0', overflow: 'hidden' }}>
                         <div className="pu-card-header" style={{ padding: '20px 18px 0' }}>

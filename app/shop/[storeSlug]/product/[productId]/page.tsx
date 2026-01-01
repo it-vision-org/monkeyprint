@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import AddToCartButton from "@/components/AddToCartButton";
 
-export default async function ProductPage({ params }: { params: { storeSlug: string, productId: string } }) {
+export default async function ProductPage({ params }: { params: Promise<{ storeSlug: string, productId: string }> }) {
+    const { storeSlug, productId } = await params;
     const product = await prisma.product.findUnique({
-        where: { id: params.productId },
+        where: { id: productId },
         include: { store: true }
     });
 
@@ -18,7 +19,7 @@ export default async function ProductPage({ params }: { params: { storeSlug: str
     return (
         <div style={{ minHeight: '100vh', background: '#fff' }}>
             <header style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
-                <a href={`/${params.storeSlug}`} style={{ textDecoration: 'none', color: '#333', fontWeight: 600 }}>
+                <a href={`/shop/${storeSlug}`} style={{ textDecoration: 'none', color: '#333', fontWeight: 600 }}>
                     ← Retour à la boutique
                 </a>
             </header>
@@ -28,12 +29,24 @@ export default async function ProductPage({ params }: { params: { storeSlug: str
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div style={{ aspectRatio: '1', background: '#f9fafb', borderRadius: '16px', overflow: 'hidden', border: '1px solid #eee' }}>
                         {frontUrl && (
-                            <img src={frontUrl} alt="Front" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <Image 
+                                src={frontUrl} 
+                                alt="Front" 
+                                width={500} 
+                                height={500}
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                            />
                         )}
                     </div>
                     {backUrl && (
                         <div style={{ aspectRatio: '1', background: '#f9fafb', borderRadius: '16px', overflow: 'hidden', border: '1px solid #eee' }}>
-                            <img src={backUrl} alt="Back" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <Image 
+                                src={backUrl} 
+                                alt="Back" 
+                                width={500} 
+                                height={500}
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                            />
                         </div>
                     )}
                 </div>
@@ -50,10 +63,11 @@ export default async function ProductPage({ params }: { params: { storeSlug: str
 
                     <div style={{ padding: '20px', background: '#f9fafb', borderRadius: '12px', border: '1px solid #eee' }}>
                         <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Commander maintenant</h3>
-                        <AddToCartButton product={product} frontUrl={frontUrl} storeName={product.store.name} storeSlug={params.storeSlug} />
+                        <AddToCartButton product={product} frontUrl={frontUrl} storeName={product.store.name} storeSlug={storeSlug} />
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+

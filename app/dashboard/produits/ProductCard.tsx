@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { deleteProduct } from './actions';
+import { useAlert } from '@/components/AlertContext';
 
 interface ProductCardProps {
     product: {
@@ -23,6 +25,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, imageUrl }: ProductCardProps) {
     const router = useRouter();
+    const { showAlert } = useAlert();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -32,7 +35,7 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
         setIsDeleting(false);
 
         if (result?.error) {
-            alert(`Erreur: ${result.error}`);
+            showAlert(`Erreur: ${result.error}`, 'error');
         } else {
             setShowDeleteModal(false);
             // Refresh the page to show updated product list
@@ -123,7 +126,13 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
 
                 <div className="produit-image-container">
                     {imageUrl ? (
-                        <img src={imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <Image 
+                            src={imageUrl} 
+                            alt={product.name} 
+                            width={300} 
+                            height={300}
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                        />
                     ) : (
                         <div style={{ width: '100%', height: 180, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Img</div>
                     )}
@@ -246,9 +255,11 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
                                         border: '2px solid #e5e7eb',
                                         flexShrink: 0,
                                     }}>
-                                        <img
+                                        <Image
                                             src={imageUrl}
                                             alt={product.name}
+                                            width={100}
+                                            height={100}
                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         />
                                     </div>

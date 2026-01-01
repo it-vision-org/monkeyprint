@@ -17,22 +17,33 @@ export default async function PortefeuillePage() {
     if (!user || user.stores.length === 0) redirect("/create-shop");
     const store = user.stores[0];
 
-    // Fetch all orders
-    const orders = await prisma.order.findMany({
-        where: { storeId: store.id },
-        orderBy: { createdAt: 'desc' },
-        include: { items: true } // Need items for calculation? Order has totalAmount.
+    // Only fetch DELIVERED_AND_PAID orders (these are the only ones that contribute to wallet)
+    const deliveredOrders = await prisma.order.findMany({
+        where: { 
+            storeId: store.id,
+            status: 'DELIVERED_AND_PAID'
+        },
+        orderBy: { deliveredAt: 'desc' },
+        include: { items: true }
     });
 
-    // Calculate "En attente" (Pending/Shipped but not Completed/Paid)
-    // Assumption: 'PENDING' and 'SHIPPED' count as pending funds?
-    // Let's assume 'PENDING' is pending.
-    const pendingOrders = orders.filter(o => o.status === 'PENDING');
+    // Calculate dates for 14-day rule
+    const now = new Date();
+    const fourteenDaysAgo = new Date(now);
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+    // "En attente" - orders delivered less than 14 days ago
+    const pendingOrders = deliveredOrders.filter(o => {
+        if (!o.deliveredAt) return false;
+        return new Date(o.deliveredAt) > fourteenDaysAgo;
+    });
     const pendingAmount = pendingOrders.reduce((acc, o) => acc + o.totalAmount, 0);
 
-    // Calculate "Pret" (Paid/Completed)
-    // Assumption: 'PAID' or 'COMPLETED' means ready to withdraw.
-    const availableOrders = orders.filter(o => ['PAID', 'COMPLETED'].includes(o.status));
+    // "Pret" - orders delivered more than 14 days ago (ready to withdraw)
+    const availableOrders = deliveredOrders.filter(o => {
+        if (!o.deliveredAt) return false;
+        return new Date(o.deliveredAt) <= fourteenDaysAgo;
+    });
     const availableAmount = availableOrders.reduce((acc, o) => acc + o.totalAmount, 0);
 
     // Get last withdrawal

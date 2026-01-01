@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/components/AlertContext';
 
 interface StoreDetailActionsProps {
     storeId: string;
@@ -10,6 +11,7 @@ interface StoreDetailActionsProps {
 
 export default function StoreDetailActions({ storeId, currentStatus }: StoreDetailActionsProps) {
     const router = useRouter();
+    const { showAlert } = useAlert();
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState(currentStatus);
 
@@ -31,11 +33,11 @@ export default function StoreDetailActions({ storeId, currentStatus }: StoreDeta
                 router.refresh();
             } else {
                 const error = await response.json();
-                alert(error.error || 'Une erreur est survenue');
+                showAlert(error.error || 'Une erreur est survenue', 'error');
             }
         } catch (error) {
             console.error('Error updating store status:', error);
-            alert('Une erreur est survenue');
+            showAlert('Une erreur est survenue', 'error');
         } finally {
             setIsLoading(false);
         }

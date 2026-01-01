@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductUploadHeader from "../components/ProductUploadHeader";
 import { combineDesigns } from "@/lib/utils/designRenderer";
+import { useAlert } from '@/components/AlertContext';
 
 type GenderOption = {
     id: string;
@@ -24,6 +25,7 @@ const MIN_PRICE = 55;
 
 export default function ProductDetailsPage() {
     const router = useRouter();
+    const { showAlert } = useAlert();
     const [frontDesignImage, setFrontDesignImage] = useState<string | null>(null);
     const [backDesignImage, setBackDesignImage] = useState<string | null>(null);
     const [selectedMockup, setSelectedMockup] = useState<string | null>(null);
@@ -162,7 +164,7 @@ export default function ProductDetailsPage() {
         }
 
         if (!imageToDownload) {
-            alert('Impossible de générer l\'image combinée');
+            showAlert('Impossible de générer l\'image combinée', 'error');
             return;
         }
 
@@ -184,7 +186,7 @@ export default function ProductDetailsPage() {
         }
 
         if (!imageToUse) {
-            alert('Impossible de générer l\'image combinée');
+            showAlert('Impossible de générer l\'image combinée', 'error');
             return;
         }
 
@@ -526,7 +528,7 @@ export default function ProductDetailsPage() {
 
     const handleGenerateMockup = async () => {
         if (!designEditorData) {
-            alert('Aucun design trouvé. Veuillez retourner à l\'éditeur de design.');
+            showAlert('Aucun design trouvé. Veuillez retourner à l\'éditeur de design.', 'warning');
             return;
         }
 
@@ -626,7 +628,7 @@ export default function ProductDetailsPage() {
             }
         } catch (error: any) {
             console.error('Error generating mockups:', error);
-            alert(`Erreur lors de la génération des maquettes: ${error.message}`);
+            showAlert(`Erreur lors de la génération des maquettes: ${error.message}`, 'error');
             setMockupLoading(false);
         }
     };
@@ -647,7 +649,7 @@ export default function ProductDetailsPage() {
 
     const handleSubmit = async () => {
         if (!productName || !productPrice) {
-            alert("Veuillez remplir le nom et le prix du produit.");
+            showAlert("Veuillez remplir le nom et le prix du produit.", 'warning');
             return;
         }
 
@@ -660,7 +662,7 @@ export default function ProductDetailsPage() {
         }
 
         if (!finalImage) {
-            alert("Veuillez générer une maquette ou attendre que les aperçus se chargent.");
+            showAlert("Veuillez générer une maquette ou attendre que les aperçus se chargent.", 'warning');
             return;
         }
 
@@ -682,7 +684,7 @@ export default function ProductDetailsPage() {
 
             // Check if there's an error returned (not a redirect)
             if (result?.error) {
-                alert(`Erreur: ${result.error}`);
+                showAlert(`Erreur: ${result.error}`, 'error');
                 setIsSubmitting(false);
             }
             // If no error and no result, redirect happened (which throws)
@@ -694,7 +696,7 @@ export default function ProductDetailsPage() {
             }
             // Only show error for actual errors
             console.error('Product creation error:', error);
-            alert("Une erreur est survenue lors de la création du produit.");
+            showAlert("Une erreur est survenue lors de la création du produit.", 'error');
             setIsSubmitting(false);
         }
     };

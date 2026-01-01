@@ -4,8 +4,10 @@ import { redirect, notFound } from "next/navigation";
 import { getR2Url } from "@/lib/storage";
 import { format } from "date-fns";
 import Link from "next/link";
+import AdminOrderActions from "./AdminOrderActions";
 
-export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -14,7 +16,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
     const order = await prisma.order.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             customer: true,
             store: {
@@ -46,14 +48,16 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         switch (status) {
             case 'PENDING':
                 return 'Non confirmé';
-            case 'PAID':
-                return 'Payé';
-            case 'SHIPPED':
-                return 'Expédié';
-            case 'COMPLETED':
-                return 'Terminé';
-            case 'RETURNED':
-                return 'Retourné';
+            case 'CONFIRMED':
+                return 'Confirmé';
+            case 'IN_TREATMENT':
+                return 'En traitement';
+            case 'IN_DELIVERY':
+                return 'En livraison';
+            case 'DELIVERED_AND_PAID':
+                return 'Livré et payé';
+            case 'RETURN':
+                return 'Retour';
             default:
                 return status;
         }
@@ -63,11 +67,15 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         switch (status) {
             case 'PENDING':
                 return '#f97316';
-            case 'PAID':
-            case 'SHIPPED':
-            case 'COMPLETED':
+            case 'CONFIRMED':
+                return '#3b82f6';
+            case 'IN_TREATMENT':
+                return '#3b82f6';
+            case 'IN_DELIVERY':
+                return '#8b5cf6';
+            case 'DELIVERED_AND_PAID':
                 return '#10b981';
-            case 'RETURNED':
+            case 'RETURN':
                 return '#ef4444';
             default:
                 return '#6b7280';
@@ -97,6 +105,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                 <h1 className="dash-page-title">Détails de la commande #{order.id.slice(0, 8)}</h1>
             </div>
 
+
             {/* Order Header */}
             <div style={{ 
                 background: 'white', 
@@ -107,8 +116,23 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                        <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '12px' }}>
-                            #{order.id.slice(0, 8)}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: 700 }}>
+                                #{order.id.slice(0, 8)}
+                            </div>
+                            {order.deletionRequested && (
+                                <div style={{ 
+                                    fontSize: '12px', 
+                                    color: '#f59e0b', 
+                                    padding: '4px 10px',
+                                    background: '#fef3c7',
+                                    borderRadius: '6px',
+                                    fontWeight: 600,
+                                    border: '1px solid #fde68a'
+                                }}>
+                                    Suppression demandée
+                                </div>
+                            )}
                         </div>
                         <div style={{ 
                             display: 'inline-block',
@@ -262,6 +286,11 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                         <div style={{ fontSize: '20px', fontWeight: 700, color: '#2563eb' }}>{order.totalAmount} DT</div>
                     </div>
                 </div>
+            </div>
+
+            {/* Admin Actions */}
+            <div style={{ marginTop: '24px' }}>
+                <AdminOrderActions orderId={order.id} currentStatus={order.status} />
             </div>
         </div>
     );

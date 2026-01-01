@@ -6,7 +6,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 import OrderDetailActions from "./OrderDetailActions";
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -19,7 +20,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     const store = user.stores[0];
 
     const order = await prisma.order.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             customer: true,
             items: {
@@ -46,14 +47,16 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         switch (status) {
             case 'PENDING':
                 return 'Non confirmé';
-            case 'PAID':
-                return 'Payé';
-            case 'SHIPPED':
-                return 'Expédié';
-            case 'COMPLETED':
-                return 'Terminé';
-            case 'RETURNED':
-                return 'Retourné';
+            case 'CONFIRMED':
+                return 'Confirmé';
+            case 'IN_TREATMENT':
+                return 'En traitement';
+            case 'IN_DELIVERY':
+                return 'En livraison';
+            case 'DELIVERED_AND_PAID':
+                return 'Livré et payé';
+            case 'RETURN':
+                return 'Retour';
             default:
                 return status;
         }
@@ -63,11 +66,15 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         switch (status) {
             case 'PENDING':
                 return '#f97316';
-            case 'PAID':
-            case 'SHIPPED':
-            case 'COMPLETED':
+            case 'CONFIRMED':
+                return '#3b82f6';
+            case 'IN_TREATMENT':
+                return '#3b82f6';
+            case 'IN_DELIVERY':
+                return '#8b5cf6';
+            case 'DELIVERED_AND_PAID':
                 return '#10b981';
-            case 'RETURNED':
+            case 'RETURN':
                 return '#ef4444';
             default:
                 return '#6b7280';
@@ -103,9 +110,23 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     <div className="commande-card" style={{ marginBottom: '24px' }}>
                         <div className="commande-card-header">
                             <div>
-                                <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                    <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                    {order.deletionRequested && (
+                                        <div style={{ 
+                                            fontSize: '12px', 
+                                            color: '#f59e0b', 
+                                            padding: '4px 10px',
+                                            background: '#fef3c7',
+                                            borderRadius: '6px',
+                                            fontWeight: 600,
+                                            border: '1px solid #fde68a'
+                                        }}>
+                                            Suppression demandée
+                                        </div>
+                                    )}
+                                </div>
                                 <div style={{ 
-                                    marginTop: '8px',
                                     display: 'inline-block',
                                     padding: '6px 12px',
                                     borderRadius: '6px',
@@ -212,10 +233,20 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                         </div>
                     </div>
 
-                    {/* Order Actions */}
-                    <div style={{ marginTop: '24px' }}>
-                        <OrderDetailActions orderId={order.id} currentStatus={order.status} />
-                    </div>
+                    {/* Note: Status updates after confirmation are admin-only */}
+                    {order.status === 'PENDING' && (
+                        <div style={{ 
+                            marginTop: '24px', 
+                            padding: '16px', 
+                            background: '#f9fafb', 
+                            borderRadius: '12px',
+                            border: '1px solid #e5e7eb'
+                        }}>
+                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                                Une fois confirmée, seuls les administrateurs peuvent modifier le statut de cette commande.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

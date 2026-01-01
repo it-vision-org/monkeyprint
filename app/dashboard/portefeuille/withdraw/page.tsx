@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAlert } from '@/components/AlertContext';
 
 export default function WithdrawPage() {
     const router = useRouter();
+    const { showAlert } = useAlert();
     const [amount, setAmount] = useState('');
     const [bankDetails, setBankDetails] = useState('');
     const [availableAmount, setAvailableAmount] = useState(0);
@@ -32,12 +34,12 @@ export default function WithdrawPage() {
         e.preventDefault();
         
         if (!amount || parseFloat(amount) <= 0) {
-            alert('Veuillez entrer un montant valide');
+            showAlert('Veuillez entrer un montant valide', 'warning');
             return;
         }
 
         if (parseFloat(amount) > availableAmount) {
-            alert(`Le montant demandé dépasse le montant disponible (${availableAmount.toFixed(2)} DT)`);
+            showAlert(`Le montant demandé dépasse le montant disponible (${availableAmount.toFixed(2)} DT)`, 'warning');
             return;
         }
 
@@ -59,12 +61,12 @@ export default function WithdrawPage() {
             if (response.ok) {
                 router.push('/dashboard/portefeuille/withdrawals');
             } else {
-                alert(data.error || 'Une erreur est survenue');
+                showAlert(data.error || 'Une erreur est survenue', 'error');
                 setIsLoading(false);
             }
         } catch (error) {
             console.error('Error creating withdrawal:', error);
-            alert('Une erreur est survenue');
+            showAlert('Une erreur est survenue', 'error');
             setIsLoading(false);
         }
     };

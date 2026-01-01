@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
         }),
         prisma.order.aggregate({
             _sum: { totalAmount: true },
-            where: { status: { in: ['PAID', 'COMPLETED', 'SHIPPED'] } }
+            where: { status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] } }
         })
     ]);
 
@@ -180,7 +180,23 @@ export default async function AdminDashboardPage() {
                                 recentOrders.map((order: any) => (
                                     <div key={order.id} className="admin-activity-item">
                                         <div className="admin-activity-item-content">
-                                            <div className="admin-activity-item-name">{order.id.substring(0, 8)}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div className="admin-activity-item-name">{order.id.substring(0, 8)}</div>
+                                                {order.deletionRequested && (
+                                                    <span style={{ 
+                                                        fontSize: '9px', 
+                                                        color: '#f59e0b', 
+                                                        padding: '2px 6px',
+                                                        background: '#fef3c7',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 600,
+                                                        border: '1px solid #fde68a',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        Suppression demandée
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="admin-activity-item-detail">{order.store.name}</div>
                                             <div className="admin-activity-item-date">{new Date(order.createdAt).toLocaleDateString()}</div>
                                         </div>

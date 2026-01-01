@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import MainHeader from '@/components/MainHeader';
+import type { MenuItem } from '@/components/types';
+
+const contactMenuItems: MenuItem[] = [
+    { label: "Accueil", href: "/", icon: "🏠" },
+    { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
+    { label: "Contactez-nous", href: "/contact", icon: "💬" },
+];
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -39,30 +45,9 @@ export default function ContactPage() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f9fafb', padding: '20px' }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                {/* Header */}
-                <header style={{
-                    background: 'white',
-                    padding: '20px',
-                    borderRadius: '16px',
-                    marginBottom: '24px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px'
-                }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                        <Image
-                            src="/logo.png"
-                            alt="Monkey Print"
-                            width={100}
-                            height={50}
-                            style={{ objectFit: 'contain' }}
-                        />
-                    </Link>
-                </header>
-
+        <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+            <MainHeader menuItems={contactMenuItems} />
+            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
                 {/* Contact Form */}
                 <div style={{
                     background: 'white',

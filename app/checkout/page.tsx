@@ -5,10 +5,12 @@ import { useState } from "react";
 import { placeOrder } from "./actions";
 import { getR2Url } from "@/lib/storage";
 import { useRouter } from "next/navigation";
+import { useAlert } from '@/components/AlertContext';
 
 export default function CheckoutPage() {
     const router = useRouter(); // Add hook usage
     const { items, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
+    const { showAlert } = useAlert();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -29,7 +31,7 @@ export default function CheckoutPage() {
 
             const result = await placeOrder(formData);
             if (result && result.error) {
-                alert(result.error);
+                showAlert(result.error, 'error');
                 setIsSubmitting(false);
             } else if (result && result.success) {
                 // Success
@@ -43,7 +45,7 @@ export default function CheckoutPage() {
             // `clearCart` should be called. 
             // Let's modify the action to NOT redirect, but return success, then we redirect client side.
             console.error(e);
-            alert("Une erreur inattendue est survenue.");
+            showAlert("Une erreur inattendue est survenue.", 'error');
             setIsSubmitting(false);
         }
     };

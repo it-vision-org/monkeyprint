@@ -1,8 +1,9 @@
 'use client';
 
+import { confirmOrder } from '../actions';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateOrderStatus } from '../actions';
+import { useAlert } from '@/components/AlertContext';
 
 interface OrderDetailActionsProps {
     orderId: string;
@@ -11,11 +12,13 @@ interface OrderDetailActionsProps {
 
 export default function OrderDetailActions({ orderId, currentStatus }: OrderDetailActionsProps) {
     const router = useRouter();
+    const { confirm } = useAlert();
     const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState('');
 
-    const handleStatusUpdate = async (newStatus: string) => {
-        if (!confirm(`Êtes-vous sûr de vouloir changer le statut à "${newStatus}"?`)) {
+    const handleConfirm = async () => {
+        const confirmed = await confirm('Confirmer cette commande ?', 'info');
+        if (!confirmed) {
             return;
         }
 
@@ -23,46 +26,34 @@ export default function OrderDetailActions({ orderId, currentStatus }: OrderDeta
         setError('');
 
         try {
-            const result = await updateOrderStatus(orderId, newStatus);
+            const result = await confirmOrder(orderId);
             if (result?.error) {
                 setError(result.error);
             } else {
                 router.refresh();
             }
         } catch (e) {
-            console.error('Update error:', e);
+            console.error('Confirm error:', e);
             setError('Une erreur est survenue');
         } finally {
             setIsUpdating(false);
         }
     };
 
-    const getStatusOptions = () => {
-        switch (currentStatus) {
-            case 'PENDING':
-                return [
-                    { value: 'PAID', label: 'Marquer comme Payé', color: '#10b981' },
-                    { value: 'SHIPPED', label: 'Marquer comme Expédié', color: '#3b82f6' },
-                ];
-            case 'PAID':
-                return [
-                    { value: 'SHIPPED', label: 'Marquer comme Expédié', color: '#3b82f6' },
-                    { value: 'COMPLETED', label: 'Marquer comme Terminé', color: '#10b981' },
-                ];
-            case 'SHIPPED':
-                return [
-                    { value: 'COMPLETED', label: 'Marquer comme Terminé', color: '#10b981' },
-                    { value: 'RETURNED', label: 'Marquer comme Retourné', color: '#ef4444' },
-                ];
-            default:
-                return [];
-        }
-    };
-
-    const options = getStatusOptions();
-
-    if (options.length === 0) {
-        return null;
+    // Only show confirmation button for PENDING orders
+    if (currentStatus !== 'PENDING') {
+        return (
+            <div style={{ 
+                padding: '20px', 
+                background: '#f9fafb', 
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb'
+            }}>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                    Une fois confirmée, seuls les administrateurs peuvent modifier le statut de cette commande.
+                </p>
+            </div>
+        );
     }
 
     return (
@@ -86,29 +77,24 @@ export default function OrderDetailActions({ orderId, currentStatus }: OrderDeta
                     {error}
                 </div>
             )}
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {options.map((option) => (
-                    <button
-                        key={option.value}
-                        onClick={() => handleStatusUpdate(option.value)}
-                        disabled={isUpdating}
-                        style={{
-                            padding: '12px 24px',
-                            border: 'none',
-                            borderRadius: '8px',
-                            background: option.color,
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            cursor: isUpdating ? 'not-allowed' : 'pointer',
-                            opacity: isUpdating ? 0.5 : 1,
-                            transition: 'opacity 0.2s'
-                        }}
-                    >
-                        {option.label}
-                    </button>
-                ))}
-            </div>
+            <button
+                onClick={handleConfirm}
+                disabled={isUpdating}
+                style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: '#10b981',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: isUpdating ? 'not-allowed' : 'pointer',
+                    opacity: isUpdating ? 0.5 : 1,
+                    transition: 'opacity 0.2s'
+                }}
+            >
+                {isUpdating ? 'Confirmation...' : 'Confirmer la commande'}
+            </button>
         </div>
     );
 }

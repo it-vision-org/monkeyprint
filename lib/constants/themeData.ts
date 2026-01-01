@@ -41,8 +41,8 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             reviews: 131
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
-            title: "GrabMeShoe",
-            subtitle: "Explore the finest clothes chez GrabMeShoe",
+            title: "Boutique",
+            subtitle: "Explore the finest clothes chez notre boutique",
             image: "/T-Shirt.png",
             imageWidth: 280,
             imageHeight: 280,
@@ -76,8 +76,8 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             reviews: 130
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
-            title: "GrabMeShoe",
-            subtitle: "Explore the finest clothes for kids, chez GrabMeShoe",
+            title: "Boutique",
+            subtitle: "Explore the finest clothes for kids, chez notre boutique",
             variant: 'circles',
             circles: [
                 { src: "/T-Shirt-Design.png", className: "theme-2-hero-image-circle theme-2-hero-img-1" },
@@ -113,8 +113,8 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             reviews: 131
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
-            title: "GrabMeShoe",
-            subtitle: "Explore the finest clothes\nchez GrabMeShoe",
+            title: "Boutique",
+            subtitle: "Explore the finest clothes\nchez notre boutique",
             variant: 'background',
             backgroundImage: "/T-Shirt-Design.png"
         },

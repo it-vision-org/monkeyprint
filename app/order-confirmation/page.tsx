@@ -68,9 +68,25 @@ export default async function OrderConfirmationPage({
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                     <div>
                                         <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>{order.store.name}</h3>
-                                        <p style={{ color: '#666', fontSize: '14px' }}>
-                                            Commande #{order.id.slice(0, 8)} • {format(new Date(order.createdAt), "d MMMM yyyy 'à' HH:mm")}
-                                        </p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
+                                                Commande #{order.id.slice(0, 8)} • {format(new Date(order.createdAt), "d MMMM yyyy 'à' HH:mm")}
+                                            </p>
+                                            {order.deletionRequested && (
+                                                <span style={{ 
+                                                    fontSize: '11px', 
+                                                    color: '#f59e0b', 
+                                                    padding: '3px 8px',
+                                                    background: '#fef3c7',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 600,
+                                                    border: '1px solid #fde68a',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    Suppression demandée
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
                                         <p style={{ fontSize: '18px', fontWeight: 600, color: '#41eb5c' }}>{order.totalAmount.toFixed(2)} DT</p>

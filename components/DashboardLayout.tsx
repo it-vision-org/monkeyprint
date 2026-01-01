@@ -29,7 +29,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const sectionLabel = useMemo(() => getSectionLabel(pathname), [pathname]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [themeModalOpen, setThemeModalOpen] = useState(false);
   const [commandesOpen, setCommandesOpen] = useState(false);
   const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
   const commandesDropdownRef = useRef<HTMLDivElement | null>(null);
@@ -38,6 +37,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const navItemRefs = useRef<(HTMLAnchorElement | HTMLDivElement | null)[]>([]);
 
   const commandesStatus = (searchParams.get("status") as CommandesStatus | null) ?? null;
+
+  const handleVisitStore = async () => {
+    try {
+      const response = await fetch('/api/store-info');
+      if (!response.ok) {
+        console.error('Failed to fetch store info');
+        return;
+      }
+      const data = await response.json();
+      router.push(`/shop/${data.slug}`);
+    } catch (error) {
+      console.error('Error fetching store info:', error);
+    }
+  };
 
   // Update indicator position based on active nav item
   useEffect(() => {
@@ -203,7 +216,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="dash-actions">
-            <button className="dash-visit-btn" onClick={() => setThemeModalOpen(true)}>
+            <button className="dash-visit-btn" onClick={handleVisitStore}>
               VISITER LE MAGASIN
             </button>
             <button className="dash-user-btn" aria-label="Compte">
@@ -243,7 +256,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 className="dash-visit-btn-mobile"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setThemeModalOpen(true);
+                  handleVisitStore();
                 }}
               >
                 VISITER LE MAGASIN
@@ -395,51 +408,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="dash-container">{children}</div>
       </main>
 
-      {themeModalOpen && (
-        <div className="delete-dialog-overlay" onClick={() => setThemeModalOpen(false)}>
-          <div className="theme-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="theme-modal-title">Choisissez votre thème</h3>
-            <div className="theme-modal-grid">
-              <div className="theme-modal-card" onClick={() => router.push("/store/theme-1")}>
-                <div className="theme-modal-preview">
-                  <Image
-                    src="/theme-1.png"
-                    alt="Theme 1"
-                    width={200}
-                    height={300}
-                    style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <p className="theme-modal-name">Thème 1</p>
-              </div>
-              <div className="theme-modal-card" onClick={() => router.push("/store/theme-2")}>
-                <div className="theme-modal-preview">
-                  <Image
-                    src="/theme-2.png"
-                    alt="Theme 2"
-                    width={200}
-                    height={300}
-                    style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <p className="theme-modal-name">Thème 2</p>
-              </div>
-              <div className="theme-modal-card" onClick={() => router.push("/store/theme-3")}>
-                <div className="theme-modal-preview">
-                  <Image
-                    src="/theme-3.png"
-                    alt="Theme 3"
-                    width={200}
-                    height={300}
-                    style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <p className="theme-modal-name">Thème 3</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

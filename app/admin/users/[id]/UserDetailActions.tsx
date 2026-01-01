@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAlert } from '@/components/AlertContext';
 
 interface UserDetailActionsProps {
     userId: string;
@@ -10,13 +11,15 @@ interface UserDetailActionsProps {
 
 export default function UserDetailActions({ userId, currentRole }: UserDetailActionsProps) {
     const router = useRouter();
+    const { showAlert, confirm } = useAlert();
     const [isLoading, setIsLoading] = useState(false);
     const [role, setRole] = useState(currentRole);
 
     const handleRoleChange = async (newRole: string) => {
         if (isLoading) return;
         
-        if (!confirm(`Êtes-vous sûr de vouloir changer le rôle de cet utilisateur en ${newRole === 'ADMIN' ? 'Administrateur' : 'Utilisateur'}?`)) {
+        const confirmed = await confirm(`Êtes-vous sûr de vouloir changer le rôle de cet utilisateur en ${newRole === 'ADMIN' ? 'Administrateur' : 'Utilisateur'}?`, 'warning');
+        if (!confirmed) {
             return;
         }
         
@@ -35,11 +38,11 @@ export default function UserDetailActions({ userId, currentRole }: UserDetailAct
                 router.refresh();
             } else {
                 const error = await response.json();
-                alert(error.error || 'Une erreur est survenue');
+                showAlert(error.error || 'Une erreur est survenue', 'error');
             }
         } catch (error) {
             console.error('Error updating user role:', error);
-            alert('Une erreur est survenue');
+            showAlert('Une erreur est survenue', 'error');
         } finally {
             setIsLoading(false);
         }

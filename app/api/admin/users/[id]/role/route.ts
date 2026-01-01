@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
@@ -19,7 +20,7 @@ export async function POST(
         }
 
         // Prevent self-demotion
-        if (adminUser.id === params.id) {
+        if (adminUser.id === id) {
             return NextResponse.json({ error: "Vous ne pouvez pas modifier votre propre rôle" }, { status: 400 });
         }
 
@@ -30,7 +31,7 @@ export async function POST(
         }
 
         const user = await prisma.user.update({
-            where: { id: params.id },
+            where: { id },
             data: { role },
         });
 

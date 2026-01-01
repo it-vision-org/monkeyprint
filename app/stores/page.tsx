@@ -100,7 +100,7 @@ export default async function StoresPage() {
                         {storesWithLogos.map((store) => (
                             <Link
                                 key={store.id}
-                                href={`/${store.slug}`}
+                                href={`/shop/${store.slug}`}
                                 style={{
                                     background: 'white',
                                     borderRadius: '20px',

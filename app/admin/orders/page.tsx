@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import AdminOrderTableRow from "./AdminOrderTableRow";
 
 export default async function AdminOrdersPage({
     searchParams,
@@ -22,7 +23,9 @@ export default async function AdminOrdersPage({
     const pageSize = 10;
 
     const where: any = {};
-    if (status !== "all") {
+    if (status === "deletion-requested") {
+        where.deletionRequested = true;
+    } else if (status !== "all") {
         where.status = status.toUpperCase();
     }
     if (query) {
@@ -36,11 +39,27 @@ export default async function AdminOrdersPage({
     const [orders, totalCount, statsByStatus] = await Promise.all([
         prisma.order.findMany({
             where,
-            include: {
-                store: true,
-                customer: true,
+            select: {
+                id: true,
+                status: true,
+                totalAmount: true,
+                createdAt: true,
+                updatedAt: true,
+                deletionRequested: true,
+                store: {
+                    select: {
+                        name: true
+                    }
+                },
+                customer: {
+                    select: {
+                        name: true
+                    }
+                },
                 _count: {
-                    select: { orderItems: true }
+                    select: {
+                        items: true
+                    }
                 }
             },
             orderBy: { createdAt: 'desc' },
@@ -55,34 +74,19 @@ export default async function AdminOrdersPage({
         })
     ]);
 
+    // Count deletion requested orders
+    const deletionRequestedCount = await prisma.order.count({
+        where: { deletionRequested: true }
+    });
+
     const stats = {
         total: statsByStatus.reduce((sum: number, s: any) => sum + s._count, 0),
         pending: statsByStatus.find((s: any) => s.status === 'PENDING')?._count || 0,
-        paid: statsByStatus.find((s: any) => s.status === 'PAID')?._count || 0,
+        confirmed: statsByStatus.find((s: any) => s.status === 'CONFIRMED')?._count || 0,
+        deletionRequested: deletionRequestedCount,
         revenue: statsByStatus.reduce((sum: number, s: any) => sum + (s._sum.totalAmount || 0), 0)
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PENDING': return 'orange';
-            case 'PAID': return 'blue';
-            case 'SHIPPED': return 'purple';
-            case 'COMPLETED': return 'green';
-            case 'CANCELLED': return 'red';
-            default: return 'gray';
-        }
-    };
-
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'PENDING': return 'En attente';
-            case 'PAID': return 'Payé';
-            case 'SHIPPED': return 'Expédié';
-            case 'COMPLETED': return 'Livré';
-            case 'CANCELLED': return 'Annulé';
-            default: return status;
-        }
-    };
 
     return (
         <>
@@ -112,11 +116,15 @@ export default async function AdminOrdersPage({
                 </div>
                 <div className="admin-orders-stat-card">
                     <div className="admin-orders-stat-value">{stats.pending}</div>
-                    <div className="admin-orders-stat-label">En attente</div>
+                    <div className="admin-orders-stat-label">Non confirmées</div>
                 </div>
                 <div className="admin-orders-stat-card">
-                    <div className="admin-orders-stat-value">{stats.paid}</div>
-                    <div className="admin-orders-stat-label">Payées</div>
+                    <div className="admin-orders-stat-value">{stats.confirmed}</div>
+                    <div className="admin-orders-stat-label">Confirmées</div>
+                </div>
+                <div className="admin-orders-stat-card">
+                    <div className="admin-orders-stat-value">{stats.deletionRequested}</div>
+                    <div className="admin-orders-stat-label">Suppression demandée</div>
                 </div>
                 <div className="admin-orders-stat-card">
                     <div className="admin-orders-stat-value">{stats.revenue.toLocaleString()} DT</div>
@@ -145,10 +153,13 @@ export default async function AdminOrdersPage({
                         Toutes ({stats.total})
                     </Link>
                     <Link href={`/admin/orders?status=pending&q=${query}`} className={`admin-filter-tab ${status === 'pending' ? 'active' : ''}`}>
-                        En attente ({stats.pending})
+                        Non confirmées ({stats.pending})
                     </Link>
-                    <Link href={`/admin/orders?status=paid&q=${query}`} className={`admin-filter-tab ${status === 'paid' ? 'active' : ''}`}>
-                        Payées ({stats.paid})
+                    <Link href={`/admin/orders?status=confirmed&q=${query}`} className={`admin-filter-tab ${status === 'confirmed' ? 'active' : ''}`}>
+                        Confirmées ({stats.confirmed})
+                    </Link>
+                    <Link href={`/admin/orders?status=deletion-requested&q=${query}`} className={`admin-filter-tab ${status === 'deletion-requested' ? 'active' : ''}`}>
+                        Suppression demandée ({stats.deletionRequested})
                     </Link>
                 </div>
             </div>
@@ -171,32 +182,13 @@ export default async function AdminOrdersPage({
                     <tbody>
                         {orders.length === 0 ? (
                             <tr>
-                                <td colSpan={8} style={{ textAlign: 'center', padding: '20px' }}>Aucune commande trouvée</td>
+                                <td colSpan={8} style={{ textAlign: 'center', padding: '40px 20px' }}>
+                                    <div style={{ color: '#6b7280', fontSize: '15px' }}>Aucune commande trouvée</div>
+                                </td>
                             </tr>
                         ) : (
                             orders.map((order: any) => (
-                                <tr key={order.id}>
-                                    <td className="admin-order-id">{order.id.substring(0, 8)}</td>
-                                    <td>{order.store.name}</td>
-                                    <td>{order.customer.name}</td>
-                                    <td>{order._count.orderItems}</td>
-                                    <td className="admin-order-amount">{order.totalAmount} DT</td>
-                                    <td>
-                                        <span className={`admin-status-badge ${getStatusColor(order.status)}`}>
-                                            {getStatusLabel(order.status)}
-                                        </span>
-                                    </td>
-                                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                                    <td>
-                                        <Link 
-                                            href={`/admin/orders/${order.id}`}
-                                            className="admin-action-btn"
-                                            style={{ textDecoration: 'none' }}
-                                        >
-                                            Voir détails
-                                        </Link>
-                                    </td>
-                                </tr>
+                                <AdminOrderTableRow key={order.id} order={order} />
                             ))
                         )}
                     </tbody>

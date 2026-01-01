@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'picsum.photos',
       },
+      {
+        protocol: 'https',
+        hostname: 'pub-a54043a6fb8443aaa3cf47aa98675227.r2.dev',
+      },
     ],
   },
   outputFileTracingRoot: path.resolve(process.cwd()),

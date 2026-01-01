@@ -27,9 +27,9 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
     if (statusParam === 'non-confirme') {
         whereStatus = { status: 'PENDING' };
     } else if (statusParam === 'confirme') {
-        whereStatus = { status: { in: ['PAID', 'SHIPPED', 'COMPLETED'] } };
+        whereStatus = { status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] } };
     } else if (statusParam === 'retours') {
-        whereStatus = { status: 'RETURNED' };
+        whereStatus = { status: 'RETURN' };
     }
 
     // Build search filter
@@ -76,6 +76,63 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                     title: 'Liste de commandes non confirmé',
                     icon: 'check'
                 };
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'PENDING':
+                return 'Non confirmé';
+            case 'CONFIRMED':
+                return 'Confirmé';
+            case 'IN_TREATMENT':
+                return 'En traitement';
+            case 'IN_DELIVERY':
+                return 'En livraison';
+            case 'DELIVERED_AND_PAID':
+                return 'Livré et payé';
+            case 'RETURN':
+                return 'Retour';
+            default:
+                return status;
+        }
+    };
+
+    const getStatusEmoji = (status: string) => {
+        switch (status) {
+            case 'PENDING':
+                return '⏳';
+            case 'CONFIRMED':
+                return '✅';
+            case 'IN_TREATMENT':
+                return '⚙️';
+            case 'IN_DELIVERY':
+                return '🚚';
+            case 'DELIVERED_AND_PAID':
+                return '💚';
+            case 'RETURN':
+                return '↩️';
+            default:
+                return '';
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'PENDING':
+                return '#f97316';
+            case 'CONFIRMED':
+                return '#3b82f6';
+            case 'IN_TREATMENT':
+                return '#8b5cf6';
+            case 'IN_DELIVERY':
+                return '#06b6d4';
+            case 'DELIVERED_AND_PAID':
+                return '#10b981';
+            case 'RETURN':
+                return '#ef4444';
+            default:
+                return '#6b7280';
         }
     };
 
@@ -158,12 +215,41 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                                 >
                                     <div className="commande-card" style={{ cursor: 'pointer' }}>
                                         <div className="commande-card-header">
-                                            <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                                {order.deletionRequested && (
+                                                    <div style={{ 
+                                                        fontSize: '11px', 
+                                                        color: '#f59e0b', 
+                                                        padding: '4px 8px',
+                                                        background: '#fef3c7',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 600,
+                                                        border: '1px solid #fde68a'
+                                                    }}>
+                                                        Suppression demandée
+                                                    </div>
+                                                )}
+                                                {statusParam === 'confirme' && (
+                                                    <div style={{ 
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        padding: '4px 10px',
+                                                        borderRadius: '4px',
+                                                        background: getStatusColor(order.status) + '20',
+                                                        color: getStatusColor(order.status),
+                                                        fontSize: '12px',
+                                                        fontWeight: 600
+                                                    }}>
+                                                        <span>{getStatusEmoji(order.status)}</span>
+                                                        <span>{getStatusLabel(order.status)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div className="commande-header-right">
                                                 <div className="commande-date">{format(order.createdAt, "dd/MM/yyyy")}</div>
-                                                <div onClick={(e) => e.preventDefault()}>
-                                                    <OrderActions orderId={order.id} status={order.status} />
-                                                </div>
+                                                <OrderActions orderId={order.id} status={order.status} deletionRequested={order.deletionRequested} />
                                             </div>
                                         </div>
                                     <div className="commande-card-body">

@@ -179,7 +179,7 @@ export default async function AdminStoresPage({
                                                     <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                 </svg>
                                             </Link>
-                                            <Link href={`/${store.slug}`} target="_blank" className="admin-action-btn view" title="Voir la boutique">
+                                            <Link href={`/shop/${store.slug}`} target="_blank" className="admin-action-btn view" title="Voir la boutique">
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M18 13V19A2 2 0 0 1 16 21H5A2 2 0 0 1 3 19V8A2 2 0 0 1 5 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                     <path d="M15 3H21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

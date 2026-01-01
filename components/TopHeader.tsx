@@ -32,7 +32,7 @@ export default function TopHeader({
             <div className={innerClassName}>
                 <Image 
                     src="/logo.png" 
-                    alt="GrabMeShoe" 
+                    alt="Logo" 
                     width={110} 
                     height={36} 
                     style={{ objectFit: 'contain', filter: logoFilter || undefined }} 

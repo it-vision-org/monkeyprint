@@ -1,7 +1,8 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
 type CartItem = {
     label: string;
@@ -25,6 +26,22 @@ export default function ProductUploadHeader({
 }: ProductUploadHeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
+    const [hasStore, setHasStore] = useState(false);
+
+    // Check if user has a store
+    useEffect(() => {
+        async function checkStore() {
+            try {
+                const response = await fetch('/api/check-store');
+                const data = await response.json();
+                setHasStore(data.hasStore);
+            } catch (error) {
+                console.error('Error checking store:', error);
+                setHasStore(false);
+            }
+        }
+        checkStore();
+    }, []);
 
     // Default cart items if not provided
     const defaultCartItems: CartItem[] = cartItems || [
@@ -223,9 +240,21 @@ export default function ProductUploadHeader({
                         <span className="pu-logo-text">MONKEY PRINT</span>
                     </div>
                     <nav className="pu-desktop-nav">
-                        <a href="/" className="pu-desktop-nav-link">Accueil</a>
-                        <a href="/#stores" className="pu-desktop-nav-link">Shop List</a>
-                        <a href="/contact" className="pu-desktop-nav-link">Contactez-nous</a>
+                        {hasStore ? (
+                            <>
+                                <Link href="/dashboard/apercu" className="pu-desktop-nav-link">APERÇU</Link>
+                                <Link href="/dashboard/produits" className="pu-desktop-nav-link">PRODUITS</Link>
+                                <Link href="/dashboard/commandes" className="pu-desktop-nav-link">COMMANDES</Link>
+                                <Link href="/dashboard/portefeuille" className="pu-desktop-nav-link">PORTEFEUILLE</Link>
+                                <Link href="/dashboard/compte" className="pu-desktop-nav-link">COMPTE</Link>
+                            </>
+                        ) : (
+                            <>
+                                <a href="/" className="pu-desktop-nav-link">Accueil</a>
+                                <a href="/#stores" className="pu-desktop-nav-link">Shop List</a>
+                                <a href="/contact" className="pu-desktop-nav-link">Contactez-nous</a>
+                            </>
+                        )}
                     </nav>
                     <button
                         className="pu-menu-trigger"
@@ -251,9 +280,21 @@ export default function ProductUploadHeader({
                             ×
                         </button>
                         <nav className="pu-mobile-menu">
-                            <a href="/">Accueil</a>
-                            <a href="/#stores">Shop List</a>
-                            <a href="/contact">Contactez-nous</a>
+                            {hasStore ? (
+                                <>
+                                    <Link href="/dashboard/apercu" onClick={() => setMobileMenuOpen(false)}>Aperçu</Link>
+                                    <Link href="/dashboard/produits" onClick={() => setMobileMenuOpen(false)}>Produits</Link>
+                                    <Link href="/dashboard/commandes" onClick={() => setMobileMenuOpen(false)}>Commandes</Link>
+                                    <Link href="/dashboard/portefeuille" onClick={() => setMobileMenuOpen(false)}>Portefeuille</Link>
+                                    <Link href="/dashboard/compte" onClick={() => setMobileMenuOpen(false)}>Compte</Link>
+                                </>
+                            ) : (
+                                <>
+                                    <a href="/">Accueil</a>
+                                    <a href="/#stores">Shop List</a>
+                                    <a href="/contact">Contactez-nous</a>
+                                </>
+                            )}
                         </nav>
                     </div>
                 </div>

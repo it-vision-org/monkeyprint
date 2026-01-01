@@ -34,6 +34,9 @@ type MainHeaderProps = {
     
     // Optional initial session to prevent loading flash
     initialSession?: Session | null;
+    
+    // Whether to show dashboard link (only show if user has a store)
+    hasStore?: boolean;
 };
 
 const defaultMenuItems: MenuItem[] = [
@@ -57,7 +60,8 @@ export default function MainHeader({
     logoTextClassName = '',
     menuButtonClassName = '',
     mobileMenuProps = {},
-    initialSession
+    initialSession,
+    hasStore = true // Default to true for backward compatibility
 }: MainHeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { data: clientSession } = useSession();
@@ -81,7 +85,7 @@ export default function MainHeader({
         ...menuItems,
         ...(session?.user 
             ? [
-                { label: "Tableau de bord", href: "/dashboard", icon: "📊" },
+                ...(hasStore ? [{ label: "Tableau de bord", href: "/dashboard", icon: "📊" }] : []),
                 { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogout }
             ]
             : [
@@ -91,9 +95,32 @@ export default function MainHeader({
         )
     ];
 
-    // Mobile header (similar to existing Navbar)
     return (
         <>
+            <style dangerouslySetInnerHTML={{__html: `
+                .main-header-mobile-menu-button {
+                    display: flex;
+                }
+                .main-header-desktop-nav {
+                    display: none;
+                }
+                .main-header-inner {
+                    padding: 0 var(--mobile-padding-x, 18px);
+                }
+                @media (min-width: 769px) {
+                    .main-header-mobile-menu-button {
+                        display: none !important;
+                    }
+                    .main-header-desktop-nav {
+                        display: flex !important;
+                    }
+                    .main-header-inner {
+                        padding: 0 40px;
+                        max-width: 1200px;
+                        margin: 0 auto;
+                    }
+                }
+            `}} />
             <header className={className} style={{ 
                 position: 'sticky', 
                 top: 0, 
@@ -101,7 +128,7 @@ export default function MainHeader({
                 background: '#ffffff',
                 boxShadow: '0px 4px 11.4px -4px rgba(0, 0, 0, 0.25)'
             }}>
-                <div className={innerClassName} style={{
+                <div className={`${innerClassName} main-header-inner`} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -145,6 +172,57 @@ export default function MainHeader({
                         )}
                     </Link>
                     
+                    {/* Desktop Navigation */}
+                    <nav className="main-header-desktop-nav" style={{
+                        display: 'none',
+                        alignItems: 'center',
+                        gap: '32px'
+                    }}>
+                        {allMenuItems.map((item, index) => (
+                            item.onClick ? (
+                                <button
+                                    key={index}
+                                    onClick={item.onClick}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: '#242424',
+                                        fontSize: '16px',
+                                        fontFamily: 'Inter, sans-serif',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: 0
+                                    }}
+                                >
+                                    {item.icon && <span>{item.icon}</span>}
+                                    {item.label}
+                                </button>
+                            ) : (
+                                <Link
+                                    key={index}
+                                    href={item.href}
+                                    style={{
+                                        color: '#242424',
+                                        textDecoration: 'none',
+                                        fontSize: '16px',
+                                        fontFamily: 'Inter, sans-serif',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    {item.icon && <span>{item.icon}</span>}
+                                    {item.label}
+                                </Link>
+                            )
+                        ))}
+                    </nav>
+
+                    {/* Mobile Menu Button */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {showCart && (
                             <CartButton
@@ -156,7 +234,7 @@ export default function MainHeader({
                             />
                         )}
                         <button
-                            className={menuButtonClassName}
+                            className={`${menuButtonClassName} main-header-mobile-menu-button`}
                             onClick={() => handleMenuToggle(true)}
                             aria-label="Open menu"
                             type="button"

@@ -77,19 +77,21 @@ model Customer {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  status      String      @default("PENDING") // PENDING, PAID, SHIPPED, COMPLETED
-  totalAmount Float
+  id                String      @id @default(uuid())
+  status            String      @default("PENDING") // PENDING, CONFIRMED, IN_TREATMENT, IN_DELIVERY, DELIVERED_AND_PAID, RETURN
+  totalAmount       Float
+  deletionRequested Boolean     @default(false)
+  deliveredAt       DateTime?   // Set when status changes to DELIVERED_AND_PAID
   
-  customerId  String
-  storeId     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  customerId        String
+  storeId           String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
   
   // Relations
-  customer    Customer    @relation(fields: [customerId], references: [id])
-  store       Store       @relation(fields: [storeId], references: [id])
-  items       OrderItem[]
+  customer          Customer    @relation(fields: [customerId], references: [id])
+  store             Store       @relation(fields: [storeId], references: [id])
+  items             OrderItem[]
 }
 
 model OrderItem {

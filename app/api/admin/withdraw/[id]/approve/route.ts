@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const session = await auth();
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
@@ -25,7 +26,7 @@ export async function POST(
         }
 
         const withdrawal = await prisma.withdrawal.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!withdrawal) {
@@ -39,7 +40,7 @@ export async function POST(
         const newStatus = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
 
         const updatedWithdrawal = await prisma.withdrawal.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 status: newStatus,
                 processedAt: new Date(),

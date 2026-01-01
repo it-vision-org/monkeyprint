@@ -731,3 +731,355 @@
   .editor { height: 700px; }
   .canvasArea { gap: 20px; }
 }
+
+/* Image Options Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.imageOptionsModal {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.imageOptionsModal.dragOver {
+  border: 3px dashed #14b8a6;
+  background: #f0fdfa;
+  transform: scale(1.02);
+}
+
+.modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modalClose:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.modalClose:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
+}
+
+.dragDropArea {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+}
+
+.dragDropArea:hover {
+  border-color: #14b8a6;
+  background: #f0fdfa;
+}
+
+.dragDropArea.dragOver {
+  border-color: #14b8a6;
+  background: #f0fdfa;
+  border-width: 3px;
+  transform: scale(1.02);
+}
+
+.dragDropArea svg {
+  stroke: #64748b;
+  transition: stroke 0.3s ease;
+}
+
+.dragDropArea:hover svg,
+.dragDropArea.dragOver svg {
+  stroke: #14b8a6;
+}
+
+.dragDropText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.dragDropArea:hover .dragDropText,
+.dragDropArea.dragOver .dragDropText {
+  color: #14b8a6;
+}
+
+.dragDropSubtext {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.imageOptionsButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imageOptionBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.imageOptionBtn:hover {
+  border-color: #14b8a6;
+  background: #f0fdfa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+.imageOptionBtn svg {
+  width: 24px;
+  height: 24px;
+  stroke: #14b8a6;
+}
+
+/* AI Prompt Section */
+.aiPromptSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.promptLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.promptInput {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.promptInput:focus {
+  outline: none;
+  border-color: #14b8a6;
+}
+
+.promptInput:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.aiActions {
+  display: flex;
+  gap: 12px;
+}
+
+.generateBtn {
+  flex: 1;
+  padding: 12px 24px;
+  background: #14b8a6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #0d9488;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+.generateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.backBtn {
+  padding: 12px 24px;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backBtn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.backBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Generated Images Grid */
+.generatedImagesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.generatedImageCard {
+  aspect-ratio: 1;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  padding: 0;
+}
+
+.generatedImageCard:hover {
+  border-color: #14b8a6;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+.generatedImageCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.regenerateSection {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.regenerateBtn {
+  padding: 10px 20px;
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.regenerateBtn:hover {
+  background: #e2e8f0;
+}
+
+.miniSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* Drag and Drop Styles */
+.dragOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 184, 166, 0.1);
+  border: 3px dashed #14b8a6;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.dragOverlay svg {
+  stroke: #14b8a6;
+  opacity: 0.8;
+}
+
+.dragOverlay p {
+  font-size: 18px;
+  font-weight: 600;
+  color: #14b8a6;
+  margin: 0;
+}
+
+.dragHint {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.dragHint p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-style: italic;
+}

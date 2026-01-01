@@ -98,6 +98,14 @@ export default function DesignEditor({ productType, productColor, initialDesign,
     const [isRemovingBg, setIsRemovingBg] = useState(false);
     const [hasRemovedBg, setHasRemovedBg] = useState<Record<string, boolean>>({}); // Track by object id or ref
 
+    // Image options modal
+    const [showImageOptions, setShowImageOptions] = useState(false);
+    const [showAIPrompt, setShowAIPrompt] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+    const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+    const [isDraggingOver, setIsDraggingOver] = useState(false);
+
     // Undo/Redo state for UI
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
@@ -935,6 +943,81 @@ export default function DesignEditor({ productType, productColor, initialDesign,
     const handleFiles = (files: FileList | null) => {
         if (!files) return;
         Array.from(files).forEach(f => { if (f.type.startsWith('image/')) addImage(f); });
+        setShowImageOptions(false);
+        setIsDraggingOver(false);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDraggingOver(false);
+        handleFiles(e.dataTransfer.files);
+    };
+
+
+    const handleGenerateAI = async () => {
+        if (!aiPrompt.trim()) {
+            alert('Please enter a prompt');
+            return;
+        }
+
+        setIsGeneratingAI(true);
+        try {
+            // Call API to generate images with AI
+            const response = await fetch('/api/generate-ai-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: aiPrompt }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate images');
+            }
+
+            const data = await response.json();
+            if (data.images && data.images.length > 0) {
+                setGeneratedImages(data.images);
+            } else {
+                throw new Error('No images generated');
+            }
+        } catch (error) {
+            console.error('Error generating AI images:', error);
+            alert('Failed to generate images. Please try again.');
+        } finally {
+            setIsGeneratingAI(false);
+        }
+    };
+
+    const selectGeneratedImage = (imageUrl: string) => {
+        // Convert data URL to blob/file and add to canvas
+        fetch(imageUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], 'ai-generated.png', { type: 'image/png' });
+                addImage(file);
+                setShowImageOptions(false);
+                setShowAIPrompt(false);
+                setGeneratedImages([]);
+                setAiPrompt('');
+            })
+            .catch(err => {
+                console.error('Error loading generated image:', err);
+                alert('Failed to load generated image');
+            });
     };
 
     const updateTextProp = (prop: string, val: any) => {
@@ -1011,7 +1094,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                         <button className={`${styles.tool} ${activeTool === 'text' ? styles.active : ''}`} onClick={() => { setActiveTool('text'); addText(); }} title="Add Text">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" y1="20" x2="15" y2="20" /><line x1="12" y1="4" x2="12" y2="20" /></svg>
                         </button>
-                        <button className={`${styles.tool} ${activeTool === 'image' ? styles.active : ''}`} onClick={() => { setActiveTool('image'); fileInputRef.current?.click(); }} title="Add Images">
+                        <button className={`${styles.tool} ${activeTool === 'image' ? styles.active : ''}`} onClick={() => { setActiveTool('image'); setShowImageOptions(true); }} title="Add Images">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                         </button>
                         <button className={`${styles.tool} ${activeTool === 'draw' ? styles.active : ''}`} onClick={() => setActiveTool('draw')} title="Draw">
@@ -1178,6 +1261,127 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                     <div className={styles.colorPickerOverlay} onClick={() => setShowColorPicker(false)} />
                     <div className={styles.colorPicker}>
                         <SketchPicker color={currentColor} onChange={(c: ColorResult) => { setCurrentColor(c.hex); if (selected?.type === 'i-text') updateTextProp('fill', c.hex); if (mainCanvas.current?.freeDrawingBrush) mainCanvas.current.freeDrawingBrush.color = c.hex; }} presetColors={PRESET_COLORS} />
+                    </div>
+                </div>
+            )}
+
+            {/* Image Options Modal */}
+            {showImageOptions && (
+                <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); setGeneratedImages([]); } }}>
+                    <div 
+                        className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
+                        onClick={(e) => e.stopPropagation()}
+                        onDragOver={!showAIPrompt && generatedImages.length === 0 ? handleDragOver : undefined}
+                        onDragLeave={!showAIPrompt && generatedImages.length === 0 ? handleDragLeave : undefined}
+                        onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
+                    >
+                        <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setGeneratedImages([]); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
+                        
+                        {!showAIPrompt && generatedImages.length === 0 && (
+                            <>
+                                <h3 className={styles.modalTitle}>Add Image</h3>
+                                <div 
+                                    className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ''}`}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    {isDraggingOver ? (
+                                        <>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="64" height="64">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                            <p className={styles.dragDropText}>Drop your image here</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="48" height="48">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                            <p className={styles.dragDropText}>Drag and drop your image here</p>
+                                            <p className={styles.dragDropSubtext}>or click to browse</p>
+                                        </>
+                                    )}
+                                </div>
+                                <div className={styles.imageOptionsButtons}>
+                                    <button className={styles.imageOptionBtn} onClick={() => setShowAIPrompt(true)}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                            <path d="M2 17l10 5 10-5" />
+                                            <path d="M2 12l10 5 10-5" />
+                                        </svg>
+                                        <span>Generate with AI</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {showAIPrompt && generatedImages.length === 0 && (
+                            <>
+                                <h3 className={styles.modalTitle}>Generate with AI</h3>
+                                <div className={styles.aiPromptSection}>
+                                    <label className={styles.promptLabel}>Enter your prompt:</label>
+                                    <textarea
+                                        className={styles.promptInput}
+                                        value={aiPrompt}
+                                        onChange={(e) => setAiPrompt(e.target.value)}
+                                        placeholder="Describe the image you want to generate..."
+                                        rows={4}
+                                        disabled={isGeneratingAI}
+                                    />
+                                    <div className={styles.aiActions}>
+                                        <button
+                                            className={styles.generateBtn}
+                                            onClick={handleGenerateAI}
+                                            disabled={!aiPrompt.trim() || isGeneratingAI}
+                                        >
+                                            {isGeneratingAI ? (
+                                                <>
+                                                    <span className={styles.miniSpinner}></span>
+                                                    Generating...
+                                                </>
+                                            ) : (
+                                                'Generate'
+                                            )}
+                                        </button>
+                                        <button
+                                            className={styles.backBtn}
+                                            onClick={() => { setShowAIPrompt(false); setAiPrompt(''); }}
+                                            disabled={isGeneratingAI}
+                                        >
+                                            Back
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {generatedImages.length > 0 && (
+                            <>
+                                <h3 className={styles.modalTitle}>Select Generated Image</h3>
+                                <div className={styles.generatedImagesGrid}>
+                                    {generatedImages.map((img, index) => (
+                                        <button
+                                            key={index}
+                                            className={styles.generatedImageCard}
+                                            onClick={() => selectGeneratedImage(img)}
+                                        >
+                                            <img src={img} alt={`Generated ${index + 1}`} />
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className={styles.regenerateSection}>
+                                    <button
+                                        className={styles.regenerateBtn}
+                                        onClick={() => { setGeneratedImages([]); setShowAIPrompt(true); }}
+                                    >
+                                        Use New Prompt
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

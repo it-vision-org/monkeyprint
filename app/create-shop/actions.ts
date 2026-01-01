@@ -29,14 +29,20 @@ export async function registerUser(formData: FormData) {
             },
         });
 
-        // Attempt to sign in - signIn always throws NEXT_REDIRECT in server actions
-        // even with redirect: false, so we catch and ignore it
+        // Attempt to sign in - signIn may throw NEXT_REDIRECT in server actions
+        // We need to handle this properly
         try {
-            await signIn('credentials', { email, password, redirect: false });
+            const result = await signIn('credentials', { 
+                email, 
+                password, 
+                redirect: false 
+            });
+            // If signIn returns without throwing, it was successful
+            return { success: true };
         } catch (e: any) {
-            // Check if it's a Next.js redirect (which is expected)
-            if (e?.digest?.startsWith('NEXT_REDIRECT')) {
-                // This is normal - sign in was successful
+            // Check if it's a Next.js redirect (which indicates success in Next.js 15)
+            if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.message?.includes('NEXT_REDIRECT')) {
+                // This is normal - sign in was successful, redirect was triggered
                 return { success: true };
             }
             // Check for auth errors
@@ -44,12 +50,10 @@ export async function registerUser(formData: FormData) {
                 console.error('Auth error:', e);
                 return { error: 'Failed to auto-login' };
             }
-            // Re-throw unexpected errors
+            // For other errors, log and return error
             console.error('Unexpected sign-in error:', e);
-            throw e;
+            return { error: 'Failed to sign in after registration' };
         }
-
-        return { success: true };
     } catch (error: any) {
         // Let Next.js redirects pass through
         if (error?.digest?.startsWith('NEXT_REDIRECT')) {

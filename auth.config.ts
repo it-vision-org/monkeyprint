@@ -19,8 +19,9 @@ export const authConfig = {
                 return false; // Redirect unauthenticated users to login page
             }
 
-            // Redirect logged-in users away from login and create-shop pages
-            if (isLoggedIn && (isOnCreateShop || isOnLogin)) {
+            // Redirect logged-in users away from login page only
+            // Allow logged-in users to access /create-shop (they may not have a store yet)
+            if (isLoggedIn && isOnLogin) {
                 return NextResponse.redirect(new URL('/dashboard/apercu', nextUrl));
             }
 

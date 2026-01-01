@@ -29,7 +29,7 @@ export default function StoreThemeSelection() {
     return (
         <div className="theme-selection-page">
             <header className="theme-selection-header">
-                <Image src="/logo.png" alt="GrabMeShoe" width={120} height={40} style={{ objectFit: 'contain' }} />
+                <Image src="/logo.png" alt="Logo" width={120} height={40} style={{ objectFit: 'contain' }} />
             </header>
 
             <main className="theme-selection-main">

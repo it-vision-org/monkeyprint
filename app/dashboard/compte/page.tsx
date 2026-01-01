@@ -55,6 +55,7 @@ export default async function ComptePage() {
                     initialShopName={store.name}
                     email={user.email}
                     storeId={store.id}
+                    initialTheme={store.theme || 'theme-1'}
                 />
             </div>
         </div>

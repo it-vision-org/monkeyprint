@@ -5,7 +5,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 import UserDetailActions from "./UserDetailActions";
 
-export default async function AdminUserDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -14,7 +15,7 @@ export default async function AdminUserDetailPage({ params }: { params: { id: st
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
     const targetUser = await prisma.user.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             stores: {
                 include: {
@@ -39,7 +40,7 @@ export default async function AdminUserDetailPage({ params }: { params: { id: st
         const revenueResult = await prisma.order.aggregate({
             where: {
                 storeId: store.id,
-                status: { in: ['PAID', 'COMPLETED', 'SHIPPED'] }
+                status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] }
             },
             _sum: { totalAmount: true }
         });
@@ -253,7 +254,7 @@ export default async function AdminUserDetailPage({ params }: { params: { id: st
                                             {store.name}
                                         </div>
                                         <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                                            /{store.slug}
+                                            /shop/{store.slug}
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>

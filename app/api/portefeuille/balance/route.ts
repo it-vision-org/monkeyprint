@@ -20,11 +20,18 @@ export async function GET() {
 
         const store = user.stores[0];
 
-        // Calculate available amount (PAID/COMPLETED orders)
+        // Only count DELIVERED_AND_PAID orders that are more than 14 days old
+        const now = new Date();
+        const fourteenDaysAgo = new Date(now);
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
         const availableOrders = await prisma.order.findMany({
             where: {
                 storeId: store.id,
-                status: { in: ['PAID', 'COMPLETED'] }
+                status: 'DELIVERED_AND_PAID',
+                deliveredAt: {
+                    lte: fourteenDaysAgo
+                }
             }
         });
 
