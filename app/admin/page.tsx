@@ -5,13 +5,11 @@ import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
     const session = await auth();
-    // In a real scenario, check for session.user.role === 'ADMIN'
-    // For now, we allow access to authenticated users or check if email is admin
     if (!session?.user?.email) redirect("/");
 
-    // We can Implement a strict check here later:
-    // const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    // if (user?.role !== 'ADMIN') redirect("/dashboard");
+    // Check for admin role
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (user?.role !== 'ADMIN') redirect("/dashboard");
 
     const [
         storeCount,

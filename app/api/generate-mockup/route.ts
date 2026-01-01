@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_KEY = 'AIzaSyDOz1X0L9gPVkiELnH1OYVpn_1yqXieho4';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is not set');
+}
 // Primary model: gemini-3-pro-image-preview
 const GEMINI_API_URL_PRIMARY = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent';
 // Fallback model: gemini-2.5-flash-image
@@ -63,12 +66,25 @@ export async function POST(request: NextRequest) {
       ? designImageBase64.split(',')[1]
       : designImageBase64;
 
+    // Sanitize custom prompt to prevent injection
+    const sanitizePrompt = (input: string): string => {
+      // Remove potentially dangerous characters and limit length
+      return input
+        .trim()
+        .slice(0, 200) // Already validated, but extra safety
+        .replace(/[<>{}[\]\\]/g, '') // Remove brackets and backslashes
+        .replace(/\n/g, ' ') // Replace newlines with spaces
+        .replace(/\s+/g, ' ') // Collapse multiple spaces
+        .trim();
+    };
+
     // Build prompt for image editing
     let prompt: string;
     
     if (gender === 'custom' && customPrompt) {
-      // Use custom prompt with warning that it's user input and not sanitized
-      prompt = `[USER INPUT - NOT SANITIZED] The user has asked for a custom design. Their request is: ${customPrompt.trim()}. The t-shirt should have the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
+      // Sanitize the custom prompt before using it
+      const sanitizedPrompt = sanitizePrompt(customPrompt);
+      prompt = `The user has asked for a custom design. Their request is: ${sanitizedPrompt}. The t-shirt should have the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
     } else {
       // Use predefined prompt
       prompt = `${GENDER_PROMPTS[gender]} a t-shirt with the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;

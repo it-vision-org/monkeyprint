@@ -2,7 +2,7 @@ import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
     pages: {
-        signIn: '/create-shop', // Redirect to create-shop for login
+        signIn: '/login', // Dedicated login page
     },
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {

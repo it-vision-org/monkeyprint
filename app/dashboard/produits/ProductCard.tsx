@@ -43,44 +43,83 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
     return (
         <>
             <div className="produit-card" style={{ position: 'relative' }}>
-                {/* Delete Button */}
-                <button
-                    onClick={() => setShowDeleteModal(true)}
-                    style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: 'rgba(239, 68, 68, 0.9)',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 10,
-                        transition: 'all 0.2s',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 1)';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.9)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                    title="Supprimer le produit"
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                </button>
+                {/* Action Buttons */}
+                <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    display: 'flex',
+                    gap: '8px',
+                    zIndex: 10,
+                }}>
+                    {/* Edit Button */}
+                    <button
+                        onClick={() => router.push(`/dashboard/produits/${product.id}/edit`)}
+                        style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            background: 'rgba(59, 130, 246, 0.9)',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(59, 130, 246, 1)';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.9)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        title="Modifier le produit"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+
+                    {/* Delete Button */}
+                    <button
+                        onClick={() => setShowDeleteModal(true)}
+                        style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            border: 'none',
+                            background: 'rgba(239, 68, 68, 0.9)',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(239, 68, 68, 1)';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.9)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        title="Supprimer le produit"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                    </button>
+                </div>
 
                 <div className="produit-image-container">
                     {imageUrl ? (

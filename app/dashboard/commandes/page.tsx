@@ -6,7 +6,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import OrderActions from "./OrderActions";
 
-export default async function CommandesPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function CommandesPage({ searchParams }: { searchParams: { status?: string; q?: string } }) {
     const session = await auth();
     if (!session?.user?.email) redirect("/");
 
@@ -19,6 +19,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
     const store = user.stores[0];
 
     const statusParam = searchParams.status || 'non-confirme';
+    const query = searchParams.q || '';
 
     let whereStatus: any = {};
 
@@ -30,10 +31,22 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
         whereStatus = { status: 'RETURNED' };
     }
 
+    // Build search filter
+    let searchFilter: any = {};
+    if (query) {
+        searchFilter.OR = [
+            { id: { contains: query, mode: 'insensitive' } },
+            { customer: { name: { contains: query, mode: 'insensitive' } } },
+            { customer: { phoneNumber: { contains: query, mode: 'insensitive' } } },
+            { customer: { address: { contains: query, mode: 'insensitive' } } },
+        ];
+    }
+
     const orders = await prisma.order.findMany({
         where: {
             storeId: store.id,
-            ...whereStatus
+            ...whereStatus,
+            ...searchFilter
         },
         include: {
             customer: true
@@ -73,21 +86,21 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
                 <div className="commandes-container">
                     <div className="commandes-status-tabs">
                         <Link
-                            href="/dashboard/commandes?status=non-confirme"
+                            href={`/dashboard/commandes?status=non-confirme${query ? `&q=${encodeURIComponent(query)}` : ''}`}
                             className={`commandes-status-tab orange ${statusParam === 'non-confirme' ? 'active' : ''}`}
                         >
                             <span className="dash-submenu-dot orange"></span>
                             Non confirmé
                         </Link>
                         <Link
-                            href="/dashboard/commandes?status=confirme"
+                            href={`/dashboard/commandes?status=confirme${query ? `&q=${encodeURIComponent(query)}` : ''}`}
                             className={`commandes-status-tab green ${statusParam === 'confirme' ? 'active' : ''}`}
                         >
                             <span className="dash-submenu-dot green"></span>
                             Confirmé
                         </Link>
                         <Link
-                            href="/dashboard/commandes?status=retours"
+                            href={`/dashboard/commandes?status=retours${query ? `&q=${encodeURIComponent(query)}` : ''}`}
                             className={`commandes-status-tab red ${statusParam === 'retours' ? 'active' : ''}`}
                         >
                             <span className="dash-submenu-dot red"></span>
@@ -113,13 +126,20 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
                     )}
 
                     <div className="commandes-search-bar">
-                        <div className="commandes-search">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <form action="/dashboard/commandes" method="get" className="commandes-search" style={{ width: '100%', display: 'flex' }}>
+                            <input type="hidden" name="status" value={statusParam} />
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: '12px', position: 'absolute', pointerEvents: 'none' }}>
                                 <circle cx="11" cy="11" r="8" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 <path d="M21 21L16.65 16.65" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <input type="text" placeholder="Rechercher" />
-                        </div>
+                            <input 
+                                type="text" 
+                                name="q"
+                                placeholder="Rechercher par ID, nom, téléphone ou adresse..." 
+                                defaultValue={query}
+                                style={{ width: '100%', paddingLeft: '40px' }}
+                            />
+                        </form>
                         {/* Removed Date Picker mock for now, keep simplistic */}
                     </div>
 
@@ -130,14 +150,21 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
                             </div>
                         ) : (
                             orders.map((order) => (
-                                <div key={order.id} className="commande-card">
-                                    <div className="commande-card-header">
-                                        <div className="commande-id">#{order.id.slice(0, 8)}</div>
-                                        <div className="commande-header-right">
-                                            <div className="commande-date">{format(order.createdAt, "dd/MM/yyyy")}</div>
-                                            <OrderActions orderId={order.id} status={order.status} />
+                                <Link 
+                                    key={order.id} 
+                                    href={`/dashboard/commandes/${order.id}`}
+                                    style={{ textDecoration: 'none', color: 'inherit' }}
+                                >
+                                    <div className="commande-card" style={{ cursor: 'pointer' }}>
+                                        <div className="commande-card-header">
+                                            <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                            <div className="commande-header-right">
+                                                <div className="commande-date">{format(order.createdAt, "dd/MM/yyyy")}</div>
+                                                <div onClick={(e) => e.preventDefault()}>
+                                                    <OrderActions orderId={order.id} status={order.status} />
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
                                     <div className="commande-card-body">
                                         <div className="commande-row">
                                             <div className="commande-label">Nom</div>
@@ -157,6 +184,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
                                         </div>
                                     </div>
                                 </div>
+                                </Link>
                             ))
                         )}
                     </div>

@@ -1,18 +1,40 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const DEFAULT_SETTINGS = {
+    siteName: "Monkey Print",
+    siteEmail: "admin@monkeyprint.com",
+    maintenanceMode: false,
+    allowNewStores: true,
+    commissionRate: 15,
+    maxProductsPerStore: 100,
+    enableEmailNotifications: true,
+    enableSMSNotifications: false,
+};
 
 export default function AdminSettingsPage() {
-    const [settings, setSettings] = useState({
-        siteName: "Monkey Print",
-        siteEmail: "admin@monkeyprint.com",
-        maintenanceMode: false,
-        allowNewStores: true,
-        commissionRate: 15,
-        maxProductsPerStore: 100,
-        enableEmailNotifications: true,
-        enableSMSNotifications: false,
-    });
+    const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    useEffect(() => {
+        // Load settings from API
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.settings) {
+                    // Merge with defaults to ensure all keys are present
+                    setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
+                }
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error('Error loading settings:', err);
+                setIsLoading(false);
+            });
+    }, []);
 
     const handleToggle = (key: string) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
@@ -22,9 +44,63 @@ export default function AdminSettingsPage() {
         setSettings(prev => ({ ...prev, [key]: value }));
     };
 
+    const handleSave = async () => {
+        setIsSaving(true);
+        setSaveMessage(null);
+
+        try {
+            const response = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ settings }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSaveMessage({ type: 'success', text: 'Paramètres enregistrés avec succès' });
+                setTimeout(() => setSaveMessage(null), 3000);
+            } else {
+                setSaveMessage({ type: 'error', text: data.error || 'Erreur lors de l\'enregistrement' });
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            setSaveMessage({ type: 'error', text: 'Erreur lors de l\'enregistrement' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <>
+                <h1 className="dash-page-title">Paramètres</h1>
+                <div style={{ padding: '40px', textAlign: 'center' }}>
+                    Chargement...
+                </div>
+            </>
+        );
+    }
+
     return (
         <>
             <h1 className="dash-page-title">Paramètres</h1>
+            
+            {saveMessage && (
+                <div style={{
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    marginBottom: '24px',
+                    background: saveMessage.type === 'success' ? '#d1fae5' : '#fee2e2',
+                    color: saveMessage.type === 'success' ? '#065f46' : '#991b1b',
+                    fontSize: '14px',
+                    fontWeight: 500
+                }}>
+                    {saveMessage.text}
+                </div>
+            )}
 
             {/* General Settings */}
             <div className="admin-settings-section">
@@ -148,11 +224,16 @@ export default function AdminSettingsPage() {
 
             {/* Save Button */}
             <div className="admin-settings-actions">
-                <button className="admin-settings-save-btn">
+                <button 
+                    className="admin-settings-save-btn"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    style={{ opacity: isSaving ? 0.6 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+                >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Enregistrer les modifications
+                    {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
                 </button>
             </div>
         </>

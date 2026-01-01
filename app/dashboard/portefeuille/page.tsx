@@ -34,8 +34,16 @@ export default async function PortefeuillePage() {
     const availableOrders = orders.filter(o => ['PAID', 'COMPLETED'].includes(o.status));
     const availableAmount = availableOrders.reduce((acc, o) => acc + o.totalAmount, 0);
 
-    // "Last Withdrawal" - We don't have a Withdrawal model yet. Making it 0 or placeholder.
-    const withdrawnAmount = 0;
+    // Get last withdrawal
+    const lastWithdrawal = await prisma.withdrawal.findFirst({
+        where: {
+            storeId: store.id,
+            status: { in: ['APPROVED', 'COMPLETED'] }
+        },
+        orderBy: { processedAt: 'desc' }
+    });
+
+    const withdrawnAmount = lastWithdrawal?.amount || 0;
 
     return (
         <div className="portefeuille-main">
@@ -101,7 +109,9 @@ export default async function PortefeuillePage() {
                                     <span className="portefeuille-section-item-price green-price">{order.totalAmount} DT</span>
                                 </div>
                             ))}
-                            <button className="portefeuille-section-button">Recevez votre paiement</button>
+                            <Link href="/dashboard/portefeuille/withdraw" className="portefeuille-section-button" style={{ textDecoration: 'none', display: 'block' }}>
+                                Recevez votre paiement
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -109,7 +119,7 @@ export default async function PortefeuillePage() {
                 {/* Divider */}
                 <div className="portefeuille-divider"></div>
 
-                {/* Votre dernier paiement (Static for now as we don't track withdrawals yet) */}
+                {/* Votre dernier paiement */}
                 <div className="portefeuille-section">
                     <div className="portefeuille-section-icon purple-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -120,10 +130,32 @@ export default async function PortefeuillePage() {
                     <div className="portefeuille-section-content">
                         <h3 className="portefeuille-section-title">Votre dernier paiement</h3>
                         <p className="portefeuille-section-desc">Votre dernier retrait d&apos;argent !</p>
+                        {lastWithdrawal && (
+                            <div className="portefeuille-section-date">
+                                {format(lastWithdrawal.processedAt || lastWithdrawal.requestedAt, "dd/MM/yyyy")}
+                            </div>
+                        )}
                         <div className="portefeuille-section-amount purple-amount">
-                            <span className="portefeuille-section-value">0</span>
+                            <span className="portefeuille-section-value">{withdrawnAmount}</span>
                             <span className="portefeuille-section-currency">DT</span>
                         </div>
+                        {lastWithdrawal && (
+                            <div className="portefeuille-section-items">
+                                <Link 
+                                    href="/dashboard/portefeuille/withdrawals"
+                                    style={{ 
+                                        display: 'block',
+                                        marginTop: '12px',
+                                        fontSize: '14px',
+                                        color: '#a855f7',
+                                        fontWeight: 600,
+                                        textDecoration: 'none'
+                                    }}
+                                >
+                                    Voir l&apos;historique complet →
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

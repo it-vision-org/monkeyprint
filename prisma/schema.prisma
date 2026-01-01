@@ -40,6 +40,7 @@ model Store {
   owner       User      @relation(fields: [ownerId], references: [id])
   products    Product[]
   orders      Order[]
+  withdrawals Withdrawal[]
 }
 
 model Product {
@@ -104,4 +105,31 @@ model OrderItem {
   // Relations
   product   Product @relation(fields: [productId], references: [id])
   order     Order   @relation(fields: [orderId], references: [id])
+}
+
+model Withdrawal {
+  id            String    @id @default(uuid())
+  storeId       String
+  amount        Float
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
+  bankDetails   String?   @db.Text // JSON or text with bank account info
+  requestedAt   DateTime  @default(now())
+  processedAt   DateTime?
+  processedBy   String?   // Admin user ID who processed it
+  notes         String?   @db.Text
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  store         Store     @relation(fields: [storeId], references: [id])
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+  type      String   @default("string") // string, number, boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

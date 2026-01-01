@@ -224,8 +224,8 @@ export default function ProductUploadHeader({
                     </div>
                     <nav className="pu-desktop-nav">
                         <a href="/" className="pu-desktop-nav-link">Accueil</a>
-                        <a href="#" className="pu-desktop-nav-link">Shop List</a>
-                        <a href="#" className="pu-desktop-nav-link">Contactez-nous</a>
+                        <a href="/#stores" className="pu-desktop-nav-link">Shop List</a>
+                        <a href="/contact" className="pu-desktop-nav-link">Contactez-nous</a>
                     </nav>
                     <button
                         className="pu-menu-trigger"
@@ -252,8 +252,8 @@ export default function ProductUploadHeader({
                         </button>
                         <nav className="pu-mobile-menu">
                             <a href="/">Accueil</a>
-                            <a href="#">Shop List</a>
-                            <a href="#">Contactez-nous</a>
+                            <a href="/#stores">Shop List</a>
+                            <a href="/contact">Contactez-nous</a>
                         </nav>
                     </div>
                 </div>

@@ -13,8 +13,8 @@ import type { MenuItem } from "@/components/types";
 
 const menuItems: MenuItem[] = [
     { label: "Connexion / S'inscrire", href: "/create-shop", icon: "👤" },
-    { label: "Découvrez les boutiques", href: "#stores", icon: "🔥" },
-    { label: "Contactez-nous", href: "#", icon: "💬" },
+    { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
+    { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
 
 export default function Home() {

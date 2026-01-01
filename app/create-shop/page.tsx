@@ -17,7 +17,7 @@ import { registerUser, createStore } from './actions';
 const createShopMenuItems: MenuItem[] = [
     { label: "Accueil", href: "/", icon: "🏠" },
     { label: "Découvrez les boutiques", href: "/#stores", icon: "🔥" },
-    { label: "Contactez-nous", href: "#", icon: "💬" },
+    { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
 
 
