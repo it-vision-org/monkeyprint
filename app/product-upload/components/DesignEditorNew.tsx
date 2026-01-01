@@ -97,13 +97,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
     const [imageOpacity, setImageOpacity] = useState(1);
     const [isRemovingBg, setIsRemovingBg] = useState(false);
     const [hasRemovedBg, setHasRemovedBg] = useState<Record<string, boolean>>({}); // Track by object id or ref
+    const [originalImages, setOriginalImages] = useState<Record<string, string>>({}); // Store original image data URLs by object id
+    const [bgRemovalTechnique, setBgRemovalTechnique] = useState<'conservative' | 'moderate' | 'aggressive'>('moderate');
+    const [showTechniqueSelector, setShowTechniqueSelector] = useState(false);
 
     // Image options modal
     const [showImageOptions, setShowImageOptions] = useState(false);
     const [showAIPrompt, setShowAIPrompt] = useState(false);
     const [aiPrompt, setAiPrompt] = useState('');
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-    const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+    const [generatedImages, setGeneratedImages] = useState<string[]>([]); // Current batch of generated images
+    const [aiImageHistory, setAiImageHistory] = useState<string[]>([]); // History of all generated images
     const [isDraggingOver, setIsDraggingOver] = useState(false);
 
     // Undo/Redo state for UI
@@ -991,6 +995,16 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             const data = await response.json();
             if (data.images && data.images.length > 0) {
                 setGeneratedImages(data.images);
+                // Add new images to history (avoid duplicates)
+                setAiImageHistory(prev => {
+                    const newHistory = [...prev];
+                    data.images.forEach((img: string) => {
+                        if (!newHistory.includes(img)) {
+                            newHistory.push(img);
+                        }
+                    });
+                    return newHistory;
+                });
             } else {
                 throw new Error('No images generated');
             }
@@ -1011,7 +1025,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 addImage(file);
                 setShowImageOptions(false);
                 setShowAIPrompt(false);
-                setGeneratedImages([]);
+                // Don't clear generatedImages or history - keep them for next time
                 setAiPrompt('');
             })
             .catch(err => {
@@ -1212,42 +1226,335 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                 />
 
                                 {!((selected as any).id && hasRemovedBg[(selected as any).id]) && (
-                                    <button
-                                        className={`${styles.removeBgBtn} ${isRemovingBg ? styles.loading : ''}`}
-                                        onClick={() => {
-                                            if (isRemovingBg) return;
-                                            setIsRemovingBg(true);
-                                            // Fake removing bg animation
-                                            setTimeout(() => {
-                                                setIsRemovingBg(false);
-                                                // Pretend we did something
-                                                if (selected) {
-                                                    const id = (selected as any).id || Math.random().toString();
-                                                    (selected as any).id = id;
-                                                    setHasRemovedBg(prev => ({ ...prev, [id]: true }));
-                                                    saveCurrentDesign();
-                                                }
-                                            }, 2000);
-                                        }}
-                                        disabled={isRemovingBg}
-                                    >
-                                        {isRemovingBg ? (
-                                            <>
-                                                <span className={styles.miniSpinner}></span>
-                                                Removing...
-                                            </>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                        {!showTechniqueSelector ? (
+                                            <button
+                                                className={`${styles.removeBgBtn} ${isRemovingBg ? styles.loading : ''}`}
+                                                onClick={() => {
+                                                    if (isRemovingBg) return;
+                                                    setShowTechniqueSelector(true);
+                                                }}
+                                                disabled={isRemovingBg}
+                                            >
+                                                {isRemovingBg ? (
+                                                    <>
+                                                        <span className={styles.miniSpinner}></span>
+                                                        Removing...
+                                                    </>
+                                                ) : (
+                                                    <>✨ Remove Background</>
+                                                )}
+                                            </button>
                                         ) : (
-                                            <>✨ Remove Background</>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
+                                                    Choose removal technique:
+                                                </div>
+                                                <button
+                                                    className={styles.techniqueBtn}
+                                                    style={{
+                                                        background: bgRemovalTechnique === 'conservative' 
+                                                            ? 'linear-gradient(135deg, #10b981, #059669)' 
+                                                            : 'rgba(0,0,0,0.05)',
+                                                        color: bgRemovalTechnique === 'conservative' ? 'white' : '#475569',
+                                                        border: `2px solid ${bgRemovalTechnique === 'conservative' ? '#10b981' : 'rgba(0,0,0,0.08)'}`,
+                                                    }}
+                                                    onClick={() => setBgRemovalTechnique('conservative')}
+                                                >
+                                                    🛡️ Conservative (Preserves more)
+                                                </button>
+                                                <button
+                                                    className={styles.techniqueBtn}
+                                                    style={{
+                                                        background: bgRemovalTechnique === 'moderate' 
+                                                            ? 'linear-gradient(135deg, #6366f1, #4f46e5)' 
+                                                            : 'rgba(0,0,0,0.05)',
+                                                        color: bgRemovalTechnique === 'moderate' ? 'white' : '#475569',
+                                                        border: `2px solid ${bgRemovalTechnique === 'moderate' ? '#6366f1' : 'rgba(0,0,0,0.08)'}`,
+                                                    }}
+                                                    onClick={() => setBgRemovalTechnique('moderate')}
+                                                >
+                                                    ⚖️ Moderate (Balanced)
+                                                </button>
+                                                <button
+                                                    className={styles.techniqueBtn}
+                                                    style={{
+                                                        background: bgRemovalTechnique === 'aggressive' 
+                                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+                                                            : 'rgba(0,0,0,0.05)',
+                                                        color: bgRemovalTechnique === 'aggressive' ? 'white' : '#475569',
+                                                        border: `2px solid ${bgRemovalTechnique === 'aggressive' ? '#ef4444' : 'rgba(0,0,0,0.08)'}`,
+                                                    }}
+                                                    onClick={() => setBgRemovalTechnique('aggressive')}
+                                                >
+                                                    🔥 Aggressive (Removes more)
+                                                </button>
+                                                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                                                    <button
+                                                        className={styles.techniqueBtn}
+                                                        style={{
+                                                            flex: 1,
+                                                            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                        }}
+                                                        onClick={async () => {
+                                                            if (isRemovingBg || !selected || !mainCanvas.current) return;
+                                                            
+                                                            // Check if selected object is an image
+                                                            if (!(selected instanceof fabric.FabricImage)) {
+                                                                alert('Please select an image to remove background');
+                                                                return;
+                                                            }
+
+                                                            setIsRemovingBg(true);
+                                                            setShowTechniqueSelector(false);
+
+                                                            try {
+                                                                // Get the image's data URL
+                                                                const img = selected as fabric.FabricImage;
+                                                                const imgElement = img.getElement() as HTMLImageElement;
+                                                                
+                                                                // Get the original image source URL
+                                                                let imageSrc = imgElement.src;
+                                                                
+                                                                // If it's a blob URL, we need to convert it to data URL
+                                                                let imageDataUrl: string;
+                                                                
+                                                                if (imageSrc.startsWith('data:')) {
+                                                                    // Already a data URL
+                                                                    imageDataUrl = imageSrc;
+                                                                } else if (imageSrc.startsWith('blob:')) {
+                                                                    // Convert blob URL to data URL
+                                                                    const response = await fetch(imageSrc);
+                                                                    const blob = await response.blob();
+                                                                    imageDataUrl = await new Promise((resolve, reject) => {
+                                                                        const reader = new FileReader();
+                                                                        reader.onloadend = () => resolve(reader.result as string);
+                                                                        reader.onerror = reject;
+                                                                        reader.readAsDataURL(blob);
+                                                                    });
+                                                                } else {
+                                                                    // For other URLs, fetch and convert
+                                                                    const response = await fetch(imageSrc);
+                                                                    const blob = await response.blob();
+                                                                    imageDataUrl = await new Promise((resolve, reject) => {
+                                                                        const reader = new FileReader();
+                                                                        reader.onloadend = () => resolve(reader.result as string);
+                                                                        reader.onerror = reject;
+                                                                        reader.readAsDataURL(blob);
+                                                                    });
+                                                                }
+                                                                
+                                                                // If we still don't have a data URL, create one from the image element
+                                                                if (!imageDataUrl || !imageDataUrl.startsWith('data:')) {
+                                                                    const tempCanvas = document.createElement('canvas');
+                                                                    const naturalWidth = imgElement.naturalWidth || img.width || 800;
+                                                                    const naturalHeight = imgElement.naturalHeight || img.height || 800;
+                                                                    
+                                                                    tempCanvas.width = naturalWidth;
+                                                                    tempCanvas.height = naturalHeight;
+                                                                    const tempCtx = tempCanvas.getContext('2d');
+                                                                    
+                                                                    if (!tempCtx) {
+                                                                        throw new Error('Could not get canvas context');
+                                                                    }
+
+                                                                    // Wait for image to load if needed
+                                                                    await new Promise((resolve) => {
+                                                                        if (imgElement.complete) {
+                                                                            resolve(null);
+                                                                        } else {
+                                                                            imgElement.onload = () => resolve(null);
+                                                                            imgElement.onerror = () => resolve(null);
+                                                                        }
+                                                                    });
+
+                                                                    // Draw the image to the canvas at full resolution
+                                                                    tempCtx.drawImage(imgElement, 0, 0, naturalWidth, naturalHeight);
+                                                                    
+                                                                    // Get the data URL
+                                                                    imageDataUrl = tempCanvas.toDataURL('image/png');
+                                                                }
+
+                                                                // Store the original image before processing (for undo)
+                                                                const currentId = (img as any).id || Math.random().toString();
+                                                                if (!originalImages[currentId]) {
+                                                                    setOriginalImages(prev => ({ ...prev, [currentId]: imageDataUrl }));
+                                                                }
+
+                                                                // Call the API to remove background with selected technique
+                                                                const response = await fetch('/api/remove-background', {
+                                                                    method: 'POST',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/json',
+                                                                    },
+                                                                    body: JSON.stringify({ 
+                                                                        imageDataUrl,
+                                                                        technique: bgRemovalTechnique 
+                                                                    }),
+                                                                });
+
+                                                                if (!response.ok) {
+                                                                    const error = await response.json();
+                                                                    throw new Error(error.error || 'Failed to remove background');
+                                                                }
+
+                                                                const data = await response.json();
+                                                                
+                                                                if (!data.success || !data.imageDataUrl) {
+                                                                    throw new Error('Invalid response from server');
+                                                                }
+
+                                                                // Replace the image with the processed version
+                                                                const processedDataUrl = data.imageDataUrl;
+                                                                
+                                                                // Create new image from processed data URL
+                                                                fabric.FabricImage.fromURL(processedDataUrl).then((newImg: fabric.FabricImage) => {
+                                                                    if (!mainCanvas.current) return;
+
+                                                                    // Preserve the position, scale, and other properties
+                                                                    newImg.set({
+                                                                        left: img.left,
+                                                                        top: img.top,
+                                                                        scaleX: img.scaleX,
+                                                                        scaleY: img.scaleY,
+                                                                        angle: img.angle,
+                                                                        originX: img.originX,
+                                                                        originY: img.originY,
+                                                                        opacity: img.opacity,
+                                                                        clipPath: img.clipPath,
+                                                                    });
+
+                                                                    // Remove old image and add new one
+                                                                    mainCanvas.current.remove(img);
+                                                                    mainCanvas.current.add(newImg);
+                                                                    mainCanvas.current.setActiveObject(newImg);
+                                                                    mainCanvas.current.renderAll();
+                                                                    
+                                                                    // Mark as processed and preserve original image reference
+                                                                    const id = (newImg as any).id || currentId;
+                                                                    (newImg as any).id = id;
+                                                                    setHasRemovedBg(prev => ({ ...prev, [id]: true }));
+                                                                    // Keep the original image stored (don't overwrite if it exists)
+                                                                    if (!originalImages[id]) {
+                                                                        setOriginalImages(prev => ({ ...prev, [id]: imageDataUrl }));
+                                                                    }
+                                                                    setSelected(newImg);
+                                                                    
+                                                                    saveCurrentDesign();
+                                                                    setIsRemovingBg(false);
+                                                                }).catch((err) => {
+                                                                    console.error('Error loading processed image:', err);
+                                                                    alert('Failed to load processed image');
+                                                                    setIsRemovingBg(false);
+                                                                });
+
+                                                            } catch (error: any) {
+                                                                console.error('Error removing background:', error);
+                                                                alert(error.message || 'Failed to remove background. Please try again.');
+                                                                setIsRemovingBg(false);
+                                                            }
+                                                        }}
+                                                    disabled={isRemovingBg}
+                                                >
+                                                    {isRemovingBg ? (
+                                                        <>
+                                                            <span className={styles.miniSpinner}></span>
+                                                            Processing...
+                                                        </>
+                                                    ) : (
+                                                        <>✨ Apply {bgRemovalTechnique.charAt(0).toUpperCase() + bgRemovalTechnique.slice(1)}</>
+                                                    )}
+                                                </button>
+                                                <button
+                                                    className={styles.techniqueBtn}
+                                                    style={{
+                                                        flex: 1,
+                                                        background: 'rgba(0,0,0,0.05)',
+                                                        color: '#475569',
+                                                        border: '1px solid rgba(0,0,0,0.08)',
+                                                    }}
+                                                    onClick={() => setShowTechniqueSelector(false)}
+                                                    disabled={isRemovingBg}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
                                         )}
-                                    </button>
+                                    </div>
                                 )}
 
                                 {selected && (selected as any).id && hasRemovedBg[(selected as any).id] && (
-                                    <div className={styles.bgRemovedBadge}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        Background Removed
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                                        <div className={styles.bgRemovedBadge}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                            Background Removed
+                                        </div>
+                                        {originalImages[(selected as any).id] && (
+                                            <button
+                                                className={styles.undoRemoveBgBtn}
+                                                onClick={async () => {
+                                                    if (!selected || !mainCanvas.current) return;
+                                                    
+                                                    const img = selected as fabric.FabricImage;
+                                                    const id = (img as any).id;
+                                                    const originalDataUrl = originalImages[id];
+                                                    
+                                                    if (!originalDataUrl) {
+                                                        alert('Original image not found');
+                                                        return;
+                                                    }
+
+                                                    try {
+                                                        // Restore the original image
+                                                        fabric.FabricImage.fromURL(originalDataUrl).then((originalImg: fabric.FabricImage) => {
+                                                            if (!mainCanvas.current) return;
+
+                                                            // Preserve the position, scale, and other properties
+                                                            originalImg.set({
+                                                                left: img.left,
+                                                                top: img.top,
+                                                                scaleX: img.scaleX,
+                                                                scaleY: img.scaleY,
+                                                                angle: img.angle,
+                                                                originX: img.originX,
+                                                                originY: img.originY,
+                                                                opacity: img.opacity,
+                                                                clipPath: img.clipPath,
+                                                            });
+
+                                                            // Remove processed image and add original
+                                                            mainCanvas.current.remove(img);
+                                                            mainCanvas.current.add(originalImg);
+                                                            mainCanvas.current.setActiveObject(originalImg);
+                                                            mainCanvas.current.renderAll();
+                                                            
+                                                            // Clear the background removal flag
+                                                            setHasRemovedBg(prev => {
+                                                                const newState = { ...prev };
+                                                                delete newState[id];
+                                                                return newState;
+                                                            });
+                                                            setSelected(originalImg);
+                                                            
+                                                            saveCurrentDesign();
+                                                        }).catch((err) => {
+                                                            console.error('Error restoring original image:', err);
+                                                            alert('Failed to restore original image');
+                                                        });
+                                                    } catch (error: any) {
+                                                        console.error('Error undoing background removal:', error);
+                                                        alert(error.message || 'Failed to undo background removal');
+                                                    }
+                                                }}
+                                            >
+                                                ↶ Undo Background Removal
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1267,7 +1574,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
             {/* Image Options Modal */}
             {showImageOptions && (
-                <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); setGeneratedImages([]); } }}>
+                <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); } }}>
                     <div 
                         className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
                         onClick={(e) => e.stopPropagation()}
@@ -1275,7 +1582,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                         onDragLeave={!showAIPrompt && generatedImages.length === 0 ? handleDragLeave : undefined}
                         onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
                     >
-                        <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setGeneratedImages([]); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
+                        <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
                         
                         {!showAIPrompt && generatedImages.length === 0 && (
                             <>
@@ -1355,30 +1662,109 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                         </button>
                                     </div>
                                 </div>
+                                
+                                {/* Show history if available when prompt is open */}
+                                {aiImageHistory.length > 0 && (
+                                    <>
+                                        <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '24px', marginBottom: '12px' }}>
+                                            Previous Generations
+                                        </h4>
+                                        <div className={styles.generatedImagesGrid}>
+                                            {aiImageHistory.map((img, index) => (
+                                                <button
+                                                    key={`history-${index}`}
+                                                    className={styles.generatedImageCard}
+                                                    onClick={() => selectGeneratedImage(img)}
+                                                >
+                                                    <img src={img} alt={`Previous ${index + 1}`} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </>
                         )}
 
-                        {generatedImages.length > 0 && (
+                        {(generatedImages.length > 0 || aiImageHistory.length > 0) && (
                             <>
-                                <h3 className={styles.modalTitle}>Select Generated Image</h3>
-                                <div className={styles.generatedImagesGrid}>
-                                    {generatedImages.map((img, index) => (
-                                        <button
-                                            key={index}
-                                            className={styles.generatedImageCard}
-                                            onClick={() => selectGeneratedImage(img)}
-                                        >
-                                            <img src={img} alt={`Generated ${index + 1}`} />
-                                        </button>
-                                    ))}
-                                </div>
+                                <h3 className={styles.modalTitle}>
+                                    {generatedImages.length > 0 ? 'New Generated Images' : 'Previous Generated Images'}
+                                </h3>
+                                
+                                {/* Show current batch if available */}
+                                {generatedImages.length > 0 && (
+                                    <div className={styles.generatedImagesGrid}>
+                                        {generatedImages.map((img, index) => (
+                                            <button
+                                                key={`new-${index}`}
+                                                className={styles.generatedImageCard}
+                                                onClick={() => selectGeneratedImage(img)}
+                                            >
+                                                <img src={img} alt={`Generated ${index + 1}`} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Show history if there are previous images */}
+                                {aiImageHistory.length > 0 && (
+                                    <>
+                                        {generatedImages.length > 0 && (
+                                            <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '20px', marginBottom: '12px' }}>
+                                                Previous Generations
+                                            </h4>
+                                        )}
+                                        <div className={styles.generatedImagesGrid}>
+                                            {aiImageHistory
+                                                .filter(img => !generatedImages.includes(img)) // Don't show duplicates
+                                                .map((img, index) => (
+                                                    <button
+                                                        key={`history-${index}`}
+                                                        className={styles.generatedImageCard}
+                                                        onClick={() => selectGeneratedImage(img)}
+                                                    >
+                                                        <img src={img} alt={`Previous ${index + 1}`} />
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className={styles.regenerateSection}>
                                     <button
                                         className={styles.regenerateBtn}
-                                        onClick={() => { setGeneratedImages([]); setShowAIPrompt(true); }}
+                                        onClick={() => { 
+                                            setGeneratedImages([]); 
+                                            setShowAIPrompt(true); 
+                                        }}
                                     >
-                                        Use New Prompt
+                                        Generate New Images
                                     </button>
+                                    {aiImageHistory.length > 0 && (
+                                        <button
+                                            className={styles.clearHistoryBtn}
+                                            onClick={() => {
+                                                if (confirm('Clear all generated image history?')) {
+                                                    setAiImageHistory([]);
+                                                    setGeneratedImages([]);
+                                                }
+                                            }}
+                                            style={{
+                                                marginTop: '8px',
+                                                padding: '8px 16px',
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                color: '#dc2626',
+                                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                borderRadius: '8px',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                            }}
+                                        >
+                                            Clear History
+                                        </button>
+                                    )}
                                 </div>
                             </>
                         )}

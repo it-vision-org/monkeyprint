@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
-import ProductUploadHeader from "./components/ProductUploadHeader";
-import DesignEditor from "./components/DesignEditorNew";
+import DesignEditor from "../../product-upload/components/DesignEditorNew";
 
 type ProductCard = {
     id: string;
@@ -191,7 +190,7 @@ export default function ProductUploadPage() {
         console.log('Verified saved design data:', verify?.substring(0, 200));
         
         // Navigate immediately - sessionStorage is synchronous
-        router.push("/product-upload/details");
+        router.push("/dashboard/product-upload/details");
     };
 
     const handleDesignChange = (designData: string) => {
@@ -210,51 +209,8 @@ export default function ProductUploadPage() {
         }
     }, []);
 
-    const cartItems = [
-        {
-            label: "Articles (T-shirt)",
-            price: BASE_PRICE,
-            icon: (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                    <path d="M3 6h18" />
-                    <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-            ),
-        },
-        {
-            label: "Design",
-            price: DESIGN_FEE,
-            icon: (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                    <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg>
-            ),
-        },
-        {
-            label: "Qualité",
-            price: qualityPrice,
-            icon: (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 7h-9" />
-                    <path d="M14 17H5" />
-                    <circle cx="17" cy="17" r="3" />
-                    <circle cx="7" cy="7" r="3" />
-                </svg>
-            ),
-        },
-    ];
-
     return (
         <div className="product-upload-page">
-            <ProductUploadHeader
-                totalPrice={totalPrice}
-                cartItems={cartItems}
-                showPriceDetails={true}
-            />
-
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
                     <div className="pu-intro">

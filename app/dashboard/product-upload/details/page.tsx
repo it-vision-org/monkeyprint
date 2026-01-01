@@ -4,7 +4,7 @@ import Image from "next/image";
 // Note: Using document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import ProductUploadHeader from "../components/ProductUploadHeader";
+// ProductUploadHeader removed - using dashboard layout instead
 import { combineDesigns } from "@/lib/utils/designRenderer";
 import { useAlert } from '@/components/AlertContext';
 
@@ -679,7 +679,7 @@ export default function ProductDetailsPage() {
             // Send only the final mockup image
             formData.append('mockupImage', finalImage);
 
-            const { createProduct } = await import('../actions');
+            const { createProduct } = await import('../../../product-upload/actions');
             const result = await createProduct(formData);
 
             // Check if there's an error returned (not a redirect)
@@ -709,11 +709,6 @@ export default function ProductDetailsPage() {
 
     return (
         <div className="product-upload-page">
-            <ProductUploadHeader
-                totalPrice={displayTotalPrice}
-                showPriceDetails={true}
-            />
-
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
                     <button

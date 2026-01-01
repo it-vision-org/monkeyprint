@@ -122,5 +122,5 @@ export async function createStore(prevState: any, formData: FormData) {
         return { error: 'Failed to create store' };
     }
 
-    redirect('/product-upload');
+    redirect('/dashboard/product-upload');
 }

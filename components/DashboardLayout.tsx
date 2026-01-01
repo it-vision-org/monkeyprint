@@ -11,6 +11,7 @@ type CommandesStatus = "non-confirme" | "confirme" | "retours";
 function getSectionLabel(pathname: string) {
   if (pathname.startsWith("/dashboard/apercu")) return "APERÇU";
   if (pathname.startsWith("/dashboard/produits")) return "PRODUITS";
+  if (pathname.startsWith("/dashboard/product-upload")) return "NOUVEAU PRODUIT";
   if (pathname.startsWith("/dashboard/commandes")) return "COMMANDES";
   if (pathname.startsWith("/dashboard/portefeuille")) return "PORTEFEUILLE";
   if (pathname.startsWith("/dashboard/compte")) return "COMPTE";

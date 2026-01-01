@@ -9,12 +9,11 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-            const isOnProductUpload = nextUrl.pathname.startsWith('/product-upload');
             const isOnCreateShop = nextUrl.pathname === '/create-shop';
             const isOnLogin = nextUrl.pathname === '/login';
 
-            // Protect dashboard and product-upload routes - require authentication
-            if (isOnDashboard || isOnProductUpload) {
+            // Protect dashboard routes - require authentication
+            if (isOnDashboard) {
                 if (isLoggedIn) return true;
                 return false; // Redirect unauthenticated users to login page
             }
