@@ -47,18 +47,9 @@ export default function OrderActions({ orderId, status, deletionRequested }: { o
 
     if (loading) return <div style={{ fontSize: '12px', color: '#666' }}>...</div>;
 
-    // Don't show delete button if deletion is already requested
+    // Don't show delete button if deletion is already requested (badge is shown on the left)
     if (deletionRequested) {
-        return (
-            <div 
-                className="commande-actions"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div style={{ fontSize: '12px', color: '#f59e0b', padding: '4px 8px' }}>
-                    Suppression demandée
-                </div>
-            </div>
-        );
+        return null;
     }
 
     return (

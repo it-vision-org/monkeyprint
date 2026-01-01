@@ -14,6 +14,7 @@ function getSectionLabel(pathname: string) {
   if (pathname.startsWith("/dashboard/product-upload")) return "NOUVEAU PRODUIT";
   if (pathname.startsWith("/dashboard/commandes")) return "COMMANDES";
   if (pathname.startsWith("/dashboard/portefeuille")) return "PORTEFEUILLE";
+  if (pathname.startsWith("/dashboard/support")) return "SUPPORT";
   if (pathname.startsWith("/dashboard/compte")) return "COMPTE";
   return "DASHBOARD";
 }
@@ -63,7 +64,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         if (isActivePath(pathname, "/dashboard/produits")) return 1;
         if (pathname.startsWith("/dashboard/commandes")) return 2;
         if (isActivePath(pathname, "/dashboard/portefeuille")) return 3;
-        if (isActivePath(pathname, "/dashboard/compte")) return 4;
+        if (isActivePath(pathname, "/dashboard/support")) return 4;
+        if (isActivePath(pathname, "/dashboard/compte")) return 5;
         return -1;
       })();
 
@@ -121,13 +123,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="dashboard-page">
       <header className="dash-header">
         <div className="dash-container">
-          <div className="dash-logo" title={sectionLabel}>
-            <span
-              className="dash-section"
-              title={sectionLabel}
-            >
-              {sectionLabel}
-            </span>
+          <div className="dash-logo">
           </div>
 
           <nav className="dash-nav">
@@ -205,9 +201,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 PORTEFEUILLE
               </Link>
               <Link
+                href="/dashboard/support"
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/support") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[4] = el; }}
+              >
+                SUPPORT
+              </Link>
+              <Link
                 href="/dashboard/compte"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
-                ref={(el) => { navItemRefs.current[4] = el; }}
+                ref={(el) => { navItemRefs.current[5] = el; }}
               >
                 COMPTE
               </Link>
@@ -217,26 +220,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="dash-actions">
-            <button className="dash-visit-btn" onClick={handleVisitStore}>
+            <button className="dash-visit-btn" onClick={handleVisitStore} title="VISITER LE MAGASIN">
               VISITER LE MAGASIN
-            </button>
-            <button className="dash-user-btn" aria-label="Compte">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </button>
           </div>
 
@@ -346,6 +331,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <circle cx="12" cy="13" r="2" stroke="currentColor" strokeWidth="2" />
                 </svg>
                 Portefeuille
+              </Link>
+
+              <Link href="/dashboard/support" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/support") ? "active" : ""}`}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Support
               </Link>
 
               <Link href="/dashboard/compte" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/compte") ? "active" : ""}`}>

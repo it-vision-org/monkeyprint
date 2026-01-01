@@ -11,6 +11,7 @@ function getSectionLabel(pathname: string) {
   if (pathname.startsWith("/admin/users")) return "UTILISATEURS";
   if (pathname.startsWith("/admin/orders")) return "COMMANDES";
   if (pathname.startsWith("/admin/products")) return "PRODUITS";
+  if (pathname.startsWith("/admin/support")) return "SUPPORT";
   if (pathname.startsWith("/admin/analytics")) return "ANALYTIQUES";
   if (pathname.startsWith("/admin/settings")) return "PARAMÈTRES";
   return "ADMIN";
@@ -42,8 +43,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         if (isActivePath(pathname, "/admin/users")) return 2;
         if (isActivePath(pathname, "/admin/orders")) return 3;
         if (isActivePath(pathname, "/admin/products")) return 4;
-        if (isActivePath(pathname, "/admin/analytics")) return 5;
-        if (isActivePath(pathname, "/admin/settings")) return 6;
+        if (isActivePath(pathname, "/admin/support")) return 5;
+        if (isActivePath(pathname, "/admin/analytics")) return 6;
+        if (isActivePath(pathname, "/admin/settings")) return 7;
         return -1;
       })();
 
@@ -87,6 +89,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     { href: "/admin/users", label: "UTILISATEURS" },
     { href: "/admin/orders", label: "COMMANDES" },
     { href: "/admin/products", label: "PRODUITS" },
+    { href: "/admin/support", label: "SUPPORT" },
     { href: "/admin/analytics", label: "ANALYTIQUES" },
     { href: "/admin/settings", label: "PARAMÈTRES" },
   ];
