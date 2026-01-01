@@ -24,18 +24,15 @@ export async function createProduct(formData: FormData) {
     const price = parseFloat(formData.get('price') as string);
     const type = formData.get('type') as string;
     const designData = formData.get('designData') as string;
-    const frontImageBase64 = formData.get('frontImage') as string;
-    const backImageBase64 = formData.get('backImage') as string;
+    const mockupImageBase64 = formData.get('mockupImage') as string;
 
     let previewFront = null;
     let previewBack = null;
 
     try {
-        if (frontImageBase64) {
-            previewFront = await uploadImageToR2(frontImageBase64, 'products');
-        }
-        if (backImageBase64) {
-            previewBack = await uploadImageToR2(backImageBase64, 'products');
+        // Upload only the final mockup/combined image
+        if (mockupImageBase64) {
+            previewFront = await uploadImageToR2(mockupImageBase64, 'products');
         }
 
         await prisma.product.create({
@@ -46,15 +43,15 @@ export async function createProduct(formData: FormData) {
                 type: type || 'tshirt',
                 designData,
                 previewFront,
-                previewBack,
+                previewBack, // Keep as null for now
                 storeId: store.id
             }
         });
-
     } catch (e) {
         console.error('Product creation failed:', e);
         return { error: 'Failed to create product' };
     }
 
+    // Redirect on success (redirect throws, so it won't return)
     redirect('/dashboard/apercu');
 }

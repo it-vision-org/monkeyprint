@@ -42,6 +42,7 @@ export default function ProductDetailsPage() {
     const [isRenderingDesign, setIsRenderingDesign] = useState(true);
     const [combinedDesignImage, setCombinedDesignImage] = useState<string | null>(null);
     const [customPrompt, setCustomPrompt] = useState<string>("");
+    const [isFirstProduct, setIsFirstProduct] = useState<boolean>(true);
 
     // Load design data on mount
     useEffect(() => {
@@ -66,6 +67,21 @@ export default function ProductDetailsPage() {
                 setSelectedMockup(savedDesign);
             }
         }
+    }, []);
+
+    // Check if this is the first product
+    useEffect(() => {
+        async function checkProductCount() {
+            try {
+                const response = await fetch('/api/check-product-count');
+                const data = await response.json();
+                setIsFirstProduct(data.count === 0);
+            } catch (error) {
+                console.error('Error checking product count:', error);
+                setIsFirstProduct(false);
+            }
+        }
+        checkProductCount();
     }, []);
 
     const generateCombinedImage = async () => {
@@ -635,6 +651,19 @@ export default function ProductDetailsPage() {
             return;
         }
 
+        // Check if user has selected a mockup or we need to use combined image
+        let finalImage = selectedMockup;
+        
+        if (!finalImage) {
+            // If no mockup selected, generate and use the combined image
+            finalImage = combinedDesignImage || await generateCombinedImage();
+        }
+
+        if (!finalImage) {
+            alert("Veuillez générer une maquette ou attendre que les aperçus se chargent.");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -644,16 +673,27 @@ export default function ProductDetailsPage() {
             formData.append('price', productPrice);
             formData.append('type', sessionStorage.getItem("productType") || 'tshirt');
             formData.append('designData', designEditorData || '{}');
+            
+            // Send only the final mockup image
+            formData.append('mockupImage', finalImage);
 
-            if (frontDesignImage) formData.append('frontImage', frontDesignImage);
-            if (backDesignImage) formData.append('backImage', backDesignImage);
+            const { createProduct } = await import('../actions');
+            const result = await createProduct(formData);
 
-            const { createProduct } = await import('../actions'); // Dynamic import to avoid server/client issues if any, or just import at top
-            await createProduct(formData);
-
-            // Redirect is handled by the server action
-        } catch (error) {
-            console.error(error);
+            // Check if there's an error returned (not a redirect)
+            if (result?.error) {
+                alert(`Erreur: ${result.error}`);
+                setIsSubmitting(false);
+            }
+            // If no error and no result, redirect happened (which throws)
+        } catch (error: any) {
+            // Check if it's a Next.js redirect (which is expected and not an error)
+            if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+                // This is normal - redirect is happening, product was created successfully
+                return;
+            }
+            // Only show error for actual errors
+            console.error('Product creation error:', error);
             alert("Une erreur est survenue lors de la création du produit.");
             setIsSubmitting(false);
         }
@@ -682,11 +722,11 @@ export default function ProductDetailsPage() {
                         {isSubmitting ? (
                             <>
                                 <div className="pu-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-                                Public...
+                                Publication...
                             </>
                         ) : (
                             <>
-                                Publier le produit
+                                {isFirstProduct ? "Publier le produit" : "Ajouter un produit"}
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="22" y1="2" x2="11" y2="13"></line>
                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -1114,7 +1154,7 @@ export default function ProductDetailsPage() {
                     </section>
 
                     <button className="pd-submit" type="button" onClick={handleSubmit}>
-                        VOTRE SITE WEB EST PRÊT
+                        {isFirstProduct ? "VOTRE SITE WEB EST PRÊT" : "PUBLIER LE PRODUIT"}
                     </button>
                 </div>
             </main>

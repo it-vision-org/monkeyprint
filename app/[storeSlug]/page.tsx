@@ -4,9 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-export default async function StorePage({ params }: { params: { storeSlug: string } }) {
+export default async function StorePage({ params }: { params: Promise<{ storeSlug: string }> }) {
+    const { storeSlug } = await params;
     const store = await prisma.store.findUnique({
-        where: { slug: params.storeSlug },
+        where: { slug: storeSlug },
         include: {
             products: true
         }

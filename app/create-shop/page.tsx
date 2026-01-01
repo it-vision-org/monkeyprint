@@ -20,100 +20,9 @@ const createShopMenuItems: MenuItem[] = [
     { label: "Contactez-nous", href: "#", icon: "💬" },
 ];
 
-// Step 1: Account Creation
-const Step1 = ({ shopName, logo, setStep, router, email, setEmail, password, setPassword }: any) => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleRegister = async () => {
-        setIsLoading(true);
-        setError('');
-
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('password', password);
-
-        try {
-            const result = await registerUser(formData);
-            if (result && result.error) {
-                setError(result.error);
-            } else {
-                setStep(2);
-            }
-        } catch (e) {
-            setError('Something went wrong');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className={styles.step1Container}>
-            <h2 className={styles.mainTitle}>Créer un compte</h2>
-            <StepDots
-                currentStep={3}
-                totalSteps={3}
-                onStepClick={(s) => {
-                    if (s === 3) setStep(1);
-                }}
-                className={styles.stepDots}
-                dotClassName={styles.stepDot}
-                filledClassName={styles.filled}
-            />
-
-            <div className="cs-card cs-card-profile">
-                <div className="cs-profile-picture">
-                    {logo ? (
-                        <Image src={logo} alt="Profile" width={96} height={96} style={{ objectFit: 'cover', borderRadius: '50%' }} />
-                    ) : (
-                        <Image src="/logo.png" alt="Profile" width={96} height={96} />
-                    )}
-                </div>
-                <span className="cs-profile-username">{shopName}</span>
-            </div>
-
-            <div className="cs-card">
-                <div className="cs-card-heading cs-heading-multiline">
-                    <h3>Entrez votre adresse e-mail<br />Ou numéro de téléphone</h3>
-                    <span>Doit être rempli<span>*</span></span>
-                </div>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="cs-pill-input" />
-
-                <div className="cs-card-heading" style={{ marginTop: '8px' }}>
-                    <h3>Créer un mot de passe</h3>
-                    <span>Doit être rempli<span>*</span></span>
-                </div>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="cs-pill-input" />
-                {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
-            </div>
-
-            <div className="cs-divider-standalone">Ou</div>
-
-            {/* Google button kept as placeholder for UI consistency, non-functional for now */}
-            <button className="cs-google-btn" type="button">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                </svg>
-                Sign in with Google
-            </button>
-
-            <button
-                className={`cs-primary-btn ${styles.step1Button}`}
-                onClick={handleRegister}
-                type="button"
-                disabled={isLoading}
-            >
-                {isLoading ? 'CREATION...' : "S'INSCRIRE"}
-            </button>
-        </div>
-    );
-};
 
 // Step 2: Theme Selection
-const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any) => {
+const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any) => {
     const themes = [
         { id: 'theme-1', label: "Design moderne", image: "/theme-1.png" },
         { id: 'theme-2', label: "Design audacieux", image: "/theme-2.png" },
@@ -140,8 +49,7 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
                 currentStep={2}
                 totalSteps={3}
                 onStepClick={(s) => {
-                    if (s === 2) setStep(2);
-                    if (s === 3) setStep(1);
+                    if (s === 1) setStep(1);
                 }}
                 className={styles.stepDots}
                 dotClassName={styles.stepDot}
@@ -202,8 +110,120 @@ const Step2 = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }: any
     );
 };
 
-// Step 3: Store Creation (Final)
-const Step3 = ({ shopName, setShopName, categories, selectedCategories, categorySearch, setCategorySearch, toggleCategory, handleAddCategory, setStep, logo, setLogo, logoFile, setLogoFile, onCreateShop }: any) => {
+// Step 3 needs the full implementation with form submission
+const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, password, setPassword, onCreateShop }: any) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        try {
+            const result = await registerUser(formData);
+            if (result && result.error) {
+                setError(result.error);
+                setIsLoading(false);
+            } else {
+                // Registration successful, now create the store
+                await onCreateShop();
+                // Don't set isLoading to false - redirect will happen
+            }
+        } catch (e) {
+            console.error('Registration error:', e);
+            setError('Something went wrong');
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className={styles.step1Container}>
+            <h2 className={styles.mainTitle}>Créer un compte</h2>
+            <StepDots
+                currentStep={3}
+                totalSteps={3}
+                onStepClick={(s) => {
+                    if (s === 1) setStep(1);
+                    if (s === 2) setStep(2);
+                }}
+                className={styles.stepDots}
+                dotClassName={styles.stepDot}
+                filledClassName={styles.filled}
+            />
+
+            <div className="cs-card cs-card-profile">
+                <div className="cs-profile-picture">
+                    {logo ? (
+                        <Image src={logo} alt="Profile" width={96} height={96} style={{ objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                        <Image src="/logo.png" alt="Profile" width={96} height={96} />
+                    )}
+                </div>
+                <span className="cs-profile-username">{shopName}</span>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                <div className="cs-card">
+                    <div className="cs-card-heading cs-heading-multiline">
+                        <h3>Entrez votre adresse e-mail<br />Ou numéro de téléphone</h3>
+                        <span>Doit être rempli<span>*</span></span>
+                    </div>
+                    <input 
+                        type="email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        className="cs-pill-input"
+                        required
+                        autoComplete="email"
+                    />
+
+                    <div className="cs-card-heading" style={{ marginTop: '8px' }}>
+                        <h3>Créer un mot de passe</h3>
+                        <span>Doit être rempli<span>*</span></span>
+                    </div>
+                    <input 
+                        type="password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        className="cs-pill-input"
+                        required
+                        autoComplete="new-password"
+                    />
+                    {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
+                </div>
+
+                <div className="cs-divider-standalone">Ou</div>
+
+                {/* Google button kept as placeholder for UI consistency, non-functional for now */}
+                <button className="cs-google-btn" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                    Sign in with Google
+                </button>
+
+                <button
+                    className={`cs-primary-btn ${styles.step1Button}`}
+                    type="submit"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+// Step 1: Store Details (First Step)
+const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategories, categorySearch, setCategorySearch, toggleCategory, handleAddCategory, setStep, logo, setLogo, logoFile, setLogoFile }: any) => {
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -219,25 +239,13 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.svg'] } });
 
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async () => {
-        setIsLoading(true);
-        await onCreateShop();
-        // Redirect happens in action
-    }
-
     return (
         <div className={styles.step3Container}>
             <h2 className={styles.mainTitle}>Commencez par créer votre boutique</h2>
             <StepDots
                 currentStep={1}
                 totalSteps={3}
-                onStepClick={(s) => {
-                    if (s === 1) setStep(3);
-                    if (s === 2) setStep(2);
-                    if (s === 3) setStep(1);
-                }}
+                onStepClick={() => {}}
                 className={styles.stepDots}
                 dotClassName={styles.stepDot}
                 filledClassName={styles.filled}
@@ -323,11 +331,10 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
 
             <button
                 className={`cs-primary-btn ${styles.step3Button}`}
-                onClick={handleSubmit}
+                onClick={() => setStep(2)}
                 type="button"
-                disabled={isLoading}
             >
-                {isLoading ? 'CREATION EN COURS...' : "SUIVANT (DASHBOARD)"}
+                SUIVANT
             </button>
         </div>
     );
@@ -336,15 +343,10 @@ const Step3 = ({ shopName, setShopName, categories, selectedCategories, category
 
 export default function CreateShopPage() {
     const router = useRouter();
-    // We reverse the steps for UI logic from original: User starts at Step 3 (Info) -> Step 2 (Theme) -> Step 1 (Register) in original code??
-    // Wait, the original code had Step 1 as Account, Step 2 as Theme, Step 3 as Store Info (labeled "Commencez par créer votre boutique").
-    // But the original `step` state started at 3...
-    // Let's re-organize logically:
-    // 1. Account (Register)
-    // 2. Theme
-    // 3. Store Details
-
-    // I will use 1 for Account, 2 for Theme, 3 for Store Details.
+    // Logical step flow:
+    // Step 1: Store Details (name, logo, categories)
+    // Step 2: Theme Selection
+    // Step 3: Account Creation (register and create store)
     const [step, setStep] = useState(1);
 
     const [shopName, setShopName] = useState("GrabMeShoe");
@@ -465,28 +467,7 @@ export default function CreateShopPage() {
             {/* Main Content */}
             <main>
                 {step === 1 && (
-                    <Step1
-                        shopName={shopName}
-                        logo={logo}
-                        setStep={setStep}
-                        router={router}
-                        email={email}
-                        setEmail={setEmail}
-                        password={password}
-                        setPassword={setPassword}
-                    />
-                )}
-                {step === 2 && (
-                    <Step2
-                        shopName={shopName}
-                        selectedTheme={selectedTheme}
-                        setSelectedTheme={setSelectedTheme}
-                        setStep={setStep}
-                        logo={logo}
-                    />
-                )}
-                {step === 3 && (
-                    <Step3
+                    <Step1StoreDetails
                         shopName={shopName}
                         setShopName={setShopName}
                         categories={categories}
@@ -500,7 +481,27 @@ export default function CreateShopPage() {
                         setLogo={setLogo}
                         logoFile={logoFile}
                         setLogoFile={setLogoFile}
+                    />
+                )}
+                {step === 2 && (
+                    <Step2Theme
+                        shopName={shopName}
+                        selectedTheme={selectedTheme}
+                        setSelectedTheme={setSelectedTheme}
+                        setStep={setStep}
+                        logo={logo}
+                    />
+                )}
+                {step === 3 && (
+                    <Step3AccountFull
+                        shopName={shopName}
+                        logo={logo}
+                        setStep={setStep}
                         router={router}
+                        email={email}
+                        setEmail={setEmail}
+                        password={password}
+                        setPassword={setPassword}
                         onCreateShop={handleCreateShop}
                     />
                 )}

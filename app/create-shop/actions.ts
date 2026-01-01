@@ -29,23 +29,30 @@ export async function registerUser(formData: FormData) {
             },
         });
 
-        // Attempt to sign in
+        // Attempt to sign in - signIn always throws NEXT_REDIRECT in server actions
+        // even with redirect: false, so we catch and ignore it
         try {
             await signIn('credentials', { email, password, redirect: false });
-        } catch (e) {
+        } catch (e: any) {
+            // Check if it's a Next.js redirect (which is expected)
+            if (e?.digest?.startsWith('NEXT_REDIRECT')) {
+                // This is normal - sign in was successful
+                return { success: true };
+            }
+            // Check for auth errors
             if (e instanceof AuthError) {
+                console.error('Auth error:', e);
                 return { error: 'Failed to auto-login' };
             }
-            // signIn throws redirects, so we might catch that.
-            // But we set redirect: false, so it shouldn't throw for redirect.
-            // Actually, in server actions, signIn usually throws.
-            // We will handle it manually / let it pass if it's a redirect.
+            // Re-throw unexpected errors
+            console.error('Unexpected sign-in error:', e);
             throw e;
         }
 
         return { success: true };
-    } catch (error) {
-        if ((error as any).type === 'CallbackRouteError') {
+    } catch (error: any) {
+        // Let Next.js redirects pass through
+        if (error?.digest?.startsWith('NEXT_REDIRECT')) {
             throw error;
         }
         console.error('Registration error:', error);
