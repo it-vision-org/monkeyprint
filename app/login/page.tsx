@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../create-shop/createShop.module.css';
+import loginStyles from './login.module.css';
+import MainHeader from '@/components/MainHeader';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -30,8 +32,8 @@ export default function LoginPage() {
                 setError('Email ou mot de passe incorrect');
                 setIsLoading(false);
             } else {
-                // Successful login - redirect to dashboard
-                router.push('/dashboard');
+                // Successful login - redirect to dashboard apercu
+                router.push('/dashboard/apercu');
                 router.refresh();
             }
         } catch (e) {
@@ -43,6 +45,14 @@ export default function LoginPage() {
 
     return (
         <div className={styles.createShopContainer}>
+            <MainHeader 
+                menuItems={[
+                    { label: "Accueil", href: "/", icon: "🏠" },
+                    { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
+                    { label: "Contactez-nous", href: "/contact", icon: "💬" },
+                    { label: "Créer une boutique", href: "/create-shop", icon: "➕" }
+                ]}
+            />
             <div className={styles.backgroundV4}>
                 <div className={styles.backgroundGradient1}></div>
                 <div className={styles.backgroundGradient2}></div>
@@ -50,8 +60,8 @@ export default function LoginPage() {
                 <div className={styles.backgroundGradient4}></div>
             </div>
 
-            <main style={{ position: 'relative', zIndex: 2, padding: '20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '100%', maxWidth: '390px' }}>
+            <main style={{ position: 'relative', zIndex: 2, padding: '20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
+                <div className={loginStyles.loginFormContainer}>
                     <div className={styles.step1Container}>
                         <h2 className={styles.mainTitle}>Se connecter</h2>
 

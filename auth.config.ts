@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export const authConfig = {
     pages: {
@@ -9,11 +10,20 @@ export const authConfig = {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
             const isOnProductUpload = nextUrl.pathname.startsWith('/product-upload');
+            const isOnCreateShop = nextUrl.pathname === '/create-shop';
+            const isOnLogin = nextUrl.pathname === '/login';
 
+            // Protect dashboard and product-upload routes - require authentication
             if (isOnDashboard || isOnProductUpload) {
                 if (isLoggedIn) return true;
                 return false; // Redirect unauthenticated users to login page
             }
+
+            // Redirect logged-in users away from login and create-shop pages
+            if (isLoggedIn && (isOnCreateShop || isOnLogin)) {
+                return NextResponse.redirect(new URL('/dashboard/apercu', nextUrl));
+            }
+
             return true;
         },
         async session({ session, token }: any) {

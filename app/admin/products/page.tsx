@@ -7,7 +7,7 @@ import Image from "next/image";
 export default async function AdminProductsPage({
     searchParams,
 }: {
-    searchParams: { q?: string; page?: string };
+    searchParams: Promise<{ q?: string; page?: string }>;
 }) {
     const session = await auth();
     if (!session?.user?.email) redirect("/");
@@ -16,8 +16,9 @@ export default async function AdminProductsPage({
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
-    const query = searchParams.q || "";
-    const page = parseInt(searchParams.page || "1");
+    const resolvedParams = await searchParams;
+    const query = resolvedParams.q || "";
+    const page = parseInt(resolvedParams.page || "1");
     const pageSize = 12;
 
     const where: any = {};

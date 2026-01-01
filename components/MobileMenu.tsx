@@ -33,7 +33,7 @@ export default function MobileMenu({
                 position: 'fixed',
                 inset: 0,
                 background: 'rgba(0, 0, 0, 0.25)',
-                zIndex: 60,
+                zIndex: 1000,
             }}
             onClick={onClose}
         >
@@ -43,12 +43,17 @@ export default function MobileMenu({
                     position: 'absolute',
                     top: 0,
                     right: 0,
-                    width: '80%',
+                    width: '85%',
+                    maxWidth: '400px',
+                    minWidth: '280px',
                     height: '100%',
                     background: '#ffffff',
-                    padding: '40px var(--mobile-padding-x)',
+                    padding: '40px var(--mobile-padding-x, 18px)',
                     borderTopLeftRadius: '20px',
                     borderBottomLeftRadius: '20px',
+                    boxSizing: 'border-box',
+                    overflowY: 'auto',
+                    WebkitOverflowScrolling: 'touch',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -71,24 +76,59 @@ export default function MobileMenu({
                     </button>
                 </div>
                 <nav className={navClassName} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {items.map((item, index) => (
-                        <Link
-                            key={index}
-                            href={item.href}
-                            style={{
-                                color: '#0d1c23',
-                                textDecoration: 'none',
-                                fontSize: 20,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                            }}
-                            onClick={onClose}
-                        >
-                            {item.icon && <span style={{ fontSize: 22 }}>{item.icon}</span>}
-                            {item.label}
-                        </Link>
-                    ))}
+                    {items.map((item, index) => {
+                        const handleClick = (e: React.MouseEvent) => {
+                            onClose();
+                            if (item.onClick) {
+                                e.preventDefault();
+                                item.onClick();
+                            }
+                        };
+
+                        if (item.onClick) {
+                            return (
+                                <button
+                                    key={index}
+                                    onClick={handleClick}
+                                    style={{
+                                        color: '#0d1c23',
+                                        textDecoration: 'none',
+                                        fontSize: 20,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        padding: 0
+                                    }}
+                                >
+                                    {item.icon && <span style={{ fontSize: 22 }}>{item.icon}</span>}
+                                    {item.label}
+                                </button>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={index}
+                                href={item.href}
+                                style={{
+                                    color: '#0d1c23',
+                                    textDecoration: 'none',
+                                    fontSize: 20,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                }}
+                                onClick={handleClick}
+                            >
+                                {item.icon && <span style={{ fontSize: 22 }}>{item.icon}</span>}
+                                {item.label}
+                            </Link>
+                        );
+                    })}
                 </nav>
             </div>
         </div>

@@ -1,5 +1,6 @@
 // Shared components exports
 export { default as Navbar } from './Navbar';
+export { default as MainHeader } from './MainHeader';
 export { default as MobileMenu } from './MobileMenu';
 export { default as ProductCard } from './ProductCard';
 export { default as StarRating } from './StarRating';

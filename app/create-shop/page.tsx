@@ -9,6 +9,7 @@ import styles from './createShop.module.css';
 import StepDots from '@/components/StepDots';
 import type { MenuItem } from '@/components/types';
 import { registerUser, createStore } from './actions';
+import MainHeader from '@/components/MainHeader';
 // We need to use useFormState/useFormStatus or standard transition
 // Since we are in nextjs 15 (as seen in package.json next^15), we use `useActionState` if available or `useFormState` from react-dom.
 // Actually, let's stick to simple async/await for Step 1 and form action for Step 3?
@@ -16,8 +17,9 @@ import { registerUser, createStore } from './actions';
 
 const createShopMenuItems: MenuItem[] = [
     { label: "Accueil", href: "/", icon: "🏠" },
-    { label: "Découvrez les boutiques", href: "/#stores", icon: "🔥" },
+    { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
     { label: "Contactez-nous", href: "/contact", icon: "💬" },
+    { label: "Se connecter", href: "/login", icon: "👤" },
 ];
 
 
@@ -362,7 +364,6 @@ export default function CreateShopPage() {
     const [selectedCategories, setSelectedCategories] = useState(["Streetwear", "Music"]);
     const [categorySearch, setCategorySearch] = useState("");
     const [selectedTheme, setSelectedTheme] = useState<string>('theme-1');
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Prevent body scrolling on mobile - container handles scrolling internally
     useEffect(() => {
@@ -417,52 +418,7 @@ export default function CreateShopPage() {
             </div>
 
             {/* Nav Bar */}
-            <header className={styles.navBar}>
-                <div className={styles.logoContainer}>
-                    <Image src="/logo.png" alt="Monkey Print" width={84} height={42} className={styles.logo} />
-                    <span className={styles.logoText}>MONKEY PRINT</span>
-                </div>
-                <nav className={styles.desktopNavMenu}>
-                    {createShopMenuItems.map((item, index) => (
-                        <Link
-                            key={index}
-                            href={item.href}
-                            className={styles.desktopNavMenuItem}
-                        >
-                            {item.icon && <span style={{ marginRight: '10px', fontSize: '20px' }}>{item.icon}</span>}
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
-                <button
-                    className={styles.menuButton}
-                    onClick={() => setMobileMenuOpen(true)}
-                    type="button"
-                    aria-label="Ouvrir le menu"
-                >
-                    <div className={styles.menuButtonLine}></div>
-                    <div className={styles.menuButtonLine}></div>
-                    <div className={styles.menuButtonLine}></div>
-                </button>
-            </header>
-
-            {/* Mobile Menu */}
-            <div className={`${styles.menuSlide} ${mobileMenuOpen ? styles.open : ''}`}>
-                <button onClick={() => setMobileMenuOpen(false)} style={{ background: "none", border: "none", color: "white", fontSize: "32px", cursor: "pointer", marginBottom: "20px", padding: "20px" }}>×</button>
-                <nav style={{ padding: "20px 18px", display: "flex", flexDirection: "column", gap: "20px" }}>
-                    {createShopMenuItems.map((item, index) => (
-                        <a
-                            key={index}
-                            href={item.href}
-                            style={{ color: "white", textDecoration: "none", fontSize: "20px", display: "flex", alignItems: "center", gap: "12px" }}
-                            onClick={() => setMobileMenuOpen(false)}
-                        >
-                            {item.icon && <span style={{ fontSize: 22 }}>{item.icon}</span>}
-                            {item.label}
-                        </a>
-                    ))}
-                </nav>
-            </div>
+            <MainHeader menuItems={createShopMenuItems} />
 
             {/* Main Content */}
             <main>

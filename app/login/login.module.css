@@ -1,0 +1,11 @@
+.loginFormContainer {
+  width: 100%;
+  max-width: 390px;
+}
+
+@media (min-width: 769px) {
+  .loginFormContainer {
+    max-width: 600px;
+  }
+}
+

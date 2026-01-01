@@ -6,7 +6,7 @@ import Link from "next/link";
 export default async function AdminUsersPage({
     searchParams,
 }: {
-    searchParams: { q?: string; role?: string; page?: string };
+    searchParams: Promise<{ q?: string; role?: string; page?: string }>;
 }) {
     const session = await auth();
     if (!session?.user?.email) redirect("/");
@@ -15,9 +15,10 @@ export default async function AdminUsersPage({
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
-    const query = searchParams.q || "";
-    const role = searchParams.role || "all";
-    const page = parseInt(searchParams.page || "1");
+    const resolvedParams = await searchParams;
+    const query = resolvedParams.q || "";
+    const role = resolvedParams.role || "all";
+    const page = parseInt(resolvedParams.page || "1");
     const pageSize = 10;
 
     const where: any = {};

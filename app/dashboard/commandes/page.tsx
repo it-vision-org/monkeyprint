@@ -6,7 +6,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import OrderActions from "./OrderActions";
 
-export default async function CommandesPage({ searchParams }: { searchParams: { status?: string; q?: string } }) {
+export default async function CommandesPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
     const session = await auth();
     if (!session?.user?.email) redirect("/");
 
@@ -18,8 +18,9 @@ export default async function CommandesPage({ searchParams }: { searchParams: { 
     if (!user || user.stores.length === 0) redirect("/create-shop");
     const store = user.stores[0];
 
-    const statusParam = searchParams.status || 'non-confirme';
-    const query = searchParams.q || '';
+    const resolvedParams = await searchParams;
+    const statusParam = resolvedParams.status || 'non-confirme';
+    const query = resolvedParams.q || '';
 
     let whereStatus: any = {};
 
