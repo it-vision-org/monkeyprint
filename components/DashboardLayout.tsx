@@ -24,7 +24,7 @@ function isActivePath(activePath: string, href: string) {
 }
 
 // Mobile Store Info Component
-function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: string | null } }) {
+function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: string | null } | null }) {
   if (!storeInfo) return null;
 
   return (

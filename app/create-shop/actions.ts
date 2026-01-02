@@ -88,7 +88,7 @@ export async function createStore(prevState: any, formData: FormData) {
     if (!user) return { error: 'User not found' };
 
     // Check if user already has a store
-    const existingStore = await prisma.store.findUnique({
+    const existingStore = await prisma.store.findFirst({
         where: { ownerId: user.id }
     });
     
