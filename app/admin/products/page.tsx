@@ -78,7 +78,7 @@ export default async function AdminProductsPage({
 
     // Resolve image URLs for products
     const productsWithImages = await Promise.all(
-        products.map(async (product) => {
+        products.map(async (product: typeof products[number]) => {
             const imageUrl = product.previewFront ? await getR2Url(product.previewFront) : null;
             return { ...product, imageUrl };
         })
