@@ -12,14 +12,14 @@ export async function deleteProduct(productId: string) {
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { stores: true }
+        include: { store: true }
     });
 
-    if (!user || user.stores.length === 0) {
+    if (!user || !user.store) {
         return { error: 'Store not found' };
     }
 
-    const store = user.stores[0];
+    const store = user.store;
 
     // Verify the product belongs to the user's store
     const product = await prisma.product.findFirst({
@@ -60,14 +60,14 @@ export async function updateProduct(productId: string, formData: FormData) {
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { stores: true }
+        include: { store: true }
     });
 
-    if (!user || user.stores.length === 0) {
+    if (!user || !user.store) {
         return { error: 'Store not found' };
     }
 
-    const store = user.stores[0];
+    const store = user.store;
 
     // Verify the product belongs to the user's store
     const product = await prisma.product.findFirst({

@@ -13,11 +13,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { stores: true }
+        include: { store: true }
     });
 
-    if (!user || user.stores.length === 0) redirect("/create-shop");
-    const store = user.stores[0];
+    if (!user || !user.store) redirect("/create-shop");
+    const store = user.store;
 
     const order = await prisma.order.findUnique({
         where: { id },

@@ -11,11 +11,11 @@ export default async function PortefeuillePage() {
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { stores: true }
+        include: { store: true }
     });
 
-    if (!user || user.stores.length === 0) redirect("/create-shop");
-    const store = user.stores[0];
+    if (!user || !user.store) redirect("/create-shop");
+    const store = user.store;
 
     // Only fetch DELIVERED_AND_PAID orders (these are the only ones that contribute to wallet)
     const deliveredOrders = await prisma.order.findMany({

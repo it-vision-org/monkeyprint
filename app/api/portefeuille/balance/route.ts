@@ -11,14 +11,14 @@ export async function GET() {
 
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
-            include: { stores: true }
+            include: { store: true }
         });
 
-        if (!user || user.stores.length === 0) {
+        if (!user || !user.store) {
             return NextResponse.json({ error: "Aucune boutique trouvée" }, { status: 404 });
         }
 
-        const store = user.stores[0];
+        const store = user.store;
 
         // Only count DELIVERED_AND_PAID orders that are more than 14 days old
         const now = new Date();

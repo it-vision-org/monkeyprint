@@ -37,7 +37,7 @@ export default async function AdminUsersPage({
             where,
             include: {
                 _count: {
-                    select: { stores: true }
+                    select: { store: true }
                 }
             },
             orderBy: { createdAt: 'desc' },
@@ -167,7 +167,7 @@ export default async function AdminUsersPage({
                                             {user.role === 'ADMIN' ? 'Admin' : 'Vendeur'}
                                         </span>
                                     </td>
-                                    <td>{user._count.stores}</td>
+                                    <td>{user._count.store}</td>
                                     <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                                     <td>
                                         <span className="admin-status-badge green">

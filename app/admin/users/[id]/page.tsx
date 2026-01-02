@@ -17,7 +17,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     const targetUser = await prisma.user.findUnique({
         where: { id },
         include: {
-            stores: {
+            store: {
                 include: {
                     _count: {
                         select: {
@@ -34,17 +34,17 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
         notFound();
     }
 
-    // Calculate total revenue across all stores
+    // Calculate total revenue
     let totalRevenue = 0;
-    for (const store of targetUser.stores) {
+    if (targetUser.store) {
         const revenueResult = await prisma.order.aggregate({
             where: {
-                storeId: store.id,
+                storeId: targetUser.store.id,
                 status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] }
             },
             _sum: { totalAmount: true }
         });
-        totalRevenue += revenueResult._sum.totalAmount || 0;
+        totalRevenue = revenueResult._sum.totalAmount || 0;
     }
 
     const totalOrders = await prisma.order.count({
@@ -191,7 +191,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                     <div>
                         <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Magasins</div>
                         <div style={{ fontSize: '24px', fontWeight: 700, color: '#2563eb' }}>
-                            {targetUser.stores.length}
+                            {targetUser.store ? 1 : 0}
                         </div>
                     </div>
                     <div>
@@ -223,63 +223,61 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
                 <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Magasins</h2>
-                {targetUser.stores.length === 0 ? (
+                {!targetUser.store ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
                         Aucun magasin
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {targetUser.stores.map((store: typeof targetUser.stores[number]) => (
-                            <Link
-                                key={store.id}
-                                href={`/admin/stores/${store.id}`}
-                                style={{ textDecoration: 'none', color: 'inherit' }}
+                        <Link
+                            key={targetUser.store.id}
+                            href={`/admin/stores/${targetUser.store.id}`}
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                            <div 
+                                style={{ 
+                                    padding: '16px',
+                                    background: '#f9fafb',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = '#f9fafb'}
                             >
-                                <div 
-                                    style={{ 
-                                        padding: '16px',
-                                        background: '#f9fafb',
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                        transition: 'background 0.2s'
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = '#f9fafb'}
-                                >
-                                    <div>
-                                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
-                                            {store.name}
-                                        </div>
-                                        <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                                            /shop/{store.slug}
-                                        </div>
+                                <div>
+                                    <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
+                                        {targetUser.store.name}
                                     </div>
-                                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Produits</div>
-                                            <div style={{ fontSize: '16px', fontWeight: 600 }}>{store._count.products}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Commandes</div>
-                                            <div style={{ fontSize: '16px', fontWeight: 600 }}>{store._count.orders}</div>
-                                        </div>
-                                        <div style={{ 
-                                            padding: '6px 12px',
-                                            borderRadius: '6px',
-                                            background: store.status === 'ACTIVE' ? '#10b98120' : store.status === 'SUSPENDED' ? '#ef444420' : '#f9731620',
-                                            color: store.status === 'ACTIVE' ? '#10b981' : store.status === 'SUSPENDED' ? '#ef4444' : '#f97316',
-                                            fontSize: '14px',
-                                            fontWeight: 600
-                                        }}>
-                                            {store.status === 'ACTIVE' ? 'Actif' : store.status === 'SUSPENDED' ? 'Suspendu' : 'En attente'}
-                                        </div>
+                                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                        /shop/{targetUser.store.slug}
                                     </div>
                                 </div>
-                            </Link>
-                        ))}
+                                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Produits</div>
+                                        <div style={{ fontSize: '16px', fontWeight: 600 }}>{targetUser.store._count.products}</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>Commandes</div>
+                                        <div style={{ fontSize: '16px', fontWeight: 600 }}>{targetUser.store._count.orders}</div>
+                                    </div>
+                                    <div style={{ 
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        background: targetUser.store.status === 'ACTIVE' ? '#10b98120' : targetUser.store.status === 'SUSPENDED' ? '#ef444420' : '#f9731620',
+                                        color: targetUser.store.status === 'ACTIVE' ? '#10b981' : targetUser.store.status === 'SUSPENDED' ? '#ef4444' : '#f97316',
+                                        fontSize: '14px',
+                                        fontWeight: 600
+                                    }}>
+                                        {targetUser.store.status === 'ACTIVE' ? 'Actif' : targetUser.store.status === 'SUSPENDED' ? 'Suspendu' : 'En attente'}
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
                     </div>
                 )}
             </div>

@@ -11,14 +11,14 @@ export async function getStoreInfo() {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      include: { stores: true }
+      include: { store: true }
     });
 
-    if (!user || user.stores.length === 0) {
+    if (!user || !user.store) {
       return null;
     }
 
-    const store = user.stores[0];
+    const store = user.store;
     
     // Resolve logo URL if it exists
     const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;

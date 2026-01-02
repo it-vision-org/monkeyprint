@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
 
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
-            include: { stores: true }
+            include: { store: true }
         });
 
-        if (!user || user.stores.length === 0) {
+        if (!user || !user.store) {
             return NextResponse.json({ error: "Aucune boutique trouvée" }, { status: 404 });
         }
 
-        const store = user.stores[0];
+        const store = user.store;
         const { amount, bankDetails } = await request.json();
 
         if (!amount || amount <= 0) {
@@ -90,14 +90,14 @@ export async function GET(request: NextRequest) {
 
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
-            include: { stores: true }
+            include: { store: true }
         });
 
-        if (!user || user.stores.length === 0) {
+        if (!user || !user.store) {
             return NextResponse.json({ error: "Aucune boutique trouvée" }, { status: 404 });
         }
 
-        const store = user.stores[0];
+        const store = user.store;
 
         const withdrawals = await prisma.withdrawal.findMany({
             where: { storeId: store.id },

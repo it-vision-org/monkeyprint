@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
             where,
             include: {
                 _count: {
-                    select: { stores: true }
+                    select: { store: true }
                 }
             },
             orderBy: { createdAt: 'desc' },
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             `"${(user.name || '').replace(/"/g, '""')}"`,
             user.email,
             user.role,
-            user._count.stores.toString(),
+            user._count.store.toString(),
             new Date(user.createdAt).toLocaleDateString('fr-FR')
         ]);
 
