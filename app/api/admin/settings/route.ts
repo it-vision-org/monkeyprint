@@ -20,7 +20,7 @@ export async function GET() {
 
         // Convert to object format
         const settingsObj: Record<string, any> = {};
-        settings.forEach(setting => {
+        settings.forEach((setting: typeof settings[number]) => {
             let value: any = setting.value;
             if (setting.type === 'number') {
                 value = parseFloat(value);

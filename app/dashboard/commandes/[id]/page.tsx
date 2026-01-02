@@ -37,7 +37,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
     // Get product images
     const itemsWithImages = await Promise.all(
-        order.items.map(async (item) => {
+        order.items.map(async (item: typeof order.items[number]) => {
             const imageUrl = item.product.previewFront ? await getR2Url(item.product.previewFront) : null;
             return { ...item, imageUrl };
         })

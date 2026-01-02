@@ -43,7 +43,7 @@ export default async function StoreAllProductsPage({ params }: { params: Promise
 
     // Convert database products to Product type with R2 URLs
     const productsWithImages: Product[] = await Promise.all(
-        store.products.map(async (product) => {
+        store.products.map(async (product: typeof store.products[number]) => {
             let imageUrl: string | undefined;
             if (product.previewFront) {
                 imageUrl = await getR2Url(product.previewFront);

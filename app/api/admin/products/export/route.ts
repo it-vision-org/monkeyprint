@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
         // Generate CSV
         const headers = ['ID', 'Nom', 'Magasin', 'Prix (DT)', 'Type', 'Vendu', 'Date de création'];
-        const rows = products.map(product => [
+        const rows = products.map((product: typeof products[number]) => [
             product.id,
             `"${product.name.replace(/"/g, '""')}"`,
             `"${product.store.name.replace(/"/g, '""')}"`,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
         const csvContent = [
             headers.join(','),
-            ...rows.map(row => row.join(','))
+            ...rows.map((row: string[]) => row.join(','))
         ].join('\n');
 
         // Return CSV file

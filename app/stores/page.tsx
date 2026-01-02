@@ -19,7 +19,7 @@ export default async function StoresPage() {
 
     // Get logo URLs for all stores
     const storesWithLogos = await Promise.all(
-        stores.map(async (store) => {
+        stores.map(async (store: typeof stores[number]) => {
             const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
             return { ...store, logoUrl };
         })

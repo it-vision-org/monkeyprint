@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
         // Generate CSV
         const headers = ['ID', 'Magasin', 'Client', 'Téléphone', 'Articles', 'Montant (DT)', 'Statut', 'Date de création'];
-        const rows = orders.map(order => [
+        const rows = orders.map((order: typeof orders[number]) => [
             order.id,
             `"${order.store.name.replace(/"/g, '""')}"`,
             `"${(order.customer.name || '').replace(/"/g, '""')}"`,
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
         const csvContent = [
             headers.join(','),
-            ...rows.map(row => row.join(','))
+            ...rows.map((row: string[]) => row.join(','))
         ].join('\n');
 
         // Return CSV file

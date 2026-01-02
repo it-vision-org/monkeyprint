@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        const availableAmount = availableOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+        const availableAmount = availableOrders.reduce((acc: number, o: typeof availableOrders[number]) => acc + o.totalAmount, 0);
 
         // Check pending withdrawals
         const pendingWithdrawals = await prisma.withdrawal.findMany({
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        const pendingAmount = pendingWithdrawals.reduce((acc, w) => acc + w.amount, 0);
+        const pendingAmount = pendingWithdrawals.reduce((acc: number, w: typeof pendingWithdrawals[number]) => acc + w.amount, 0);
         const actuallyAvailable = availableAmount - pendingAmount;
 
         if (amount > actuallyAvailable) {

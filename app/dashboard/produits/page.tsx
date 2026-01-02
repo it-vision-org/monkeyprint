@@ -46,7 +46,7 @@ export default async function ProduitsPage() {
                             Aucun produit. <Link href="/dashboard/product-upload" style={{ color: '#000', textDecoration: 'underline' }}>Créez-en un !</Link>
                         </div>
                     ) : (
-                        await Promise.all(products.map(async (product) => {
+                        await Promise.all(products.map(async (product: typeof products[number]) => {
                             const imageUrl = product.previewFront ? await getR2Url(product.previewFront) : null;
 
                             return (

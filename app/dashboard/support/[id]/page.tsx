@@ -114,7 +114,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
             </div>
 
             <div className="support-messages">
-                {(await Promise.all(ticket.messages.map(async (message) => {
+                {(await Promise.all(ticket.messages.map(async (message: typeof ticket.messages[number]) => {
                     const imageUrl = message.imageUrl ? await getR2Url(message.imageUrl) : null;
                     return { message, imageUrl };
                 }))).map(({ message, imageUrl }) => (
@@ -141,7 +141,7 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                             </span>
                         </div>
                         <div className="support-message-content">
-                            {message.content.split('\n').map((line, i) => (
+                            {message.content.split('\n').map((line: string, i: number) => (
                                 <p key={i}>{line}</p>
                             ))}
                         </div>

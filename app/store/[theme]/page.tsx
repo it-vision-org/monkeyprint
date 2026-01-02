@@ -46,11 +46,11 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
     });
 
     // Get the first store with products
-    const store = stores.find(s => s.products.length > 0) || stores[0];
+    const store = stores.find((s: typeof stores[number]) => s.products.length > 0) || stores[0];
 
     // Convert database products to Product type with R2 URLs
     const productsWithImages: Product[] = store?.products ? await Promise.all(
-        store.products.map(async (product) => {
+        store.products.map(async (product: typeof store.products[number]) => {
             let imageUrl: string | undefined;
             if (product.previewFront) {
                 imageUrl = await getR2Url(product.previewFront);

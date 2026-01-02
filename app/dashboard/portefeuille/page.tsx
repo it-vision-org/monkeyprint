@@ -33,18 +33,18 @@ export default async function PortefeuillePage() {
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
     // "En attente" - orders delivered less than 14 days ago
-    const pendingOrders = deliveredOrders.filter(o => {
+    const pendingOrders = deliveredOrders.filter((o: typeof deliveredOrders[number]) => {
         if (!o.deliveredAt) return false;
         return new Date(o.deliveredAt) > fourteenDaysAgo;
     });
-    const pendingAmount = pendingOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+    const pendingAmount = pendingOrders.reduce((acc: number, o: typeof pendingOrders[number]) => acc + o.totalAmount, 0);
 
     // "Pret" - orders delivered more than 14 days ago (ready to withdraw)
-    const availableOrders = deliveredOrders.filter(o => {
+    const availableOrders = deliveredOrders.filter((o: typeof deliveredOrders[number]) => {
         if (!o.deliveredAt) return false;
         return new Date(o.deliveredAt) <= fourteenDaysAgo;
     });
-    const availableAmount = availableOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+    const availableAmount = availableOrders.reduce((acc: number, o: typeof availableOrders[number]) => acc + o.totalAmount, 0);
 
     // Get last withdrawal
     const lastWithdrawal = await prisma.withdrawal.findFirst({
@@ -85,7 +85,7 @@ export default async function PortefeuillePage() {
                         </div>
                         <div className="portefeuille-section-items">
                             <div className="portefeuille-section-item-label">Articles Vendus :</div>
-                            {pendingOrders.slice(0, 3).map(order => (
+                            {pendingOrders.slice(0, 3).map((order: typeof pendingOrders[number]) => (
                                 <div key={order.id} className="portefeuille-section-item">
                                     <span>ID #{order.id.slice(0, 8)}</span>
                                     <span className="portefeuille-section-item-price orange-price">{order.totalAmount} DT</span>
@@ -115,7 +115,7 @@ export default async function PortefeuillePage() {
                         </div>
                         <div className="portefeuille-section-items">
                             <div className="portefeuille-section-item-label">Articles Vendus et traité :</div>
-                            {availableOrders.slice(0, 3).map(order => (
+                            {availableOrders.slice(0, 3).map((order: typeof availableOrders[number]) => (
                                 <div key={order.id} className="portefeuille-section-item">
                                     <span>ID #{order.id.slice(0, 8)}</span>
                                     <span className="portefeuille-section-item-price green-price">{order.totalAmount} DT</span>

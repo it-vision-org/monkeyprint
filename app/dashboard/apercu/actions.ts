@@ -163,7 +163,7 @@ export async function getSalesTrend(
     }
 
     // Aggregate orders by date or hour
-    orders.forEach(order => {
+    orders.forEach((order: typeof orders[number]) => {
         let key: string;
         if (period === 'today') {
             // Group by hour
@@ -190,8 +190,8 @@ export async function getSalesTrend(
         .sort((a, b) => a.date.localeCompare(b.date));
 
     // Calculate totals
-    const total = orders.reduce((sum, order) => sum + order.totalAmount, 0);
-    const previousTotal = previousOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const total = orders.reduce((sum: number, order: typeof orders[number]) => sum + order.totalAmount, 0);
+    const previousTotal = previousOrders.reduce((sum: number, order: typeof previousOrders[number]) => sum + order.totalAmount, 0);
     
     // Calculate percentage change
     const changePercent = previousTotal === 0 

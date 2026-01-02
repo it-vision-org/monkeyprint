@@ -207,7 +207,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                                 Aucune commande trouvée.
                             </div>
                         ) : (
-                            orders.map((order) => (
+                            orders.map((order: typeof orders[number]) => (
                                 <Link 
                                     key={order.id} 
                                     href={`/dashboard/commandes/${order.id}`}

@@ -229,7 +229,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {targetUser.stores.map((store) => (
+                        {targetUser.stores.map((store: typeof targetUser.stores[number]) => (
                             <Link
                                 key={store.id}
                                 href={`/admin/stores/${store.id}`}

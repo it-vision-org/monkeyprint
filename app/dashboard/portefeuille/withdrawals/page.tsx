@@ -103,7 +103,7 @@ export default async function WithdrawalsPage() {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {withdrawals.map((withdrawal) => (
+                        {withdrawals.map((withdrawal: typeof withdrawals[number]) => (
                             <div
                                 key={withdrawal.id}
                                 style={{

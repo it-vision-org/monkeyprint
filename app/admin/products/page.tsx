@@ -86,7 +86,7 @@ export default async function AdminProductsPage({
 
     // Count products by store for filter tabs
     const productCountsByStore = await Promise.all(
-        stores.map(async (store) => {
+        stores.map(async (store: typeof stores[number]) => {
             const count = await prisma.product.count({
                 where: { storeId: store.id },
             });
@@ -184,7 +184,7 @@ export default async function AdminProductsPage({
                                 }}
                             >
                                 <option value="all">Autres magasins...</option>
-                                {stores.slice(5).map((store) => (
+                                {stores.slice(5).map((store: typeof stores[number]) => (
                                     <option key={store.id} value={store.id}>
                                         {store.name} ({productCountsByStore.find(s => s.id === store.id)?.count || 0})
                                     </option>

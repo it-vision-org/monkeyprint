@@ -294,7 +294,7 @@ export default async function AdminStoreDetailPage({ params }: { params: Promise
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {store.products.map((product) => (
+                        {store.products.map((product: typeof store.products[number]) => (
                             <div 
                                 key={product.id}
                                 style={{ 
@@ -350,7 +350,7 @@ export default async function AdminStoreDetailPage({ params }: { params: Promise
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {store.orders.map((order) => (
+                        {store.orders.map((order: typeof store.orders[number]) => (
                             <Link
                                 key={order.id}
                                 href={`/admin/orders/${order.id}`}

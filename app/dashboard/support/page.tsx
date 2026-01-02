@@ -89,9 +89,9 @@ export default async function SupportPage() {
                         <p className="support-empty-subtitle">Créez un nouveau ticket pour obtenir de l'aide</p>
                     </div>
                 ) : (
-                    tickets.map((ticket) => {
+                    tickets.map((ticket: typeof tickets[number]) => {
                         const lastMessage = ticket.messages[ticket.messages.length - 1];
-                        const unreadCount = ticket.messages.filter(m => m.isAdmin && !m.createdAt).length; // Simplified - you might want to track read status
+                        const unreadCount = ticket.messages.filter((m: typeof ticket.messages[number]) => m.isAdmin && !m.createdAt).length; // Simplified - you might want to track read status
 
                         return (
                             <Link 

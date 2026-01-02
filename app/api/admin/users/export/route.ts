@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
         // Generate CSV
         const headers = ['ID', 'Nom', 'Email', 'Rôle', 'Magasins', 'Date d\'inscription'];
-        const rows = users.map(user => [
+        const rows = users.map((user: typeof users[number]) => [
             user.id,
             `"${(user.name || '').replace(/"/g, '""')}"`,
             user.email,
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
         const csvContent = [
             headers.join(','),
-            ...rows.map(row => row.join(','))
+            ...rows.map((row: string[]) => row.join(','))
         ].join('\n');
 
         // Return CSV file
