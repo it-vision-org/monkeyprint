@@ -4,6 +4,9 @@ import { Suspense } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { getStoreInfo } from "@/lib/store";
 
+// Mark this route as dynamic since it uses auth() which requires headers
+export const dynamic = 'force-dynamic';
+
 async function DashboardLayoutWrapper({ children }: { children: ReactNode }) {
   const storeInfo = await getStoreInfo();
   
