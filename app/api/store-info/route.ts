@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getR2Url } from "@/lib/storage";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -19,10 +20,15 @@ export async function GET() {
         }
 
         const store = user.stores[0];
+        
+        // Resolve logo URL if it exists
+        const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
 
         return NextResponse.json({ 
             slug: store.slug,
-            theme: store.theme || 'theme-1'
+            theme: store.theme || 'theme-1',
+            name: store.name,
+            logoUrl: logoUrl
         });
     } catch (error) {
         console.error("Error fetching store info:", error);

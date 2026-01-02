@@ -87,6 +87,15 @@ export async function createStore(prevState: any, formData: FormData) {
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return { error: 'User not found' };
 
+    // Check if user already has a store
+    const existingStore = await prisma.store.findUnique({
+        where: { ownerId: user.id }
+    });
+    
+    if (existingStore) {
+        return { error: 'You already have a store. Each user can only have one store.' };
+    }
+
     let logoUrl = null;
     if (logoFile && logoFile.size > 0) {
         try {
@@ -117,8 +126,12 @@ export async function createStore(prevState: any, formData: FormData) {
             }
         });
 
-    } catch (e) {
+    } catch (e: any) {
         console.error("Store creation failed", e);
+        // Check if it's a unique constraint violation (user already has a store)
+        if (e.code === 'P2002' && e.meta?.target?.includes('ownerId')) {
+            return { error: 'You already have a store. Each user can only have one store.' };
+        }
         return { error: 'Failed to create store' };
     }
 

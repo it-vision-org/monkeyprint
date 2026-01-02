@@ -12,11 +12,11 @@ export async function renderDesignToImage(
     throw new Error('This function must be called on the client side');
   }
 
-  const fabric = (await import('fabric')).fabric;
+  const fabric = await import('fabric');
 
   return new Promise((resolve, reject) => {
     try {
-      const canvas = new fabric.StaticCanvas(null, {
+      const canvas = new fabric.StaticCanvas(undefined, {
         width,
         height,
         backgroundColor: 'transparent',

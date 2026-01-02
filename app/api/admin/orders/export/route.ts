@@ -33,11 +33,26 @@ export async function GET(request: NextRequest) {
 
         const orders = await prisma.order.findMany({
             where,
-            include: {
-                store: true,
-                customer: true,
+            select: {
+                id: true,
+                status: true,
+                totalAmount: true,
+                createdAt: true,
+                store: {
+                    select: {
+                        name: true
+                    }
+                },
+                customer: {
+                    select: {
+                        name: true,
+                        phoneNumber: true
+                    }
+                },
                 _count: {
-                    select: { orderItems: true }
+                    select: {
+                        items: true
+                    }
                 }
             },
             orderBy: { createdAt: 'desc' },
@@ -50,7 +65,7 @@ export async function GET(request: NextRequest) {
             `"${order.store.name.replace(/"/g, '""')}"`,
             `"${(order.customer.name || '').replace(/"/g, '""')}"`,
             order.customer.phoneNumber,
-            order._count.orderItems.toString(),
+            order._count.items.toString(),
             order.totalAmount.toFixed(2),
             order.status,
             new Date(order.createdAt).toLocaleDateString('fr-FR')

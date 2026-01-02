@@ -4,6 +4,14 @@
 
 .desktopOnly {
   display: block;
+  /* Ensure sticky positioning works - no overflow or transform on parent */
+  overflow: visible !important;
+  position: static !important;
+  transform: none !important;
+  /* Ensure no height constraint */
+  min-height: auto;
+  /* Ensure it doesn't create a containing block */
+  contain: none;
 }
 
 @media (max-width: 768px) {

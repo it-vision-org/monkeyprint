@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSession, signOut, Session } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+import type { Session } from 'next-auth';
 import MobileMenu from './MobileMenu';
 import CartButton from './CartButton';
 import type { MenuItem } from './types';
@@ -122,9 +123,12 @@ export default function MainHeader({
                 }
             `}} />
             <header className={className} style={{ 
-                position: 'sticky', 
-                top: 0, 
-                zIndex: 100,
+                position: 'fixed', 
+                top: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                zIndex: 1000,
                 background: '#ffffff',
                 boxShadow: '0px 4px 11.4px -4px rgba(0, 0, 0, 0.25)'
             }}>

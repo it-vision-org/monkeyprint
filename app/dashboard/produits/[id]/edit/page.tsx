@@ -4,7 +4,8 @@ import { redirect, notFound } from "next/navigation";
 import { getR2Url } from "@/lib/storage";
 import EditProductForm from "./EditProductForm";
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -17,7 +18,7 @@ export default async function EditProductPage({ params }: { params: { id: string
     const store = user.stores[0];
 
     const product = await prisma.product.findUnique({
-        where: { id: params.id }
+        where: { id }
     });
 
     if (!product || product.storeId !== store.id) {

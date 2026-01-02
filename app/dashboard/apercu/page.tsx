@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { getR2Url } from "@/lib/storage";
 import SalesChart from "./SalesChart";
 
 export default async function ApercuPage() {
@@ -50,9 +52,12 @@ export default async function ApercuPage() {
 
     // Mocking change percentages for now as we don't have historical data structure easily accessible without complex queries
 
+    // Resolve logo URL from R2
+    const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
+
     return (
         <>
-            <h1 className="dash-page-title">Aperçu</h1>
+
             <div className="apercu-grid">
                 {/* Row 1: Ventes totales & Commandes en attente */}
                 <div className="apercu-card apercu-ventes">

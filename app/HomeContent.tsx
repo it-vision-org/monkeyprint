@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useSession, signOut, Session } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import type { Session } from 'next-auth';
 import { useRouter } from "next/navigation";
 import styles from "./homeMobile.module.css";
 import desktopStyles from "./homeDesktop.module.css";
@@ -47,9 +48,9 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
       ];
 
   return (
-    <div style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
+    <>
       {/* Mobile (Figma / 390px absolute layout) */}
-      <div className={styles.mobileOnly}>
+      <div className={styles.mobileOnly} style={{ overflowX: 'hidden', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
         <div className={styles.landingPage}>
           {/* NAV BAR */}
           <MainHeader menuItems={menuItems} initialSession={initialSession} />
@@ -127,9 +128,9 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
 
       {/* Desktop/Tablet - Full Desktop Design */}
       <div className={styles.desktopOnly}>
-        <div className={desktopStyles.desktopContainer}>
-          {/* Navbar */}
-          <header className={desktopStyles.desktopNavbar}>
+        {/* Navbar - Outside container for proper sticky positioning */}
+        <header className={desktopStyles.desktopNavbar}>
+          <div className={desktopStyles.desktopNavbarInner}>
             <div className={desktopStyles.desktopLogoContainer}>
               <Image
                 src="/logo.png"
@@ -164,8 +165,10 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
                 ))}
               </ul>
             </nav>
-          </header>
+          </div>
+        </header>
 
+        <div className={desktopStyles.desktopContainer}>
           {/* Hero Section */}
           <section className={desktopStyles.desktopHeroSection}>
             {/* Background Monkey SVG */}
@@ -332,7 +335,7 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

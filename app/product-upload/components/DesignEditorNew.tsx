@@ -43,7 +43,7 @@ const getContrastColor = (hexColor: string): string => {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
 
-export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange, onSave }: DesignEditorProps) {
+export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange }: DesignEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const previewRef = useRef<HTMLCanvasElement>(null);

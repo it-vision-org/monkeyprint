@@ -2,8 +2,8 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import { uploadImageToR2 } from "@/lib/storage";
+import { revalidatePath } from "next/cache";
 
 export async function createTicket(formData: FormData) {
     const session = await auth();

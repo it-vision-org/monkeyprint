@@ -21,12 +21,23 @@
   }
 }
 
-html,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  /* Ensure sticky works */
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
   width: 100%;
   overflow-x: hidden;
+  /* Ensure sticky works - don't set overflow-y hidden */
+  min-height: 100%;
+  position: relative;
 }
 
 /* Prevent horizontal scroll on create-shop page desktop */
@@ -3504,9 +3515,16 @@ button.pu-mini-dot {
   background: #eff6fb;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
-  position: relative;
   box-sizing: border-box;
+  /* Ensure sticky positioning works - no overflow on parent, no position relative */
+  display: flex;
+  flex-direction: column;
+  /* Remove position: relative to allow sticky to work relative to viewport */
+  position: static !important;
+  overflow: visible !important;
+  /* Ensure no transform or other properties that break sticky */
+  transform: none !important;
+  will-change: auto;
 }
 
 /* Header */
@@ -3514,9 +3532,17 @@ button.pu-mini-dot {
   background: white;
   border-bottom: 1px solid #e5e7eb;
   padding: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: fixed !important; /* Use fixed for reliability */
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  /* Ensure header stays on top */
+  flex-shrink: 0 !important;
+  /* Prevent any transform or will-change that might break sticky */
+  transform: none !important;
+  will-change: auto;
 }
 
 .dash-container {
@@ -3677,19 +3703,24 @@ button.pu-mini-dot {
   background: #0b7a6d;
 }
 
-
 /* Main Content */
 .dash-main {
   padding: 40px 0;
+  padding-top: 120px; /* Space for fixed header (80px header + 40px padding) */
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  /* Ensure sticky works - allow vertical overflow */
+  overflow-y: visible;
 }
 
 @media (max-width: 768px) {
   .dash-main {
     padding: 20px 0 80px;
+    padding-top: 100px; /* Space for fixed header (80px header + 20px padding) */
   }
 
   .dash-main .dash-container {
@@ -5418,16 +5449,41 @@ button.pu-mini-dot {
 }
 
 @media (max-width: 768px) {
+  /* Ensure header is sticky on mobile */
+  .dashboard-page {
+    display: flex;
+    flex-direction: column;
+    overflow: visible !important;
+    position: static !important;
+    transform: none !important;
+  }
+
+  .dashboard-page .dash-header {
+    position: fixed !important; /* Use fixed for reliability on mobile */
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    background: white !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    flex-shrink: 0 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
   .dash-container {
     padding: 0 18px;
     height: 64px;
     grid-template-columns: 1fr auto;
     justify-content: space-between;
+    align-items: center;
   }
 
   .dash-logo {
     font-size: 18px;
     color: #0d9488;
+    display: none;
   }
 
   .dashboard-page .dash-header .dash-nav {
@@ -5444,6 +5500,41 @@ button.pu-mini-dot {
     justify-content: center;
     grid-column: 2;
     justify-self: end;
+  }
+
+  /* Mobile Store Info - Inside Sticky Header */
+  .dash-mobile-store-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    grid-column: 1;
+    max-width: calc(100% - 60px);
+  }
+
+  .dash-mobile-store-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .dash-mobile-store-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-dm-sans), "DM Sans", -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   .dash-main .dash-container {
@@ -5577,6 +5668,46 @@ button.pu-mini-dot {
 }
 
 /* ==================== Aperçu Page (Pixel Perfect) ==================== */
+.apercu-shop-header {
+  margin-bottom: 32px;
+}
+
+.apercu-shop-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.apercu-shop-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apercu-shop-details {
+  flex: 1;
+}
+
+.apercu-shop-details .dash-page-title {
+  margin-bottom: 0;
+}
+
+.apercu-shop-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 4px;
+  font-family: var(--font-dm-sans), "DM Sans", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
 .apercu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -5867,6 +5998,27 @@ button.pu-mini-dot {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: visible !important; /* Allow sticky to work */
+    position: static !important;
+  }
+
+  .apercu-shop-header {
+    margin-bottom: 24px;
+  }
+
+  .apercu-shop-info {
+    gap: 16px;
+  }
+
+  .apercu-shop-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+  }
+
+  .apercu-shop-name {
+    font-size: 16px;
+    margin-top: 2px;
   }
 
   .apercu-grid {
@@ -5990,6 +6142,10 @@ button.pu-mini-dot {
 /* Desktop hidden for mobile-only design */
 @media (min-width: 769px) {
   .dash-mobile-menu-btn {
+    display: none;
+  }
+
+  .dash-mobile-store-info {
     display: none;
   }
 }
@@ -6254,6 +6410,10 @@ button.pu-mini-dot {
   padding: 24px var(--mobile-padding-x) 80px;
   background: #e0e7ff;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  /* Ensure sticky works */
+  overflow-y: visible;
 }
 
 .produits-container {
@@ -6294,7 +6454,12 @@ button.pu-mini-dot {
   }
 
   .produits-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 40px;
+    padding: 0;
+    width: 100%;
   }
 
   .produit-card {
@@ -6314,6 +6479,8 @@ button.pu-mini-dot {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+  padding: 0;
+  width: 100%;
 }
 
 .produits-page-title {
@@ -6462,6 +6629,14 @@ button.pu-mini-dot {
 
   .produits-page-title {
     font-size: 20px;
+  }
+
+  .produits-title-row {
+    margin-bottom: 20px;
+  }
+
+  .produits-container {
+    position: relative;
   }
 }
 
@@ -10027,19 +10202,37 @@ button.pu-mini-dot {
 
   .dashboard-page .dash-header {
     display: flex !important;
+    position: -webkit-sticky !important; /* Safari support */
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    will-change: auto;
   }
 }
 
 /* Desktop Dashboard Header Styles */
 @media (min-width: 769px) {
+  .dashboard-page {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
   .dashboard-page .dash-header {
     display: flex !important;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+    position: fixed !important; /* Use fixed for reliability */
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    background: white !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05) !important;
+    flex-shrink: 0 !important;
+    transform: none !important;
+    will-change: auto;
   }
 
   .dashboard-page .dash-header .dash-container {
@@ -10221,7 +10414,6 @@ button.pu-mini-dot {
     flex-shrink: 0;
   }
 
-
   .dashboard-page .dash-header .dash-visit-btn {
     background: #0d9488;
     color: white;
@@ -10245,7 +10437,6 @@ button.pu-mini-dot {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
   }
-
 }
 
 /* Responsive adjustments for smaller desktop screens (800-900px range) */
@@ -10363,7 +10554,6 @@ button.pu-mini-dot {
     gap: 10px;
     flex-shrink: 0;
   }
-
 }
 
 /* Responsive adjustments for smaller desktop screens */

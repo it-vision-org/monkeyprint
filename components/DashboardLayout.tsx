@@ -23,7 +23,35 @@ function isActivePath(activePath: string, href: string) {
   return activePath === href || activePath.startsWith(`${href}/`) || activePath.startsWith(`${href}?`);
 }
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+// Mobile Store Info Component
+function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: string | null } }) {
+  if (!storeInfo) return null;
+
+  return (
+    <div className="dash-mobile-store-info">
+      {storeInfo.logoUrl && (
+        <div className="dash-mobile-store-logo">
+          <Image 
+            src={storeInfo.logoUrl} 
+            alt={storeInfo.name} 
+            width={32} 
+            height={32}
+            style={{ objectFit: 'contain', borderRadius: '6px' }}
+          />
+        </div>
+      )}
+      <div className="dash-mobile-store-name">{storeInfo.name}</div>
+    </div>
+  );
+}
+
+export default function DashboardLayout({ 
+  children,
+  storeInfo: initialStoreInfo 
+}: { 
+  children: ReactNode;
+  storeInfo: { name: string; logoUrl: string | null } | null;
+}) {
   const router = useRouter();
   const pathname = usePathname() ?? "/dashboard";
   const searchParams = useSearchParams();
@@ -33,6 +61,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandesOpen, setCommandesOpen] = useState(false);
   const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
+  const storeInfo = initialStoreInfo;
   const commandesDropdownRef = useRef<HTMLDivElement | null>(null);
   const navIndicatorRef = useRef<HTMLDivElement | null>(null);
   const navWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -123,6 +152,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="dashboard-page">
       <header className="dash-header">
         <div className="dash-container">
+          <MobileStoreInfo storeInfo={storeInfo} />
           <div className="dash-logo">
           </div>
 

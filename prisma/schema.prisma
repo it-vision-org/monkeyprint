@@ -20,49 +20,49 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   // Relations
-  stores          Store[]
-  supportTickets  SupportTicket[]
+  store          Store? // One-to-one: Each user can have at most one store
+  supportTickets SupportTicket[]
 }
 
 model Store {
-  id          String    @id @default(uuid())
-  name        String
-  slug        String    @unique
-  logoUrl     String?
-  theme       String    @default("theme-1")
-  status      String    @default("ACTIVE") // ACTIVE, PENDING, SUSPENDED
-  ownerId     String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  theme     String   @default("theme-1")
+  status    String   @default("ACTIVE") // ACTIVE, PENDING, SUSPENDED
+  ownerId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  owner       User      @relation(fields: [ownerId], references: [id])
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade) // One-to-one: Each store belongs to one user
   products    Product[]
   orders      Order[]
   withdrawals Withdrawal[]
 }
 
 model Product {
-  id             String   @id @default(uuid())
-  name           String
-  description    String?
-  basePrice      Float
-  type           String   // 'tshirt' | 'hoodie'
-  
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  basePrice   Float
+  type        String // 'tshirt' | 'hoodie'
+
   // Design Data
-  designData     String   @db.Text // JSON string of fabric.js state
-  previewFront   String?  // R2 URL
-  previewBack    String?  // R2 URL
-  
-  storeId        String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  designData   String  @db.Text // JSON string of fabric.js state
+  previewFront String? // R2 URL
+  previewBack  String? // R2 URL
+
+  storeId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  store          Store    @relation(fields: [storeId], references: [id])
-  orderItems     OrderItem[]
+  store      Store       @relation(fields: [storeId], references: [id])
+  orderItems OrderItem[]
 }
 
 model Customer {
@@ -74,58 +74,58 @@ model Customer {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  orders      Order[]
+  orders Order[]
 }
 
 model Order {
-  id                String      @id @default(uuid())
-  status            String      @default("PENDING") // PENDING, CONFIRMED, IN_TREATMENT, IN_DELIVERY, DELIVERED_AND_PAID, RETURN
+  id                String    @id @default(uuid())
+  status            String    @default("PENDING") // PENDING, CONFIRMED, IN_TREATMENT, IN_DELIVERY, DELIVERED_AND_PAID, RETURN
   totalAmount       Float
-  deletionRequested Boolean     @default(false)
-  deliveredAt       DateTime?   // Set when status changes to DELIVERED_AND_PAID
-  
-  customerId        String
-  storeId           String
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
+  deletionRequested Boolean   @default(false)
+  deliveredAt       DateTime? // Set when status changes to DELIVERED_AND_PAID
+
+  customerId String
+  storeId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id])
-  store             Store       @relation(fields: [storeId], references: [id])
-  items             OrderItem[]
+  customer Customer    @relation(fields: [customerId], references: [id])
+  store    Store       @relation(fields: [storeId], references: [id])
+  items    OrderItem[]
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  quantity  Int
-  price     Float   // Price at time of purchase
-  size      String?
-  color     String?
-  
+  id       String  @id @default(uuid())
+  quantity Int
+  price    Float // Price at time of purchase
+  size     String?
+  color    String?
+
   productId String
   orderId   String
-  
+
   // Relations
-  product   Product @relation(fields: [productId], references: [id])
-  order     Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
 }
 
 model Withdrawal {
-  id            String    @id @default(uuid())
-  storeId       String
-  amount        Float
-  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
-  bankDetails   String?   @db.Text // JSON or text with bank account info
-  requestedAt   DateTime  @default(now())
-  processedAt   DateTime?
-  processedBy   String?   // Admin user ID who processed it
-  notes         String?   @db.Text
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id          String    @id @default(uuid())
+  storeId     String
+  amount      Float
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED, COMPLETED
+  bankDetails String?   @db.Text // JSON or text with bank account info
+  requestedAt DateTime  @default(now())
+  processedAt DateTime?
+  processedBy String? // Admin user ID who processed it
+  notes       String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  store         Store     @relation(fields: [storeId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
 }
 
 model Setting {
@@ -138,27 +138,27 @@ model Setting {
 }
 
 model SupportTicket {
-  id          String                 @id @default(uuid())
-  subject     String
-  status      String                 @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
-  priority    String                 @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
-  userId      String
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  
+  id        String   @id @default(uuid())
+  subject   String
+  status    String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority  String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  user        User                   @relation(fields: [userId], references: [id])
-  messages    SupportTicketMessage[]
+  user     User                   @relation(fields: [userId], references: [id])
+  messages SupportTicketMessage[]
 }
 
 model SupportTicketMessage {
-  id          String         @id @default(uuid())
-  ticketId    String
-  content     String         @db.Text
-  imageUrl    String?        // R2 URL for attached image
-  isAdmin     Boolean        @default(false) // true if message is from admin, false if from user
-  createdAt   DateTime       @default(now())
-  
+  id        String   @id @default(uuid())
+  ticketId  String
+  content   String   @db.Text
+  imageUrl  String? // R2 URL for attached image
+  isAdmin   Boolean  @default(false) // true if message is from admin, false if from user
+  createdAt DateTime @default(now())
+
   // Relations
-  ticket      SupportTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 }

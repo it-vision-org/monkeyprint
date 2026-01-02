@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
-import { useSession, Session } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import type { Session } from 'next-auth';
 import styles from './createShop.module.css';
 import StepDots from '@/components/StepDots';
 import type { MenuItem } from '@/components/types';
@@ -123,7 +124,13 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
         setError('');
 
         try {
-            await onCreateShop();
+            const result = await onCreateShop();
+            // Check if createStore returned an error
+            if (result && result.error) {
+                setError(result.error);
+                setIsLoading(false);
+                return;
+            }
         } catch (storeError: any) {
             // If createStore redirects, it throws NEXT_REDIRECT which is expected
             if (storeError?.digest?.startsWith('NEXT_REDIRECT') || 
@@ -132,7 +139,7 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                 return;
             }
             console.error('Store creation error:', storeError);
-            setError('Failed to create store');
+            setError(storeError?.message || 'Failed to create store');
             setIsLoading(false);
         }
     };
@@ -205,9 +212,14 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                 return; // Stop execution if there's an error
             }
             // Registration successful, now create the store
-            // Note: createStore will redirect, so we don't need to handle the response
             try {
-                await onCreateShop();
+                const storeResult = await onCreateShop();
+                // Check if createStore returned an error
+                if (storeResult && storeResult.error) {
+                    setError(storeResult.error);
+                    setIsLoading(false);
+                    return;
+                }
             } catch (storeError: any) {
                 // If createStore redirects, it throws NEXT_REDIRECT which is expected
                 // Don't show this as an error to the user
@@ -217,7 +229,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     return;
                 }
                 console.error('Store creation error:', storeError);
-                setError('Failed to create store');
+                setError(storeError?.message || 'Failed to create store');
                 setIsLoading(false);
             }
         } catch (e: any) {
@@ -515,7 +527,13 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
             formData.append('logo', logoFile);
         }
 
-        await createStore(null, formData);
+        const result = await createStore(null, formData);
+        // If there's an error, return it so the calling component can display it
+        if (result && result.error) {
+            return result;
+        }
+        // Otherwise, redirect will happen
+        return result;
     };
 
     return (
