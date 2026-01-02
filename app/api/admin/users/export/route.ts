@@ -33,9 +33,7 @@ export async function GET(request: NextRequest) {
         const users = await prisma.user.findMany({
             where,
             include: {
-                _count: {
-                    select: { store: true }
-                }
+                store: true
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -47,7 +45,7 @@ export async function GET(request: NextRequest) {
             `"${(user.name || '').replace(/"/g, '""')}"`,
             user.email,
             user.role,
-            user._count.store.toString(),
+            (user.store ? 1 : 0).toString(),
             new Date(user.createdAt).toLocaleDateString('fr-FR')
         ]);
 

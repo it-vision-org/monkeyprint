@@ -36,9 +36,7 @@ export default async function AdminUsersPage({
         prisma.user.findMany({
             where,
             include: {
-                _count: {
-                    select: { store: true }
-                }
+                store: true
             },
             orderBy: { createdAt: 'desc' },
             skip: (page - 1) * pageSize,
@@ -167,7 +165,7 @@ export default async function AdminUsersPage({
                                             {user.role === 'ADMIN' ? 'Admin' : 'Vendeur'}
                                         </span>
                                     </td>
-                                    <td>{user._count.store}</td>
+                                    <td>{user.store ? 1 : 0}</td>
                                     <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                                     <td>
                                         <span className="admin-status-badge green">
