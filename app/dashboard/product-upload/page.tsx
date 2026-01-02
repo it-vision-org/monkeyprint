@@ -56,8 +56,24 @@ const QUALITY_OPTIONS: QualityOption[] = [
     { id: "fireproof", label: "FireProof", price: 12 },
 ];
 
-const BASE_PRICE = 20;
 const DESIGN_FEE = 30;
+
+// Product base prices
+const PRODUCT_PRICES: Record<string, number> = {
+    hoodie: 30,
+    hoodie2: 30,
+    hoodie3: 30,
+    tshirt: 20,
+    tshirt2: 20,
+    tshirt3: 20,
+};
+
+// Get product name for display
+const getProductName = (productId: string): string => {
+    if (productId.startsWith('hoodie')) return 'Hoodie';
+    if (productId.startsWith('tshirt')) return 'T-Shirt';
+    return 'T-Shirt'; // default
+};
 
 export default function ProductUploadPage() {
     const router = useRouter();
@@ -70,6 +86,9 @@ export default function ProductUploadPage() {
     const [isLoadingAI, setIsLoadingAI] = useState(false);
     const [aiImages, setAiImages] = useState<string[]>([]);
     const [designEditorData, setDesignEditorData] = useState<string | null>(null);
+    const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
+    const [desktopPriceExpanded, setDesktopPriceExpanded] = useState(false);
+    const [desktopPriceLocked, setDesktopPriceLocked] = useState(false);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -110,7 +129,8 @@ export default function ProductUploadPage() {
     };
 
     const qualityPrice = QUALITY_OPTIONS.find((option) => option.id === selectedQuality)?.price ?? 0;
-    const totalPrice = BASE_PRICE + DESIGN_FEE + qualityPrice;
+    const basePrice = PRODUCT_PRICES[selectedProduct] ?? 20;
+    const totalPrice = basePrice + DESIGN_FEE + qualityPrice;
 
     const toggleColor = (id: string) => {
         setSelectedColors((prev) => {
@@ -209,8 +229,223 @@ export default function ProductUploadPage() {
         }
     }, []);
 
+    // Mobile sticky price bar
+    const MobilePriceBar = () => (
+        <div className="pu-cart-container pu-cart-container-mobile">
+            <button
+                className="pu-cart-bar"
+                type="button"
+                aria-expanded={mobilePriceExpanded}
+                onClick={() => setMobilePriceExpanded((prev) => !prev)}
+            >
+                <div className="pu-cart-content">
+                    <svg
+                        className="pu-cart-icon"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                    </svg>
+                </div>
+                <div className="pu-cart-total">
+                    <span className="pu-cart-price">{totalPrice}DT</span>
+                    <svg
+                        width="16"
+                        height="10"
+                        viewBox="0 0 16 10"
+                        fill="none"
+                        className={mobilePriceExpanded ? "expanded" : ""}
+                    >
+                        <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </div>
+            </button>
+            {mobilePriceExpanded && (
+                <div className="pu-cart-details pu-cart-details-mobile">
+                    <div className="pu-cart-details-header">
+                        <h3 className="pu-cart-details-title">Détails du prix</h3>
+                    </div>
+                    <div className="pu-cart-items">
+                        <div className="pu-cart-item">
+                            <div className="pu-cart-item-info">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                                    <path d="M3 6h18" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                                <span>Articles ({getProductName(selectedProduct)})</span>
+                            </div>
+                            <span className="pu-cart-item-price">{basePrice}DT</span>
+                        </div>
+                        <div className="pu-cart-item">
+                            <div className="pu-cart-item-info">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                                </svg>
+                                <span>Design</span>
+                            </div>
+                            <span className="pu-cart-item-price">{DESIGN_FEE}DT</span>
+                        </div>
+                        <div className="pu-cart-item">
+                            <div className="pu-cart-item-info">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                    <path d="M2 17l10 5 10-5" />
+                                    <path d="M2 12l10 5 10-5" />
+                                </svg>
+                                <span>Quality ({QUALITY_OPTIONS.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                            </div>
+                            <span className="pu-cart-item-price">{qualityPrice}DT</span>
+                        </div>
+                    </div>
+                    <div className="pu-cart-total-line">
+                        <span className="pu-cart-total-label">Total</span>
+                        <span className="pu-cart-total-price">{totalPrice}DT</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    // Desktop floating price widget
+    const DesktopPriceWidget = () => {
+        const handleToggle = () => {
+            if (desktopPriceLocked) {
+                setDesktopPriceLocked(false);
+                setDesktopPriceExpanded(false);
+            } else {
+                setDesktopPriceLocked(true);
+                setDesktopPriceExpanded(true);
+            }
+        };
+        
+        const handleMouseEnter = () => {
+            if (!desktopPriceLocked) {
+                setDesktopPriceExpanded(true);
+            }
+        };
+        
+        const handleMouseLeave = () => {
+            if (!desktopPriceLocked) {
+                setDesktopPriceExpanded(false);
+            }
+        };
+        
+        return (
+            <div 
+                className={`pu-price-widget-desktop ${desktopPriceExpanded ? 'expanded' : ''} ${desktopPriceLocked ? 'locked' : ''}`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <button
+                    className="pu-price-widget-trigger"
+                    type="button"
+                    onClick={handleToggle}
+                    aria-label="Voir le récapitulatif des prix"
+                >
+                    <div className="pu-price-widget-trigger-icon">
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                        </svg>
+                    </div>
+                    <div className="pu-price-widget-trigger-price">{totalPrice}DT</div>
+                </button>
+
+                <div className="pu-price-widget-panel">
+                    <div className="pu-price-widget-header">
+                        <div className="pu-price-widget-header-icon">
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                            </svg>
+                        </div>
+                        <div className="pu-price-widget-header-title">Récapitulatif</div>
+                    </div>
+                    <div className="pu-price-widget-content">
+                        <div className="pu-price-widget-items">
+                            <div className="pu-price-widget-item">
+                                <div className="pu-price-widget-item-info">
+                                    <div className="pu-price-widget-item-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                                            <path d="M3 6h18" />
+                                            <path d="M16 10a4 4 0 0 1-8 0" />
+                                        </svg>
+                                    </div>
+                                    <span className="pu-price-widget-item-label">Articles ({getProductName(selectedProduct)})</span>
+                                </div>
+                                <span className="pu-price-widget-item-price">{basePrice}DT</span>
+                            </div>
+                            <div className="pu-price-widget-item">
+                                <div className="pu-price-widget-item-info">
+                                    <div className="pu-price-widget-item-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                                        </svg>
+                                    </div>
+                                    <span className="pu-price-widget-item-label">Design</span>
+                                </div>
+                                <span className="pu-price-widget-item-price">{DESIGN_FEE}DT</span>
+                            </div>
+                            <div className="pu-price-widget-item">
+                                <div className="pu-price-widget-item-info">
+                                    <div className="pu-price-widget-item-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                            <path d="M2 17l10 5 10-5" />
+                                            <path d="M2 12l10 5 10-5" />
+                                        </svg>
+                                    </div>
+                                    <span className="pu-price-widget-item-label">Quality ({QUALITY_OPTIONS.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                </div>
+                                <span className="pu-price-widget-item-price">{qualityPrice}DT</span>
+                            </div>
+                        </div>
+                        <div className="pu-price-widget-total">
+                            <div className="pu-price-widget-total-label">Total</div>
+                            <div className="pu-price-widget-total-price">{totalPrice}DT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="product-upload-page">
+            {/* Mobile sticky price bar */}
+            <MobilePriceBar />
+            
+            {/* Desktop floating price widget */}
+            <DesktopPriceWidget />
+
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
                     <div className="pu-intro">
@@ -385,8 +620,8 @@ export default function ProductUploadPage() {
                         </div>
                         <div className="pu-summary">
                             <div className="pu-summary-row">
-                                <span>Articles (T-shirt)</span>
-                                <span>{BASE_PRICE}DT</span>
+                                <span>Articles ({getProductName(selectedProduct)})</span>
+                                <span>{basePrice}DT</span>
                             </div>
                             <div className="pu-summary-row">
                                 <span>Design</span>
@@ -438,6 +673,7 @@ export default function ProductUploadPage() {
                     </div>
                 </div>
             )}
+
         </div>
     );
 }

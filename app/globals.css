@@ -1965,7 +1965,71 @@ body {
   color: #ffffff;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: visible;
   position: relative;
+}
+
+/* Override dashboard layout constraints for product-upload page */
+.dash-main .product-upload-page {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 80px);
+  margin-top: -40px;
+  margin-bottom: -40px;
+  left: 0;
+  right: 0;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+}
+
+/* Override dashboard page background when product-upload is present */
+.dashboard-page:has(.product-upload-page) {
+  background: transparent !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: 100vh !important;
+}
+
+.dash-main:has(.product-upload-page) {
+  padding: 0 !important;
+  padding-top: 80px !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  min-height: calc(100vh - 80px) !important;
+  max-height: none !important;
+}
+
+.dash-main:has(.product-upload-page) .dash-container {
+  padding: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 768px) {
+  .dash-main:has(.product-upload-page) {
+    padding-top: 64px !important; /* Mobile header height */
+  }
+
+  .dash-main .product-upload-page {
+    margin-top: -20px;
+    margin-bottom: -20px;
+  }
+
+  /* Add padding for sticky price bar on mobile */
+  .dash-main:has(.product-upload-page) .pu-mobile-main {
+    padding-top: calc(
+      64px + 56px + 28px
+    ) !important; /* header + price bar + spacing */
+  }
 }
 
 .product-upload-page::before {
@@ -2121,6 +2185,53 @@ body {
   max-width: 100%;
   padding: 0;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+/* On dashboard pages, position below dashboard header */
+.dashboard-page .pu-cart-container-mobile {
+  position: sticky !important;
+  top: 64px !important; /* Mobile header height */
+  z-index: 999 !important;
+}
+
+@media (min-width: 769px) {
+  .dashboard-page .pu-cart-container-mobile {
+    top: 80px !important; /* Desktop header height */
+  }
+}
+
+/* Ensure sticky works on mobile - override any parent overflow */
+@media (max-width: 768px) {
+  .dashboard-page .product-upload-page {
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    position: relative !important;
+  }
+
+  /* Ensure parent containers don't break sticky */
+  .dashboard-page,
+  .dash-main,
+  .dash-main:has(.product-upload-page) {
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  /* Make mobile price bar fixed and attached to header */
+  .dashboard-page .pu-cart-container-mobile,
+  .dashboard-page .product-upload-page .pu-cart-container-mobile,
+  .dashboard-page .product-upload-page > .pu-cart-container-mobile {
+    position: fixed !important;
+    top: 64px !important; /* Dashboard header height on mobile */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 999 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+  }
 }
 
 @media (min-width: 900px) {
@@ -2673,6 +2784,8 @@ body {
   max-width: 100%;
   position: relative;
   z-index: 1;
+  overflow-y: visible;
+  overflow-x: hidden;
 }
 
 .pu-mobile-flow,
@@ -2683,6 +2796,8 @@ body {
   flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
+  overflow: visible;
+  min-height: auto;
 }
 
 .pu-intro,
@@ -3111,18 +3226,22 @@ button.pu-mini-dot {
   background: rgba(255, 255, 255, 0.88);
   padding: 14px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 10px;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .pu-summary-row,
 .pu-summary-total {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
   font-weight: 600;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .pu-summary-total {
@@ -3522,6 +3641,7 @@ button.pu-mini-dot {
   /* Remove position: relative to allow sticky to work relative to viewport */
   position: static !important;
   overflow: visible !important;
+  overflow-x: hidden !important;
   /* Ensure no transform or other properties that break sticky */
   transform: none !important;
   will-change: auto;
@@ -3715,6 +3835,7 @@ button.pu-mini-dot {
   min-height: 0;
   /* Ensure sticky works - allow vertical overflow */
   overflow-y: visible;
+  height: auto;
 }
 
 @media (max-width: 768px) {

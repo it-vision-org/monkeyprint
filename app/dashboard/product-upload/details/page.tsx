@@ -711,26 +711,6 @@ export default function ProductDetailsPage() {
         <div className="product-upload-page">
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
-                    <button
-                        className="pd-submit-button"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || isRenderingDesign}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <div className="pu-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-                                Publication...
-                            </>
-                        ) : (
-                            <>
-                                {isFirstProduct ? "Publier le produit" : "Ajouter un produit"}
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </>
-                        )}
-                    </button>
                     <div className="pd-intro">
                         <p className="pd-intro-title">Dernière étape, remplissez la description de votre produit</p>
                         <span className="pd-intro-line" />
