@@ -11,6 +11,7 @@ function getSectionLabel(pathname: string) {
   if (pathname.startsWith("/admin/users")) return "UTILISATEURS";
   if (pathname.startsWith("/admin/orders")) return "COMMANDES";
   if (pathname.startsWith("/admin/products")) return "PRODUITS";
+  if (pathname.startsWith("/admin/product-config")) return "CONFIG PRODUITS";
   if (pathname.startsWith("/admin/support")) return "SUPPORT";
   if (pathname.startsWith("/admin/analytics")) return "ANALYTIQUES";
   if (pathname.startsWith("/admin/settings")) return "PARAMÈTRES";
@@ -89,6 +90,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     { href: "/admin/users", label: "UTILISATEURS" },
     { href: "/admin/orders", label: "COMMANDES" },
     { href: "/admin/products", label: "PRODUITS" },
+    { href: "/admin/product-config", label: "CONFIG PRODUITS" },
     { href: "/admin/support", label: "SUPPORT" },
     { href: "/admin/analytics", label: "ANALYTIQUES" },
     { href: "/admin/settings", label: "PARAMÈTRES" },

@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import DesignEditor from "../../product-upload/components/DesignEditorNew";
+import { getProductForEdit } from "../../product-upload/actions";
 
 type ProductCard = {
     id: string;
@@ -25,62 +26,38 @@ type QualityOption = {
     price: number;
 };
 
-const PRODUCT_TYPES: ProductCard[] = [
-    { id: "hoodie", name: "Hoodie", image: "/Hoodie.png", badge: "30DT" },
-    { id: "tshirt", name: "T-Shirt", image: "/T-Shirt.png", badge: "20DT" },
-    { id: "hoodie2", name: "Hoodie", image: "/Hoodie.png" },
-    { id: "tshirt2", name: "T-Shirt", image: "/T-Shirt.png" },
-    { id: "hoodie3", name: "Hoodie", image: "/Hoodie.png" },
-    { id: "tshirt3", name: "T-Shirt", image: "/T-Shirt.png" },
-];
-
-const COLOR_SWATCHES: ColorSwatch[] = [
-    { id: "white", hex: "#ffffff", label: "Blanc" },
-    { id: "blue", hex: "#3557ff", label: "Bleu" },
-    { id: "black", hex: "#1c1c1c", label: "Noir" },
-    { id: "red", hex: "#ff3b3b", label: "Rouge" },
-    { id: "lime", hex: "#bdfb2a", label: "Vert" },
-];
-
-const COLOR_FILTERS: Record<string, string> = {
-    white: "brightness(1.05)",
-    blue: "saturate(2.2) hue-rotate(180deg) brightness(0.9)",
-    black: "brightness(0.35) contrast(1.1)",
-    red: "saturate(2.1) hue-rotate(-15deg) brightness(0.95)",
-    lime: "saturate(2.2) hue-rotate(60deg) brightness(1.1)",
-};
-
-const QUALITY_OPTIONS: QualityOption[] = [
-    { id: "cotton", label: "Cotton", price: 0 },
-    { id: "normal", label: "Normal", price: 5 },
-    { id: "fireproof", label: "FireProof", price: 12 },
-];
-
-const DESIGN_FEE = 30;
-
-// Product base prices
-const PRODUCT_PRICES: Record<string, number> = {
-    hoodie: 30,
-    hoodie2: 30,
-    hoodie3: 30,
-    tshirt: 20,
-    tshirt2: 20,
-    tshirt3: 20,
-};
+// These will be loaded from the API
+let PRODUCT_TYPES: ProductCard[] = [];
+let COLOR_SWATCHES: ColorSwatch[] = [];
+let QUALITY_OPTIONS: QualityOption[] = [];
+let DESIGN_FEE = 30;
+let PRODUCT_PRICES: Record<string, number> = {};
+let COLOR_FILTERS: Record<string, string> = {};
 
 // Get product name for display
-const getProductName = (productId: string): string => {
-    if (productId.startsWith('hoodie')) return 'Hoodie';
-    if (productId.startsWith('tshirt')) return 'T-Shirt';
-    return 'T-Shirt'; // default
+const getProductName = (productId: string, productTypes: ProductCard[]): string => {
+    const product = productTypes.find(p => p.id === productId);
+    return product?.name || 'T-Shirt';
 };
 
 export default function ProductUploadPage() {
     const router = useRouter();
-    const [selectedProduct, setSelectedProduct] = useState<string>("tshirt");
-    const [selectedColors, setSelectedColors] = useState<string[]>(["black"]);
-    const [activeColor, setActiveColorState] = useState<string>("black");
-    const [selectedQuality, setSelectedQuality] = useState<string>("cotton");
+    const searchParams = useSearchParams();
+    const editProductId = searchParams.get('edit');
+    const [isLoadingProduct, setIsLoadingProduct] = useState(!!editProductId);
+    const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+    const [configError, setConfigError] = useState<string | null>(null);
+    const [productTypes, setProductTypes] = useState<ProductCard[]>([]);
+    const [productTypesFull, setProductTypesFull] = useState<any[]>([]);
+    const [colorSwatches, setColorSwatches] = useState<ColorSwatch[]>([]);
+    const [qualityOptions, setQualityOptions] = useState<QualityOption[]>([]);
+    const [designFee, setDesignFee] = useState(30);
+    const [productPrices, setProductPrices] = useState<Record<string, number>>({});
+    const [colorFilters, setColorFilters] = useState<Record<string, string>>({});
+    const [selectedProduct, setSelectedProduct] = useState<string>("");
+    const [selectedColors, setSelectedColors] = useState<string[]>([]);
+    const [activeColor, setActiveColorState] = useState<string>("");
+    const [selectedQuality, setSelectedQuality] = useState<string>("");
     const [uploadedDesign, setUploadedDesign] = useState<string | null>(null);
     const [showAIPopup, setShowAIPopup] = useState(false);
     const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -89,6 +66,116 @@ export default function ProductUploadPage() {
     const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
     const [desktopPriceExpanded, setDesktopPriceExpanded] = useState(false);
     const [desktopPriceLocked, setDesktopPriceLocked] = useState(false);
+
+    // Store product images in sessionStorage when product type is selected
+    useEffect(() => {
+        if (selectedProduct && productTypesFull.length > 0) {
+            const selectedProductType = productTypes.find(p => p.id === selectedProduct);
+            if (selectedProductType) {
+                sessionStorage.setItem("productTypeImage", selectedProductType.image);
+                // Get back image from stored full product type data
+                const fullType = productTypesFull.find((pt: any) => pt.slug === selectedProduct);
+                if (fullType?.backImage) {
+                    sessionStorage.setItem("productTypeBackImage", fullType.backImage);
+                } else {
+                    // Clear back image if not available
+                    sessionStorage.removeItem("productTypeBackImage");
+                }
+                // Dispatch custom event to notify DesignEditor to reload images
+                window.dispatchEvent(new Event('productImagesUpdated'));
+            }
+        }
+    }, [selectedProduct, productTypes, productTypesFull]);
+
+    // Load product configuration from API
+    useEffect(() => {
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/product-config');
+                if (!response.ok) {
+                    throw new Error('Failed to load product configuration');
+                }
+                const data = await response.json();
+                
+                // Store full product types data
+                setProductTypesFull(data.productTypes || []);
+                
+                // Transform product types
+                const types: ProductCard[] = (data.productTypes || []).map((pt: any) => ({
+                    id: pt.slug,
+                    name: pt.name,
+                    image: pt.image,
+                    badge: `${pt.basePrice}DT`,
+                }));
+                setProductTypes(types);
+                
+                // Build product prices map
+                const prices: Record<string, number> = {};
+                (data.productTypes || []).forEach((pt: any) => {
+                    prices[pt.slug] = pt.basePrice;
+                });
+                setProductPrices(prices);
+                
+                // Transform colors
+                const colors: ColorSwatch[] = (data.colors || []).map((c: any) => ({
+                    id: c.id,
+                    hex: c.hex,
+                    label: c.name,
+                }));
+                setColorSwatches(colors);
+                
+                // Build color filters map
+                const filters: Record<string, string> = {};
+                (data.colors || []).forEach((c: any) => {
+                    if (c.filter) {
+                        filters[c.id] = c.filter;
+                    }
+                });
+                setColorFilters(filters);
+                
+                // Transform qualities
+                const qualities: QualityOption[] = (data.qualities || []).map((q: any) => ({
+                    id: q.id,
+                    label: q.name,
+                    price: q.price,
+                }));
+                setQualityOptions(qualities);
+                
+                // Set pricing settings
+                setDesignFee(data.pricingSettings?.designFee || 30);
+                
+                // Set default selections only if we have data
+                if (types.length > 0 && !selectedProduct) {
+                    const defaultProductId = types[0].id;
+                    setSelectedProduct(defaultProductId);
+                    // Store images for default product immediately
+                    const defaultProductType = types.find(p => p.id === defaultProductId);
+                    if (defaultProductType) {
+                        sessionStorage.setItem("productTypeImage", defaultProductType.image);
+                        const fullType = data.productTypes.find((pt: any) => pt.slug === defaultProductId);
+                        if (fullType?.backImage) {
+                            sessionStorage.setItem("productTypeBackImage", fullType.backImage);
+                        }
+                    }
+                }
+                if (colors.length > 0 && selectedColors.length === 0) {
+                    setSelectedColors([colors[0].id]);
+                    setActiveColorState(colors[0].id);
+                }
+                if (qualities.length > 0 && !selectedQuality) {
+                    setSelectedQuality(qualities[0].id);
+                }
+                
+                setConfigError(null);
+            } catch (error: any) {
+                console.error('Error loading product config:', error);
+                setConfigError(error.message || 'Erreur lors du chargement de la configuration');
+            } finally {
+                setIsLoadingConfig(false);
+            }
+        }
+        loadConfig();
+    }, []);
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -128,9 +215,9 @@ export default function ProductUploadPage() {
         setAiImages([]);
     };
 
-    const qualityPrice = QUALITY_OPTIONS.find((option) => option.id === selectedQuality)?.price ?? 0;
-    const basePrice = PRODUCT_PRICES[selectedProduct] ?? 20;
-    const totalPrice = basePrice + DESIGN_FEE + qualityPrice;
+    const qualityPrice = qualityOptions.find((option) => option.id === selectedQuality)?.price ?? 0;
+    const basePrice = productPrices[selectedProduct] ?? 20;
+    const totalPrice = basePrice + designFee + qualityPrice;
 
     const toggleColor = (id: string) => {
         setSelectedColors((prev) => {
@@ -168,10 +255,10 @@ export default function ProductUploadPage() {
             ? activeColor
             : (selectedColors.length > 0 ? selectedColors[0] : "");
 
-        const activeSwatch = COLOR_SWATCHES.find(swatch => swatch.id === validActiveColor);
+        const activeSwatch = colorSwatches.find(swatch => swatch.id === validActiveColor);
         const otherColors = selectedColors.filter(id => id !== validActiveColor);
         const otherSwatches = otherColors
-            .map(id => COLOR_SWATCHES.find(swatch => swatch.id === id))
+            .map(id => colorSwatches.find(swatch => swatch.id === id))
             .filter((swatch): swatch is ColorSwatch => swatch !== undefined);
 
         // Return active color first (for center), then others in their original order
@@ -180,7 +267,7 @@ export default function ProductUploadPage() {
             : otherSwatches;
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         // Save uploaded design if exists
         if (uploadedDesign) {
             sessionStorage.setItem("uploadedDesign", uploadedDesign);
@@ -188,7 +275,16 @@ export default function ProductUploadPage() {
         
         // Save product type and color for rendering background
         sessionStorage.setItem("productType", selectedProduct);
-        const activeColorHex = COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff';
+        const selectedProductType = productTypes.find(p => p.id === selectedProduct);
+        if (selectedProductType) {
+            sessionStorage.setItem("productTypeImage", selectedProductType.image);
+            // Get back image from stored full product type data
+            const fullType = productTypesFull.find((pt: any) => pt.slug === selectedProduct);
+            if (fullType?.backImage) {
+                sessionStorage.setItem("productTypeBackImage", fullType.backImage);
+            }
+        }
+        const activeColorHex = colorSwatches.find(s => s.id === activeColor)?.hex || '#ffffff';
         sessionStorage.setItem("productColor", activeColorHex);
         
         // Force save design editor data before navigation
@@ -221,13 +317,85 @@ export default function ProductUploadPage() {
 
     // Removed handleDesignSave - auto-save is now automatic in DesignEditor
 
-    // Load saved design on mount
+    // Load product data if in edit mode
     useEffect(() => {
-        const savedDesign = sessionStorage.getItem("designEditorData");
-        if (savedDesign) {
-            setDesignEditorData(savedDesign);
+        async function loadProductData() {
+            if (!editProductId) {
+                // Not in edit mode, just load saved design if exists
+                const savedDesign = sessionStorage.getItem("designEditorData");
+                if (savedDesign) {
+                    setDesignEditorData(savedDesign);
+                }
+                setIsLoadingProduct(false);
+                return;
+            }
+
+            try {
+                const result = await getProductForEdit(editProductId);
+                if (result.error) {
+                    console.error('Error loading product:', result.error);
+                    router.push('/dashboard/produits');
+                    return;
+                }
+
+                if (result.product) {
+                    const product = result.product;
+                    
+                    // Set product type
+                    setSelectedProduct(product.type || 'tshirt');
+                    
+                    // Load design data
+                    if (product.designData) {
+                        try {
+                            // Validate that designData is valid JSON
+                            const parsed = JSON.parse(product.designData);
+                            // Ensure it has the expected structure
+                            const designData = typeof parsed === 'object' && parsed !== null
+                                ? JSON.stringify({ front: parsed.front || null, back: parsed.back || null })
+                                : JSON.stringify({ front: null, back: null });
+                            setDesignEditorData(designData);
+                            sessionStorage.setItem("designEditorData", designData);
+                        } catch (e) {
+                            console.error('Error parsing designData:', e);
+                            // Use empty design if parsing fails
+                            const emptyDesign = JSON.stringify({ front: null, back: null });
+                            setDesignEditorData(emptyDesign);
+                            sessionStorage.setItem("designEditorData", emptyDesign);
+                        }
+                    } else {
+                        // No design data, use empty structure
+                        const emptyDesign = JSON.stringify({ front: null, back: null });
+                        setDesignEditorData(emptyDesign);
+                        sessionStorage.setItem("designEditorData", emptyDesign);
+                    }
+                    
+                    // Set product type and default color in sessionStorage for design rendering
+                    sessionStorage.setItem("productType", product.type || selectedProduct || 'tshirt');
+                    const defaultColorHex = colorSwatches.find(s => s.id === activeColor)?.hex || colorSwatches[0]?.hex || '#1c1c1c';
+                    sessionStorage.setItem("productColor", defaultColorHex);
+                    
+                    // Load preview image if exists
+                    if (product.previewFront) {
+                        setUploadedDesign(product.previewFront);
+                        sessionStorage.setItem("uploadedDesign", product.previewFront);
+                    }
+                    
+                    // Store product ID for later use in details page
+                    sessionStorage.setItem("editingProductId", editProductId);
+                    sessionStorage.setItem("editingProductName", product.name);
+                    sessionStorage.setItem("editingProductDescription", product.description || '');
+                    sessionStorage.setItem("editingProductPrice", product.basePrice.toString());
+                }
+            } catch (error) {
+                console.error('Error loading product for edit:', error);
+                router.push('/dashboard/produits');
+            } finally {
+                setIsLoadingProduct(false);
+            }
         }
-    }, []);
+
+        loadProductData();
+    }, [editProductId, router, activeColor]);
 
     // Mobile sticky price bar
     const MobilePriceBar = () => (
@@ -279,7 +447,7 @@ export default function ProductUploadPage() {
                                     <path d="M3 6h18" />
                                     <path d="M16 10a4 4 0 0 1-8 0" />
                                 </svg>
-                                <span>Articles ({getProductName(selectedProduct)})</span>
+                                <span>Articles ({getProductName(selectedProduct, productTypes)})</span>
                             </div>
                             <span className="pu-cart-item-price">{basePrice}DT</span>
                         </div>
@@ -292,7 +460,7 @@ export default function ProductUploadPage() {
                                 </svg>
                                 <span>Design</span>
                             </div>
-                            <span className="pu-cart-item-price">{DESIGN_FEE}DT</span>
+                            <span className="pu-cart-item-price">{designFee}DT</span>
                         </div>
                         <div className="pu-cart-item">
                             <div className="pu-cart-item-info">
@@ -301,7 +469,7 @@ export default function ProductUploadPage() {
                                     <path d="M2 17l10 5 10-5" />
                                     <path d="M2 12l10 5 10-5" />
                                 </svg>
-                                <span>Quality ({QUALITY_OPTIONS.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                <span>Quality ({qualityOptions.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
                             </div>
                             <span className="pu-cart-item-price">{qualityPrice}DT</span>
                         </div>
@@ -397,7 +565,7 @@ export default function ProductUploadPage() {
                                             <path d="M16 10a4 4 0 0 1-8 0" />
                                         </svg>
                                     </div>
-                                    <span className="pu-price-widget-item-label">Articles ({getProductName(selectedProduct)})</span>
+                                    <span className="pu-price-widget-item-label">Articles ({getProductName(selectedProduct, productTypes)})</span>
                                 </div>
                                 <span className="pu-price-widget-item-price">{basePrice}DT</span>
                             </div>
@@ -412,7 +580,7 @@ export default function ProductUploadPage() {
                                     </div>
                                     <span className="pu-price-widget-item-label">Design</span>
                                 </div>
-                                <span className="pu-price-widget-item-price">{DESIGN_FEE}DT</span>
+                                <span className="pu-price-widget-item-price">{designFee}DT</span>
                             </div>
                             <div className="pu-price-widget-item">
                                 <div className="pu-price-widget-item-info">
@@ -423,7 +591,7 @@ export default function ProductUploadPage() {
                                             <path d="M2 12l10 5 10-5" />
                                         </svg>
                                     </div>
-                                    <span className="pu-price-widget-item-label">Quality ({QUALITY_OPTIONS.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                    <span className="pu-price-widget-item-label">Quality ({qualityOptions.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
                                 </div>
                                 <span className="pu-price-widget-item-price">{qualityPrice}DT</span>
                             </div>
@@ -438,6 +606,310 @@ export default function ProductUploadPage() {
         );
     };
 
+    if (isLoadingProduct || isLoadingConfig) {
+        return (
+            <div className="product-upload-page">
+                <main className="pu-mobile-main">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '60vh',
+                        gap: '20px'
+                    }}>
+                        <div className="pu-spinner" style={{ width: '50px', height: '50px', borderWidth: '4px' }} />
+                        <p style={{ color: '#666', fontSize: '16px' }}>
+                            {isLoadingConfig ? 'Chargement de la configuration...' : 'Chargement du produit...'}
+                        </p>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    if (configError) {
+        return (
+            <div className="product-upload-page">
+                <main className="pu-mobile-main">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '80vh',
+                        gap: '32px',
+                        padding: '40px 20px',
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+                    }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 10px 40px rgba(239, 68, 68, 0.3)',
+                            marginBottom: '8px',
+                        }}>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+                        
+                        <div style={{
+                            maxWidth: '500px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                        }}>
+                            <h2 style={{
+                                color: '#991b1b',
+                                fontSize: '28px',
+                                fontWeight: 700,
+                                margin: 0,
+                                lineHeight: '1.2',
+                            }}>
+                                Erreur de chargement
+                            </h2>
+                            <p style={{
+                                color: '#7f1d1d',
+                                fontSize: '16px',
+                                lineHeight: '1.6',
+                                margin: 0,
+                            }}>
+                                {configError}
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setConfigError(null);
+                                setIsLoadingConfig(true);
+                                window.location.reload();
+                            }}
+                            style={{
+                                padding: '16px 32px',
+                                background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                fontWeight: 700,
+                                fontSize: '16px',
+                                boxShadow: '0 4px 16px rgba(65, 235, 92, 0.4)',
+                                transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 24px rgba(65, 235, 92, 0.5)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 16px rgba(65, 235, 92, 0.4)';
+                            }}
+                        >
+                            Réessayer
+                        </button>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    if (productTypes.length === 0) {
+        return (
+            <div className="product-upload-page">
+                <main className="pu-mobile-main">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '80vh',
+                        gap: '32px',
+                        padding: '40px 20px',
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                    }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 10px 40px rgba(65, 235, 92, 0.3)',
+                            marginBottom: '8px',
+                        }}>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                <path d="M2 17l10 5 10-5" />
+                                <path d="M2 12l10 5 10-5" />
+                            </svg>
+                        </div>
+                        
+                        <div style={{
+                            maxWidth: '500px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                        }}>
+                            <h2 style={{
+                                color: '#0d1c23',
+                                fontSize: '28px',
+                                fontWeight: 700,
+                                margin: 0,
+                                lineHeight: '1.2',
+                            }}>
+                                Aucun type de produit disponible
+                            </h2>
+                            <p style={{
+                                color: '#64748b',
+                                fontSize: '16px',
+                                lineHeight: '1.6',
+                                margin: 0,
+                            }}>
+                                Pour commencer à créer des produits, vous devez d'abord configurer les types de produits dans le panneau d'administration.
+                            </p>
+                        </div>
+
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                            width: '100%',
+                            maxWidth: '400px',
+                            marginTop: '8px',
+                        }}>
+                            <a
+                                href="/admin/product-config"
+                                style={{
+                                    padding: '16px 32px',
+                                    background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    fontWeight: 700,
+                                    fontSize: '16px',
+                                    textDecoration: 'none',
+                                    display: 'inline-block',
+                                    textAlign: 'center',
+                                    boxShadow: '0 4px 16px rgba(65, 235, 92, 0.4)',
+                                    transition: 'all 0.3s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 6px 24px rgba(65, 235, 92, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(65, 235, 92, 0.4)';
+                                }}
+                            >
+                                Configurer les produits
+                            </a>
+                            
+                            <button
+                                onClick={() => window.location.reload()}
+                                style={{
+                                    padding: '14px 32px',
+                                    background: 'white',
+                                    color: '#41eb5c',
+                                    border: '2px solid #41eb5c',
+                                    borderRadius: '12px',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    fontSize: '15px',
+                                    transition: 'all 0.3s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = '#f0fdf4';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'white';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                Actualiser la page
+                            </button>
+                        </div>
+
+                        <div style={{
+                            marginTop: '24px',
+                            padding: '24px',
+                            background: 'white',
+                            borderRadius: '16px',
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                            maxWidth: '500px',
+                            width: '100%',
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '16px',
+                            }}>
+                                <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '10px',
+                                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 16v-4" />
+                                        <path d="M12 8h.01" />
+                                    </svg>
+                                </div>
+                                <h3 style={{
+                                    color: '#0d1c23',
+                                    fontSize: '18px',
+                                    fontWeight: 700,
+                                    margin: 0,
+                                }}>
+                                    Comment configurer ?
+                                </h3>
+                            </div>
+                            <ol style={{
+                                color: '#64748b',
+                                fontSize: '14px',
+                                lineHeight: '1.8',
+                                margin: 0,
+                                paddingLeft: '20px',
+                                textAlign: 'left',
+                            }}>
+                                <li style={{ marginBottom: '8px' }}>
+                                    Accédez au panneau d'administration
+                                </li>
+                                <li style={{ marginBottom: '8px' }}>
+                                    Cliquez sur "CONFIG PRODUITS" dans le menu
+                                </li>
+                                <li style={{ marginBottom: '8px' }}>
+                                    Ajoutez vos types de produits, couleurs et qualités
+                                </li>
+                                <li>
+                                    Revenez ici pour commencer à créer vos produits
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="product-upload-page">
             {/* Mobile sticky price bar */}
@@ -449,14 +921,16 @@ export default function ProductUploadPage() {
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
                     <div className="pu-intro">
-                        <p className="pu-intro-title">Commençons par votre premier téléchargement.</p>
+                        <p className="pu-intro-title">
+                            {editProductId ? "Modifiez votre produit" : "Commençons par votre premier téléchargement."}
+                        </p>
                         <span className="pu-intro-line" />
                     </div>
 
                     <section className="pu-card">
                         <h2 className="pu-card-title">Choisissez le type de produit</h2>
                         <div className="pu-product-grid">
-                            {PRODUCT_TYPES.map((product) => (
+                            {productTypes.map((product) => (
                                 <button
                                     key={product.id}
                                     type="button"
@@ -523,7 +997,7 @@ export default function ProductUploadPage() {
                                 })()}
                             </div>
                             <div className="pu-color-swatches">
-                                {COLOR_SWATCHES.map((swatch) => {
+                                {colorSwatches.map((swatch) => {
                                     const isSelected = selectedColors.includes(swatch.id);
                                     const isActive = swatch.id === activeColor;
                                     return (
@@ -575,16 +1049,18 @@ export default function ProductUploadPage() {
                         <div style={{ height: '600px', minHeight: '500px' }}>
                             <DesignEditor
                                 productType={selectedProduct}
-                                productColor={activeColor ? COLOR_SWATCHES.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'}
+                                productColor={activeColor ? colorSwatches.find(s => s.id === activeColor)?.hex || '#ffffff' : '#ffffff'}
                                 initialDesign={designEditorData}
                                 onDesignChange={handleDesignChange}
+                                printAreaFront={productTypesFull.find(pt => pt.slug === selectedProduct)?.printAreaFront || null}
+                                printAreaBack={productTypesFull.find(pt => pt.slug === selectedProduct)?.printAreaBack || null}
                             />
                         </div>
                         <div style={{ padding: '16px 18px' }}>
                             <span className="pu-preview-label">Couleurs d'aperçu</span>
                             <div className="pu-mini-swatches">
                                 {selectedColors.map((colorId) => {
-                                    const swatch = COLOR_SWATCHES.find((c) => c.id === colorId);
+                                    const swatch = colorSwatches.find((c) => c.id === colorId);
                                     const isActive = colorId === activeColor;
                                     return (
                                         <button
@@ -604,7 +1080,7 @@ export default function ProductUploadPage() {
                     <section className="pu-card" style={{ gap: '14px' }}>
                         <h3 className="pu-card-subtitle">Select quality of the product</h3>
                         <div className="pu-quality-row">
-                            {QUALITY_OPTIONS.map((option) => (
+                            {qualityOptions.map((option) => (
                                 <button
                                     key={option.id}
                                     type="button"
@@ -620,12 +1096,12 @@ export default function ProductUploadPage() {
                         </div>
                         <div className="pu-summary">
                             <div className="pu-summary-row">
-                                <span>Articles ({getProductName(selectedProduct)})</span>
+                                <span>Articles ({getProductName(selectedProduct, productTypes)})</span>
                                 <span>{basePrice}DT</span>
                             </div>
                             <div className="pu-summary-row">
                                 <span>Design</span>
-                                <span>{DESIGN_FEE}DT</span>
+                                <span>{designFee}DT</span>
                             </div>
                             <div className="pu-summary-row">
                                 <span>Quality</span>
@@ -639,7 +1115,7 @@ export default function ProductUploadPage() {
                     </section>
 
                     <button className="pu-next-cta" type="button" onClick={handleNext}>
-                        SUIVANT
+                        {editProductId ? "SUIVANT (MODIFIER)" : "SUIVANT"}
                     </button>
                 </div>
             </main>

@@ -21,7 +21,8 @@ const GENDER_OPTIONS: GenderOption[] = [
     { id: "custom", label: "Personnaliser ou autre" },
 ];
 
-const MIN_PRICE = 55;
+// MIN_PRICE will be loaded from API
+let MIN_PRICE = 55;
 
 export default function ProductDetailsPage() {
     const router = useRouter();
@@ -45,14 +46,38 @@ export default function ProductDetailsPage() {
     const [combinedDesignImage, setCombinedDesignImage] = useState<string | null>(null);
     const [customPrompt, setCustomPrompt] = useState<string>("");
     const [isFirstProduct, setIsFirstProduct] = useState<boolean>(true);
+    const [minPrice, setMinPrice] = useState<number>(55);
+    const [pricingSettings, setPricingSettings] = useState<any>(null);
 
-    // Load design data on mount
+    // Load design data and product data on mount
     useEffect(() => {
         const savedDesign = sessionStorage.getItem("uploadedDesign");
         const savedEditorData = sessionStorage.getItem("designEditorData");
+        const editingProductId = sessionStorage.getItem("editingProductId");
 
         console.log('Details page loading - savedEditorData:', savedEditorData?.substring(0, 200));
         console.log('Details page loading - savedDesign:', savedDesign);
+        console.log('Details page loading - editingProductId:', editingProductId);
+
+        // If editing, load product data
+        if (editingProductId) {
+            const editingProductName = sessionStorage.getItem("editingProductName");
+            const editingProductDescription = sessionStorage.getItem("editingProductDescription");
+            const editingProductPrice = sessionStorage.getItem("editingProductPrice");
+
+            if (editingProductName) {
+                setProductName(editingProductName);
+            }
+            if (editingProductDescription) {
+                setDescription(editingProductDescription);
+                setCharCount(editingProductDescription.length);
+            }
+            if (editingProductPrice) {
+                const price = parseFloat(editingProductPrice);
+                setProductPrice(price.toString());
+                setDisplayPrice(price.toString());
+            }
+        }
 
         if (savedEditorData) {
             setDesignEditorData(savedEditorData);
@@ -69,6 +94,28 @@ export default function ProductDetailsPage() {
                 setSelectedMockup(savedDesign);
             }
         }
+    }, []);
+
+    // Load pricing settings
+    useEffect(() => {
+        async function loadPricingSettings() {
+            try {
+                const response = await fetch('/api/product-config');
+                const data = await response.json();
+                if (data.pricingSettings) {
+                    setPricingSettings(data.pricingSettings);
+                    setMinPrice(data.pricingSettings.minPrice || 55);
+                    // Set default prices if not already set
+                    if (productPrice === "55") {
+                        setProductPrice(data.pricingSettings.minPrice?.toString() || "55");
+                        setDisplayPrice(data.pricingSettings.minPrice?.toString() || "55");
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading pricing settings:', error);
+            }
+        }
+        loadPricingSettings();
     }, []);
 
     // Check if this is the first product
@@ -293,9 +340,15 @@ export default function ProductDetailsPage() {
                 const design = JSON.parse(designJson);
                 const { objects = [], w = width, h = height } = design;
 
-                // Load product background image
-                const base = productType.toLowerCase().includes('hoodie') ? 'Hoodie' : 'T-Shirt';
-                const imagePath = side === 'front' ? `/${base}.png` : `/${base}-Back.png`;
+                // Load product background image - use dynamic paths from sessionStorage or fallback
+                let imagePath: string;
+                if (side === 'front') {
+                    imagePath = sessionStorage.getItem("productTypeImage") || 
+                        (productType.toLowerCase().includes('hoodie') ? '/Hoodie.png' : '/T-Shirt.png');
+                } else {
+                    imagePath = sessionStorage.getItem("productTypeBackImage") || 
+                        (productType.toLowerCase().includes('hoodie') ? '/Hoodie-Back.png' : '/T-Shirt-Back.png');
+                }
 
                 const loadProductImage = (): Promise<HTMLImageElement> => {
                     return new Promise((resolve, reject) => {
@@ -507,11 +560,25 @@ export default function ProductDetailsPage() {
     };
 
     const profit = useMemo(() => {
+        if (!pricingSettings) return 0;
+        
         const base = parseFloat(productPrice) || 0;
         const display = parseFloat(displayPrice) || 0;
-        const delta = display - base;
-        return delta > 0 ? delta : 0;
-    }, [productPrice, displayPrice]);
+        
+        switch (pricingSettings.profitCalculationType) {
+            case 'PERCENTAGE':
+                if (pricingSettings.profitPercentage) {
+                    return (base * pricingSettings.profitPercentage) / 100;
+                }
+                return 0;
+            case 'FIXED':
+                return pricingSettings.profitFixedAmount || 0;
+            case 'DIFFERENCE':
+            default:
+                const delta = display - base;
+                return delta > 0 ? delta : 0;
+        }
+    }, [productPrice, displayPrice, pricingSettings]);
 
     const handleDescriptionChange = (value: string) => {
         setDescription(value);
@@ -679,6 +746,12 @@ export default function ProductDetailsPage() {
             // Send only the final mockup image
             formData.append('mockupImage', finalImage);
 
+            // If editing, include product ID
+            const editingProductId = sessionStorage.getItem("editingProductId");
+            if (editingProductId) {
+                formData.append('productId', editingProductId);
+            }
+
             const { createProduct } = await import('../../../product-upload/actions');
             const result = await createProduct(formData);
 
@@ -691,12 +764,17 @@ export default function ProductDetailsPage() {
         } catch (error: any) {
             // Check if it's a Next.js redirect (which is expected and not an error)
             if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-                // This is normal - redirect is happening, product was created successfully
+                // This is normal - redirect is happening, product was saved successfully
+                // Clean up edit mode sessionStorage
+                sessionStorage.removeItem("editingProductId");
+                sessionStorage.removeItem("editingProductName");
+                sessionStorage.removeItem("editingProductDescription");
+                sessionStorage.removeItem("editingProductPrice");
                 return;
             }
             // Only show error for actual errors
-            console.error('Product creation error:', error);
-            showAlert("Une erreur est survenue lors de la création du produit.", 'error');
+            console.error('Product save error:', error);
+            showAlert("Une erreur est survenue lors de l'enregistrement du produit.", 'error');
             setIsSubmitting(false);
         }
     };
@@ -705,14 +783,18 @@ export default function ProductDetailsPage() {
         router.back();
     };
 
-    const displayTotalPrice = parseFloat(productPrice) || MIN_PRICE;
+    const displayTotalPrice = parseFloat(productPrice) || minPrice;
 
     return (
         <div className="product-upload-page">
             <main className="pu-mobile-main">
                 <div className="pu-mobile-flow">
                     <div className="pd-intro">
-                        <p className="pd-intro-title">Dernière étape, remplissez la description de votre produit</p>
+                        <p className="pd-intro-title">
+                            {sessionStorage.getItem("editingProductId") 
+                                ? "Modifiez les détails de votre produit" 
+                                : "Dernière étape, remplissez la description de votre produit"}
+                        </p>
                         <span className="pd-intro-line" />
                     </div>
 
@@ -1088,7 +1170,7 @@ export default function ProductDetailsPage() {
                                     <input
                                         className="pd-input"
                                         type="number"
-                                        min={MIN_PRICE}
+                                        min={minPrice}
                                         value={productPrice}
                                         onChange={(event) => setProductPrice(event.target.value)}
                                     />
@@ -1131,7 +1213,9 @@ export default function ProductDetailsPage() {
                     </section>
 
                     <button className="pd-submit" type="button" onClick={handleSubmit}>
-                        {isFirstProduct ? "VOTRE SITE WEB EST PRÊT" : "PUBLIER LE PRODUIT"}
+                        {sessionStorage.getItem("editingProductId") 
+                            ? "ENREGISTRER LES MODIFICATIONS" 
+                            : (isFirstProduct ? "VOTRE SITE WEB EST PRÊT" : "PUBLIER LE PRODUIT")}
                     </button>
                 </div>
             </main>

@@ -57,7 +57,7 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
                 }}>
                     {/* Edit Button */}
                     <button
-                        onClick={() => router.push(`/dashboard/produits/${product.id}/edit`)}
+                        onClick={() => router.push(`/dashboard/product-upload?edit=${product.id}`)}
                         style={{
                             width: '36px',
                             height: '36px',

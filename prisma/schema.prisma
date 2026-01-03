@@ -162,3 +162,93 @@ model SupportTicketMessage {
   // Relations
   ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 }
+
+model ProductType {
+  id                  String   @id @default(uuid())
+  name                String
+  slug                String   @unique // e.g., "tshirt", "hoodie"
+  image               String   // R2 path to front image
+  backImage          String?  // R2 path to back image
+  basePrice           Float
+  displayOrder        Int      @default(0)
+  isActive            Boolean  @default(true)
+  printAreaRatioFront Float?   @default(0.8) // Printable area ratio for front (0.5 to 1.0)
+  printAreaRatioBack  Float?   @default(0.8) // Printable area ratio for back (0.5 to 1.0)
+  printAreaFront      String?  @db.Text // JSON: {x, y, width, height} for front printable area
+  printAreaBack       String?  @db.Text // JSON: {x, y, width, height} for back printable area
+  availableColorIds   String?  @db.Text // JSON array of color IDs (deprecated, use ProductTypeColor)
+  availableQualityIds String?  @db.Text // JSON array of quality IDs (deprecated, use ProductTypeQuality)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  colors   ProductTypeColor[]
+  qualities ProductTypeQuality[]
+}
+
+model ProductTypeColor {
+  id            String   @id @default(uuid())
+  productTypeId String
+  colorId       String
+  displayOrder  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  productType ProductType @relation(fields: [productTypeId], references: [id], onDelete: Cascade)
+  color       ProductColor @relation(fields: [colorId], references: [id], onDelete: Cascade)
+
+  @@unique([productTypeId, colorId])
+}
+
+model ProductTypeQuality {
+  id            String   @id @default(uuid())
+  productTypeId String
+  name          String   // e.g., "Normal", "Premium", "Deluxe"
+  price         Float    @default(0) // Additional price for this quality
+  displayOrder  Int      @default(0)
+  isDefault     Boolean  @default(false) // One quality per product should be default
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  productType ProductType @relation(fields: [productTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([productTypeId, name])
+}
+
+model ProductColor {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "Blanc", "Bleu"
+  hex         String   // e.g., "#ffffff"
+  filter      String?  // CSS filter string for color transformation
+  displayOrder Int     @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  productTypes ProductTypeColor[]
+}
+
+model ProductQuality {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "Cotton", "Normal", "FireProof"
+  price       Float    @default(0)
+  displayOrder Int     @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PricingSettings {
+  id                    String   @id @default(uuid())
+  designFee             Float    @default(30)
+  minPrice              Float    @default(55)
+  profitCalculationType String   @default("DIFFERENCE") // DIFFERENCE, PERCENTAGE, FIXED
+  profitPercentage      Float?   // If type is PERCENTAGE
+  profitFixedAmount     Float?   // If type is FIXED
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}

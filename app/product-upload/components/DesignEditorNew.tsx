@@ -20,6 +20,8 @@ type DesignEditorProps = {
     productColor: string;
     initialDesign?: string | null;
     onDesignChange?: (designData: string) => void;
+    printAreaFront?: { x: number; y: number; width: number; height: number } | null;
+    printAreaBack?: { x: number; y: number; width: number; height: number } | null;
     // onSave prop removed - auto-save is now automatic
 };
 
@@ -43,7 +45,7 @@ const getContrastColor = (hexColor: string): string => {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
 
-export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange }: DesignEditorProps) {
+export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange, printAreaFront, printAreaBack }: DesignEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const previewRef = useRef<HTMLCanvasElement>(null);
@@ -170,39 +172,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         return () => window.removeEventListener('resize', calculateSize);
     }, [calculateSize, isFullscreen]);
 
-    // Load product images
-    useEffect(() => {
-        const base = productType.toLowerCase().includes('hoodie') ? 'Hoodie' : 'T-Shirt';
-        const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => res(img);
-            img.onerror = () => res(null);
-            img.src = src;
-        });
-
-        Promise.all([loadImg(`/${base}.png`), loadImg(`/${base}-Back.png`)]).then(([front, back]) => {
-            productImgs.current = { front, back: back || front };
-            if (mainCanvas.current) {
-                setBackground(mainCanvas.current, currentSideRef.current);
-            }
-            if (previewCanvas.current) {
-                setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front');
-            }
-        });
-    }, [productType]);
-
     // Update background when color changes
     useEffect(() => {
         if (mainCanvas.current && productImgs.current.front) {
-            setBackground(mainCanvas.current, currentSideRef.current);
+            setBackground(mainCanvas.current, currentSideRef.current, currentSideRef.current === 'front' ? printAreaFront : printAreaBack);
         }
         if (previewCanvas.current && productImgs.current.front) {
-            setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front');
+            setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front', currentSideRef.current === 'front' ? printAreaBack : printAreaFront);
         }
-    }, [productColor]);
+    }, [productColor, printAreaFront, printAreaBack]);
 
-    const setBackground = useCallback(async (canvas: fabric.StaticCanvas, side: Side) => {
+    const setBackground = useCallback(async (canvas: fabric.StaticCanvas, side: Side, areaToUse?: { x: number; y: number; width: number; height: number } | null) => {
         const imgElement = side === 'front' ? productImgs.current.front : productImgs.current.back;
         if (!imgElement) {
             canvas.renderAll();
@@ -245,12 +225,36 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
             canvas.backgroundImage = bgImg;
 
-            const printW = (bgImg.width! * scale) * PRINT_AREA_RATIO;
-            const printH = (bgImg.height! * scale) * PRINT_AREA_RATIO;
+            // Use configured print area if available, otherwise fall back to ratio
+            let printW: number;
+            let printH: number;
+            let printX: number;
+            let printY: number;
+            
+            if (areaToUse && areaToUse.width && areaToUse.height) {
+                // Use configured print area coordinates
+                // The coordinates are relative to the canvas used in admin (400x500)
+                // We need to scale them to match the current canvas size
+                const adminCanvasWidth = 400;
+                const adminCanvasHeight = 500;
+                const scaleX = canvas.getWidth() / adminCanvasWidth;
+                const scaleY = canvas.getHeight() / adminCanvasHeight;
+                
+                printX = areaToUse.x * scaleX;
+                printY = areaToUse.y * scaleY;
+                printW = areaToUse.width * scaleX;
+                printH = areaToUse.height * scaleY;
+            } else {
+                // Fall back to ratio-based calculation
+                printW = (bgImg.width! * scale) * PRINT_AREA_RATIO;
+                printH = (bgImg.height! * scale) * PRINT_AREA_RATIO;
+                printX = (canvas.getWidth() - printW) / 2;
+                printY = (canvas.getHeight() - printH) / 2;
+            }
 
             const clipRect = new fabric.Rect({
-                left: canvas.getWidth() / 2,
-                top: canvas.getHeight() / 2,
+                left: printX + printW / 2,
+                top: printY + printH / 2,
                 width: printW,
                 height: printH,
                 originX: 'center',
@@ -265,8 +269,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 }
 
                 const guide = new fabric.Rect({
-                    left: canvas.getWidth() / 2,
-                    top: canvas.getHeight() / 2,
+                    left: printX + printW / 2,
+                    top: printY + printH / 2,
                     width: printW,
                     height: printH,
                     fill: 'transparent',
@@ -303,7 +307,86 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             canvas.renderAll();
             return null;
         }
-    }, [productColor]);
+    }, [productColor, printAreaFront, printAreaBack]);
+
+    // Load product images - use dynamic paths from sessionStorage (set from DB) or fallback
+    const loadProductImages = useCallback(() => {
+        // Get images from sessionStorage (these should be set from the database when product type is selected)
+        const frontImage = sessionStorage.getItem("productTypeImage");
+        const backImage = sessionStorage.getItem("productTypeBackImage");
+        
+        // Only use hardcoded fallback if sessionStorage doesn't have the image
+        // This ensures we use DB images when available
+        const frontImageSrc = frontImage || 
+            (productType.toLowerCase().includes('hoodie') ? '/Hoodie.png' : '/T-Shirt.png');
+        const backImageSrc = backImage || frontImage || 
+            (productType.toLowerCase().includes('hoodie') ? '/Hoodie-Back.png' : '/T-Shirt-Back.png');
+        
+        const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
+            if (!src) {
+                res(null);
+                return;
+            }
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => res(img);
+            img.onerror = () => {
+                console.warn('Failed to load product image:', src);
+                res(null);
+            };
+            
+            // If the image is from R2 (external domain), proxy it through our API to avoid CORS issues
+            // Check if it's an external URL (starts with http:// or https://) and not from localhost
+            const isExternalUrl = src.startsWith('http://') || src.startsWith('https://');
+            const isLocalhost = src.includes('localhost') || src.startsWith('/');
+            
+            if (isExternalUrl && !isLocalhost) {
+                // Proxy through our API endpoint
+                const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                img.src = proxyUrl;
+            } else {
+                // Use the original URL for local images
+                img.src = src;
+            }
+        });
+
+        Promise.all([loadImg(frontImageSrc), loadImg(backImageSrc)]).then(([front, back]) => {
+            productImgs.current = { front, back: back || front };
+            if (mainCanvas.current) {
+                const printArea = currentSideRef.current === 'front' ? printAreaFront : printAreaBack;
+                setBackground(mainCanvas.current, currentSideRef.current, printArea);
+            }
+            if (previewCanvas.current) {
+                const printArea = currentSideRef.current === 'front' ? printAreaBack : printAreaFront;
+                setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front', printArea);
+            }
+        });
+    }, [productType, setBackground, printAreaFront, printAreaBack]);
+
+    useEffect(() => {
+        loadProductImages();
+        
+        // Listen for storage changes to reload images when product type changes
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'productTypeImage' || e.key === 'productTypeBackImage') {
+                loadProductImages();
+            }
+        };
+        
+        // Also listen for custom storage events (for same-tab updates)
+        const handleCustomStorage = () => {
+            loadProductImages();
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        // Listen for custom event that we can trigger from the same tab
+        window.addEventListener('productImagesUpdated', handleCustomStorage);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('productImagesUpdated', handleCustomStorage);
+        };
+    }, [loadProductImages]);
 
     // Resize canvas when size changes
     useEffect(() => {
@@ -328,7 +411,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 });
 
                 mainCanvas.current.setDimensions({ width: newW, height: newH });
-                setBackground(mainCanvas.current, currentSideRef.current);
+                const printArea = currentSideRef.current === 'front' ? printAreaFront : printAreaBack;
+                setBackground(mainCanvas.current, currentSideRef.current, printArea);
                 lastSizeRef.current = { w: newW, h: newH };
                 mainCanvas.current.renderAll();
             }
@@ -450,7 +534,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
     const loadDesign = useCallback(async (canvas: fabric.StaticCanvas, design: string | null, side: Side) => {
         canvas.getObjects().forEach(o => canvas.remove(o));
-        const clipRect = await setBackground(canvas, side);
+        const printArea = side === 'front' ? printAreaFront : printAreaBack;
+        const clipRect = await setBackground(canvas, side, printArea);
         if (!design) return canvas.renderAll();
 
         try {
@@ -744,7 +829,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 attempts++;
             }
 
-            await setBackground(canvas, 'front');
+            await setBackground(canvas, 'front', printAreaFront);
 
             if (initialDesign) {
                 try {
@@ -819,7 +904,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 await new Promise(r => setTimeout(r, 100));
                 attempts++;
             }
-            await setBackground(preview, 'back');
+            await setBackground(preview, 'back', printAreaBack);
         };
 
         initPreview();
