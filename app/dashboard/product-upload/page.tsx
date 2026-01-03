@@ -73,7 +73,7 @@ export default function ProductUploadPage() {
             if (savedImage) {
                 const isExternalUrl = savedImage.startsWith('http://') || savedImage.startsWith('https://');
                 const isLocalhost = savedImage.includes('localhost') || savedImage.startsWith('/');
-                return (isExternalUrl && !isLocalhost) 
+                return (isExternalUrl && !isLocalhost)
                     ? `/api/proxy-image?url=${encodeURIComponent(savedImage)}`
                     : savedImage;
             }
@@ -95,14 +95,14 @@ export default function ProductUploadPage() {
                     // Clear back image if not available
                     sessionStorage.removeItem("productTypeBackImage");
                 }
-                
+
                 // Update mask image - proxy R2 URLs if needed for CSS masks
                 const imageUrl = selectedProductType.image;
                 if (imageUrl) {
                     const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
                     const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
                     // Proxy external R2 URLs for CSS masks to avoid CORS issues
-                    const maskUrl = (isExternalUrl && !isLocalhost) 
+                    const maskUrl = (isExternalUrl && !isLocalhost)
                         ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
                         : imageUrl;
                     setProductMaskImage(maskUrl);
@@ -110,7 +110,7 @@ export default function ProductUploadPage() {
                     // No image available, clear mask
                     setProductMaskImage(null);
                 }
-                
+
                 // Dispatch custom event to notify DesignEditor to reload images
                 window.dispatchEvent(new Event('productImagesUpdated'));
             }
@@ -120,7 +120,7 @@ export default function ProductUploadPage() {
             if (savedImage) {
                 const isExternalUrl = savedImage.startsWith('http://') || savedImage.startsWith('https://');
                 const isLocalhost = savedImage.includes('localhost') || savedImage.startsWith('/');
-                const maskUrl = (isExternalUrl && !isLocalhost) 
+                const maskUrl = (isExternalUrl && !isLocalhost)
                     ? `/api/proxy-image?url=${encodeURIComponent(savedImage)}`
                     : savedImage;
                 setProductMaskImage(maskUrl);
@@ -139,10 +139,10 @@ export default function ProductUploadPage() {
                     throw new Error('Failed to load product configuration');
                 }
                 const data = await response.json();
-                
+
                 // Store full product types data
                 setProductTypesFull(data.productTypes || []);
-                
+
                 // Transform product types
                 const types: ProductCard[] = (data.productTypes || []).map((pt: any) => ({
                     id: pt.slug,
@@ -151,14 +151,14 @@ export default function ProductUploadPage() {
                     badge: `${pt.basePrice}DT`,
                 }));
                 setProductTypes(types);
-                
+
                 // Build product prices map
                 const prices: Record<string, number> = {};
                 (data.productTypes || []).forEach((pt: any) => {
                     prices[pt.slug] = pt.basePrice;
                 });
                 setProductPrices(prices);
-                
+
                 // Transform colors
                 const colors: ColorSwatch[] = (data.colors || []).map((c: any) => ({
                     id: c.id,
@@ -166,7 +166,7 @@ export default function ProductUploadPage() {
                     label: c.name,
                 }));
                 setColorSwatches(colors);
-                
+
                 // Build color filters map
                 const filters: Record<string, string> = {};
                 (data.colors || []).forEach((c: any) => {
@@ -175,7 +175,7 @@ export default function ProductUploadPage() {
                     }
                 });
                 setColorFilters(filters);
-                
+
                 // Transform qualities
                 const qualities: QualityOption[] = (data.qualities || []).map((q: any) => ({
                     id: q.id,
@@ -183,10 +183,10 @@ export default function ProductUploadPage() {
                     price: q.price,
                 }));
                 setQualityOptions(qualities);
-                
+
                 // Set pricing settings
                 setDesignFee(data.pricingSettings?.designFee || 30);
-                
+
                 // Set default selections only if we have data
                 if (types.length > 0 && !selectedProduct) {
                     const defaultProductId = types[0].id;
@@ -204,7 +204,7 @@ export default function ProductUploadPage() {
                         if (imageUrl) {
                             const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
                             const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
-                            const maskUrl = (isExternalUrl && !isLocalhost) 
+                            const maskUrl = (isExternalUrl && !isLocalhost)
                                 ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
                                 : imageUrl;
                             setProductMaskImage(maskUrl);
@@ -215,7 +215,7 @@ export default function ProductUploadPage() {
                 }
                 // Note: Default color and quality selection will be handled by useEffect hooks
                 // that depend on selectedProduct and availableColors/availableQualities
-                
+
                 setConfigError(null);
             } catch (error: any) {
                 console.error('Error loading product config:', error);
@@ -284,7 +284,7 @@ export default function ProductUploadPage() {
         if (!selectedType?.availableColorIds || selectedType.availableColorIds.length === 0) {
             return colorSwatches; // Fallback to all colors if no specific colors defined
         }
-        return colorSwatches.filter(swatch => 
+        return colorSwatches.filter(swatch =>
             selectedType.availableColorIds.includes(swatch.id)
         );
     }, [selectedProduct, productTypesFull, colorSwatches]);
@@ -306,7 +306,7 @@ export default function ProductUploadPage() {
     // Update selected colors if current ones are not available for new product type
     useEffect(() => {
         if (availableColors.length > 0) {
-            const validColors = selectedColors.filter(colorId => 
+            const validColors = selectedColors.filter(colorId =>
                 availableColors.some(c => c.id === colorId)
             );
             if (validColors.length === 0) {
@@ -384,7 +384,7 @@ export default function ProductUploadPage() {
         if (uploadedDesign) {
             sessionStorage.setItem("uploadedDesign", uploadedDesign);
         }
-        
+
         // Save product type and color for rendering background
         sessionStorage.setItem("productType", selectedProduct);
         const selectedProductType = productTypes.find(p => p.id === selectedProduct);
@@ -398,11 +398,11 @@ export default function ProductUploadPage() {
         }
         const activeColorHex = colorSwatches.find(s => s.id === activeColor)?.hex || '#ffffff';
         sessionStorage.setItem("productColor", activeColorHex);
-        
+
         // Force save design editor data before navigation
         // Get the latest from sessionStorage first (in case auto-save already happened)
         const latestDesignData = sessionStorage.getItem("designEditorData") || designEditorData;
-        
+
         if (latestDesignData) {
             console.log('Saving design data before navigation:', latestDesignData.substring(0, 200));
             sessionStorage.setItem("designEditorData", latestDesignData);
@@ -412,11 +412,11 @@ export default function ProductUploadPage() {
             console.log('No design data, saving empty structure');
             sessionStorage.setItem("designEditorData", emptyDesign);
         }
-        
+
         // Verify it was saved
         const verify = sessionStorage.getItem("designEditorData");
         console.log('Verified saved design data:', verify?.substring(0, 200));
-        
+
         // Navigate immediately - sessionStorage is synchronous
         router.push("/dashboard/product-upload/details");
     };
@@ -452,10 +452,10 @@ export default function ProductUploadPage() {
 
                 if (result.product) {
                     const product = result.product;
-                    
+
                     // Set product type
                     setSelectedProduct(product.type || 'tshirt');
-                    
+
                     // Load design data
                     if (product.designData) {
                         try {
@@ -480,18 +480,18 @@ export default function ProductUploadPage() {
                         setDesignEditorData(emptyDesign);
                         sessionStorage.setItem("designEditorData", emptyDesign);
                     }
-                    
+
                     // Set product type and default color in sessionStorage for design rendering
                     sessionStorage.setItem("productType", product.type || selectedProduct || 'tshirt');
                     const defaultColorHex = colorSwatches.find(s => s.id === activeColor)?.hex || colorSwatches[0]?.hex || '#1c1c1c';
                     sessionStorage.setItem("productColor", defaultColorHex);
-                    
+
                     // Load preview image if exists
                     if (product.previewFront) {
                         setUploadedDesign(product.previewFront);
                         sessionStorage.setItem("uploadedDesign", product.previewFront);
                     }
-                    
+
                     // Store product ID for later use in details page
                     sessionStorage.setItem("editingProductId", editProductId);
                     sessionStorage.setItem("editingProductName", product.name);
@@ -606,21 +606,21 @@ export default function ProductUploadPage() {
                 setDesktopPriceExpanded(true);
             }
         };
-        
+
         const handleMouseEnter = () => {
             if (!desktopPriceLocked) {
                 setDesktopPriceExpanded(true);
             }
         };
-        
+
         const handleMouseLeave = () => {
             if (!desktopPriceLocked) {
                 setDesktopPriceExpanded(false);
             }
         };
-        
+
         return (
-            <div 
+            <div
                 className={`pu-price-widget-desktop ${desktopPriceExpanded ? 'expanded' : ''} ${desktopPriceLocked ? 'locked' : ''}`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
@@ -772,7 +772,7 @@ export default function ProductUploadPage() {
                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
                         </div>
-                        
+
                         <div style={{
                             maxWidth: '500px',
                             display: 'flex',
@@ -865,7 +865,7 @@ export default function ProductUploadPage() {
                                 <path d="M2 12l10 5 10-5" />
                             </svg>
                         </div>
-                        
+
                         <div style={{
                             maxWidth: '500px',
                             display: 'flex',
@@ -927,7 +927,7 @@ export default function ProductUploadPage() {
                             >
                                 Configurer les produits
                             </a>
-                            
+
                             <button
                                 onClick={() => window.location.reload()}
                                 style={{
@@ -1026,7 +1026,7 @@ export default function ProductUploadPage() {
         <div className="product-upload-page">
             {/* Mobile sticky price bar */}
             <MobilePriceBar />
-            
+
             {/* Desktop floating price widget */}
             <DesktopPriceWidget />
 
@@ -1157,13 +1157,13 @@ export default function ProductUploadPage() {
                                     const b = parseInt(hex.substring(4, 6), 16);
                                     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
                                     const isLight = brightness > 200; // Threshold for light colors
-                                    
+
                                     return (
                                         <button
                                             key={swatch.id}
                                             type="button"
                                             className={`pu-color-dot ${isSelected ? "active" : ""} ${isActive && isSelected ? "selected" : ""}`}
-                                            style={{ 
+                                            style={{
                                                 background: swatch.hex,
                                                 border: isLight ? '2px solid rgba(0, 0, 0, 0.15)' : 'none',
                                                 boxShadow: isLight ? '0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
@@ -1231,13 +1231,13 @@ export default function ProductUploadPage() {
                                     const b = hex ? parseInt(hex.substring(4, 6), 16) : 255;
                                     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
                                     const isLight = brightness > 200; // Threshold for light colors
-                                    
+
                                     return (
                                         <button
                                             key={colorId}
                                             type="button"
                                             className={`pu-mini-dot ${isActive ? "active" : ""}`}
-                                            style={{ 
+                                            style={{
                                                 background: swatch?.hex,
                                                 border: isLight ? '2px solid rgba(0, 0, 0, 0.15)' : 'none',
                                                 boxShadow: isLight ? '0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
