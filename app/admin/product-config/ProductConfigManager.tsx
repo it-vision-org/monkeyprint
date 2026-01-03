@@ -681,7 +681,19 @@ function ProductEditModal({
     // Initialize canvases when images are available
     useEffect(() => {
         if (frontImagePreview && frontCanvasRef.current && !frontFabricCanvas.current) {
-            const existingArea = formData.printAreaFront ? JSON.parse(formData.printAreaFront) : null;
+            let existingArea = null;
+            if (formData.printAreaFront) {
+                if (typeof formData.printAreaFront === 'string') {
+                    try {
+                        existingArea = JSON.parse(formData.printAreaFront);
+                    } catch (e) {
+                        console.error('Error parsing printAreaFront:', e);
+                        existingArea = null;
+                    }
+                } else if (typeof formData.printAreaFront === 'object') {
+                    existingArea = formData.printAreaFront;
+                }
+            }
             const canvas = initPrintableAreaCanvas(frontCanvasRef.current, frontImagePreview, 'front', existingArea);
             frontFabricCanvas.current = canvas || null;
         }
@@ -689,7 +701,19 @@ function ProductEditModal({
 
     useEffect(() => {
         if (backImagePreview && backCanvasRef.current && !backFabricCanvas.current) {
-            const existingArea = formData.printAreaBack ? JSON.parse(formData.printAreaBack) : null;
+            let existingArea = null;
+            if (formData.printAreaBack) {
+                if (typeof formData.printAreaBack === 'string') {
+                    try {
+                        existingArea = JSON.parse(formData.printAreaBack);
+                    } catch (e) {
+                        console.error('Error parsing printAreaBack:', e);
+                        existingArea = null;
+                    }
+                } else if (typeof formData.printAreaBack === 'object') {
+                    existingArea = formData.printAreaBack;
+                }
+            }
             const canvas = initPrintableAreaCanvas(backCanvasRef.current, backImagePreview, 'back', existingArea);
             backFabricCanvas.current = canvas || null;
         }
@@ -731,8 +755,17 @@ function ProductEditModal({
             backgroundColor: '#f9fafb',
         });
 
+        // Check if image is external and needs proxying to avoid CORS issues
+        const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+        const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
+        
+        // Use proxy for external URLs (like R2), otherwise use the original URL
+        const finalImageUrl = (isExternalUrl && !isLocalhost) 
+            ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+            : imageUrl;
+
         // Load product image as background
-        fabric.FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' }).then((img) => {
+        fabric.FabricImage.fromURL(finalImageUrl, { crossOrigin: 'anonymous' }).then((img) => {
             const scale = Math.min(
                 (canvas.getWidth() * 0.88) / (img.width || 1),
                 (canvas.getHeight() * 0.88) / (img.height || 1)
