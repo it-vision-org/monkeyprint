@@ -66,6 +66,20 @@ export default function ProductUploadPage() {
     const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
     const [desktopPriceExpanded, setDesktopPriceExpanded] = useState(false);
     const [desktopPriceLocked, setDesktopPriceLocked] = useState(false);
+    // Initialize mask image from sessionStorage if available, no fallback
+    const [productMaskImage, setProductMaskImage] = useState<string | null>(() => {
+        if (typeof window !== 'undefined') {
+            const savedImage = sessionStorage.getItem("productTypeImage");
+            if (savedImage) {
+                const isExternalUrl = savedImage.startsWith('http://') || savedImage.startsWith('https://');
+                const isLocalhost = savedImage.includes('localhost') || savedImage.startsWith('/');
+                return (isExternalUrl && !isLocalhost) 
+                    ? `/api/proxy-image?url=${encodeURIComponent(savedImage)}`
+                    : savedImage;
+            }
+        }
+        return null;
+    });
 
     // Store product images in sessionStorage when product type is selected
     useEffect(() => {
@@ -81,8 +95,37 @@ export default function ProductUploadPage() {
                     // Clear back image if not available
                     sessionStorage.removeItem("productTypeBackImage");
                 }
+                
+                // Update mask image - proxy R2 URLs if needed for CSS masks
+                const imageUrl = selectedProductType.image;
+                if (imageUrl) {
+                    const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+                    const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
+                    // Proxy external R2 URLs for CSS masks to avoid CORS issues
+                    const maskUrl = (isExternalUrl && !isLocalhost) 
+                        ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+                        : imageUrl;
+                    setProductMaskImage(maskUrl);
+                } else {
+                    // No image available, clear mask
+                    setProductMaskImage(null);
+                }
+                
                 // Dispatch custom event to notify DesignEditor to reload images
                 window.dispatchEvent(new Event('productImagesUpdated'));
+            }
+        } else {
+            // Get from sessionStorage if available (e.g., on initial load)
+            const savedImage = sessionStorage.getItem("productTypeImage");
+            if (savedImage) {
+                const isExternalUrl = savedImage.startsWith('http://') || savedImage.startsWith('https://');
+                const isLocalhost = savedImage.includes('localhost') || savedImage.startsWith('/');
+                const maskUrl = (isExternalUrl && !isLocalhost) 
+                    ? `/api/proxy-image?url=${encodeURIComponent(savedImage)}`
+                    : savedImage;
+                setProductMaskImage(maskUrl);
+            } else {
+                setProductMaskImage(null);
             }
         }
     }, [selectedProduct, productTypes, productTypesFull]);
@@ -155,6 +198,18 @@ export default function ProductUploadPage() {
                         const fullType = data.productTypes.find((pt: any) => pt.slug === defaultProductId);
                         if (fullType?.backImage) {
                             sessionStorage.setItem("productTypeBackImage", fullType.backImage);
+                        }
+                        // Set mask image for default product
+                        const imageUrl = defaultProductType.image;
+                        if (imageUrl) {
+                            const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+                            const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
+                            const maskUrl = (isExternalUrl && !isLocalhost) 
+                                ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+                                : imageUrl;
+                            setProductMaskImage(maskUrl);
+                        } else {
+                            setProductMaskImage(null);
                         }
                     }
                 }
@@ -237,7 +292,7 @@ export default function ProductUploadPage() {
     // Update selected quality if current one is not available for new product type
     useEffect(() => {
         if (availableQualities.length > 0) {
-            const currentQualityExists = availableQualities.some(q => q.id === selectedQuality);
+            const currentQualityExists = availableQualities.some((q: QualityOption) => q.id === selectedQuality);
             if (!currentQualityExists || !selectedQuality) {
                 // Set to first available quality or default quality
                 const defaultQuality = availableQualities.find((q: any) => q.isDefault) || availableQualities[0];
@@ -272,7 +327,7 @@ export default function ProductUploadPage() {
         }
     }, [availableColors, selectedColors, activeColor]);
 
-    const qualityPrice = availableQualities.find((option) => option.id === selectedQuality)?.price ?? 0;
+    const qualityPrice = availableQualities.find((option: QualityOption) => option.id === selectedQuality)?.price ?? 0;
     const basePrice = productPrices[selectedProduct] ?? 20;
     const totalPrice = basePrice + designFee + qualityPrice;
 
@@ -526,7 +581,7 @@ export default function ProductUploadPage() {
                                     <path d="M2 17l10 5 10-5" />
                                     <path d="M2 12l10 5 10-5" />
                                 </svg>
-                                <span>Quality ({availableQualities.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                <span>Quality ({availableQualities.find((o: QualityOption) => o.id === selectedQuality)?.label || 'Cotton'})</span>
                             </div>
                             <span className="pu-cart-item-price">{qualityPrice}DT</span>
                         </div>
@@ -648,7 +703,7 @@ export default function ProductUploadPage() {
                                             <path d="M2 12l10 5 10-5" />
                                         </svg>
                                     </div>
-                                    <span className="pu-price-widget-item-label">Quality ({availableQualities.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                    <span className="pu-price-widget-item-label">Quality ({availableQualities.find((o: QualityOption) => o.id === selectedQuality)?.label || 'Cotton'})</span>
                                 </div>
                                 <span className="pu-price-widget-item-price">{qualityPrice}DT</span>
                             </div>
@@ -1028,6 +1083,11 @@ export default function ProductUploadPage() {
                                             offset = isLeft ? -sideIndex * 70 : sideIndex * 70;
                                         }
 
+                                        // Only render if we have a valid mask image (R2 picture)
+                                        if (!productMaskImage) {
+                                            return null;
+                                        }
+
                                         return (
                                             <div
                                                 key={swatch.id}
@@ -1048,8 +1108,8 @@ export default function ProductUploadPage() {
                                                         width: '102px',
                                                         height: '122px',
                                                         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
-                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        WebkitMask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
+                                                        mask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
                                                         filter: 'blur(4px)',
                                                         zIndex: 0,
                                                     }}
@@ -1064,8 +1124,8 @@ export default function ProductUploadPage() {
                                                         width: '98px',
                                                         height: '118px',
                                                         backgroundColor: 'rgba(255, 255, 255, 1)',
-                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
-                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        WebkitMask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
+                                                        mask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
                                                         zIndex: 1,
                                                     }}
                                                 />
@@ -1075,8 +1135,8 @@ export default function ProductUploadPage() {
                                                         width: '90px',
                                                         height: '110px',
                                                         backgroundColor: swatch.hex,
-                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
-                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        WebkitMask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
+                                                        mask: productMaskImage ? `url(${productMaskImage}) no-repeat center / contain` : 'none',
                                                         position: 'relative',
                                                         zIndex: 2,
                                                     }}
@@ -1194,7 +1254,7 @@ export default function ProductUploadPage() {
                     <section className="pu-card" style={{ gap: '14px' }}>
                         <h3 className="pu-card-subtitle">Select quality of the product</h3>
                         <div className="pu-quality-row">
-                            {availableQualities.map((option) => (
+                            {availableQualities.map((option: QualityOption) => (
                                 <button
                                     key={option.id}
                                     type="button"

@@ -340,14 +340,18 @@ export default function ProductDetailsPage() {
                 const design = JSON.parse(designJson);
                 const { objects = [], w = width, h = height } = design;
 
-                // Load product background image - use dynamic paths from sessionStorage or fallback
-                let imagePath: string;
+                // Load product background image - use dynamic R2 picture from sessionStorage
+                let imagePath: string | null;
                 if (side === 'front') {
-                    imagePath = sessionStorage.getItem("productTypeImage") || 
-                        (productType.toLowerCase().includes('hoodie') ? '/Hoodie.png' : '/T-Shirt.png');
+                    imagePath = sessionStorage.getItem("productTypeImage");
                 } else {
-                    imagePath = sessionStorage.getItem("productTypeBackImage") || 
-                        (productType.toLowerCase().includes('hoodie') ? '/Hoodie-Back.png' : '/T-Shirt-Back.png');
+                    imagePath = sessionStorage.getItem("productTypeBackImage");
+                }
+
+                // If no image path, reject
+                if (!imagePath) {
+                    reject(new Error(`No ${side} image available`));
+                    return;
                 }
 
                 const loadProductImage = (): Promise<HTMLImageElement> => {
@@ -359,16 +363,37 @@ export default function ProductDetailsPage() {
                         img.onerror = () => {
                             // Fallback to front image if back doesn't exist
                             if (side === 'back') {
-                                const fallbackImg = document.createElement('img') as HTMLImageElement;
-                                fallbackImg.crossOrigin = 'anonymous';
-                                fallbackImg.onload = () => resolve(fallbackImg);
-                                fallbackImg.onerror = reject;
-                                fallbackImg.src = `/${base}.png`;
+                                const frontImagePath = sessionStorage.getItem("productTypeImage");
+                                if (frontImagePath) {
+                                    const fallbackImg = document.createElement('img') as HTMLImageElement;
+                                    fallbackImg.crossOrigin = 'anonymous';
+                                    
+                                    // Proxy R2 URLs if needed
+                                    const isExternalUrl = frontImagePath.startsWith('http://') || frontImagePath.startsWith('https://');
+                                    const isLocalhost = frontImagePath.includes('localhost') || frontImagePath.startsWith('/');
+                                    const finalSrc = (isExternalUrl && !isLocalhost) 
+                                        ? `/api/proxy-image?url=${encodeURIComponent(frontImagePath)}`
+                                        : frontImagePath;
+                                    
+                                    fallbackImg.onload = () => resolve(fallbackImg);
+                                    fallbackImg.onerror = reject;
+                                    fallbackImg.src = finalSrc;
+                                } else {
+                                    reject(new Error('Failed to load product image and no fallback available'));
+                                }
                             } else {
                                 reject(new Error('Failed to load product image'));
                             }
                         };
-                        img.src = imagePath;
+                        
+                        // Proxy R2 URLs if needed (external URLs that aren't localhost)
+                        const isExternalUrl = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+                        const isLocalhost = imagePath.includes('localhost') || imagePath.startsWith('/');
+                        const finalSrc = (isExternalUrl && !isLocalhost) 
+                            ? `/api/proxy-image?url=${encodeURIComponent(imagePath)}`
+                            : imagePath;
+                        
+                        img.src = finalSrc;
                     });
                 };
 

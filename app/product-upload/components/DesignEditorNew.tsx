@@ -310,20 +310,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         }
     }, [productColor, printAreaFront, printAreaBack]);
 
-    // Load product images - use dynamic paths from sessionStorage (set from DB) or fallback
+    // Load product images - use dynamic R2 paths from sessionStorage, no fallbacks
     const loadProductImages = useCallback(() => {
         // Get images from sessionStorage (these should be set from the database when product type is selected)
         const frontImage = sessionStorage.getItem("productTypeImage");
         const backImage = sessionStorage.getItem("productTypeBackImage");
         
-        // Only use hardcoded fallback if sessionStorage doesn't have the image
-        // This ensures we use DB images when available
-        const frontImageSrc = frontImage || 
-            (productType.toLowerCase().includes('hoodie') ? '/Hoodie.png' : '/T-Shirt.png');
-        const backImageSrc = backImage || frontImage || 
-            (productType.toLowerCase().includes('hoodie') ? '/Hoodie-Back.png' : '/T-Shirt-Back.png');
+        // Use only R2 images from sessionStorage, no fallbacks
+        const frontImageSrc = frontImage;
+        const backImageSrc = backImage || frontImage; // Use front image as back if back doesn't exist
         
-        const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
+        const loadImg = (src: string | null): Promise<HTMLImageElement | null> => new Promise(res => {
             if (!src) {
                 res(null);
                 return;
@@ -362,7 +359,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 setBackground(previewCanvas.current, currentSideRef.current === 'front' ? 'back' : 'front', printArea);
             }
         });
-    }, [productType, setBackground, printAreaFront, printAreaBack]);
+    }, [setBackground, printAreaFront, printAreaBack]);
 
     useEffect(() => {
         loadProductImages();
