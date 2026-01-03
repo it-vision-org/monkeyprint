@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter, useSearchParams } from "next/navigation";
 import DesignEditor from "../../product-upload/components/DesignEditorNew";
@@ -158,13 +158,8 @@ export default function ProductUploadPage() {
                         }
                     }
                 }
-                if (colors.length > 0 && selectedColors.length === 0) {
-                    setSelectedColors([colors[0].id]);
-                    setActiveColorState(colors[0].id);
-                }
-                if (qualities.length > 0 && !selectedQuality) {
-                    setSelectedQuality(qualities[0].id);
-                }
+                // Note: Default color and quality selection will be handled by useEffect hooks
+                // that depend on selectedProduct and availableColors/availableQualities
                 
                 setConfigError(null);
             } catch (error: any) {
@@ -215,7 +210,69 @@ export default function ProductUploadPage() {
         setAiImages([]);
     };
 
-    const qualityPrice = qualityOptions.find((option) => option.id === selectedQuality)?.price ?? 0;
+    // Get available qualities for the selected product type
+    const availableQualities = useMemo(() => {
+        if (!selectedProduct || !productTypesFull.length) return [];
+        const selectedType = productTypesFull.find((pt: any) => pt.slug === selectedProduct);
+        if (!selectedType?.qualities) return [];
+        return selectedType.qualities.map((q: any) => ({
+            id: q.id,
+            label: q.name,
+            price: q.price,
+        }));
+    }, [selectedProduct, productTypesFull]);
+
+    // Get available colors for the selected product type
+    const availableColors = useMemo(() => {
+        if (!selectedProduct || !productTypesFull.length) return colorSwatches;
+        const selectedType = productTypesFull.find((pt: any) => pt.slug === selectedProduct);
+        if (!selectedType?.availableColorIds || selectedType.availableColorIds.length === 0) {
+            return colorSwatches; // Fallback to all colors if no specific colors defined
+        }
+        return colorSwatches.filter(swatch => 
+            selectedType.availableColorIds.includes(swatch.id)
+        );
+    }, [selectedProduct, productTypesFull, colorSwatches]);
+
+    // Update selected quality if current one is not available for new product type
+    useEffect(() => {
+        if (availableQualities.length > 0) {
+            const currentQualityExists = availableQualities.some(q => q.id === selectedQuality);
+            if (!currentQualityExists || !selectedQuality) {
+                // Set to first available quality or default quality
+                const defaultQuality = availableQualities.find((q: any) => q.isDefault) || availableQualities[0];
+                if (defaultQuality) {
+                    setSelectedQuality(defaultQuality.id);
+                }
+            }
+        }
+    }, [availableQualities, selectedQuality]);
+
+    // Update selected colors if current ones are not available for new product type
+    useEffect(() => {
+        if (availableColors.length > 0) {
+            const validColors = selectedColors.filter(colorId => 
+                availableColors.some(c => c.id === colorId)
+            );
+            if (validColors.length === 0) {
+                // No valid colors, set to first available
+                setSelectedColors([availableColors[0].id]);
+                setActiveColorState(availableColors[0].id);
+            } else if (validColors.length !== selectedColors.length) {
+                // Some colors were removed, update selection
+                setSelectedColors(validColors);
+                if (!validColors.includes(activeColor)) {
+                    setActiveColorState(validColors[0]);
+                }
+            } else if (selectedColors.length === 0) {
+                // Initial setup: no colors selected yet
+                setSelectedColors([availableColors[0].id]);
+                setActiveColorState(availableColors[0].id);
+            }
+        }
+    }, [availableColors, selectedColors, activeColor]);
+
+    const qualityPrice = availableQualities.find((option) => option.id === selectedQuality)?.price ?? 0;
     const basePrice = productPrices[selectedProduct] ?? 20;
     const totalPrice = basePrice + designFee + qualityPrice;
 
@@ -255,10 +312,10 @@ export default function ProductUploadPage() {
             ? activeColor
             : (selectedColors.length > 0 ? selectedColors[0] : "");
 
-        const activeSwatch = colorSwatches.find(swatch => swatch.id === validActiveColor);
+        const activeSwatch = availableColors.find(swatch => swatch.id === validActiveColor);
         const otherColors = selectedColors.filter(id => id !== validActiveColor);
         const otherSwatches = otherColors
-            .map(id => colorSwatches.find(swatch => swatch.id === id))
+            .map(id => availableColors.find(swatch => swatch.id === id))
             .filter((swatch): swatch is ColorSwatch => swatch !== undefined);
 
         // Return active color first (for center), then others in their original order
@@ -469,7 +526,7 @@ export default function ProductUploadPage() {
                                     <path d="M2 17l10 5 10-5" />
                                     <path d="M2 12l10 5 10-5" />
                                 </svg>
-                                <span>Quality ({qualityOptions.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                <span>Quality ({availableQualities.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
                             </div>
                             <span className="pu-cart-item-price">{qualityPrice}DT</span>
                         </div>
@@ -591,7 +648,7 @@ export default function ProductUploadPage() {
                                             <path d="M2 12l10 5 10-5" />
                                         </svg>
                                     </div>
-                                    <span className="pu-price-widget-item-label">Quality ({qualityOptions.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
+                                    <span className="pu-price-widget-item-label">Quality ({availableQualities.find(o => o.id === selectedQuality)?.label || 'Cotton'})</span>
                                 </div>
                                 <span className="pu-price-widget-item-price">{qualityPrice}DT</span>
                             </div>
@@ -981,14 +1038,47 @@ export default function ProductUploadPage() {
                                                     zIndex: zIndex,
                                                 }}
                                             >
+                                                {/* Border/shadow layer - behind the t-shirt */}
+                                                <div
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '50%',
+                                                        transform: 'translate(-50%, -50%)',
+                                                        width: '102px',
+                                                        height: '122px',
+                                                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        filter: 'blur(4px)',
+                                                        zIndex: 0,
+                                                    }}
+                                                />
+                                                {/* White halo layer */}
+                                                <div
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '50%',
+                                                        transform: 'translate(-50%, -50%)',
+                                                        width: '98px',
+                                                        height: '118px',
+                                                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                                                        WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        mask: 'url(/T-Shirt.png) no-repeat center / contain',
+                                                        zIndex: 1,
+                                                    }}
+                                                />
+                                                {/* Main t-shirt */}
                                                 <div
                                                     style={{
                                                         width: '90px',
                                                         height: '110px',
-                                                        backgroundColor: swatch.id === 'white' ? '#f5f5f5' : swatch.hex,
+                                                        backgroundColor: swatch.hex,
                                                         WebkitMask: 'url(/T-Shirt.png) no-repeat center / contain',
                                                         mask: 'url(/T-Shirt.png) no-repeat center / contain',
-                                                        boxShadow: swatch.id === 'white' ? '0 0 0 1px rgba(0, 0, 0, 0.1)' : 'none',
+                                                        position: 'relative',
+                                                        zIndex: 2,
                                                     }}
                                                 />
                                             </div>
@@ -997,15 +1087,27 @@ export default function ProductUploadPage() {
                                 })()}
                             </div>
                             <div className="pu-color-swatches">
-                                {colorSwatches.map((swatch) => {
+                                {availableColors.map((swatch) => {
                                     const isSelected = selectedColors.includes(swatch.id);
                                     const isActive = swatch.id === activeColor;
+                                    // Check if color is light/white (for border/halo effect)
+                                    const hex = swatch.hex.replace('#', '');
+                                    const r = parseInt(hex.substring(0, 2), 16);
+                                    const g = parseInt(hex.substring(2, 4), 16);
+                                    const b = parseInt(hex.substring(4, 6), 16);
+                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                                    const isLight = brightness > 200; // Threshold for light colors
+                                    
                                     return (
                                         <button
                                             key={swatch.id}
                                             type="button"
                                             className={`pu-color-dot ${isSelected ? "active" : ""} ${isActive && isSelected ? "selected" : ""}`}
-                                            style={{ background: swatch.hex }}
+                                            style={{ 
+                                                background: swatch.hex,
+                                                border: isLight ? '2px solid rgba(0, 0, 0, 0.15)' : 'none',
+                                                boxShadow: isLight ? '0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
+                                            }}
                                             onClick={() => toggleColor(swatch.id)}
                                             title={swatch.label}
                                         >
@@ -1015,7 +1117,7 @@ export default function ProductUploadPage() {
                                                     height="18"
                                                     viewBox="0 0 24 24"
                                                     fill="none"
-                                                    stroke={swatch.id === "white" ? "#000000" : "#ffffff"}
+                                                    stroke={isLight ? "#000000" : "#ffffff"}
                                                     strokeWidth="2.5"
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
@@ -1025,8 +1127,8 @@ export default function ProductUploadPage() {
                                                         left: '50%',
                                                         transform: 'translate(-50%, -50%)',
                                                         pointerEvents: 'none',
-                                                        filter: swatch.id === "white"
-                                                            ? 'none'
+                                                        filter: isLight
+                                                            ? 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.8))'
                                                             : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))',
                                                     }}
                                                 >
@@ -1060,14 +1162,26 @@ export default function ProductUploadPage() {
                             <span className="pu-preview-label">Couleurs d'aperçu</span>
                             <div className="pu-mini-swatches">
                                 {selectedColors.map((colorId) => {
-                                    const swatch = colorSwatches.find((c) => c.id === colorId);
+                                    const swatch = availableColors.find((c) => c.id === colorId) || colorSwatches.find((c) => c.id === colorId);
                                     const isActive = colorId === activeColor;
+                                    // Check if color is light/white (for border/halo effect)
+                                    const hex = swatch?.hex?.replace('#', '') || '';
+                                    const r = hex ? parseInt(hex.substring(0, 2), 16) : 255;
+                                    const g = hex ? parseInt(hex.substring(2, 4), 16) : 255;
+                                    const b = hex ? parseInt(hex.substring(4, 6), 16) : 255;
+                                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                                    const isLight = brightness > 200; // Threshold for light colors
+                                    
                                     return (
                                         <button
                                             key={colorId}
                                             type="button"
                                             className={`pu-mini-dot ${isActive ? "active" : ""}`}
-                                            style={{ background: swatch?.hex }}
+                                            style={{ 
+                                                background: swatch?.hex,
+                                                border: isLight ? '2px solid rgba(0, 0, 0, 0.15)' : 'none',
+                                                boxShadow: isLight ? '0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
+                                            }}
                                             onClick={() => setActiveColor(colorId)}
                                             title={swatch?.label}
                                         />
@@ -1080,7 +1194,7 @@ export default function ProductUploadPage() {
                     <section className="pu-card" style={{ gap: '14px' }}>
                         <h3 className="pu-card-subtitle">Select quality of the product</h3>
                         <div className="pu-quality-row">
-                            {qualityOptions.map((option) => (
+                            {availableQualities.map((option) => (
                                 <button
                                     key={option.id}
                                     type="button"

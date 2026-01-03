@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getR2Url } from '@/lib/storage';
+import { NextResponse } from 'next/server';
 
 // Public API to fetch active product configuration for product upload page
 export async function GET() {
@@ -23,6 +23,7 @@ export async function GET() {
 
         // Parse availableColorIds and print areas from JSON string for each product type
         // Also convert R2 keys to full URLs for images
+        // Include product-type-specific qualities and colors
         const parsedProductTypes = await Promise.all(productTypes.map(async (pt) => {
             let imageUrl = pt.image;
             let backImageUrl = pt.backImage;
@@ -35,11 +36,36 @@ export async function GET() {
                 backImageUrl = await getR2Url(pt.backImage);
             }
             
+            // Get product-type-specific qualities
+            const typeQualities = await prisma.productTypeQuality.findMany({
+                where: { 
+                    productTypeId: pt.id,
+                    isActive: true 
+                },
+                orderBy: { displayOrder: 'asc' },
+            });
+            
+            // Get product-type-specific colors via ProductTypeColor relation
+            const typeColorRelations = await prisma.productTypeColor.findMany({
+                where: { productTypeId: pt.id },
+                include: { color: true },
+                orderBy: { displayOrder: 'asc' },
+            });
+            const typeColorIds = typeColorRelations
+                .filter(rel => rel.color.isActive)
+                .map(rel => rel.colorId);
+            
+            // Fallback to availableColorIds if ProductTypeColor is not used
+            const availableColorIds = typeColorIds.length > 0 
+                ? typeColorIds 
+                : (pt.availableColorIds ? JSON.parse(pt.availableColorIds) : []);
+            
             return {
                 ...pt,
                 image: imageUrl,
                 backImage: backImageUrl,
-                availableColorIds: pt.availableColorIds ? JSON.parse(pt.availableColorIds) : [],
+                availableColorIds,
+                qualities: typeQualities,
                 printAreaFront: pt.printAreaFront ? (typeof pt.printAreaFront === 'string' ? JSON.parse(pt.printAreaFront) : pt.printAreaFront) : null,
                 printAreaBack: pt.printAreaBack ? (typeof pt.printAreaBack === 'string' ? JSON.parse(pt.printAreaBack) : pt.printAreaBack) : null,
             };
