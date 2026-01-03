@@ -240,10 +240,11 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 const scaleX = canvas.getWidth() / adminCanvasWidth;
                 const scaleY = canvas.getHeight() / adminCanvasHeight;
                 
-                printX = areaToUse.x * scaleX;
-                printY = areaToUse.y * scaleY;
-                printW = areaToUse.width * scaleX;
-                printH = areaToUse.height * scaleY;
+                // Round coordinates for pixel-perfect alignment
+                printX = Math.round(areaToUse.x * scaleX);
+                printY = Math.round(areaToUse.y * scaleY);
+                printW = Math.round(areaToUse.width * scaleX);
+                printH = Math.round(areaToUse.height * scaleY);
             } else {
                 // Fall back to ratio-based calculation
                 printW = (bgImg.width! * scale) * PRINT_AREA_RATIO;

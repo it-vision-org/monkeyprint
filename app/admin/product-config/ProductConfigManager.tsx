@@ -788,27 +788,29 @@ function ProductEditModal({
             let printX: number, printY: number, printW: number, printH: number;
 
             if (existingArea && existingArea.width && existingArea.height) {
-                // Use existing area
-                printX = existingArea.x;
-                printY = existingArea.y;
+                // Use existing area - convert to center coordinates
                 printW = existingArea.width;
                 printH = existingArea.height;
+                printX = existingArea.x + printW / 2;
+                printY = existingArea.y + printH / 2;
             } else {
                 // Create default centered rectangle (80% of image size)
                 const imgWidth = (img.width || 400) * scale;
                 const imgHeight = (img.height || 500) * scale;
                 printW = imgWidth * 0.8;
                 printH = imgHeight * 0.8;
-                printX = (canvas.getWidth() - printW) / 2;
-                printY = (canvas.getHeight() - printH) / 2;
+                printX = canvas.getWidth() / 2;
+                printY = canvas.getHeight() / 2;
             }
 
-            // Create printable area rectangle
+            // Create printable area rectangle with center origin
             const printRect = new fabric.Rect({
                 left: printX,
                 top: printY,
                 width: printW,
                 height: printH,
+                originX: 'center',
+                originY: 'center',
                 fill: 'rgba(65, 235, 92, 0.2)',
                 stroke: '#41eb5c',
                 strokeWidth: 3,
@@ -831,11 +833,22 @@ function ProductEditModal({
                 const rect = canvas.getActiveObject() as fabric.Rect;
                 if (!rect) return;
 
+                // Get dimensions with scaling applied
+                const width = Math.round((rect.width || 0) * (rect.scaleX || 1));
+                const height = Math.round((rect.height || 0) * (rect.scaleY || 1));
+                
+                // Convert from center-origin to top-left coordinates for storage
+                // This maintains backward compatibility with the dashboard
+                const centerX = Math.round(rect.left || 0);
+                const centerY = Math.round(rect.top || 0);
+                const x = Math.round(centerX - width / 2);
+                const y = Math.round(centerY - height / 2);
+
                 const area = {
-                    x: rect.left || 0,
-                    y: rect.top || 0,
-                    width: (rect.width || 0) * (rect.scaleX || 1),
-                    height: (rect.height || 0) * (rect.scaleY || 1),
+                    x,
+                    y,
+                    width,
+                    height,
                 };
 
                 setFormData((prev: any) => ({
@@ -1249,13 +1262,14 @@ function ProductEditModal({
                                 </div>
                                 {frontImagePreview ? (
                                     <div style={{
-                                        width: '100%',
-                                        aspectRatio: '4/5',
+                                        width: '400px',
+                                        height: '500px',
                                         borderRadius: '12px',
                                         border: '2px solid #e5e7eb',
                                         overflow: 'hidden',
                                         position: 'relative',
                                         background: '#f9fafb',
+                                        margin: '0 auto',
                                     }}>
                                         <canvas ref={frontCanvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
                                         <div style={{
@@ -1312,13 +1326,14 @@ function ProductEditModal({
                                 </div>
                                 {backImagePreview ? (
                                     <div style={{
-                                        width: '100%',
-                                        aspectRatio: '4/5',
+                                        width: '400px',
+                                        height: '500px',
                                         borderRadius: '12px',
                                         border: '2px solid #e5e7eb',
                                         overflow: 'hidden',
                                         position: 'relative',
                                         background: '#f9fafb',
+                                        margin: '0 auto',
                                     }}>
                                         <canvas ref={backCanvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
                                         <div style={{
