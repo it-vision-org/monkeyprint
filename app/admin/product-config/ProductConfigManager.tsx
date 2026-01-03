@@ -48,6 +48,7 @@ export default function ProductConfigManager() {
     const [productTypes, setProductTypes] = useState<ProductType[]>([]);
     const [colors, setColors] = useState<ProductColor[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
 
@@ -412,19 +413,40 @@ export default function ProductConfigManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de produit ?')) return;
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de produit ? Cette action supprimera également tous les produits associés à ce type.')) return;
 
+        setDeletingId(id);
         try {
-            const response = await fetch(`/api/admin/product-types/${id}`, { method: 'DELETE' });
+            console.log('Attempting to delete product type:', id);
+            const response = await fetch(`/api/admin/product-types/${id}`, { 
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            console.log('Delete response status:', response.status);
 
             if (!response.ok) {
-                throw new Error('Erreur lors de la suppression');
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                console.error('Delete error:', errorData);
+                throw new Error(errorData.error || `Erreur ${response.status}: ${response.statusText}`);
             }
 
-            showAlert('Supprimé avec succès', 'success');
-            loadData();
-        } catch (error) {
-            showAlert('Erreur lors de la suppression', 'error');
+            const result = await response.json();
+            console.log('Delete result:', result);
+            const deletedCount = result.deletedProductsCount || 0;
+            
+            showAlert(
+                `Supprimé avec succès${deletedCount > 0 ? ` (${deletedCount} produit${deletedCount > 1 ? 's' : ''} supprimé${deletedCount > 1 ? 's' : ''})` : ''}`,
+                'success'
+            );
+            await loadData();
+        } catch (error: any) {
+            console.error('Delete error caught:', error);
+            showAlert(error.message || 'Erreur lors de la suppression', 'error');
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -454,7 +476,7 @@ export default function ProductConfigManager() {
 
     return (
         <div style={{ padding: '0' }}>
-            {/* Header - same as before */}
+            {/* Header with description and add button */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -464,29 +486,26 @@ export default function ProductConfigManager() {
                 gap: '16px',
             }}>
                 <div>
-                    <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#0d1c23', margin: 0, marginBottom: '8px' }}>
-                        Configuration des Produits
-                    </h1>
                     <p style={{ fontSize: '16px', color: '#6b7280', margin: 0 }}>
                         Gérez les types de produits, leurs zones de design et leurs couleurs disponibles
                     </p>
                 </div>
-                    <button
+                <button
                     onClick={handleAdd}
-                        style={{
-                            padding: '12px 24px',
+                    style={{
+                        padding: '12px 24px',
                         background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
                         color: 'white',
-                            border: 'none',
+                        border: 'none',
                         borderRadius: '12px',
-                            cursor: 'pointer',
+                        cursor: 'pointer',
                         fontWeight: 700,
                         fontSize: '14px',
                         boxShadow: '0 4px 16px rgba(65, 235, 92, 0.3)',
                     }}
                 >
                     + Ajouter un Produit
-                    </button>
+                </button>
             </div>
 
             {/* Product Types Grid - same as before but simplified */}
@@ -498,13 +517,14 @@ export default function ProductConfigManager() {
                 {productTypes.map((type) => (
                     <div
                         key={type.id}
-                                style={{
+                        style={{
                             background: '#ffffff',
                             borderRadius: '16px',
                             border: '2px solid #e5e7eb',
                             padding: '24px',
-                                    cursor: 'pointer',
+                            cursor: 'pointer',
                             transition: 'all 0.3s',
+                            position: 'relative',
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#41eb5c';
@@ -518,19 +538,88 @@ export default function ProductConfigManager() {
                         }}
                         onClick={() => handleEdit(type)}
                     >
+                        {/* Top bar with status and delete button */}
                         <div style={{
                             position: 'absolute',
                             top: '16px',
+                            left: '16px',
                             right: '16px',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                                                background: type.isActive ? '#d1fae5' : '#fee2e2',
-                                                color: type.isActive ? '#065f46' : '#991b1b',
-                                                fontSize: '12px',
-                            fontWeight: 600,
-                                            }}>
-                                                {type.isActive ? 'Actif' : 'Inactif'}
-                    </div>
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            zIndex: 10,
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(8px)',
+                            padding: '8px 12px',
+                            borderRadius: '12px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        }}>
+                            <div style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                background: type.isActive ? '#d1fae5' : '#fee2e2',
+                                color: type.isActive ? '#065f46' : '#991b1b',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap',
+                            }}>
+                                {type.isActive ? 'Actif' : 'Inactif'}
+                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(type.id);
+                                }}
+                                disabled={deletingId === type.id}
+                                style={{
+                                    padding: '8px 14px',
+                                    background: deletingId === type.id ? '#9ca3af' : '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    cursor: deletingId === type.id ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    boxShadow: deletingId === type.id ? 'none' : '0 2px 8px rgba(239, 68, 68, 0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    whiteSpace: 'nowrap',
+                                    opacity: deletingId === type.id ? 0.7 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (deletingId !== type.id) {
+                                        e.currentTarget.style.background = '#dc2626';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (deletingId !== type.id) {
+                                        e.currentTarget.style.background = '#ef4444';
+                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }
+                                }}
+                            >
+                                {deletingId === type.id ? (
+                                    <>
+                                        <div className="pu-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px', borderColor: 'white transparent white white' }} />
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 6h18" />
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                        </svg>
+                                        Supprimer
+                                    </>
+                                )}
+                            </button>
+                        </div>
 
                                             <div style={{
                             width: '100%',

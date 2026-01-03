@@ -53,7 +53,7 @@ export async function PUT(
     }
 }
 
-// DELETE - Delete a product type
+// DELETE - Delete a product type and all related products
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -70,18 +70,55 @@ export async function DELETE(
         }
 
         const { id } = await params;
+        console.log('Deleting product type with id:', id);
 
+        // First, get the product type to find its slug
+        const productType = await prisma.productType.findUnique({
+            where: { id },
+        });
+
+        if (!productType) {
+            console.log('Product type not found for id:', id);
+            return NextResponse.json({ error: 'Product type not found' }, { status: 404 });
+        }
+
+        console.log('Found product type:', productType.name, 'slug:', productType.slug);
+
+        // Delete all products that use this product type (by slug)
+        const deletedProducts = await prisma.product.deleteMany({
+            where: {
+                type: productType.slug,
+            },
+        });
+
+        console.log('Deleted products count:', deletedProducts.count);
+
+        // Delete the product type itself
+        // This will cascade delete ProductTypeColor and ProductTypeQuality due to onDelete: Cascade
         await prisma.productType.delete({
             where: { id },
         });
 
-        return NextResponse.json({ success: true });
+        console.log('Product type deleted successfully');
+
+        return NextResponse.json({ 
+            success: true,
+            deletedProductsCount: deletedProducts.count 
+        });
     } catch (error: any) {
         console.error('Error deleting product type:', error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
         if (error.code === 'P2025') {
             return NextResponse.json({ error: 'Product type not found' }, { status: 404 });
         }
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ 
+            error: 'Internal server error',
+            details: error.message 
+        }, { status: 500 });
     }
 }
 
