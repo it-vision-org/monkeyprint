@@ -66,15 +66,6 @@ export default function ProductConfigManager() {
     const [backImagePreview, setBackImagePreview] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
 
-    // Canvas refs for design area drawing
-    const frontCanvasRef = useRef<HTMLCanvasElement>(null);
-    const backCanvasRef = useRef<HTMLCanvasElement>(null);
-    const frontCanvas = useRef<fabric.Canvas | null>(null);
-    const backCanvas = useRef<fabric.Canvas | null>(null);
-    const frontRectRef = useRef<fabric.Rect | null>(null);
-    const backRectRef = useRef<fabric.Rect | null>(null);
-    const [isDrawingFront, setIsDrawingFront] = useState(false);
-    const [isDrawingBack, setIsDrawingBack] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -211,583 +202,6 @@ export default function ProductConfigManager() {
         setShowModal(true);
     };
 
-    // Helper function to get pointer coordinates accounting for CSS scaling
-    const getScaledPointer = (canvas: fabric.Canvas, e: MouseEvent | TouchEvent): { x: number; y: number } => {
-        const canvasEl = canvas.getElement();
-        const rect = canvasEl.getBoundingClientRect();
-        const scaleX = canvas.getWidth() / rect.width;
-        const scaleY = canvas.getHeight() / rect.height;
-        
-        let clientX: number, clientY: number;
-        if (e instanceof MouseEvent) {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        } else {
-            const touch = e.touches[0] || e.changedTouches[0];
-            clientX = touch.clientX;
-            clientY = touch.clientY;
-        }
-        
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
-    };
-
-    // Initialize canvas for drawing design area - EXACT COPY of dashboard setup
-    useEffect(() => {
-        if (showModal && frontCanvasRef.current && frontImagePreview) {
-            if (frontCanvas.current) {
-                frontCanvas.current.dispose();
-            }
-            
-            // Exact same canvas initialization as dashboard
-            const canvas = new fabric.Canvas(frontCanvasRef.current, {
-                width: 400,
-                height: 500,
-                backgroundColor: 'transparent',
-                preserveObjectStacking: true
-            });
-            frontCanvas.current = canvas;
-            // Enable selection by default
-            canvas.selection = true;
-            canvas.defaultCursor = 'default';
-
-            // Load image exactly like dashboard does - using document.createElement('img') to avoid Next.js Image conflict
-            const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
-                if (!src) {
-                    res(null);
-                    return;
-                }
-                // Use document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
-                const img = document.createElement('img') as HTMLImageElement;
-                img.crossOrigin = 'anonymous';
-                img.onload = () => res(img);
-                img.onerror = () => {
-                    console.warn('Failed to load product image:', src);
-                    res(null);
-                };
-                
-                // Check if it's an external URL and proxy if needed (same as dashboard)
-                const isExternalUrl = src.startsWith('http://') || src.startsWith('https://');
-                const isLocalhost = src.includes('localhost') || src.startsWith('/');
-                
-                if (isExternalUrl && !isLocalhost) {
-                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
-                    img.src = proxyUrl;
-                } else {
-                    img.src = src;
-                }
-            });
-
-            loadImg(frontImagePreview).then((imgElement) => {
-                if (!imgElement) {
-                    canvas.renderAll();
-                    return;
-                }
-
-                // Create fabric image from HTMLImageElement exactly like dashboard
-                const bgImg = new fabric.FabricImage(imgElement, {
-                    originX: 'center',
-                    originY: 'center',
-                });
-
-                // Exact same scaling as dashboard (0.88)
-                const scale = Math.min(
-                    (canvas.getWidth() * 0.88) / (bgImg.width || 1),
-                    (canvas.getHeight() * 0.88) / (bgImg.height || 1)
-                );
-
-                bgImg.set({
-                    left: canvas.getWidth() / 2,
-                    top: canvas.getHeight() / 2,
-                    originX: 'center',
-                    originY: 'center',
-                    scaleX: scale,
-                    scaleY: scale,
-                    selectable: false,
-                    evented: false,
-                });
-
-                // Set as background image exactly like dashboard
-                canvas.backgroundImage = bgImg;
-                // Ensure canvas allows selection and movement when not drawing
-                canvas.selection = true;
-                canvas.defaultCursor = 'default';
-                canvas.renderAll();
-
-                // Load existing print area if exists - wait for background to render first
-                setTimeout(() => {
-                    if (formData.printAreaFront) {
-                        // Remove existing rect if any
-                        if (frontRectRef.current) {
-                            canvas.remove(frontRectRef.current);
-                            frontRectRef.current = null;
-                        }
-
-                        const area = typeof formData.printAreaFront === 'string' 
-                            ? JSON.parse(formData.printAreaFront) 
-                            : formData.printAreaFront;
-                        
-                        if (area && area.width > 0 && area.height > 0) {
-                            const rect = new fabric.Rect({
-                                left: area.x || 0,
-                                top: area.y || 0,
-                                width: area.width || 100,
-                                height: area.height || 100,
-                                fill: 'rgba(65, 235, 92, 0.2)',
-                                stroke: 'rgba(65, 235, 92, 0.8)',
-                                strokeWidth: 2,
-                                strokeDashArray: [5, 5],
-                                selectable: true,
-                                hasControls: true,
-                                hasBorders: true,
-                                evented: true,
-                            });
-                            frontRectRef.current = rect;
-                            canvas.add(rect);
-                            
-                            // Ensure canvas allows selection and movement
-                            canvas.selection = true;
-                            canvas.defaultCursor = 'default';
-                            
-                            // Update print area when rectangle is modified
-                            const updatePrintArea = () => {
-                                if (!rect) return;
-                                const rectLeft = rect.left || 0;
-                                const rectTop = rect.top || 0;
-                                const rectWidth = (rect.width || 0) * (rect.scaleX || 1);
-                                const rectHeight = (rect.height || 0) * (rect.scaleY || 1);
-                                
-                                setFormData(prev => ({
-                                    ...prev,
-                                    printAreaFront: JSON.stringify({
-                                        x: rectLeft,
-                                        y: rectTop,
-                                        width: rectWidth,
-                                        height: rectHeight,
-                                    }),
-                                }));
-                            };
-                            
-                            rect.on('modified', updatePrintArea);
-                            rect.on('moving', updatePrintArea);
-                            rect.on('scaling', updatePrintArea);
-                            
-                            canvas.renderAll();
-                        }
-                    }
-                }, 100);
-            });
-
-            return () => {
-                if (frontCanvas.current) {
-                    frontCanvas.current.dispose();
-                    frontCanvas.current = null;
-                }
-            };
-        }
-    }, [showModal, frontImagePreview, formData.printAreaFront]);
-
-    useEffect(() => {
-        if (showModal && backCanvasRef.current && backImagePreview) {
-            if (backCanvas.current) {
-                backCanvas.current.dispose();
-            }
-            
-            // Exact same canvas initialization as dashboard
-            const canvas = new fabric.Canvas(backCanvasRef.current, {
-                width: 400,
-                height: 500,
-                backgroundColor: 'transparent',
-                preserveObjectStacking: true
-            });
-            backCanvas.current = canvas;
-            // Enable selection by default
-            canvas.selection = true;
-            canvas.defaultCursor = 'default';
-
-            // Load image exactly like dashboard does - using document.createElement('img') to avoid Next.js Image conflict
-            const loadImg = (src: string): Promise<HTMLImageElement | null> => new Promise(res => {
-                if (!src) {
-                    res(null);
-                    return;
-                }
-                // Use document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
-                const img = document.createElement('img') as HTMLImageElement;
-                img.crossOrigin = 'anonymous';
-                img.onload = () => res(img);
-                img.onerror = () => {
-                    console.warn('Failed to load product image:', src);
-                    res(null);
-                };
-                
-                // Check if it's an external URL and proxy if needed (same as dashboard)
-                const isExternalUrl = src.startsWith('http://') || src.startsWith('https://');
-                const isLocalhost = src.includes('localhost') || src.startsWith('/');
-                
-                if (isExternalUrl && !isLocalhost) {
-                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
-                    img.src = proxyUrl;
-                } else {
-                    img.src = src;
-                }
-            });
-
-            loadImg(backImagePreview).then((imgElement) => {
-                if (!imgElement) {
-                    canvas.renderAll();
-                    return;
-                }
-
-                // Create fabric image from HTMLImageElement exactly like dashboard
-                const bgImg = new fabric.FabricImage(imgElement, {
-                    originX: 'center',
-                    originY: 'center',
-                });
-
-                // Exact same scaling as dashboard (0.88)
-                const scale = Math.min(
-                    (canvas.getWidth() * 0.88) / (bgImg.width || 1),
-                    (canvas.getHeight() * 0.88) / (bgImg.height || 1)
-                );
-
-                bgImg.set({
-                    left: canvas.getWidth() / 2,
-                    top: canvas.getHeight() / 2,
-                    originX: 'center',
-                    originY: 'center',
-                    scaleX: scale,
-                    scaleY: scale,
-                    selectable: false,
-                    evented: false,
-                });
-
-                // Set as background image exactly like dashboard
-                canvas.backgroundImage = bgImg;
-                // Ensure canvas allows selection and movement when not drawing
-                canvas.selection = true;
-                canvas.defaultCursor = 'default';
-                canvas.renderAll();
-
-                // Load existing print area if exists - wait for background to render first
-                setTimeout(() => {
-                    if (formData.printAreaBack) {
-                        // Remove existing rect if any
-                        if (backRectRef.current) {
-                            canvas.remove(backRectRef.current);
-                            backRectRef.current = null;
-                        }
-
-                        const area = typeof formData.printAreaBack === 'string' 
-                            ? JSON.parse(formData.printAreaBack) 
-                            : formData.printAreaBack;
-                        
-                        if (area && area.width > 0 && area.height > 0) {
-                            const rect = new fabric.Rect({
-                                left: area.x || 0,
-                                top: area.y || 0,
-                                width: area.width || 100,
-                                height: area.height || 100,
-                                fill: 'rgba(65, 235, 92, 0.2)',
-                                stroke: 'rgba(65, 235, 92, 0.8)',
-                                strokeWidth: 2,
-                                strokeDashArray: [5, 5],
-                                selectable: true,
-                                hasControls: true,
-                                hasBorders: true,
-                                evented: true,
-                            });
-                            backRectRef.current = rect;
-                            canvas.add(rect);
-                            
-                            // Ensure canvas allows selection and movement
-                            canvas.selection = true;
-                            canvas.defaultCursor = 'default';
-                            
-                            // Update print area when rectangle is modified
-                            const updatePrintArea = () => {
-                                if (!rect) return;
-                                const rectLeft = rect.left || 0;
-                                const rectTop = rect.top || 0;
-                                const rectWidth = (rect.width || 0) * (rect.scaleX || 1);
-                                const rectHeight = (rect.height || 0) * (rect.scaleY || 1);
-                                
-                                setFormData(prev => ({
-                                    ...prev,
-                                    printAreaBack: JSON.stringify({
-                                        x: rectLeft,
-                                        y: rectTop,
-                                        width: rectWidth,
-                                        height: rectHeight,
-                                    }),
-                                }));
-                            };
-                            
-                            rect.on('modified', updatePrintArea);
-                            rect.on('moving', updatePrintArea);
-                            rect.on('scaling', updatePrintArea);
-                            
-                            canvas.renderAll();
-                        }
-                    }
-                }, 100);
-            });
-
-            return () => {
-                if (backCanvas.current) {
-                    backCanvas.current.dispose();
-                    backCanvas.current = null;
-                }
-            };
-        }
-    }, [showModal, backImagePreview, formData.printAreaBack]);
-
-    // Handle drawing rectangle on front canvas
-    const startDrawingFront = () => {
-        if (!frontCanvas.current || !frontImagePreview) return;
-        setIsDrawingFront(true);
-        
-        const canvas = frontCanvas.current;
-        canvas.isDrawingMode = false;
-        canvas.selection = false;
-        canvas.defaultCursor = 'crosshair';
-        
-        let isDown = false;
-        let startX = 0;
-        let startY = 0;
-        let rect: fabric.Rect | null = null;
-
-        const handleMouseDown = (e: fabric.TEvent) => {
-            // Get pointer coordinates accounting for CSS scaling
-            const pointer = getScaledPointer(canvas, e.e as MouseEvent | TouchEvent);
-            isDown = true;
-            startX = pointer.x;
-            startY = pointer.y;
-            
-            // Remove existing rect
-            if (frontRectRef.current) {
-                canvas.remove(frontRectRef.current);
-                frontRectRef.current = null;
-            }
-            
-            rect = new fabric.Rect({
-                left: startX,
-                top: startY,
-                width: 0,
-                height: 0,
-                fill: 'rgba(65, 235, 92, 0.2)',
-                stroke: 'rgba(65, 235, 92, 0.8)',
-                strokeWidth: 2,
-                strokeDashArray: [5, 5],
-                selectable: false,
-                evented: false,
-            });
-            canvas.add(rect);
-        };
-
-        const handleMouseMove = (e: fabric.TEvent) => {
-            if (!isDown || !rect) return;
-            // Get pointer coordinates accounting for CSS scaling
-            const pointer = getScaledPointer(canvas, e.e as MouseEvent | TouchEvent);
-            const width = Math.abs(pointer.x - startX);
-            const height = Math.abs(pointer.y - startY);
-            rect.set({
-                width,
-                height,
-                left: Math.min(startX, pointer.x),
-                top: Math.min(startY, pointer.y),
-            });
-            canvas.renderAll();
-        };
-
-        const handleMouseUp = () => {
-            if (!rect || !isDown) return;
-            isDown = false;
-            rect.set({ 
-                selectable: true, 
-                hasControls: true, 
-                hasBorders: true,
-                evented: true,
-            });
-            frontRectRef.current = rect;
-            canvas.defaultCursor = 'default';
-            canvas.selection = true;
-            canvas.renderAll();
-            setIsDrawingFront(false);
-            
-            // Save print area using the rectangle's actual position and size
-            // Use left/top/width/height directly to avoid stroke width affecting bounds
-            const rectLeft = rect.left || 0;
-            const rectTop = rect.top || 0;
-            const rectWidth = (rect.width || 0) * (rect.scaleX || 1);
-            const rectHeight = (rect.height || 0) * (rect.scaleY || 1);
-            
-            setFormData(prev => ({
-                ...prev,
-                printAreaFront: JSON.stringify({
-                    x: rectLeft,
-                    y: rectTop,
-                    width: rectWidth,
-                    height: rectHeight,
-                }),
-            }));
-
-            // Add listeners for when rectangle is moved/resized
-            const updatePrintArea = () => {
-                const rectLeft = rect!.left || 0;
-                const rectTop = rect!.top || 0;
-                const rectWidth = (rect!.width || 0) * (rect!.scaleX || 1);
-                const rectHeight = (rect!.height || 0) * (rect!.scaleY || 1);
-                
-                setFormData(prev => ({
-                    ...prev,
-                    printAreaFront: JSON.stringify({
-                        x: rectLeft,
-                        y: rectTop,
-                        width: rectWidth,
-                        height: rectHeight,
-                    }),
-                }));
-            };
-            
-            rect.on('modified', updatePrintArea);
-            rect.on('moving', updatePrintArea);
-            rect.on('scaling', updatePrintArea);
-
-            // Remove event listeners
-            canvas.off('mouse:down', handleMouseDown);
-            canvas.off('mouse:move', handleMouseMove);
-            canvas.off('mouse:up', handleMouseUp);
-        };
-
-        canvas.on('mouse:down', handleMouseDown);
-        canvas.on('mouse:move', handleMouseMove);
-        canvas.on('mouse:up', handleMouseUp);
-    };
-
-    // Handle drawing rectangle on back canvas
-    const startDrawingBack = () => {
-        if (!backCanvas.current || !backImagePreview) return;
-        setIsDrawingBack(true);
-        
-        const canvas = backCanvas.current;
-        canvas.isDrawingMode = false;
-        canvas.selection = false;
-        canvas.defaultCursor = 'crosshair';
-        
-        let isDown = false;
-        let startX = 0;
-        let startY = 0;
-        let rect: fabric.Rect | null = null;
-
-        const handleMouseDown = (e: fabric.TEvent) => {
-            // Get pointer coordinates accounting for CSS scaling
-            const pointer = getScaledPointer(canvas, e.e as MouseEvent | TouchEvent);
-            isDown = true;
-            startX = pointer.x;
-            startY = pointer.y;
-            
-            // Remove existing rect
-            if (backRectRef.current) {
-                canvas.remove(backRectRef.current);
-                backRectRef.current = null;
-            }
-            
-            rect = new fabric.Rect({
-                left: startX,
-                top: startY,
-                width: 0,
-                height: 0,
-                fill: 'rgba(65, 235, 92, 0.2)',
-                stroke: 'rgba(65, 235, 92, 0.8)',
-                strokeWidth: 2,
-                strokeDashArray: [5, 5],
-                selectable: false,
-                evented: false,
-            });
-            canvas.add(rect);
-        };
-
-        const handleMouseMove = (e: fabric.TEvent) => {
-            if (!isDown || !rect) return;
-            // Get pointer coordinates accounting for CSS scaling
-            const pointer = getScaledPointer(canvas, e.e as MouseEvent | TouchEvent);
-            const width = Math.abs(pointer.x - startX);
-            const height = Math.abs(pointer.y - startY);
-            rect.set({
-                width,
-                height,
-                left: Math.min(startX, pointer.x),
-                top: Math.min(startY, pointer.y),
-            });
-            canvas.renderAll();
-        };
-
-        const handleMouseUp = () => {
-            if (!rect || !isDown) return;
-            isDown = false;
-            rect.set({ 
-                selectable: true, 
-                hasControls: true, 
-                hasBorders: true,
-                evented: true,
-            });
-            backRectRef.current = rect;
-            canvas.defaultCursor = 'default';
-            canvas.selection = true;
-            canvas.renderAll();
-            setIsDrawingBack(false);
-            
-            // Save print area using the rectangle's actual position and size
-            // Use left/top/width/height directly to avoid stroke width affecting bounds
-            const rectLeft = rect.left || 0;
-            const rectTop = rect.top || 0;
-            const rectWidth = (rect.width || 0) * (rect.scaleX || 1);
-            const rectHeight = (rect.height || 0) * (rect.scaleY || 1);
-            
-            setFormData(prev => ({
-                ...prev,
-                printAreaBack: JSON.stringify({
-                    x: rectLeft,
-                    y: rectTop,
-                    width: rectWidth,
-                    height: rectHeight,
-                }),
-            }));
-
-            // Add listeners for when rectangle is moved/resized
-            const updatePrintArea = () => {
-                const rectLeft = rect!.left || 0;
-                const rectTop = rect!.top || 0;
-                const rectWidth = (rect!.width || 0) * (rect!.scaleX || 1);
-                const rectHeight = (rect!.height || 0) * (rect!.scaleY || 1);
-                
-                setFormData(prev => ({
-                    ...prev,
-                    printAreaBack: JSON.stringify({
-                        x: rectLeft,
-                        y: rectTop,
-                        width: rectWidth,
-                        height: rectHeight,
-                    }),
-                }));
-            };
-            
-            rect.on('modified', updatePrintArea);
-            rect.on('moving', updatePrintArea);
-            rect.on('scaling', updatePrintArea);
-
-            // Remove event listeners
-            canvas.off('mouse:down', handleMouseDown);
-            canvas.off('mouse:move', handleMouseMove);
-            canvas.off('mouse:up', handleMouseUp);
-        };
-
-        canvas.on('mouse:down', handleMouseDown);
-        canvas.on('mouse:move', handleMouseMove);
-        canvas.on('mouse:up', handleMouseUp);
-    };
 
     // Handle file upload
     const handleFileUpload = async (file: File, type: 'front' | 'back'): Promise<string | null> => {
@@ -896,6 +310,7 @@ export default function ProductConfigManager() {
         }));
     };
 
+
     // Handle save
     const handleSave = async () => {
         try {
@@ -941,6 +356,8 @@ export default function ProductConfigManager() {
                 image: finalImage,
                 backImage: finalBackImage,
                 availableColorIds: selectedColors,
+                printAreaFront: formData.printAreaFront || null,
+                printAreaBack: formData.printAreaBack || null,
             };
 
             const response = await fetch(url, {
@@ -1203,14 +620,6 @@ export default function ProductConfigManager() {
                     handleDragOver={handleDragOver}
                     handleDrop={handleDrop}
                     isUploading={isUploading}
-                    frontCanvasRef={frontCanvasRef}
-                    backCanvasRef={backCanvasRef}
-                    frontRectRef={frontRectRef}
-                    backRectRef={backRectRef}
-                    startDrawingFront={startDrawingFront}
-                    startDrawingBack={startDrawingBack}
-                    isDrawingFront={isDrawingFront}
-                    isDrawingBack={isDrawingBack}
                     showColorPicker={showColorPicker}
                     setShowColorPicker={setShowColorPicker}
                     newColorName={newColorName}
@@ -1253,14 +662,6 @@ function ProductEditModal({
     handleDragOver,
     handleDrop,
     isUploading,
-    frontCanvasRef,
-    backCanvasRef,
-    frontRectRef,
-    backRectRef,
-    startDrawingFront,
-    startDrawingBack,
-    isDrawingFront,
-    isDrawingBack,
     showColorPicker,
     setShowColorPicker,
     newColorName,
@@ -1272,6 +673,156 @@ function ProductEditModal({
     onSave,
     editingId,
 }: any) {
+    const frontCanvasRef = useRef<HTMLCanvasElement>(null);
+    const backCanvasRef = useRef<HTMLCanvasElement>(null);
+    const frontFabricCanvas = useRef<fabric.Canvas | null>(null);
+    const backFabricCanvas = useRef<fabric.Canvas | null>(null);
+
+    // Initialize canvases when images are available
+    useEffect(() => {
+        if (frontImagePreview && frontCanvasRef.current && !frontFabricCanvas.current) {
+            const existingArea = formData.printAreaFront ? JSON.parse(formData.printAreaFront) : null;
+            const canvas = initPrintableAreaCanvas(frontCanvasRef.current, frontImagePreview, 'front', existingArea);
+            frontFabricCanvas.current = canvas || null;
+        }
+    }, [frontImagePreview]);
+
+    useEffect(() => {
+        if (backImagePreview && backCanvasRef.current && !backFabricCanvas.current) {
+            const existingArea = formData.printAreaBack ? JSON.parse(formData.printAreaBack) : null;
+            const canvas = initPrintableAreaCanvas(backCanvasRef.current, backImagePreview, 'back', existingArea);
+            backFabricCanvas.current = canvas || null;
+        }
+    }, [backImagePreview]);
+
+    // Cleanup canvases on unmount
+    useEffect(() => {
+        return () => {
+            if (frontFabricCanvas.current) {
+                frontFabricCanvas.current.dispose();
+                frontFabricCanvas.current = null;
+            }
+            if (backFabricCanvas.current) {
+                backFabricCanvas.current.dispose();
+                backFabricCanvas.current = null;
+            }
+        };
+    }, []);
+
+    const initPrintableAreaCanvas = useCallback((
+        canvasElement: HTMLCanvasElement,
+        imageUrl: string,
+        side: 'front' | 'back',
+        existingArea?: { x: number; y: number; width: number; height: number } | null
+    ) => {
+        if (!canvasElement) return;
+
+        // Dispose existing canvas if any
+        if (side === 'front' && frontFabricCanvas.current) {
+            frontFabricCanvas.current.dispose();
+        } else if (side === 'back' && backFabricCanvas.current) {
+            backFabricCanvas.current.dispose();
+        }
+
+        // Create fabric canvas
+        const canvas = new fabric.Canvas(canvasElement, {
+            width: 400,
+            height: 500,
+            backgroundColor: '#f9fafb',
+        });
+
+        // Load product image as background
+        fabric.FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' }).then((img) => {
+            const scale = Math.min(
+                (canvas.getWidth() * 0.88) / (img.width || 1),
+                (canvas.getHeight() * 0.88) / (img.height || 1)
+            );
+
+            img.set({
+                left: canvas.getWidth() / 2,
+                top: canvas.getHeight() / 2,
+                originX: 'center',
+                originY: 'center',
+                scaleX: scale,
+                scaleY: scale,
+                selectable: false,
+                evented: false,
+            });
+
+            canvas.backgroundImage = img;
+
+            // Create or use existing printable area rectangle
+            let printX: number, printY: number, printW: number, printH: number;
+
+            if (existingArea && existingArea.width && existingArea.height) {
+                // Use existing area
+                printX = existingArea.x;
+                printY = existingArea.y;
+                printW = existingArea.width;
+                printH = existingArea.height;
+            } else {
+                // Create default centered rectangle (80% of image size)
+                const imgWidth = (img.width || 400) * scale;
+                const imgHeight = (img.height || 500) * scale;
+                printW = imgWidth * 0.8;
+                printH = imgHeight * 0.8;
+                printX = (canvas.getWidth() - printW) / 2;
+                printY = (canvas.getHeight() - printH) / 2;
+            }
+
+            // Create printable area rectangle
+            const printRect = new fabric.Rect({
+                left: printX,
+                top: printY,
+                width: printW,
+                height: printH,
+                fill: 'rgba(65, 235, 92, 0.2)',
+                stroke: '#41eb5c',
+                strokeWidth: 3,
+                strokeDashArray: [10, 5],
+                cornerColor: '#41eb5c',
+                cornerSize: 12,
+                transparentCorners: false,
+                cornerStyle: 'circle',
+                borderColor: '#2dd44a',
+                borderScaleFactor: 2,
+                lockRotation: true,
+                hasRotatingPoint: false,
+            });
+
+            canvas.add(printRect);
+            canvas.setActiveObject(printRect);
+
+            // Update formData whenever rectangle is modified
+            const updatePrintArea = () => {
+                const rect = canvas.getActiveObject() as fabric.Rect;
+                if (!rect) return;
+
+                const area = {
+                    x: rect.left || 0,
+                    y: rect.top || 0,
+                    width: (rect.width || 0) * (rect.scaleX || 1),
+                    height: (rect.height || 0) * (rect.scaleY || 1),
+                };
+
+                setFormData((prev: any) => ({
+                    ...prev,
+                    [side === 'front' ? 'printAreaFront' : 'printAreaBack']: JSON.stringify(area)
+                }));
+            };
+
+            canvas.on('object:modified', updatePrintArea);
+            canvas.on('object:scaling', updatePrintArea);
+            canvas.on('object:moving', updatePrintArea);
+
+            // Save initial state
+            updatePrintArea();
+
+            canvas.renderAll();
+        });
+
+        return canvas;
+    }, [setFormData]);
     return (
                 <div style={{
                     position: 'fixed',
@@ -1662,95 +1213,34 @@ function ProductEditModal({
                                     <label style={{ display: 'block', fontWeight: 600, fontSize: '15px', color: '#0d1c23' }}>
                                         Zone Recto (Front)
                                     </label>
-                                    {frontRectRef.current && (
-                                        <span style={{
-                                            fontSize: '12px',
-                                            color: '#41eb5c',
-                                            fontWeight: 600,
-                                            padding: '4px 8px',
-                                            background: '#f0fdf4',
-                                            borderRadius: '6px',
-                                        }}>
-                                            ✓ Zone définie
-                                        </span>
-                                    )}
                                 </div>
                                 {frontImagePreview ? (
-                                    <>
-                                        <button
-                                            onClick={startDrawingFront}
-                                            disabled={isDrawingFront}
-                                            style={{
-                                                padding: '10px 20px',
-                                                marginBottom: '16px',
-                                                width: '100%',
-                                                background: isDrawingFront 
-                                                    ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
-                                                    : 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '10px',
-                                                cursor: isDrawingFront ? 'not-allowed' : 'pointer',
-                                                fontWeight: 600,
-                                                fontSize: '14px',
-                                                boxShadow: isDrawingFront ? 'none' : '0 4px 12px rgba(65, 235, 92, 0.3)',
-                                                transition: 'all 0.2s',
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!isDrawingFront) {
-                                                    e.currentTarget.style.transform = 'translateY(-1px)';
-                                                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(65, 235, 92, 0.4)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isDrawingFront) {
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(65, 235, 92, 0.3)';
-                                                }
-                                            }}
-                                        >
-                                            {isDrawingFront ? (
-                                                <>
-                                                    <span style={{ display: 'inline-block', marginRight: '8px' }}>✏️</span>
-                                                    Dessinez un rectangle sur l'image...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span style={{ display: 'inline-block', marginRight: '8px' }}>📐</span>
-                                                    {frontRectRef.current ? 'Redessiner la Zone' : 'Dessiner la Zone'}
-                                                </>
-                                            )}
-                                        </button>
-                                        {isDrawingFront && (
-                                            <div style={{
-                                                padding: '12px',
-                                                marginBottom: '12px',
-                                                background: '#fef3c7',
-                                                borderRadius: '8px',
-                                                border: '1px solid #fbbf24',
-                                            }}>
-                                                <p style={{ margin: 0, fontSize: '13px', color: '#92400e', fontWeight: 500 }}>
-                                                    💡 Cliquez et glissez pour dessiner le rectangle de la zone imprimable
-                                                </p>
-                                            </div>
-                                        )}
+                                    <div style={{
+                                        width: '100%',
+                                        aspectRatio: '4/5',
+                                        borderRadius: '12px',
+                                        border: '2px solid #e5e7eb',
+                                        overflow: 'hidden',
+                                        position: 'relative',
+                                        background: '#f9fafb',
+                                    }}>
+                                        <canvas ref={frontCanvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
                                         <div style={{
-                                            width: '100%',
-                                            aspectRatio: '4/5',
-                                            background: '#f9fafb',
-                                            borderRadius: '12px',
-                                            border: '2px solid #e5e7eb',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            overflow: 'hidden',
-                                            position: 'relative',
+                                            position: 'absolute',
+                                            bottom: '12px',
+                                            left: '12px',
+                                            right: '12px',
+                                            padding: '8px 12px',
+                                            background: 'rgba(0, 0, 0, 0.7)',
+                                            color: 'white',
+                                            borderRadius: '8px',
+                                            fontSize: '11px',
+                                            textAlign: 'center',
+                                            pointerEvents: 'none',
                                         }}>
-                                            <canvas 
-                                                ref={frontCanvasRef}
-                                            />
+                                            <strong>💡 Tip:</strong> Glissez et redimensionnez la zone verte pour définir l'aire imprimable
                                         </div>
-                                    </>
+                                    </div>
                                 ) : (
                                     <div style={{
                                         width: '100%',
@@ -1786,95 +1276,34 @@ function ProductEditModal({
                                     <label style={{ display: 'block', fontWeight: 600, fontSize: '15px', color: '#0d1c23' }}>
                                         Zone Verso (Back)
                                     </label>
-                                    {backRectRef.current && (
-                                        <span style={{
-                                            fontSize: '12px',
-                                            color: '#41eb5c',
-                                            fontWeight: 600,
-                                            padding: '4px 8px',
-                                            background: '#f0fdf4',
-                                            borderRadius: '6px',
-                                        }}>
-                                            ✓ Zone définie
-                                        </span>
-                                    )}
                                 </div>
                                 {backImagePreview ? (
-                                    <>
-                                        <button
-                                            onClick={startDrawingBack}
-                                            disabled={isDrawingBack}
-                                            style={{
-                                                padding: '10px 20px',
-                                                marginBottom: '16px',
-                                                width: '100%',
-                                                background: isDrawingBack 
-                                                    ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' 
-                                                    : 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '10px',
-                                                cursor: isDrawingBack ? 'not-allowed' : 'pointer',
-                                                fontWeight: 600,
-                                                fontSize: '14px',
-                                                boxShadow: isDrawingBack ? 'none' : '0 4px 12px rgba(65, 235, 92, 0.3)',
-                                                transition: 'all 0.2s',
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!isDrawingBack) {
-                                                    e.currentTarget.style.transform = 'translateY(-1px)';
-                                                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(65, 235, 92, 0.4)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isDrawingBack) {
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(65, 235, 92, 0.3)';
-                                                }
-                                            }}
-                                        >
-                                            {isDrawingBack ? (
-                                                <>
-                                                    <span style={{ display: 'inline-block', marginRight: '8px' }}>✏️</span>
-                                                    Dessinez un rectangle sur l'image...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span style={{ display: 'inline-block', marginRight: '8px' }}>📐</span>
-                                                    {backRectRef.current ? 'Redessiner la Zone' : 'Dessiner la Zone'}
-                                                </>
-                                            )}
-                                        </button>
-                                        {isDrawingBack && (
-                                            <div style={{
-                                                padding: '12px',
-                                                marginBottom: '12px',
-                                                background: '#fef3c7',
-                                                borderRadius: '8px',
-                                                border: '1px solid #fbbf24',
-                                            }}>
-                                                <p style={{ margin: 0, fontSize: '13px', color: '#92400e', fontWeight: 500 }}>
-                                                    💡 Cliquez et glissez pour dessiner le rectangle de la zone imprimable
-                                                </p>
-                                            </div>
-                                        )}
+                                    <div style={{
+                                        width: '100%',
+                                        aspectRatio: '4/5',
+                                        borderRadius: '12px',
+                                        border: '2px solid #e5e7eb',
+                                        overflow: 'hidden',
+                                        position: 'relative',
+                                        background: '#f9fafb',
+                                    }}>
+                                        <canvas ref={backCanvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
                                         <div style={{
-                                            width: '100%',
-                                            aspectRatio: '4/5',
-                                            background: '#f9fafb',
-                                            borderRadius: '12px',
-                                            border: '2px solid #e5e7eb',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            overflow: 'hidden',
-                                            position: 'relative',
+                                            position: 'absolute',
+                                            bottom: '12px',
+                                            left: '12px',
+                                            right: '12px',
+                                            padding: '8px 12px',
+                                            background: 'rgba(0, 0, 0, 0.7)',
+                                            color: 'white',
+                                            borderRadius: '8px',
+                                            fontSize: '11px',
+                                            textAlign: 'center',
+                                            pointerEvents: 'none',
                                         }}>
-                                            <canvas 
-                                                ref={backCanvasRef}
-                                            />
+                                            <strong>💡 Tip:</strong> Glissez et redimensionnez la zone verte pour définir l'aire imprimable
                                         </div>
-                                    </>
+                                    </div>
                                 ) : (
                                     <div style={{
                                         width: '100%',
@@ -1970,7 +1399,7 @@ function ProductEditModal({
                                     background: '#f9fafb',
                                     borderRadius: '12px',
                                 }}>
-                                    {colors.map((color) => {
+                                    {colors.map((color: ProductColor) => {
                                     const isSelected = selectedColors.includes(color.id);
                                     return (
                                         <button
@@ -2022,7 +1451,7 @@ function ProductEditModal({
                                     );
                                     })}
                                 </div>
-                                {colors.filter(c => !c.isActive).length > 0 && (
+                                {colors.filter((c: ProductColor) => !c.isActive).length > 0 && (
                                     <div style={{
                                         marginTop: '12px',
                                         padding: '12px',
@@ -2031,7 +1460,7 @@ function ProductEditModal({
                                         border: '1px solid #fbbf24',
                                     }}>
                                         <p style={{ margin: 0, fontSize: '12px', color: '#92400e', fontWeight: 600 }}>
-                                            💡 {colors.filter(c => !c.isActive).length} couleur(s) inactive(s) - elles n'apparaîtront pas dans la sélection
+                                            💡 {colors.filter((c: ProductColor) => !c.isActive).length} couleur(s) inactive(s) - elles n'apparaîtront pas dans la sélection
                                         </p>
                                     </div>
                                 )}
@@ -2147,7 +1576,7 @@ function ProductEditModal({
                                     <div>
                                         <SketchPicker
                                             color={newColorHex}
-                                            onChange={(color: ColorResult) => setNewColorHex(color.hex)}
+                                            onChange={(color: any) => setNewColorHex(color.hex)}
                                             presetColors={['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A']}
                                         />
                                     </div>
