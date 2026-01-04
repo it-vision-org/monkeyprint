@@ -46,6 +46,8 @@ type ThemeStorePageProps = {
         backgroundColor?: string | null;
         textColor?: string | null;
         headingColor?: string | null;
+        headerBackgroundColor?: string | null;
+        headerTextColor?: string | null;
         fontFamily?: string | null;
         headingFontWeight?: string | null;
         bodyFontWeight?: string | null;
@@ -70,8 +72,45 @@ export default function ThemeStorePage({
         ? cartItems.filter(item => item.storeSlug === storeSlug).reduce((sum, item) => sum + item.quantity, 0)
         : cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+    // Build CSS variables for dynamic colors
+    const cssVariables: React.CSSProperties = {};
+    if (customization) {
+        if (customization.primaryColor) cssVariables['--theme-primary'] = customization.primaryColor;
+        if (customization.secondaryColor) cssVariables['--theme-secondary'] = customization.secondaryColor;
+        if (customization.accentColor) cssVariables['--theme-accent'] = customization.accentColor;
+        if (customization.backgroundColor) cssVariables['--theme-bg'] = customization.backgroundColor;
+        if (customization.textColor) cssVariables['--theme-text'] = customization.textColor;
+        if (customization.headingColor) cssVariables['--theme-heading'] = customization.headingColor;
+        if (customization.headerBackgroundColor) cssVariables['--theme-header-bg'] = customization.headerBackgroundColor;
+        if (customization.headerTextColor) cssVariables['--theme-header-text'] = customization.headerTextColor;
+    }
+
     const renderHero = () => {
         if (theme.id === 'theme-1') {
+            // Check if background variant is selected
+            if (heroContent.variant === 'background') {
+                return (
+                    <div className={theme.heroClassName}>
+                        {heroContent.backgroundImage && (
+                            <Image 
+                                src={heroContent.backgroundImage} 
+                                alt="Background" 
+                                width={1200} 
+                                height={600} 
+                                quality={95}
+                                sizes="100vw"
+                                className="theme-1-hero-bg-image" 
+                            />
+                        )}
+                        <div className="theme-1-hero-content">
+                            <h1 className="theme-1-hero-title">{heroContent.title}</h1>
+                            <p className="theme-1-hero-text">{heroContent.subtitle}</p>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Default simple variant
             return (
                 <div className={theme.heroClassName}>
                     {heroContent.image && (
@@ -80,6 +119,7 @@ export default function ThemeStorePage({
                             alt="Hero" 
                             width={heroContent.imageWidth || 280} 
                             height={heroContent.imageHeight || 280} 
+                            quality={95}
                             className="theme-1-hero-image" 
                         />
                     )}
@@ -92,17 +132,43 @@ export default function ThemeStorePage({
         }
 
         if (theme.id === 'theme-2') {
+            // Check if background variant is selected
+            if (heroContent.variant === 'background') {
+                return (
+                    <div className={theme.heroClassName}>
+                        {heroContent.backgroundImage && (
+                            <Image 
+                                src={heroContent.backgroundImage} 
+                                alt="Background" 
+                                width={1200} 
+                                height={600} 
+                                quality={95}
+                                sizes="100vw"
+                                className="theme-2-hero-bg-image" 
+                            />
+                        )}
+                        <div className="theme-2-hero-content">
+                            <h1 className="theme-2-hero-title">{heroContent.title}</h1>
+                            <p className="theme-2-hero-text">{heroContent.subtitle}</p>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Default circles variant
             return (
                 <div className={theme.heroClassName}>
-                    {heroContent.circles && (
+                    {heroContent.circles && heroContent.circles.length > 0 && (
                         <div className="theme-2-hero-images-left">
                             {heroContent.circles.map((circle, idx) => (
                                 <div key={idx} className={circle.className}>
                                     <Image 
                                         src={circle.src} 
                                         alt={`Child ${idx + 1}`} 
-                                        width={100} 
-                                        height={100} 
+                                        width={220} 
+                                        height={220} 
+                                        quality={95}
+                                        sizes="110px"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                                     />
                                 </div>
@@ -116,8 +182,10 @@ export default function ThemeStorePage({
                             <Image 
                                 src={heroContent.image} 
                                 alt="Teddy" 
-                                width={60} 
-                                height={60} 
+                                width={120} 
+                                height={120} 
+                                quality={95}
+                                sizes="60px"
                                 className="theme-2-hero-teddy" 
                                 style={{ objectFit: 'contain' }} 
                             />
@@ -155,8 +223,11 @@ export default function ThemeStorePage({
     const bestSellerSection = sections.find(s => s.type === 'best-seller');
     const productsSection = sections.find(s => s.type === 'products');
 
+    // Use headerTextColor for cart icon if available, otherwise fall back to theme's cartStrokeColor
+    const cartIconColor = customization?.headerTextColor || theme.cartStrokeColor || '#1f2937';
+
     return (
-        <div className={theme.pageClassName}>
+        <div className={theme.pageClassName} style={cssVariables}>
             <StoreHeader
                 cartCount={cartCount}
                 cartHref={`${theme.baseRoute}/cart`}
@@ -165,7 +236,7 @@ export default function ThemeStorePage({
                 containerClassName={theme.containerClassName}
                 cartButtonClassName={theme.cartButtonClassName}
                 cartBadgeClassName={theme.cartBadgeClassName}
-                cartStrokeColor={theme.cartStrokeColor}
+                cartStrokeColor={cartIconColor}
             />
 
             {renderHero()}

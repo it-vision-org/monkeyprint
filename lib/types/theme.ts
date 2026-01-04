@@ -59,6 +59,8 @@ export interface ThemeCustomization {
   backgroundColor?: string;
   textColor?: string;
   headingColor?: string;
+  headerBackgroundColor?: string;
+  headerTextColor?: string;
   
   // Hero Section
   heroTitle?: string;
@@ -103,10 +105,16 @@ export interface ThemeCustomizationDefaults {
 // Default customization values for each theme
 export const themeDefaults: ThemeCustomizationDefaults = {
   'theme-1': {
-    primaryColor: '#3b82f6',
-    secondaryColor: '#8b5cf6',
-    accentColor: '#ec4899',
+    primaryColor: '#0ea5e9', // Sky Blue
+    secondaryColor: '#3b82f6', // Blue
+    accentColor: '#6366f1', // Indigo
+    backgroundColor: '#ffffff',
+    textColor: '#1e293b',
+    headingColor: '#0f172a',
+    headerBackgroundColor: 'rgba(255, 255, 255, 0.98)',
+    headerTextColor: '#1f2937',
     heroVariant: 'simple',
+    heroImageUrl: '/hero1.png',
     bestSellerTitle: 'Best Seller',
     productsTitle: 'Products',
     categoriesTitle: 'Categories',
@@ -114,14 +122,20 @@ export const themeDefaults: ThemeCustomizationDefaults = {
     productCardStyle: 'default',
     gridColumns: 2,
     fontFamily: 'system',
-    headingFontWeight: '700',
+    headingFontWeight: '800',
     bodyFontWeight: '400',
   },
   'theme-2': {
-    primaryColor: '#f59e0b',
-    secondaryColor: '#ef4444',
-    accentColor: '#8b5cf6',
+    primaryColor: '#fb923c', // Coral
+    secondaryColor: '#f472b6', // Magenta
+    accentColor: '#a855f7', // Purple
+    backgroundColor: '#ffffff',
+    textColor: '#1f2937',
+    headingColor: '#111827',
+    headerBackgroundColor: 'rgba(255, 255, 255, 0.98)',
+    headerTextColor: '#1f2937',
     heroVariant: 'circles',
+    heroImageUrl: '/hero2.png',
     bestSellerTitle: 'Best Seller',
     productsTitle: 'Products',
     categoriesTitle: 'Categories',
@@ -129,17 +143,20 @@ export const themeDefaults: ThemeCustomizationDefaults = {
     productCardStyle: 'gradient',
     gridColumns: 2,
     fontFamily: 'system',
-    headingFontWeight: '800',
+    headingFontWeight: '900',
     bodyFontWeight: '500',
   },
   'theme-3': {
-    primaryColor: '#ffffff',
-    secondaryColor: '#a855f7',
-    accentColor: '#ec4899',
-    backgroundColor: '#0f172a',
-    textColor: '#f1f5f9',
+    primaryColor: '#8b5cf6', // Deep Purple
+    secondaryColor: '#ec4899', // Pink
+    accentColor: '#f472b6', // Rose
+    backgroundColor: '#0f0718', // Very Dark Purple
+    textColor: '#e2e8f0',
     headingColor: '#ffffff',
+    headerBackgroundColor: 'rgba(15, 7, 24, 0.98)',
+    headerTextColor: '#ffffff',
     heroVariant: 'background',
+    heroImageUrl: '/hero3.png',
     bestSellerTitle: 'Best Seller',
     productsTitle: 'Products',
     categoriesTitle: 'Categories',
@@ -147,7 +164,7 @@ export const themeDefaults: ThemeCustomizationDefaults = {
     productCardStyle: 'shadowed',
     gridColumns: 2,
     fontFamily: 'system',
-    headingFontWeight: '700',
+    headingFontWeight: '800',
     bodyFontWeight: '400',
   },
 };

@@ -64,7 +64,7 @@ export default function ThemeCustomizationEditor() {
 
   const saveCustomization = async (partial?: Partial<ThemeCustomizationData>) => {
     // Validate all color fields before saving
-    const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor'];
+    const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor'];
     const errors: Record<string, string> = {};
     
     colorFields.forEach(field => {
@@ -590,6 +590,8 @@ function ColorsTab({
     { key: 'backgroundColor', label: 'Couleur de fond', default: themeDefaultsForCurrentTheme.backgroundColor || '#ffffff' },
     { key: 'textColor', label: 'Couleur du texte', default: themeDefaultsForCurrentTheme.textColor || '#1f2937' },
     { key: 'headingColor', label: 'Couleur des titres', default: themeDefaultsForCurrentTheme.headingColor || '#111827' },
+    { key: 'headerBackgroundColor', label: 'Couleur de fond du header', default: themeDefaultsForCurrentTheme.headerBackgroundColor || (currentTheme === 'theme-3' ? 'rgba(15, 7, 24, 0.98)' : 'rgba(255, 255, 255, 0.98)') },
+    { key: 'headerTextColor', label: 'Couleur du texte du header', default: themeDefaultsForCurrentTheme.headerTextColor || (currentTheme === 'theme-3' ? '#ffffff' : '#1f2937') },
   ];
 
   return (
@@ -833,7 +835,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       ),
       ref: fileInputRefs.woman,
       currentImage: customization.categoryWomanImageUrl,
-      defaultImage: '/Hoodie.png'
+      defaultImage: '/woman.png'
     },
     {
       key: 'categoryManImageUrl' as const,
@@ -846,7 +848,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       ),
       ref: fileInputRefs.man,
       currentImage: customization.categoryManImageUrl,
-      defaultImage: '/Hoodie.png'
+      defaultImage: '/man.png'
     },
     {
       key: 'categoryKidsImageUrl' as const,
@@ -859,7 +861,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       ),
       ref: fileInputRefs.kids,
       currentImage: customization.categoryKidsImageUrl,
-      defaultImage: '/Hoodie.png'
+      defaultImage: '/kids.png'
     },
   ];
 
@@ -962,6 +964,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                       src={category.currentImage}
                       alt={category.label}
                       fill
+                      quality={95}
                       style={{ objectFit: 'cover' }}
                     />
                     <div 

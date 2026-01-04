@@ -70,9 +70,16 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
     // Get customization or use defaults
     const customization = store?.themeCustomization;
     
-    // Resolve hero image URLs - prioritize customization, then store logo, then undefined (no default)
+    // Resolve hero image URLs - prioritize customization, then store logo, then default hero images
     let customHeroImage: string | undefined;
     let customHeroBackground: string | undefined;
+    
+    // Default hero images for each theme
+    const defaultHeroImages: Record<string, string> = {
+        'theme-1': '/hero1.png',
+        'theme-2': '/hero2.png',
+        'theme-3': '/hero3.png'
+    };
     
     // First check customization
     if (customization?.heroImageUrl) {
@@ -85,6 +92,9 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
         customHeroImage = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
             ? store.logoUrl
             : await getR2Url(store.logoUrl);
+    } else {
+        // Use default hero image for the theme
+        customHeroImage = defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
     }
     
     if (customization?.heroBackgroundUrl) {
@@ -96,6 +106,9 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
         customHeroBackground = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
             ? store.logoUrl
             : await getR2Url(store.logoUrl);
+    } else {
+        // Use default hero image for the theme
+        customHeroBackground = defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
     }
 
     // Create hero content from store data based on theme
@@ -123,16 +136,18 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
             variant: 'simple'
         };
     } else if (heroVariant === 'circles') {
+        // Ensure we always have a hero image for circles variant
+        const heroImageForCircles = customHeroImage || defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
         heroContent = {
             title: customization?.heroTitle || store?.name || 'Boutique',
             subtitle: customization?.heroSubtitle || `Explore the finest clothes for kids, chez ${store?.name || 'notre boutique'}`,
             variant: 'circles',
-            circles: customHeroImage ? [
-                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
-                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-2" },
-                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-3" }
+            circles: heroImageForCircles ? [
+                { src: heroImageForCircles, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
+                { src: heroImageForCircles, className: "theme-2-hero-image-circle theme-2-hero-img-2" },
+                { src: heroImageForCircles, className: "theme-2-hero-image-circle theme-2-hero-img-3" }
             ] : undefined,
-            image: customHeroImage
+            image: heroImageForCircles
         };
     } else {
         // theme-3 background variant
@@ -145,9 +160,9 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
     }
 
     // Get category images from customization or use defaults
-    let categoryWomanImage = "/Hoodie.png";
-    let categoryManImage = "/Hoodie.png";
-    let categoryKidsImage = "/Hoodie.png";
+    let categoryWomanImage = "/woman.png";
+    let categoryManImage = "/man.png";
+    let categoryKidsImage = "/kids.png";
     
     if (customization?.categoryWomanImageUrl) {
         // If it's already a full URL, use it directly; otherwise resolve it
@@ -167,9 +182,9 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
     }
     
     const categories = [
-        { image: categoryWomanImage, alt: "Woman", label: "Woman", imageWidth: 120, imageHeight: 160 },
-        { image: categoryManImage, alt: "Man", label: "Man", imageWidth: 120, imageHeight: 160 },
-        { image: categoryKidsImage, alt: "Kids", label: "Kids", imageWidth: 120, imageHeight: 160 }
+        { image: categoryWomanImage, alt: "Woman", label: "Woman", imageWidth: 400, imageHeight: 533 },
+        { image: categoryManImage, alt: "Man", label: "Man", imageWidth: 400, imageHeight: 533 },
+        { image: categoryKidsImage, alt: "Kids", label: "Kids", imageWidth: 400, imageHeight: 533 }
     ];
 
     // Create sections with real products
@@ -197,6 +212,19 @@ export default async function ThemePage({ params }: { params: Promise<{ theme: s
             heroContent={heroContent}
             categories={categories}
             sections={sections}
+            customization={customization ? {
+                primaryColor: customization.primaryColor,
+                secondaryColor: customization.secondaryColor,
+                accentColor: customization.accentColor,
+                backgroundColor: customization.backgroundColor,
+                textColor: customization.textColor,
+                headingColor: customization.headingColor,
+                headerBackgroundColor: customization.headerBackgroundColor,
+                headerTextColor: customization.headerTextColor,
+                fontFamily: customization.fontFamily,
+                headingFontWeight: customization.headingFontWeight,
+                bodyFontWeight: customization.bodyFontWeight,
+            } : undefined}
         />
     );
 }

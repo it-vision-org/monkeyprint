@@ -34,6 +34,8 @@ export default function CategoryCard({
                 alt={alt} 
                 width={imageWidth} 
                 height={imageHeight} 
+                quality={95}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 className={imageClassName}
             />

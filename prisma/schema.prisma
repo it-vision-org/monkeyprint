@@ -265,7 +265,9 @@ model StoreThemeCustomization {
   accentColor        String?  @default("#ec4899")
   backgroundColor    String?  
   textColor          String?  
-  headingColor       String?  
+  headingColor       String?
+  headerBackgroundColor String?
+  headerTextColor    String?  
   
   // Hero Section
   heroTitle          String?  @db.Text

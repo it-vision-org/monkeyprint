@@ -43,15 +43,15 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
         heroContent: {
             title: "Boutique",
             subtitle: "Explore the finest clothes chez notre boutique",
-            image: "/T-Shirt.png",
+            image: "/hero1.png",
             imageWidth: 280,
             imageHeight: 280,
             variant: 'simple'
         },
         categories: [
-            { image: "/Hoodie.png", alt: "Woman", label: "Woman", imageWidth: 120, imageHeight: 160 },
-            { image: "/Hoodie.png", alt: "Man", label: "Man", imageWidth: 120, imageHeight: 160 },
-            { image: "/Hoodie.png", alt: "Kids", label: "Kids", imageWidth: 120, imageHeight: 160 }
+            { image: "/woman.png", alt: "Woman", label: "Woman", imageWidth: 400, imageHeight: 533 },
+            { image: "/man.png", alt: "Man", label: "Man", imageWidth: 400, imageHeight: 533 },
+            { image: "/kids.png", alt: "Kids", label: "Kids", imageWidth: 400, imageHeight: 533 }
         ],
         sections: [
             { title: "Best Seller", type: 'best-seller', products: Array(3).fill({
@@ -80,11 +80,11 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             subtitle: "Explore the finest clothes for kids, chez notre boutique",
             variant: 'circles',
             circles: [
-                { src: "/T-Shirt-Design.png", className: "theme-2-hero-image-circle theme-2-hero-img-1" },
-                { src: "/T-Shirt-Design.png", className: "theme-2-hero-image-circle theme-2-hero-img-2" },
-                { src: "/T-Shirt-Design.png", className: "theme-2-hero-image-circle theme-2-hero-img-3" }
+                { src: "/hero2.png", className: "theme-2-hero-image-circle theme-2-hero-img-1" },
+                { src: "/hero2.png", className: "theme-2-hero-image-circle theme-2-hero-img-2" },
+                { src: "/hero2.png", className: "theme-2-hero-image-circle theme-2-hero-img-3" }
             ],
-            image: "/T-Shirt-Design.png"
+            image: "/hero2.png"
         },
         categories: [
             { image: "/T-Shirt-Design.png", alt: "Girl", label: "Girl", imageWidth: 200, imageHeight: 280, className: "theme-2-cat-yellow" },
@@ -116,7 +116,7 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             title: "Boutique",
             subtitle: "Explore the finest clothes\nchez notre boutique",
             variant: 'background',
-            backgroundImage: "/T-Shirt-Design.png"
+            backgroundImage: "/hero3.png"
         },
         categories: [
             { image: "/T-Shirt-Design.png", alt: "Woman", label: "Woman", imageWidth: 140, imageHeight: 220 },
