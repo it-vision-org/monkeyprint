@@ -287,50 +287,168 @@ export default function ThemeCustomizationEditor() {
   }
 
   return (
-    <div className="compte-main">
-      <div className="compte-container">
-        <div className="compte-title-row">
-          <h1 className="compte-page-title">Personnalisation du thème</h1>
-        </div>
+    <>
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+          }
+        }
+        
+        @media (max-width: 1024px) {
+          .theme-layout {
+            grid-template-columns: 1fr !important;
+          }
+          
+          .theme-sidebar {
+            position: static !important;
+            max-height: none !important;
+          }
+          
+          .theme-nav {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+            gap: 8px !important;
+          }
+          
+          .theme-nav-item {
+            flex-direction: column !important;
+            text-align: center !important;
+            padding: 12px 8px !important;
+          }
+        }
+      `}</style>
+      <div className="compte-main">
+        <div className="compte-container">
+          <div className="compte-title-row">
+            <h1 className="compte-page-title">Personnalisation du thème</h1>
+          </div>
 
-        {/* Tabs */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '8px', 
-          marginBottom: '24px',
-          overflowX: 'auto',
-          paddingBottom: '8px',
-          borderBottom: '2px solid #e5e7eb'
-        }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 16px',
-                border: 'none',
-                background: activeTab === tab.id ? '#0d9488' : 'transparent',
-                color: activeTab === tab.id ? 'white' : '#6b7280',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: activeTab === tab.id ? 600 : 500,
-                whiteSpace: 'nowrap',
-                transition: 'all 0.2s'
-              }}
+          {/* Modern Sidebar Layout */}
+          <div 
+            className="theme-layout"
+            style={{ 
+              display: 'grid',
+              gridTemplateColumns: '280px 1fr',
+              gap: '32px',
+              marginTop: '32px',
+              alignItems: 'flex-start'
+            }}
+          >
+          {/* Vertical Sidebar Menu */}
+          <aside 
+            className="theme-sidebar"
+            style={{
+              position: 'sticky',
+              top: '24px',
+              background: 'white',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '12px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto'
+            }}
+          >
+            <nav 
+              className="theme-nav"
+              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
             >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                
+                return (
+                  <div key={tab.id} style={{ position: 'relative' }}>
+                    <button
+                      type="button"
+                      className="theme-nav-item"
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '14px 16px',
+                        border: 'none',
+                        background: isActive 
+                          ? 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)' 
+                          : 'transparent',
+                        color: isActive ? 'white' : '#4b5563',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: isActive ? 600 : 500,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        zIndex: 2,
+                        textAlign: 'left',
+                        boxShadow: isActive 
+                          ? '0 4px 12px rgba(13, 148, 136, 0.25)' 
+                          : 'none',
+                        transform: isActive ? 'translateX(4px)' : 'translateX(0)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.background = '#f3f4f6';
+                          e.currentTarget.style.color = '#111827';
+                          e.currentTarget.style.transform = 'translateX(2px)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.background = 'transparent';
+                          e.currentTarget.style.color = '#4b5563';
+                          e.currentTarget.style.transform = 'translateX(0)';
+                        }
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '20px',
+                        height: '20px',
+                        flexShrink: 0,
+                        opacity: isActive ? 1 : 0.7,
+                        transition: 'opacity 0.2s'
+                      }}>
+                        {tab.icon}
+                      </div>
+                      <span style={{ flex: 1 }}>{tab.label}</span>
+                      {isActive && (
+                        <div style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: 'white',
+                          boxShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
+                          animation: 'pulse 2s infinite'
+                        }} />
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </nav>
+            
+            {/* Decorative gradient at bottom */}
+            <div style={{
+              height: '20px',
+              background: 'linear-gradient(to bottom, transparent, rgba(243, 244, 246, 0.8))',
+              marginTop: '12px',
+              borderRadius: '0 0 16px 16px',
+              pointerEvents: 'none'
+            }} />
+          </aside>
 
-        {/* Tab Content */}
-        <div className="compte-form-section">
+          {/* Tab Content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="compte-form-section">
           {activeTab === 'overview' && (
             <OverviewTab 
               customization={customization} 
@@ -382,36 +500,40 @@ export default function ThemeCustomizationEditor() {
               updateField={updateField}
             />
           )}
-        </div>
+            </div>
 
-        <button
-          type="button"
-          onClick={() => saveCustomization()}
-          disabled={isSaving || hasValidationErrors()}
-          className="compte-submit-btn"
-          style={{ 
-            marginTop: '24px',
-            opacity: hasValidationErrors() ? 0.6 : 1,
-            cursor: hasValidationErrors() ? 'not-allowed' : 'pointer'
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span>{isSaving ? 'Enregistrement...' : 'Enregistrer toutes les modifications'}</span>
-        </button>
-        {hasValidationErrors() && (
-          <p style={{ 
-            marginTop: '12px', 
-            fontSize: '14px', 
-            color: '#ef4444',
-            textAlign: 'center'
-          }}>
-            Veuillez corriger les erreurs de validation avant d'enregistrer
-          </p>
-        )}
+            <button
+              type="button"
+              onClick={() => saveCustomization()}
+              disabled={isSaving || hasValidationErrors()}
+              className="compte-submit-btn"
+              style={{ 
+                marginTop: '32px',
+                opacity: hasValidationErrors() ? 0.6 : 1,
+                cursor: hasValidationErrors() ? 'not-allowed' : 'pointer',
+                width: '100%'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span>{isSaving ? 'Enregistrement...' : 'Enregistrer toutes les modifications'}</span>
+            </button>
+            {hasValidationErrors() && (
+              <p style={{ 
+                marginTop: '12px', 
+                fontSize: '14px', 
+                color: '#ef4444',
+                textAlign: 'center'
+              }}>
+                Veuillez corriger les erreurs de validation avant d'enregistrer
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
+    </>
   );
 }
 
