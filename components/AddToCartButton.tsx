@@ -26,7 +26,7 @@ export default function AddToCartButton({ product, frontUrl, storeName, storeSlu
 
     const handleBuyNow = () => {
         handleAddToCart();
-        router.push('/checkout');
+        router.push(`/shop/${storeSlug}/checkout`);
     };
 
     return (

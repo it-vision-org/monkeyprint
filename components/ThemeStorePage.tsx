@@ -10,6 +10,7 @@ import CategoryCard from '@/components/CategoryCard';
 import SectionTitle from '@/components/SectionTitle';
 import type { Product } from '@/components/types';
 import type { ThemeConfig } from './themeConfig';
+import { useCart } from '@/components/CartContext';
 
 type ThemeStorePageProps = {
     theme: ThemeConfig;
@@ -38,6 +39,18 @@ type ThemeStorePageProps = {
         products?: Product[];
         showViewAll?: boolean;
     }>;
+    customization?: {
+        primaryColor?: string | null;
+        secondaryColor?: string | null;
+        accentColor?: string | null;
+        backgroundColor?: string | null;
+        textColor?: string | null;
+        headingColor?: string | null;
+        fontFamily?: string | null;
+        headingFontWeight?: string | null;
+        bodyFontWeight?: string | null;
+    };
+    storeSlug?: string; // Optional store slug to filter cart items
 };
 
 export default function ThemeStorePage({
@@ -45,22 +58,31 @@ export default function ThemeStorePage({
     products,
     heroContent,
     categories,
-    sections = []
+    sections = [],
+    customization,
+    storeSlug
 }: ThemeStorePageProps) {
     const router = useRouter();
-    const [cartCount] = useState(1);
+    const { items: cartItems } = useCart();
+    
+    // Calculate cart count - filter by store if storeSlug provided, otherwise show all
+    const cartCount = storeSlug
+        ? cartItems.filter(item => item.storeSlug === storeSlug).reduce((sum, item) => sum + item.quantity, 0)
+        : cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const renderHero = () => {
         if (theme.id === 'theme-1') {
             return (
                 <div className={theme.heroClassName}>
-                    <Image 
-                        src={heroContent.image || "/T-Shirt.png"} 
-                        alt="Shirt" 
-                        width={heroContent.imageWidth || 280} 
-                        height={heroContent.imageHeight || 280} 
-                        className="theme-1-hero-image" 
-                    />
+                    {heroContent.image && (
+                        <Image 
+                            src={heroContent.image} 
+                            alt="Hero" 
+                            width={heroContent.imageWidth || 280} 
+                            height={heroContent.imageHeight || 280} 
+                            className="theme-1-hero-image" 
+                        />
+                    )}
                     <div className="theme-1-hero-content">
                         <h1 className="theme-1-hero-title">{heroContent.title}</h1>
                         <p className="theme-1-hero-text">{heroContent.subtitle}</p>

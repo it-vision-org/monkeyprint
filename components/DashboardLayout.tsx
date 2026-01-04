@@ -15,6 +15,7 @@ function getSectionLabel(pathname: string) {
   if (pathname.startsWith("/dashboard/commandes")) return "COMMANDES";
   if (pathname.startsWith("/dashboard/portefeuille")) return "PORTEFEUILLE";
   if (pathname.startsWith("/dashboard/support")) return "SUPPORT";
+  if (pathname.startsWith("/dashboard/theme")) return "THÈME";
   if (pathname.startsWith("/dashboard/compte")) return "COMPTE";
   return "DASHBOARD";
 }
@@ -94,7 +95,8 @@ export default function DashboardLayout({
         if (pathname.startsWith("/dashboard/commandes")) return 2;
         if (isActivePath(pathname, "/dashboard/portefeuille")) return 3;
         if (isActivePath(pathname, "/dashboard/support")) return 4;
-        if (isActivePath(pathname, "/dashboard/compte")) return 5;
+        if (isActivePath(pathname, "/dashboard/theme")) return 5;
+        if (isActivePath(pathname, "/dashboard/compte")) return 6;
         return -1;
       })();
 
@@ -238,9 +240,16 @@ export default function DashboardLayout({
                 SUPPORT
               </Link>
               <Link
+                href="/dashboard/theme"
+                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/theme") ? "active" : ""}`}
+                ref={(el) => { navItemRefs.current[5] = el; }}
+              >
+                THÈME
+              </Link>
+              <Link
                 href="/dashboard/compte"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
-                ref={(el) => { navItemRefs.current[5] = el; }}
+                ref={(el) => { navItemRefs.current[6] = el; }}
               >
                 COMPTE
               </Link>

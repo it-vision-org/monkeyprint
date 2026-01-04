@@ -2,17 +2,23 @@
 
 import { useCart } from "@/components/CartContext";
 import { useState } from "react";
-import { placeOrder } from "./actions";
+import { placeOrder } from "@/app/checkout/actions";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAlert } from '@/components/AlertContext';
 import Link from "next/link";
+import StoreHeader from "@/components/StoreHeader";
+import type { ThemeConfig } from '@/components/themeConfig';
 
-export default function CheckoutPage() {
+export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: string; theme: ThemeConfig }) {
     const router = useRouter();
-    const { items, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
+    const { items: allItems, updateQuantity, removeFromCart } = useCart();
     const { showAlert } = useAlert();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Filter items by store
+    const items = allItems.filter(item => item.storeSlug === storeSlug);
+    const cartTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,7 +33,8 @@ export default function CheckoutPage() {
                 showAlert(result.error, 'error');
                 setIsSubmitting(false);
             } else if (result && result.success) {
-                clearCart();
+                // Remove only items from this store
+                items.forEach(item => removeFromCart(item.id));
                 router.push(`/order-confirmation?orders=${result.orderIds.join(',')}`);
             }
         } catch (e) {
@@ -40,28 +47,57 @@ export default function CheckoutPage() {
     const shippingCost = 7;
     const total = cartTotal + shippingCost;
 
+    const getPageClassName = () => {
+        const baseClass = 'checkout-page-modern';
+        if (theme.id === 'theme-2') return `${baseClass} checkout-theme-2`;
+        if (theme.id === 'theme-3') return `${baseClass} checkout-theme-3`;
+        return `${baseClass} checkout-theme-1`;
+    };
+
     if (items.length === 0) {
         return (
-            <div className="checkout-empty-modern">
-                <div className="checkout-empty-content-modern">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <h1>Votre panier est vide</h1>
-                    <p>Commencez à magasiner pour ajouter des articles à votre panier</p>
-                    <Link href="/stores" className="checkout-empty-btn-modern">
-                        Découvrir des boutiques
-                    </Link>
+            <div className={getPageClassName()}>
+                <StoreHeader
+                    cartCount={items.length}
+                    cartHref={`${theme.baseRoute}/cart`}
+                    logoFilter={theme.logoFilter}
+                    className={theme.headerClassName}
+                    containerClassName={theme.containerClassName}
+                    cartButtonClassName={theme.cartButtonClassName}
+                    cartBadgeClassName={theme.cartBadgeClassName}
+                    cartStrokeColor={theme.cartStrokeColor}
+                />
+                <div className="checkout-empty-modern">
+                    <div className="checkout-empty-content-modern">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <h1>Your cart is empty</h1>
+                        <p>Start shopping to add items to your cart</p>
+                        <Link href={theme.baseRoute} className="checkout-empty-btn-modern">
+                            Back to Store
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="checkout-page-modern">
+        <div className={getPageClassName()}>
+            <StoreHeader
+                cartCount={items.length}
+                cartHref={`${theme.baseRoute}/cart`}
+                logoFilter={theme.logoFilter}
+                className={theme.headerClassName}
+                containerClassName={theme.containerClassName}
+                cartButtonClassName={theme.cartButtonClassName}
+                cartBadgeClassName={theme.cartBadgeClassName}
+                cartStrokeColor={theme.cartStrokeColor}
+            />
             <div className="checkout-container-modern">
                 <div className="checkout-header-modern">
-                    <Link href="/stores" className="checkout-back-modern">
+                    <Link href={theme.baseRoute} className="checkout-back-modern">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -221,3 +257,4 @@ export default function CheckoutPage() {
         </div>
     );
 }
+

@@ -25,6 +25,7 @@ export async function GET() {
         const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
 
         return NextResponse.json({ 
+            id: store.id,
             slug: store.slug,
             theme: store.theme || 'theme-1',
             name: store.name,

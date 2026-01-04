@@ -38,10 +38,11 @@ model Store {
   updatedAt DateTime @updatedAt
 
   // Relations
-  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade) // One-to-one: Each store belongs to one user
-  products    Product[]
-  orders      Order[]
-  withdrawals Withdrawal[]
+  owner              User                    @relation(fields: [ownerId], references: [id], onDelete: Cascade) // One-to-one: Each store belongs to one user
+  products           Product[]
+  orders             Order[]
+  withdrawals        Withdrawal[]
+  themeCustomization StoreThemeCustomization?
 }
 
 model Product {
@@ -251,4 +252,56 @@ model PricingSettings {
   profitFixedAmount     Float?   // If type is FIXED
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+}
+
+model StoreThemeCustomization {
+  id        String   @id @default(uuid())
+  storeId   String   @unique
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Colors
+  primaryColor       String?  @default("#3b82f6")
+  secondaryColor     String?  @default("#8b5cf6")
+  accentColor        String?  @default("#ec4899")
+  backgroundColor    String?  
+  textColor          String?  
+  headingColor       String?  
+  
+  // Hero Section
+  heroTitle          String?  @db.Text
+  heroSubtitle       String?  @db.Text
+  heroImageUrl       String?  // R2 URL
+  heroBackgroundUrl  String?  // R2 URL
+  heroVariant        String?  @default("simple") // simple, circles, background
+  heroCtaText        String?
+  heroCtaLink        String?
+  
+  // Content
+  bestSellerTitle    String?  @default("Best Seller")
+  productsTitle      String?  @default("Products")
+  categoriesTitle    String?  @default("Categories")
+  bestSellerDesc     String?  @db.Text
+  productsDesc       String?  @db.Text
+  categoriesDesc     String?  @db.Text
+  
+  // Category Images
+  categoryWomanImageUrl  String?  // R2 URL
+  categoryManImageUrl    String?  // R2 URL
+  categoryKidsImageUrl   String?  // R2 URL
+  
+  // Layout & Spacing
+  layoutDensity      String?  @default("comfortable") // spacious, comfortable, compact
+  productCardStyle   String?  @default("default") // default, bordered, shadowed, gradient
+  gridColumns        Int?     @default(2) // Number of columns on mobile
+  
+  // Typography
+  fontFamily         String?  @default("system")
+  headingFontWeight  String?  @default("700")
+  bodyFontWeight     String?  @default("400")
+  
+  // Theme-specific settings (stored as JSON)
+  themeSettings      String?  @db.Text // JSON for theme-specific customizations
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -19,7 +19,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
                 orderBy: {
                     createdAt: 'desc'
                 }
-            }
+            },
+            themeCustomization: true
         }
     });
 
@@ -53,13 +54,41 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
         })
     );
 
-    // Get store logo URL for hero
-    let heroImage = "/T-Shirt.png";
-    if (store.logoUrl) {
-        heroImage = await getR2Url(store.logoUrl);
+    // Get customization or use defaults
+    const customization = store.themeCustomization;
+    
+    // Resolve hero image URLs - prioritize customization, then store logo, then undefined (no default)
+    let customHeroImage: string | undefined;
+    let customHeroBackground: string | undefined;
+    
+    // First check customization
+    if (customization?.heroImageUrl) {
+        // If it's already a full URL, use it directly; otherwise resolve it
+        customHeroImage = customization.heroImageUrl.startsWith('http://') || customization.heroImageUrl.startsWith('https://')
+            ? customization.heroImageUrl
+            : await getR2Url(customization.heroImageUrl);
+    } else if (store.logoUrl) {
+        // Fallback to store logo if no custom hero image
+        customHeroImage = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
+            ? store.logoUrl
+            : await getR2Url(store.logoUrl);
+    }
+    
+    if (customization?.heroBackgroundUrl) {
+        customHeroBackground = customization.heroBackgroundUrl.startsWith('http://') || customization.heroBackgroundUrl.startsWith('https://')
+            ? customization.heroBackgroundUrl
+            : await getR2Url(customization.heroBackgroundUrl);
+    } else if (store.logoUrl) {
+        // Fallback to store logo if no custom background
+        customHeroBackground = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
+            ? store.logoUrl
+            : await getR2Url(store.logoUrl);
     }
 
-    // Create hero content from store data based on theme
+    // Create hero content from store data and customizations
+    const heroVariant = (customization?.heroVariant as 'simple' | 'circles' | 'background') || 
+        (themeId === 'theme-1' ? 'simple' : themeId === 'theme-2' ? 'circles' : 'background');
+    
     let heroContent: {
         title: string;
         subtitle: string;
@@ -71,42 +100,63 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
         backgroundImage?: string;
     };
 
-    if (themeId === 'theme-1') {
+    if (heroVariant === 'simple') {
         heroContent = {
-            title: store.name,
-            subtitle: `Explore the finest clothes chez ${store.name}`,
-            image: heroImage,
+            title: customization?.heroTitle || store.name,
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes chez ${store.name}`,
+            image: customHeroImage,
             imageWidth: 280,
             imageHeight: 280,
             variant: 'simple'
         };
-    } else if (themeId === 'theme-2') {
+    } else if (heroVariant === 'circles') {
         heroContent = {
-            title: store.name,
-            subtitle: `Explore the finest clothes for kids, chez ${store.name}`,
+            title: customization?.heroTitle || store.name,
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes for kids, chez ${store.name}`,
             variant: 'circles',
-            circles: [
-                { src: heroImage, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
-                { src: heroImage, className: "theme-2-hero-image-circle theme-2-hero-img-2" },
-                { src: heroImage, className: "theme-2-hero-image-circle theme-2-hero-img-3" }
-            ],
-            image: heroImage
+            circles: customHeroImage ? [
+                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
+                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-2" },
+                { src: customHeroImage, className: "theme-2-hero-image-circle theme-2-hero-img-3" }
+            ] : undefined,
+            image: customHeroImage
         };
     } else {
-        // theme-3
+        // background variant
         heroContent = {
-            title: store.name,
-            subtitle: `Explore the finest clothes\nchez ${store.name}`,
+            title: customization?.heroTitle || store.name,
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes\nchez ${store.name}`,
             variant: 'background',
-            backgroundImage: heroImage
+            backgroundImage: customHeroBackground
         };
     }
 
-    // Use default categories for now (can be enhanced later)
+    // Get category images from customization or use defaults
+    let categoryWomanImage = "/Hoodie.png";
+    let categoryManImage = "/Hoodie.png";
+    let categoryKidsImage = "/Hoodie.png";
+    
+    if (customization?.categoryWomanImageUrl) {
+        // If it's already a full URL, use it directly; otherwise resolve it
+        categoryWomanImage = customization.categoryWomanImageUrl.startsWith('http://') || customization.categoryWomanImageUrl.startsWith('https://')
+            ? customization.categoryWomanImageUrl
+            : await getR2Url(customization.categoryWomanImageUrl);
+    }
+    if (customization?.categoryManImageUrl) {
+        categoryManImage = customization.categoryManImageUrl.startsWith('http://') || customization.categoryManImageUrl.startsWith('https://')
+            ? customization.categoryManImageUrl
+            : await getR2Url(customization.categoryManImageUrl);
+    }
+    if (customization?.categoryKidsImageUrl) {
+        categoryKidsImage = customization.categoryKidsImageUrl.startsWith('http://') || customization.categoryKidsImageUrl.startsWith('https://')
+            ? customization.categoryKidsImageUrl
+            : await getR2Url(customization.categoryKidsImageUrl);
+    }
+    
     const categories = [
-        { image: "/Hoodie.png", alt: "Woman", label: "Woman", imageWidth: 120, imageHeight: 160 },
-        { image: "/Hoodie.png", alt: "Man", label: "Man", imageWidth: 120, imageHeight: 160 },
-        { image: "/Hoodie.png", alt: "Kids", label: "Kids", imageWidth: 120, imageHeight: 160 }
+        { image: categoryWomanImage, alt: "Woman", label: "Woman", imageWidth: 120, imageHeight: 160 },
+        { image: categoryManImage, alt: "Man", label: "Man", imageWidth: 120, imageHeight: 160 },
+        { image: categoryKidsImage, alt: "Kids", label: "Kids", imageWidth: 120, imageHeight: 160 }
     ];
 
     // Create sections with real products
@@ -115,12 +165,12 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
 
     const sections = [
         { 
-            title: "Best Seller", 
+            title: customization?.bestSellerTitle || "Best Seller", 
             type: 'best-seller' as const, 
             products: bestSellerProducts.length > 0 ? bestSellerProducts : undefined
         },
         { 
-            title: "Products", 
+            title: customization?.productsTitle || "Products", 
             type: 'products' as const, 
             products: allProducts.length > 0 ? allProducts : undefined,
             showViewAll: true 
@@ -134,13 +184,44 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
     };
 
     return (
-        <ThemeStorePage
-            theme={themeWithStoreRoute}
-            products={productsWithImages}
-            heroContent={heroContent}
-            categories={categories}
-            sections={sections}
-        />
+        <>
+            {customization && (
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                        :root {
+                            ${customization.primaryColor ? `--theme-primary: ${customization.primaryColor};` : ''}
+                            ${customization.secondaryColor ? `--theme-secondary: ${customization.secondaryColor};` : ''}
+                            ${customization.accentColor ? `--theme-accent: ${customization.accentColor};` : ''}
+                            ${customization.backgroundColor ? `--theme-bg: ${customization.backgroundColor};` : ''}
+                            ${customization.textColor ? `--theme-text: ${customization.textColor};` : ''}
+                            ${customization.headingColor ? `--theme-heading: ${customization.headingColor};` : ''}
+                            ${customization.fontFamily ? `--theme-font: ${customization.fontFamily === 'system' ? 'system-ui, -apple-system' : customization.fontFamily};` : ''}
+                            ${customization.headingFontWeight ? `--theme-heading-weight: ${customization.headingFontWeight};` : ''}
+                            ${customization.bodyFontWeight ? `--theme-body-weight: ${customization.bodyFontWeight};` : ''}
+                        }
+                    `
+                }} />
+            )}
+            <ThemeStorePage
+                theme={themeWithStoreRoute}
+                products={productsWithImages}
+                heroContent={heroContent}
+                categories={categories}
+                sections={sections}
+                storeSlug={store.slug}
+                customization={customization ? {
+                    primaryColor: customization.primaryColor,
+                    secondaryColor: customization.secondaryColor,
+                    accentColor: customization.accentColor,
+                    backgroundColor: customization.backgroundColor,
+                    textColor: customization.textColor,
+                    headingColor: customization.headingColor,
+                    fontFamily: customization.fontFamily,
+                    headingFontWeight: customization.headingFontWeight,
+                    bodyFontWeight: customization.bodyFontWeight,
+                } : undefined}
+            />
+        </>
     );
 }
 

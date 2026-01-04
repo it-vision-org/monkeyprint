@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import StoreHeader from '@/components/StoreHeader';
 import ProductCard from '@/components/ProductCard';
 import type { Product } from '@/components/types';
 import type { ThemeConfig } from './themeConfig';
-import { DEFAULT_PRODUCTS, DEFAULT_SIZES } from '@/lib/constants/mockData';
+import { DEFAULT_SIZES } from '@/lib/constants/mockData';
 
 type AllProductsPageProps = {
     theme: ThemeConfig;
@@ -41,22 +40,22 @@ export default function AllProductsPage({
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSort, setSelectedSort] = useState('default');
 
-    const products: Product[] = initialProducts.length > 0 
-        ? initialProducts 
-        : Array(12).fill({
-            name: DEFAULT_PRODUCTS[0].name,
-            price: DEFAULT_PRODUCTS[0].price,
-            rating: 4.5,
-            reviews: 13
-        }).map((p, idx) => ({ ...p, id: idx }));
+    const products: Product[] = initialProducts.length > 0 ? initialProducts : [];
 
     const resetFilters = () => {
         setSelectedSize('');
         setSelectedColor('');
     };
 
+    const getPageClassName = () => {
+        const baseClass = 'all-products-page-modern';
+        if (theme.id === 'theme-2') return `${baseClass} all-products-theme-2`;
+        if (theme.id === 'theme-3') return `${baseClass} all-products-theme-3`;
+        return `${baseClass} all-products-theme-1`;
+    };
+
     return (
-        <div className="all-products-page">
+        <div className={getPageClassName()}>
             <StoreHeader
                 cartCount={1}
                 cartHref={`${theme.baseRoute}/cart`}
@@ -68,218 +67,210 @@ export default function AllProductsPage({
                 cartStrokeColor={theme.cartStrokeColor}
             />
 
-            <main className="all-products-main">
-                <h1 className="all-products-title">Tous les produits</h1>
+            <main className="all-products-main-modern">
+                <div className="all-products-header-modern">
+                    <h1 className="all-products-title-modern">All Products</h1>
+                    <p className="all-products-subtitle-modern">{products.length} products available</p>
+                </div>
 
-                <div className="all-products-controls">
+                <div className="all-products-toolbar-modern">
+                    <div className="all-products-toolbar-left">
+                        <button 
+                            className="all-products-filter-btn-modern" 
+                            onClick={() => setFilterOpen(true)}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 4H21L13 14V20L11 22V14L3 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span>Filters</span>
+                        </button>
+                    </div>
                     <div style={{ position: 'relative' }}>
-                        <button className="all-products-btn" onClick={() => setSortOpen(!sortOpen)}>
+                        <button 
+                            className="all-products-sort-btn-modern" 
+                            onClick={() => setSortOpen(!sortOpen)}
+                        >
                             <span>Sort</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 6H13M3 12H11M3 18H13M17 8V20M17 20L13 16M17 20L21 16" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <svg 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none"
+                                style={{ transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                            >
+                                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </button>
                         {sortOpen && (
                             <>
-                                <div className="sort-dropdown-overlay" onClick={() => setSortOpen(false)}></div>
-                                <div className="sort-dropdown">
+                                <div className="sort-dropdown-overlay-modern" onClick={() => setSortOpen(false)}></div>
+                                <div className="sort-dropdown-modern">
                                     <button 
-                                        className={`sort-dropdown-item ${selectedSort === 'default' ? 'selected' : ''}`}
+                                        className={`sort-dropdown-item-modern ${selectedSort === 'default' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('default'); setSortOpen(false); }}
                                     >
-                                        Par défaut
+                                        Default
                                     </button>
                                     <button 
-                                        className={`sort-dropdown-item ${selectedSort === 'price-asc' ? 'selected' : ''}`}
+                                        className={`sort-dropdown-item-modern ${selectedSort === 'price-asc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-asc'); setSortOpen(false); }}
                                     >
-                                        Prix: Croissant
+                                        Price: Low to High
                                     </button>
                                     <button 
-                                        className={`sort-dropdown-item ${selectedSort === 'price-desc' ? 'selected' : ''}`}
+                                        className={`sort-dropdown-item-modern ${selectedSort === 'price-desc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-desc'); setSortOpen(false); }}
                                     >
-                                        Prix: Décroissant
+                                        Price: High to Low
                                     </button>
                                     <button 
-                                        className={`sort-dropdown-item ${selectedSort === 'rating' ? 'selected' : ''}`}
+                                        className={`sort-dropdown-item-modern ${selectedSort === 'rating' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('rating'); setSortOpen(false); }}
                                     >
-                                        Meilleure note
+                                        Highest Rated
                                     </button>
                                 </div>
                             </>
                         )}
                     </div>
-                    <button className="all-products-btn" onClick={() => setFilterOpen(true)}>
-                        <span>Filter</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M3 4H21L13 14V20L11 22V14L3 4Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </button>
                 </div>
 
-                <div className="all-products-grid">
-                    {products.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            href={`${theme.baseRoute}/product/${product.id}`}
-                            className="all-products-card"
-                            imageClassName="all-products-image"
-                            nameClassName="all-products-name"
-                            priceClassName="all-products-price"
-                            ratingClassName="all-products-rating"
-                            reviewsClassName="all-products-reviews"
-                        />
-                    ))}
-                </div>
+                {products.length === 0 ? (
+                    <div className="all-products-empty-modern">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <h3>No products found</h3>
+                        <p>Check back later for new products</p>
+                    </div>
+                ) : (
+                    <div className="all-products-grid-modern">
+                        {products.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                href={`${theme.baseRoute}/product/${product.id}`}
+                                className={theme.productCardClassName}
+                                imageClassName={theme.productImageClassName}
+                                nameClassName={theme.productNameClassName}
+                                priceClassName={theme.productPriceClassName}
+                                ratingClassName={theme.productRatingClassName}
+                            />
+                        ))}
+                    </div>
+                )}
             </main>
 
             {/* Filter Modal */}
             {filterOpen && (
-                <div className="filter-modal-overlay" onClick={() => setFilterOpen(false)}>
-                    <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
-                        <button className="filter-modal-close" onClick={() => setFilterOpen(false)}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M18 6L6 18M6 6L18 18" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
-
-                        <div className="filter-categories">
-                            <button 
-                                className={`filter-category-tab ${selectedCategory === 'TOUT' ? 'active' : ''}`}
-                                onClick={() => setSelectedCategory('TOUT')}
-                            >
-                                TOUT
-                            </button>
-                            <button 
-                                className={`filter-category-tab ${selectedCategory === 'FEMME' ? 'active' : ''}`}
-                                onClick={() => setSelectedCategory('FEMME')}
-                            >
-                                FEMME
-                            </button>
-                            <button 
-                                className={`filter-category-tab ${selectedCategory === 'HOMME' ? 'active' : ''}`}
-                                onClick={() => setSelectedCategory('HOMME')}
-                            >
-                                HOMME
-                            </button>
-                            <button 
-                                className={`filter-category-tab ${selectedCategory === 'ENFANTS' ? 'active' : ''}`}
-                                onClick={() => setSelectedCategory('ENFANTS')}
-                            >
-                                ENFANTS
+                <div className="filter-modal-overlay-modern" onClick={() => setFilterOpen(false)}>
+                    <div className="filter-modal-modern" onClick={(e) => e.stopPropagation()}>
+                        <div className="filter-modal-header-modern">
+                            <h2>Filters</h2>
+                            <button className="filter-modal-close-modern" onClick={() => setFilterOpen(false)}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
                             </button>
                         </div>
 
-                        <div className="filter-divider"></div>
+                        <div className="filter-modal-content-modern">
+                            <div className="filter-categories-modern">
+                                {['TOUT', 'FEMME', 'HOMME', 'ENFANTS'].map((cat) => (
+                                    <button 
+                                        key={cat}
+                                        className={`filter-category-tab-modern ${selectedCategory === cat ? 'active' : ''}`}
+                                        onClick={() => setSelectedCategory(cat)}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
 
-                        <div className="filter-section">
-                            <button 
-                                className="filter-section-header"
-                                onClick={() => setTypeExpanded(!typeExpanded)}
-                            >
-                                <span>Type</span>
-                                <svg 
-                                    width="16" 
-                                    height="16" 
-                                    viewBox="0 0 24 24" 
-                                    fill="none"
-                                    style={{ transform: typeExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                            <div className="filter-section-modern">
+                                <button 
+                                    className="filter-section-header-modern"
+                                    onClick={() => setTailleExpanded(!tailleExpanded)}
                                 >
-                                    <path d="M6 9L12 15L18 9" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                            {typeExpanded && (
-                                <div className="filter-section-content">
-                                    <div className="filter-option">T-shirts</div>
-                                    <div className="filter-option">Hoodies</div>
-                                    <div className="filter-option">Mugs</div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="filter-divider"></div>
-
-                        <div className="filter-section">
-                            <button 
-                                className="filter-section-header"
-                                onClick={() => setTailleExpanded(!tailleExpanded)}
-                            >
-                                <span>Taille</span>
-                                <svg 
-                                    width="16" 
-                                    height="16" 
-                                    viewBox="0 0 24 24" 
-                                    fill="none"
-                                    style={{ transform: tailleExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
-                                >
-                                    <path d="M6 9L12 15L18 9" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                            {tailleExpanded && (
-                                <div className="filter-section-content">
-                                    <div className="filter-size-options">
-                                        {sizes.map((size) => (
-                                            <button
-                                                key={size}
-                                                className={`filter-size-btn ${selectedSize === size ? 'selected' : ''}`}
-                                                onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
+                                    <span>Size</span>
+                                    <svg 
+                                        width="16" 
+                                        height="16" 
+                                        viewBox="0 0 24 24" 
+                                        fill="none"
+                                        style={{ transform: tailleExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                                    >
+                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                {tailleExpanded && (
+                                    <div className="filter-section-content-modern">
+                                        <div className="filter-size-options-modern">
+                                            {sizes.map((size) => (
+                                                <button
+                                                    key={size}
+                                                    className={`filter-size-btn-modern ${selectedSize === size ? 'selected' : ''}`}
+                                                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
 
-                        <div className="filter-divider"></div>
-
-                        <div className="filter-section">
-                            <button 
-                                className="filter-section-header"
-                                onClick={() => setCouleurExpanded(!couleurExpanded)}
-                            >
-                                <span>Couleur</span>
-                                <svg 
-                                    width="16" 
-                                    height="16" 
-                                    viewBox="0 0 24 24" 
-                                    fill="none"
-                                    style={{ transform: couleurExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                            <div className="filter-section-modern">
+                                <button 
+                                    className="filter-section-header-modern"
+                                    onClick={() => setCouleurExpanded(!couleurExpanded)}
                                 >
-                                    <path d="M6 9L12 15L18 9" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                            {couleurExpanded && (
-                                <div className="filter-section-content">
-                                    <div className="filter-color-options">
-                                        {colors.map((color) => (
-                                            <button
-                                                key={color.value}
-                                                className={`filter-color-btn ${selectedColor === color.value ? 'selected' : ''} ${color.value === 'white' ? 'filter-color-white' : ''}`}
-                                                onClick={() => setSelectedColor(selectedColor === color.value ? '' : color.value)}
-                                                style={{ backgroundColor: color.hex }}
-                                            >
-                                            </button>
-                                        ))}
+                                    <span>Color</span>
+                                    <svg 
+                                        width="16" 
+                                        height="16" 
+                                        viewBox="0 0 24 24" 
+                                        fill="none"
+                                        style={{ transform: couleurExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                                    >
+                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+                                {couleurExpanded && (
+                                    <div className="filter-section-content-modern">
+                                        <div className="filter-color-options-modern">
+                                            {colors.map((color) => (
+                                                <button
+                                                    key={color.value}
+                                                    className={`filter-color-btn-modern ${selectedColor === color.value ? 'selected' : ''} ${color.value === 'white' ? 'filter-color-white-modern' : ''}`}
+                                                    onClick={() => setSelectedColor(selectedColor === color.value ? '' : color.value)}
+                                                    style={{ backgroundColor: color.hex }}
+                                                    title={color.value}
+                                                >
+                                                    {selectedColor === color.value && (
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
 
-                        <button className="filter-reset-btn" onClick={resetFilters}>
-                            <span>Réinitialiser le filtre</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M1 4V10H7M23 20V14H17M17 14L22 9M17 14L12 9M7 10L2 15M7 10L12 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
+                        <div className="filter-modal-footer-modern">
+                            <button className="filter-reset-btn-modern" onClick={resetFilters}>
+                                Reset Filters
+                            </button>
+                            <button className="filter-apply-btn-modern" onClick={() => setFilterOpen(false)}>
+                                Apply Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
         </div>
     );
 }
-
