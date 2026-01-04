@@ -44,7 +44,7 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
     };
 
     // Build CSS variables for dynamic colors
-    const cssVariables: React.CSSProperties = {};
+    const cssVariables: React.CSSProperties & Record<string, string> = {};
     if (customization) {
         if (customization.primaryColor) cssVariables['--theme-primary'] = customization.primaryColor;
         if (customization.secondaryColor) cssVariables['--theme-secondary'] = customization.secondaryColor;
