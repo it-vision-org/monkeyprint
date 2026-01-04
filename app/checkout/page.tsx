@@ -83,7 +83,7 @@ export default function CheckoutPage() {
                                         name="firstName" 
                                         required 
                                         className="checkout-input-modern"
-                                        placeholder="John"
+                                        placeholder="Nom"
                                     />
                                 </div>
                                 <div className="checkout-form-group-modern">
@@ -92,7 +92,7 @@ export default function CheckoutPage() {
                                         name="lastName" 
                                         required 
                                         className="checkout-input-modern"
-                                        placeholder="Doe"
+                                        placeholder="Prénom"
                                     />
                                 </div>
                             </div>
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
                                     name="address" 
                                     required 
                                     className="checkout-input-modern"
-                                    placeholder="15 Rue de la Liberté"
+                                    placeholder="Adresse"
                                 />
                             </div>
 

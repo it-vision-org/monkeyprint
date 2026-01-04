@@ -23,6 +23,47 @@ export default async function CartPage({ params }: { params: Promise<{ storeSlug
         baseRoute: `/shop/${storeSlug}`
     };
 
-    return <CartPageClient storeSlug={storeSlug} theme={themeWithRoute} />;
+    const customization = store.themeCustomization;
+
+    return (
+        <>
+            {customization && (
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                        :root {
+                            ${customization.primaryColor ? `--theme-primary: ${customization.primaryColor};` : ''}
+                            ${customization.secondaryColor ? `--theme-secondary: ${customization.secondaryColor};` : ''}
+                            ${customization.accentColor ? `--theme-accent: ${customization.accentColor};` : ''}
+                            ${customization.backgroundColor ? `--theme-bg: ${customization.backgroundColor};` : ''}
+                            ${customization.textColor ? `--theme-text: ${customization.textColor};` : ''}
+                            ${customization.headingColor ? `--theme-heading: ${customization.headingColor};` : ''}
+                            ${customization.headerBackgroundColor ? `--theme-header-bg: ${customization.headerBackgroundColor};` : ''}
+                            ${customization.headerTextColor ? `--theme-header-text: ${customization.headerTextColor};` : ''}
+                            ${customization.fontFamily ? `--theme-font: ${customization.fontFamily === 'system' ? 'system-ui, -apple-system' : customization.fontFamily};` : ''}
+                            ${customization.headingFontWeight ? `--theme-heading-weight: ${customization.headingFontWeight};` : ''}
+                            ${customization.bodyFontWeight ? `--theme-body-weight: ${customization.bodyFontWeight};` : ''}
+                        }
+                    `
+                }} />
+            )}
+            <CartPageClient 
+                storeSlug={storeSlug} 
+                theme={themeWithRoute}
+                customization={customization ? {
+                    primaryColor: customization.primaryColor,
+                    secondaryColor: customization.secondaryColor,
+                    accentColor: customization.accentColor,
+                    backgroundColor: customization.backgroundColor,
+                    textColor: customization.textColor,
+                    headingColor: customization.headingColor,
+                    headerBackgroundColor: customization.headerBackgroundColor,
+                    headerTextColor: customization.headerTextColor,
+                    fontFamily: customization.fontFamily,
+                    headingFontWeight: customization.headingFontWeight,
+                    bodyFontWeight: customization.bodyFontWeight,
+                } : undefined}
+            />
+        </>
+    );
 }
 

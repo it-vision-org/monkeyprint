@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import type { Product } from '@/components/types';
 import type { ThemeConfig } from './themeConfig';
 import { DEFAULT_SIZES } from '@/lib/constants/mockData';
+import { useCart } from '@/components/CartContext';
 
 type AllProductsPageProps = {
     theme: ThemeConfig;
@@ -30,6 +31,7 @@ export default function AllProductsPage({
     colors = DEFAULT_COLORS
 }: AllProductsPageProps) {
     const router = useRouter();
+    const { items: cartItems } = useCart();
     const [sortOpen, setSortOpen] = useState(false);
     const [filterOpen, setFilterOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('TOUT');
@@ -41,6 +43,9 @@ export default function AllProductsPage({
     const [selectedSort, setSelectedSort] = useState('default');
 
     const products: Product[] = initialProducts.length > 0 ? initialProducts : [];
+    
+    // Calculate total cart count (sum of all item quantities)
+    const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     const resetFilters = () => {
         setSelectedSize('');
@@ -57,7 +62,7 @@ export default function AllProductsPage({
     return (
         <div className={getPageClassName()}>
             <StoreHeader
-                cartCount={1}
+                cartCount={cartCount}
                 cartHref={`${theme.baseRoute}/cart`}
                 logoFilter={theme.logoFilter}
                 className={theme.headerClassName}

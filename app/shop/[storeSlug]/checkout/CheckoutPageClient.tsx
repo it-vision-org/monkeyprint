@@ -9,15 +9,35 @@ import { useAlert } from '@/components/AlertContext';
 import Link from "next/link";
 import StoreHeader from "@/components/StoreHeader";
 import type { ThemeConfig } from '@/components/themeConfig';
+import { TUNISIAN_CITIES } from '@/lib/constants/mockData';
 
-export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: string; theme: ThemeConfig }) {
+type Customization = {
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    accentColor?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    headingColor?: string | null;
+    headerBackgroundColor?: string | null;
+    headerTextColor?: string | null;
+    fontFamily?: string | null;
+    headingFontWeight?: string | null;
+    bodyFontWeight?: string | null;
+};
+
+export default function CheckoutPageClient({ storeSlug, theme, customization }: { storeSlug: string; theme: ThemeConfig; customization?: Customization }) {
     const router = useRouter();
     const { items: allItems, updateQuantity, removeFromCart } = useCart();
     const { showAlert } = useAlert();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     // Filter items by store
     const items = allItems.filter(item => item.storeSlug === storeSlug);
+    
+    // Calculate total cart count (sum of all item quantities)
+    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    
     const cartTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -33,9 +53,12 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
                 showAlert(result.error, 'error');
                 setIsSubmitting(false);
             } else if (result && result.success) {
-                // Remove only items from this store
+                // Set redirecting state to prevent empty cart message from showing
+                setIsRedirecting(true);
+                // Remove items from cart immediately (before redirect)
                 items.forEach(item => removeFromCart(item.id));
-                router.push(`/order-confirmation?orders=${result.orderIds.join(',')}`);
+                // Redirect to order confirmation
+                router.push(`/shop/${storeSlug}/order-confirmation?orders=${result.orderIds.join(',')}`);
             }
         } catch (e) {
             console.error(e);
@@ -54,18 +77,64 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
         return `${baseClass} checkout-theme-1`;
     };
 
-    if (items.length === 0) {
+    // Build CSS variables for dynamic colors
+    const cssVariables: React.CSSProperties & Record<string, string> = {};
+    if (customization) {
+        if (customization.primaryColor) cssVariables['--theme-primary'] = customization.primaryColor;
+        if (customization.secondaryColor) cssVariables['--theme-secondary'] = customization.secondaryColor;
+        if (customization.accentColor) cssVariables['--theme-accent'] = customization.accentColor;
+        if (customization.backgroundColor) cssVariables['--theme-bg'] = customization.backgroundColor;
+        if (customization.textColor) cssVariables['--theme-text'] = customization.textColor;
+        if (customization.headingColor) cssVariables['--theme-heading'] = customization.headingColor;
+        if (customization.headerBackgroundColor) cssVariables['--theme-header-bg'] = customization.headerBackgroundColor;
+        if (customization.headerTextColor) cssVariables['--theme-header-text'] = customization.headerTextColor;
+    }
+
+    // Use headerTextColor for cart icon if available, otherwise fall back to theme's cartStrokeColor
+    const cartIconColor = customization?.headerTextColor || theme.cartStrokeColor || '#1f2937';
+
+    // Show loading state if redirecting after successful order
+    if (isRedirecting) {
         return (
-            <div className={getPageClassName()}>
+            <div className={getPageClassName()} style={cssVariables}>
                 <StoreHeader
-                    cartCount={items.length}
+                    cartCount={0}
                     cartHref={`${theme.baseRoute}/cart`}
                     logoFilter={theme.logoFilter}
                     className={theme.headerClassName}
                     containerClassName={theme.containerClassName}
                     cartButtonClassName={theme.cartButtonClassName}
                     cartBadgeClassName={theme.cartBadgeClassName}
-                    cartStrokeColor={theme.cartStrokeColor}
+                    cartStrokeColor={cartIconColor}
+                />
+                <div className="checkout-empty-modern">
+                    <div className="checkout-empty-content-modern">
+                        <svg className="checkout-spinner-modern" width="64" height="64" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="32" strokeDashoffset="32">
+                                <animate attributeName="stroke-dasharray" dur="2s" values="0 32;16 16;0 32;0 32" repeatCount="indefinite"/>
+                                <animate attributeName="stroke-dashoffset" dur="2s" values="0;-16;-32;-32" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                        <h1>Processing your order...</h1>
+                        <p>Redirecting to confirmation page</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (items.length === 0) {
+        return (
+            <div className={getPageClassName()} style={cssVariables}>
+                <StoreHeader
+                    cartCount={cartCount}
+                    cartHref={`${theme.baseRoute}/cart`}
+                    logoFilter={theme.logoFilter}
+                    className={theme.headerClassName}
+                    containerClassName={theme.containerClassName}
+                    cartButtonClassName={theme.cartButtonClassName}
+                    cartBadgeClassName={theme.cartBadgeClassName}
+                    cartStrokeColor={cartIconColor}
                 />
                 <div className="checkout-empty-modern">
                     <div className="checkout-empty-content-modern">
@@ -84,16 +153,16 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
     }
 
     return (
-        <div className={getPageClassName()}>
+        <div className={getPageClassName()} style={cssVariables}>
             <StoreHeader
-                cartCount={items.length}
+                cartCount={cartCount}
                 cartHref={`${theme.baseRoute}/cart`}
                 logoFilter={theme.logoFilter}
                 className={theme.headerClassName}
                 containerClassName={theme.containerClassName}
                 cartButtonClassName={theme.cartButtonClassName}
                 cartBadgeClassName={theme.cartBadgeClassName}
-                cartStrokeColor={theme.cartStrokeColor}
+                cartStrokeColor={cartIconColor}
             />
             <div className="checkout-container-modern">
                 <div className="checkout-header-modern">
@@ -119,7 +188,7 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
                                         name="firstName" 
                                         required 
                                         className="checkout-input-modern"
-                                        placeholder="John"
+                                        placeholder="Nom"
                                     />
                                 </div>
                                 <div className="checkout-form-group-modern">
@@ -128,7 +197,7 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
                                         name="lastName" 
                                         required 
                                         className="checkout-input-modern"
-                                        placeholder="Doe"
+                                        placeholder="Prénom"
                                     />
                                 </div>
                             </div>
@@ -150,18 +219,21 @@ export default function CheckoutPageClient({ storeSlug, theme }: { storeSlug: st
                                     name="address" 
                                     required 
                                     className="checkout-input-modern"
-                                    placeholder="15 Rue de la Liberté"
+                                    placeholder="Adresse"
                                 />
                             </div>
 
                             <div className="checkout-form-group-modern">
                                 <label className="checkout-label-modern">City</label>
-                                <input 
+                                <select 
                                     name="city" 
                                     required 
                                     className="checkout-input-modern"
-                                    placeholder="Tunis"
-                                />
+                                >
+                                    {TUNISIAN_CITIES.map((city) => (
+                                        <option key={city} value={city}>{city}</option>
+                                    ))}
+                                </select>
                             </div>
                         </form>
                     </div>

@@ -8,12 +8,29 @@ import Link from "next/link";
 import StoreHeader from "@/components/StoreHeader";
 import type { ThemeConfig } from '@/components/themeConfig';
 
-export default function CartPageClient({ storeSlug, theme }: { storeSlug: string; theme: ThemeConfig }) {
+type Customization = {
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    accentColor?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    headingColor?: string | null;
+    headerBackgroundColor?: string | null;
+    headerTextColor?: string | null;
+    fontFamily?: string | null;
+    headingFontWeight?: string | null;
+    bodyFontWeight?: string | null;
+};
+
+export default function CartPageClient({ storeSlug, theme, customization }: { storeSlug: string; theme: ThemeConfig; customization?: Customization }) {
     const router = useRouter();
     const { items: allItems, updateQuantity, removeFromCart } = useCart();
 
     // Filter items by store
     const items = allItems.filter(item => item.storeSlug === storeSlug);
+    
+    // Calculate total cart count (sum of all item quantities)
+    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
     
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shippingCost = 7;
@@ -26,18 +43,34 @@ export default function CartPageClient({ storeSlug, theme }: { storeSlug: string
         return `${baseClass} cart-theme-1`;
     };
 
+    // Build CSS variables for dynamic colors
+    const cssVariables: React.CSSProperties = {};
+    if (customization) {
+        if (customization.primaryColor) cssVariables['--theme-primary'] = customization.primaryColor;
+        if (customization.secondaryColor) cssVariables['--theme-secondary'] = customization.secondaryColor;
+        if (customization.accentColor) cssVariables['--theme-accent'] = customization.accentColor;
+        if (customization.backgroundColor) cssVariables['--theme-bg'] = customization.backgroundColor;
+        if (customization.textColor) cssVariables['--theme-text'] = customization.textColor;
+        if (customization.headingColor) cssVariables['--theme-heading'] = customization.headingColor;
+        if (customization.headerBackgroundColor) cssVariables['--theme-header-bg'] = customization.headerBackgroundColor;
+        if (customization.headerTextColor) cssVariables['--theme-header-text'] = customization.headerTextColor;
+    }
+
+    // Use headerTextColor for cart icon if available, otherwise fall back to theme's cartStrokeColor
+    const cartIconColor = customization?.headerTextColor || theme.cartStrokeColor || '#1f2937';
+
     if (items.length === 0) {
         return (
-            <div className={getPageClassName()}>
+            <div className={getPageClassName()} style={cssVariables}>
                 <StoreHeader
-                    cartCount={items.length}
+                    cartCount={cartCount}
                     cartHref={`${theme.baseRoute}/cart`}
                     logoFilter={theme.logoFilter}
                     className={theme.headerClassName}
                     containerClassName={theme.containerClassName}
                     cartButtonClassName={theme.cartButtonClassName}
                     cartBadgeClassName={theme.cartBadgeClassName}
-                    cartStrokeColor={theme.cartStrokeColor}
+                    cartStrokeColor={cartIconColor}
                 />
                 <div className="cart-empty-modern">
                     <div className="cart-empty-content-modern">
@@ -56,16 +89,16 @@ export default function CartPageClient({ storeSlug, theme }: { storeSlug: string
     }
 
     return (
-        <div className={getPageClassName()}>
+        <div className={getPageClassName()} style={cssVariables}>
             <StoreHeader
-                cartCount={items.length}
+                cartCount={cartCount}
                 cartHref={`${theme.baseRoute}/cart`}
                 logoFilter={theme.logoFilter}
                 className={theme.headerClassName}
                 containerClassName={theme.containerClassName}
                 cartButtonClassName={theme.cartButtonClassName}
                 cartBadgeClassName={theme.cartBadgeClassName}
-                cartStrokeColor={theme.cartStrokeColor}
+                cartStrokeColor={cartIconColor}
             />
             <div className="cart-container-modern">
                 <div className="cart-header-modern">

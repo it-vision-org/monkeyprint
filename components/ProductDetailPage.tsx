@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import PageHeader from './PageHeader';
 import TopHeader from './TopHeader';
 import { DEFAULT_PRODUCT_DETAIL, DEFAULT_SIZES, DEFAULT_COLORS } from '@/lib/constants/mockData';
+import { useCart } from '@/components/CartContext';
 
 type ProductDetailPageProps = {
     baseRoute: string;
@@ -31,18 +32,22 @@ export default function ProductDetailPage({
     gradientId = 'half-star-detail'
 }: ProductDetailPageProps) {
     const router = useRouter();
+    const { items: cartItems } = useCart();
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
 
     const fullStars = Math.floor(product.rating);
     const hasHalfStar = product.rating % 1 !== 0;
+    
+    // Calculate total cart count (sum of all item quantities)
+    const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <div className="product-detail-page">
             {showTopHeader && (
                 <TopHeader
                     cartHref={`${baseRoute}/cart`}
-                    cartCount={1}
+                    cartCount={cartCount}
                     className="product-detail-top-header"
                     innerClassName="product-detail-top-header-inner"
                     cartButtonClassName="product-detail-top-cart-btn"
@@ -133,7 +138,9 @@ export default function ProductDetailPage({
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span className="product-cart-badge">1</span>
+                    {cartCount > 0 && (
+                        <span className="product-cart-badge">{cartCount}</span>
+                    )}
                 </button>
                 <button className="product-add-to-cart-btn" onClick={() => router.push(`${baseRoute}/cart`)}>
                     Commandez maintenant

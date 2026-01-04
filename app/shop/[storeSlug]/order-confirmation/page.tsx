@@ -1,37 +1,69 @@
 import { prisma } from "@/lib/prisma";
-import { getR2Url } from "@/lib/storage";
-import { notFound } from "next/navigation";
 import { themeConfigs } from '@/components/themeConfig';
-import ProductPageClient from "./ProductPageClient";
+import { notFound } from "next/navigation";
+import { getR2Url } from "@/lib/storage";
+import { format } from "date-fns";
+import OrderConfirmationClient from "./OrderConfirmationClient";
 
-export default async function ProductPage({ params }: { params: Promise<{ storeSlug: string, productId: string }> }) {
-    const { storeSlug, productId } = await params;
-    const product = await prisma.product.findUnique({
-        where: { id: productId },
-        include: { 
-            store: {
-                include: {
-                    themeCustomization: true
-                }
-            }
+export default async function OrderConfirmationPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ storeSlug: string }>;
+    searchParams: Promise<{ orders?: string }>;
+}) {
+    const { storeSlug } = await params;
+    const resolvedParams = await searchParams;
+    const orderIds = resolvedParams.orders ? resolvedParams.orders.split(',') : [];
+
+    const store = await prisma.store.findUnique({
+        where: { slug: storeSlug },
+        include: {
+            themeCustomization: true
         }
     });
 
-    if (!product || !product.store) notFound();
+    if (!store) notFound();
 
-    const frontUrl = product.previewFront ? await getR2Url(product.previewFront) : null;
-    const backUrl = product.previewBack ? await getR2Url(product.previewBack) : null;
-
-    const themeId = (product.store.theme || 'theme-1') as keyof typeof themeConfigs;
+    const themeId = (store.theme || 'theme-1') as keyof typeof themeConfigs;
     const theme = themeConfigs[themeId] || themeConfigs['theme-1'];
     
-    // Update baseRoute to use shop route
     const themeWithRoute = {
         ...theme,
         baseRoute: `/shop/${storeSlug}`
     };
 
-    const customization = product.store.themeCustomization;
+    const customization = store.themeCustomization;
+
+    let orders: any[] = [];
+
+    if (orderIds.length > 0) {
+        // Filter orders to only show orders from this store
+        orders = await prisma.order.findMany({
+            where: { 
+                id: { in: orderIds },
+                storeId: store.id
+            },
+            include: {
+                store: true,
+                items: {
+                    include: {
+                        product: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        // Pre-load all images
+        for (const order of orders) {
+            for (const item of order.items) {
+                if (item.product.previewFront) {
+                    (item as any).imageUrl = await getR2Url(item.product.previewFront);
+                }
+            }
+        }
+    }
 
     return (
         <>
@@ -54,8 +86,7 @@ export default async function ProductPage({ params }: { params: Promise<{ storeS
                     `
                 }} />
             )}
-            <ProductPageClient
-                product={product}
+            <OrderConfirmationClient 
                 storeSlug={storeSlug}
                 theme={themeWithRoute}
                 customization={customization ? {
@@ -71,9 +102,9 @@ export default async function ProductPage({ params }: { params: Promise<{ storeS
                     headingFontWeight: customization.headingFontWeight,
                     bodyFontWeight: customization.bodyFontWeight,
                 } : undefined}
-                frontUrl={frontUrl}
-                backUrl={backUrl}
+                orders={orders}
             />
         </>
     );
 }
+
