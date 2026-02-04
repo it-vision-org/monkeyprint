@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingButton from "@/components/LoadingButton";
+import LoadingLink from "@/components/LoadingLink";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -32,10 +34,10 @@ function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: st
     <div className="dash-mobile-store-info">
       {storeInfo.logoUrl && (
         <div className="dash-mobile-store-logo">
-          <Image 
-            src={storeInfo.logoUrl} 
-            alt={storeInfo.name} 
-            width={32} 
+          <Image
+            src={storeInfo.logoUrl}
+            alt={storeInfo.name}
+            width={32}
             height={32}
             style={{ objectFit: 'contain', borderRadius: '6px' }}
           />
@@ -46,10 +48,10 @@ function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: st
   );
 }
 
-export default function DashboardLayout({ 
+export default function DashboardLayout({
   children,
-  storeInfo: initialStoreInfo 
-}: { 
+  storeInfo: initialStoreInfo
+}: {
   children: ReactNode;
   storeInfo: { name: string; logoUrl: string | null } | null;
 }) {
@@ -160,20 +162,20 @@ export default function DashboardLayout({
 
           <nav className="dash-nav">
             <div className="dash-nav-indicator-wrapper" ref={navWrapperRef}>
-              <Link
+              <LoadingLink
                 href="/dashboard/apercu"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/apercu") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[0] = el; }}
               >
                 APERÇU
-              </Link>
-              <Link
+              </LoadingLink>
+              <LoadingLink
                 href="/dashboard/produits"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/produits") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[1] = el; }}
               >
                 PRODUITS
-              </Link>
+              </LoadingLink>
 
               <div
                 className="dash-nav-dropdown"
@@ -197,71 +199,77 @@ export default function DashboardLayout({
 
                 {commandesDropdownOpen && (
                   <div className="dash-nav-dropdown-menu" role="menu">
-                    <Link
+                    <LoadingLink
                       href="/dashboard/commandes?status=non-confirme"
                       className={`dash-nav-dropdown-item ${commandesStatus === "non-confirme" ? "active" : ""}`}
                       role="menuitem"
                     >
                       <span className="dash-submenu-dot orange" aria-hidden="true"></span>
                       Non confirmé
-                    </Link>
-                    <Link
+                    </LoadingLink>
+                    <LoadingLink
                       href="/dashboard/commandes?status=confirme"
                       className={`dash-nav-dropdown-item ${commandesStatus === "confirme" ? "active" : ""}`}
                       role="menuitem"
                     >
                       <span className="dash-submenu-dot green" aria-hidden="true"></span>
                       Confirmé
-                    </Link>
-                    <Link
+                    </LoadingLink>
+                    <LoadingLink
                       href="/dashboard/commandes?status=retours"
                       className={`dash-nav-dropdown-item ${commandesStatus === "retours" ? "active" : ""}`}
                       role="menuitem"
                     >
                       <span className="dash-submenu-dot red" aria-hidden="true"></span>
                       Retours
-                    </Link>
+                    </LoadingLink>
                   </div>
                 )}
               </div>
 
-              <Link
+              <LoadingLink
                 href="/dashboard/portefeuille"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/portefeuille") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[3] = el; }}
               >
                 PORTEFEUILLE
-              </Link>
-              <Link
+              </LoadingLink>
+              <LoadingLink
                 href="/dashboard/support"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/support") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[4] = el; }}
               >
                 SUPPORT
-              </Link>
-              <Link
+              </LoadingLink>
+              <LoadingLink
                 href="/dashboard/theme"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/theme") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[5] = el; }}
               >
                 THÈME
-              </Link>
-              <Link
+              </LoadingLink>
+              <LoadingLink
                 href="/dashboard/compte"
                 className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
                 ref={(el) => { navItemRefs.current[6] = el; }}
               >
                 COMPTE
-              </Link>
+              </LoadingLink>
               {/* Optional Admin Link can be added here once useSession is integrated */}
               <div className="dash-nav-indicator" ref={navIndicatorRef}></div>
             </div>
           </nav>
 
           <div className="dash-actions">
-            <button className="dash-visit-btn" onClick={handleVisitStore} title="VISITER LE MAGASIN">
+            <LoadingButton
+              className="dash-visit-btn"
+              onClick={handleVisitStore}
+              title="VISITER LE MAGASIN"
+              variant="outline"
+              size="sm"
+            >
               VISITER LE MAGASIN
-            </button>
+            </LoadingButton>
           </div>
 
           <button className="dash-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
@@ -294,15 +302,15 @@ export default function DashboardLayout({
             </div>
 
             <nav className="dash-mobile-nav">
-              <Link href="/dashboard/apercu" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/apercu") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/apercu" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/apercu") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Aperçu
-              </Link>
+              </LoadingLink>
 
-              <Link href="/dashboard/produits" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/produits") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/produits" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/produits") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -310,7 +318,7 @@ export default function DashboardLayout({
                   <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Produits
-              </Link>
+              </LoadingLink>
 
               <div className="dash-mobile-nav-section">
                 <button className="dash-mobile-nav-item commandes-toggle" onClick={() => setCommandesOpen((v) => !v)} type="button">
@@ -342,23 +350,23 @@ export default function DashboardLayout({
                 </button>
                 {commandesOpen && (
                   <div className="dash-mobile-submenu">
-                    <Link href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
+                    <LoadingLink href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
                       <span className="dash-submenu-dot orange"></span>
                       Non confirmé
-                    </Link>
-                    <Link href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
+                    </LoadingLink>
+                    <LoadingLink href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
                       <span className="dash-submenu-dot green"></span>
                       Confirmé
-                    </Link>
-                    <Link href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
+                    </LoadingLink>
+                    <LoadingLink href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
                       <span className="dash-submenu-dot red"></span>
                       Retours
-                    </Link>
+                    </LoadingLink>
                   </div>
                 )}
               </div>
 
-              <Link href="/dashboard/portefeuille" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/portefeuille") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/portefeuille" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/portefeuille") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M21 8H3M21 8V16C21 16.5304 20.7893 17.0391 20.4142 17.4142C20.0391 17.7893 19.5304 18 19 18H5C4.46957 18 3.96086 17.7893 3.58579 17.4142C3.21071 17.0391 3 16.5304 3 16V8M21 8L19 3H5L3 8"
@@ -370,28 +378,28 @@ export default function DashboardLayout({
                   <circle cx="12" cy="13" r="2" stroke="currentColor" strokeWidth="2" />
                 </svg>
                 Portefeuille
-              </Link>
+              </LoadingLink>
 
-              <Link href="/dashboard/support" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/support") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/support" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/support") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Support
-              </Link>
+              </LoadingLink>
 
-              <Link href="/dashboard/theme" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/theme") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/theme" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/theme") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                  <circle cx="8" cy="12" r="1.5" fill="currentColor"/>
-                  <circle cx="16" cy="12" r="1.5" fill="currentColor"/>
-                  <circle cx="12" cy="8" r="1.5" fill="currentColor"/>
-                  <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="2" fill="currentColor" />
+                  <circle cx="8" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="16" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="8" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="16" r="1.5" fill="currentColor" />
                 </svg>
                 Thème
-              </Link>
+              </LoadingLink>
 
-              <Link href="/dashboard/compte" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/compte") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/compte" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/compte") ? "active" : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
@@ -409,7 +417,7 @@ export default function DashboardLayout({
                   />
                 </svg>
                 Compte
-              </Link>
+              </LoadingLink>
 
               <Link href="/dashboard/parametres" className="dash-mobile-nav-item bordered">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

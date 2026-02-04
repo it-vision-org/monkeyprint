@@ -4,8 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
-    firstName: z.string().min(2),
-    lastName: z.string().min(2),
+    name: z.string().min(2),
     phoneNumber: z.string().min(8), // Assuming Tunisian phone numbers
     address: z.string().min(5),
     city: z.string().min(2),
@@ -14,8 +13,7 @@ const checkoutSchema = z.object({
 
 export async function placeOrder(formData: FormData) {
     const rawData = {
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
+        name: formData.get('name'),
         phoneNumber: formData.get('phoneNumber'),
         address: formData.get('address'),
         city: formData.get('city'),
@@ -28,7 +26,7 @@ export async function placeOrder(formData: FormData) {
         return { error: 'Invalid form data' };
     }
 
-    const { firstName, lastName, phoneNumber, address, city, items } = validatedFields.data;
+    const { name, phoneNumber, address, city, items } = validatedFields.data;
     const cartItems = JSON.parse(items);
 
     if (!cartItems.length) {
@@ -56,7 +54,7 @@ export async function placeOrder(formData: FormData) {
             customer = await prisma.customer.create({
                 data: {
                     phoneNumber,
-                    name: `${firstName} ${lastName}`,
+                    name,
                     address: `${address}, ${city}`,
                     // city: city // Schema doesn't have city separate? Let's check schema.
                     // Schema has name, phoneNumber, address.
@@ -67,7 +65,7 @@ export async function placeOrder(formData: FormData) {
             await prisma.customer.update({
                 where: { id: customer.id },
                 data: {
-                    name: `${firstName} ${lastName}`,
+                    name,
                     address: `${address}, ${city}`
                 }
             });

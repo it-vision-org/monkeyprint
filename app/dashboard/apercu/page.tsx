@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 import Image from "next/image";
 import { getR2Url } from "@/lib/storage";
 import SalesChart from "./SalesChart";
@@ -14,8 +14,8 @@ export default async function ApercuPage() {
 
     // Use findUnique if possible, or findFirst with explicit limit
     const store = await prisma.store.findFirst({
-        where: { 
-            ownerId: session.user.id 
+        where: {
+            ownerId: session.user.id
         },
         include: {
             orders: {
@@ -72,7 +72,7 @@ export default async function ApercuPage() {
                     <div className="apercu-card-subtitle">Depuis le mois dernier</div>
                 </div>
 
-                <Link href="/dashboard/commandes?status=non-confirme" className="apercu-card apercu-commandes apercu-card-link">
+                <LoadingLink href="/dashboard/commandes?status=non-confirme" className="apercu-card apercu-commandes apercu-card-link">
                     <h3 className="apercu-card-label">Commandes en attente</h3>
                     <div className="apercu-card-value-simple">
                         {pendingOrdersCount}
@@ -81,10 +81,10 @@ export default async function ApercuPage() {
                         -0%
                     </div>
                     <div className="apercu-card-subtitle">Depuis le mois dernier</div>
-                </Link>
+                </LoadingLink>
 
                 {/* Row 2: Paiement en attente */}
-                <Link href="/dashboard/portefeuille" className="apercu-card apercu-paiement-attente apercu-card-link">
+                <LoadingLink href="/dashboard/portefeuille" className="apercu-card apercu-paiement-attente apercu-card-link">
                     <h3 className="apercu-card-label">Paiement en attente</h3>
                     <div className="apercu-card-value">
                         <span className="apercu-value">0</span>
@@ -94,10 +94,10 @@ export default async function ApercuPage() {
                         +0%
                     </div>
                     <div className="apercu-card-subtitle">Depuis le mois dernier</div>
-                </Link>
+                </LoadingLink>
 
                 {/* Row 3: Paiement en cours */}
-                <Link href="/dashboard/portefeuille" className="apercu-card apercu-paiement-cours apercu-card-link">
+                <LoadingLink href="/dashboard/portefeuille" className="apercu-card apercu-paiement-cours apercu-card-link">
                     <div className="apercu-header-row">
                         <h3 className="apercu-card-label">Paiement en cours</h3>
                         <div className="apercu-date">{new Date().toLocaleDateString('fr-FR')}</div>
@@ -108,16 +108,16 @@ export default async function ApercuPage() {
                         <span className="apercu-currency">DT</span>
                     </div>
                     <div className="apercu-card-notice">Une fois prêt, un courriel vous sera envoyé.</div>
-                </Link>
+                </LoadingLink>
 
                 {/* Row 4: Commandes retournées */}
-                <Link href="/dashboard/commandes?status=retours" className="apercu-card apercu-retournees apercu-card-link">
+                <LoadingLink href="/dashboard/commandes?status=retours" className="apercu-card apercu-retournees apercu-card-link">
                     <h3 className="apercu-card-label">Commandes retournées</h3>
                     <div className="apercu-card-value-negative">
                         <span className="apercu-value">-0</span>
                         <span className="apercu-currency">DT</span>
                     </div>
-                </Link>
+                </LoadingLink>
 
                 {/* Sales Trend Chart */}
                 <SalesChart />

@@ -457,6 +457,13 @@
   left: 100%;
 }
 
+.desktopHeroCta:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25),
+    0px 0px 20px rgba(255, 41, 195, 0.2);
+  transition-duration: 0.1s;
+}
+
 /* Enhanced How It Works Desktop */
 .desktopHowItWorksSection {
   padding: 140px 80px;
@@ -884,6 +891,13 @@
 
 .desktopFooterCta:hover::before {
   left: 100%;
+}
+
+.desktopFooterCta:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2),
+    0px 0px 20px rgba(255, 41, 195, 0.15);
+  transition-duration: 0.1s;
 }
 
 .desktopFooterCtaText {

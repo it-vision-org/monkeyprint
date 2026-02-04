@@ -4,6 +4,24 @@
   --background: #ffffff;
   --foreground: #171717;
   --mobile-padding-x: 18px;
+  
+  /* Interaction timing variables */
+  --spring-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --spring-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --spring-responsive: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  
+  /* Interaction durations */
+  --duration-instant: 0.1s;
+  --duration-fast: 0.15s;
+  --duration-normal: 0.25s;
+  --duration-slow: 0.35s;
+  
+  /* Interactive element scales */
+  --scale-tap: 0.96;
+  --scale-hover: 1.02;
+  --scale-tap-subtle: 0.98;
+  --scale-hover-subtle: 1.01;
 }
 
 @theme inline {
@@ -51,6 +69,296 @@ body {
   background: #ffffff;
   color: #171717;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==========================================================================
+   GLOBAL TACTILE FEEDBACK SYSTEM
+   Premium micro-interactions for all interactive elements
+   ========================================================================== */
+
+/* Base interactive element - applied to buttons, links, cards */
+.interactive,
+button:not([disabled]),
+[role="button"]:not([disabled]),
+a.btn,
+.btn {
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    background-color var(--duration-fast) ease-out,
+    border-color var(--duration-fast) ease-out;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover state - lift effect */
+@media (hover: hover) {
+  .interactive:hover:not([disabled]),
+  button:not([disabled]):hover,
+  [role="button"]:not([disabled]):hover {
+    transform: scale(var(--scale-hover)) translateY(-1px);
+  }
+  
+  .interactive-subtle:hover:not([disabled]) {
+    transform: scale(var(--scale-hover-subtle));
+  }
+}
+
+/* Active/Pressed state - push down effect */
+.interactive:active:not([disabled]),
+button:not([disabled]):active,
+[role="button"]:not([disabled]):active {
+  transform: scale(var(--scale-tap)) !important;
+  transition-duration: var(--duration-instant);
+}
+
+.interactive-subtle:active:not([disabled]) {
+  transform: scale(var(--scale-tap-subtle)) !important;
+}
+
+/* Card interactive states */
+.card-interactive {
+  transition: 
+    transform var(--duration-normal) var(--spring-smooth),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .card-interactive:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.card-interactive:active {
+  transform: translateY(-4px) scale(0.99);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Link hover underline animation */
+.link-animated {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width var(--duration-normal) var(--ease-out-expo);
+}
+
+@media (hover: hover) {
+  .link-animated:hover::after {
+    width: 100%;
+  }
+}
+
+/* Input focus ring animation */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition: 
+    border-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    transform var(--duration-fast) var(--spring-responsive);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  transform: scale(1.005);
+}
+
+/* Checkbox and Radio tactile feedback */
+input[type="checkbox"],
+input[type="radio"] {
+  transition: transform var(--duration-instant) var(--spring-bounce);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:active,
+input[type="radio"]:active {
+  transform: scale(0.9);
+}
+
+/* Icon button specific styles */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out;
+}
+
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.icon-btn:active {
+  transform: scale(0.9) rotate(-5deg);
+}
+
+/* Ripple effect container (for JS-powered ripples) */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple-animation 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Loading state styles */
+.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shimmer effect for skeleton loading */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Pulse animation for attention */
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Bounce animation for success states */
+.bounce {
+  animation: bounce 0.5s var(--spring-bounce);
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Shake animation for error states */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-8px);
+  }
+  40%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide up animation */
+.slide-up {
+  animation: slideUp var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Utility styles to match the provided desktop mock */
@@ -638,12 +946,34 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cs-chip:hover {
+  background: rgba(13, 28, 35, 0.18);
+  transform: scale(1.05) rotate(1deg);
+}
+
+.cs-chip:active {
+  transform: scale(0.95) rotate(-1deg);
+  transition-duration: var(--duration-instant);
 }
 
 .cs-chip.active {
   background: #41eb5c;
   color: #063517;
+  box-shadow: 0 4px 12px rgba(65, 235, 92, 0.3);
+  animation: chipSelect 0.3s var(--spring-bounce);
+}
+
+@keyframes chipSelect {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .cs-primary-btn {
@@ -661,23 +991,36 @@ body {
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 22px 30px rgba(6, 53, 23, 0.3);
-  transition: all 0.2s ease;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo);
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
 }
 
 .cs-primary-btn:hover {
   background: #35d04a;
-  transform: translateY(-1px);
-  box-shadow: 0 24px 32px rgba(6, 53, 23, 0.35);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 26px 36px rgba(6, 53, 23, 0.4);
+}
+
+.cs-primary-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 12px 20px rgba(6, 53, 23, 0.25);
+  transition-duration: var(--duration-instant);
 }
 
 .cs-primary-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none !important;
 }
 
 .cs-ghost-btn {
@@ -692,6 +1035,23 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out,
+    border-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cs-ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.85);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.cs-ghost-btn:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: var(--duration-instant);
 }
 
 .cs-card-summary {
@@ -796,9 +1156,14 @@ body {
   box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.35s ease, border-color 0.35s ease,
-    z-index 0.35s ease;
+  transition: 
+    transform 0.35s var(--spring-responsive),
+    opacity 0.35s ease,
+    border-color 0.35s ease,
+    z-index 0.35s ease,
+    box-shadow 0.3s ease;
   z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cs-theme-card img {
@@ -848,17 +1213,34 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+  box-shadow: 0 4px 12px rgba(65, 235, 92, 0.3);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cs-round-nav svg {
   stroke: currentColor;
   fill: none;
+  transition: transform var(--duration-fast) var(--spring-responsive);
 }
 
 .cs-round-nav:hover {
   background: #35d04a;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(65, 235, 92, 0.4);
+}
+
+.cs-round-nav:hover svg {
+  transform: scale(1.1);
+}
+
+.cs-round-nav:active {
+  transform: scale(0.9);
+  box-shadow: 0 2px 8px rgba(65, 235, 92, 0.2);
+  transition-duration: var(--duration-instant);
 }
 
 .cs-divider-standalone {

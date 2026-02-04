@@ -2,26 +2,29 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import LoadingLink from './LoadingLink';
+import Link from 'next/link'; // Keep Link if needed for types or specific uses, but prefer LoadingLink
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import type { Session } from 'next-auth';
+import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import CartButton from './CartButton';
 import type { MenuItem } from './types';
+import { springResponsive, navLinkVariants } from '@/lib/interactions';
 
 type MainHeaderProps = {
     // Logo customization
     logoAlt?: string;
     logoText?: string;
     logoFilter?: string;
-    
+
     // Navigation
     menuItems?: MenuItem[];
     showCart?: boolean;
     cartHref?: string;
     cartCount?: number;
-    
+
     // Styling
     className?: string;
     innerClassName?: string;
@@ -29,13 +32,13 @@ type MainHeaderProps = {
     logoClassName?: string;
     logoTextClassName?: string;
     menuButtonClassName?: string;
-    
+
     // Mobile menu styling
     mobileMenuProps?: Partial<React.ComponentProps<typeof MobileMenu>>;
-    
+
     // Optional initial session to prevent loading flash
     initialSession?: Session | null;
-    
+
     // Whether to show dashboard link (only show if user has a store)
     hasStore?: boolean;
 };
@@ -45,6 +48,34 @@ const defaultMenuItems: MenuItem[] = [
     { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
     { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
+
+// Hamburger menu line animations
+const lineVariants = {
+    closed: {
+        rotate: 0,
+        y: 0,
+        opacity: 1,
+    },
+    open: (custom: number) => ({
+        rotate: custom === 0 ? 45 : custom === 2 ? -45 : 0,
+        y: custom === 0 ? 9 : custom === 2 ? -9 : 0,
+        opacity: custom === 1 ? 0 : 1,
+        transition: springResponsive,
+    }),
+};
+
+// Desktop nav link hover effect
+const navItemVariants = {
+    initial: { scale: 1 },
+    hover: {
+        scale: 1.02,
+        transition: springResponsive
+    },
+    tap: {
+        scale: 0.97,
+        transition: springResponsive
+    }
+};
 
 export default function MainHeader({
     logoAlt = 'Monkey Print',
@@ -65,6 +96,7 @@ export default function MainHeader({
     hasStore = true // Default to true for backward compatibility
 }: MainHeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { data: clientSession } = useSession();
     // Use initialSession if provided (from server), otherwise use client session
     const session = initialSession !== undefined ? initialSession : clientSession;
@@ -76,6 +108,7 @@ export default function MainHeader({
     };
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
         await signOut({ redirect: false });
         router.push('/');
         router.refresh();
@@ -84,7 +117,7 @@ export default function MainHeader({
     // Build menu items with auth-aware links
     const allMenuItems: MenuItem[] = [
         ...menuItems,
-        ...(session?.user 
+        ...(session?.user
             ? [
                 ...(hasStore ? [{ label: "Tableau de bord", href: "/dashboard", icon: "📊" }] : []),
                 { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogout }
@@ -98,7 +131,8 @@ export default function MainHeader({
 
     return (
         <>
-            <style dangerouslySetInnerHTML={{__html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .main-header-mobile-menu-button {
                     display: flex;
                 }
@@ -122,8 +156,8 @@ export default function MainHeader({
                     }
                 }
             `}} />
-            <header className={className} style={{ 
-                position: 'fixed', 
+            <header className={className} style={{
+                position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
@@ -142,12 +176,12 @@ export default function MainHeader({
                     width: '100%',
                     boxSizing: 'border-box'
                 }}>
-                    <Link href="/" className={logoContainerClassName} style={{
+                    <LoadingLink href="/" className={logoContainerClassName} style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         textDecoration: 'none'
-                    }}>
+                    }} showSpinner={false}>
                         <Image
                             src="/logo.png"
                             alt={logoAlt}
@@ -174,8 +208,8 @@ export default function MainHeader({
                                 {logoText}
                             </span>
                         )}
-                    </Link>
-                    
+                    </LoadingLink>
+
                     {/* Desktop Navigation */}
                     <nav className="main-header-desktop-nav" style={{
                         display: 'none',
@@ -184,9 +218,13 @@ export default function MainHeader({
                     }}>
                         {allMenuItems.map((item, index) => (
                             item.onClick ? (
-                                <button
+                                <motion.button
                                     key={index}
                                     onClick={item.onClick}
+                                    variants={navItemVariants}
+                                    initial="initial"
+                                    whileHover="hover"
+                                    whileTap="tap"
                                     style={{
                                         background: 'transparent',
                                         border: 'none',
@@ -198,30 +236,54 @@ export default function MainHeader({
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
-                                        padding: 0
+                                        padding: '8px 12px',
+                                        borderRadius: '8px',
+                                        position: 'relative',
                                     }}
                                 >
                                     {item.icon && <span>{item.icon}</span>}
                                     {item.label}
-                                </button>
+                                    {isLoggingOut && item.label === "Se déconnecter" && (
+                                        <span style={{
+                                            marginLeft: 8,
+                                            display: 'inline-block',
+                                            width: 12,
+                                            height: 12,
+                                            border: '2px solid currentColor',
+                                            borderTopColor: 'transparent',
+                                            borderRadius: '50%',
+                                            animation: 'spin 1s linear infinite'
+                                        }} />
+                                    )}
+                                </motion.button>
                             ) : (
-                                <Link
+                                <motion.div
                                     key={index}
-                                    href={item.href}
-                                    style={{
-                                        color: '#242424',
-                                        textDecoration: 'none',
-                                        fontSize: '16px',
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 500,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px'
-                                    }}
+                                    variants={navItemVariants}
+                                    initial="initial"
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    style={{ borderRadius: '8px' }}
                                 >
-                                    {item.icon && <span>{item.icon}</span>}
-                                    {item.label}
-                                </Link>
+                                    <LoadingLink
+                                        href={item.href}
+                                        style={{
+                                            color: '#242424',
+                                            textDecoration: 'none',
+                                            fontSize: '16px',
+                                            fontFamily: 'Inter, sans-serif',
+                                            fontWeight: 500,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '8px 12px',
+                                        }}
+                                        showSpinner={true}
+                                    >
+                                        {item.icon && <span>{item.icon}</span>}
+                                        {item.label}
+                                    </LoadingLink>
+                                </motion.div>
                             )
                         ))}
                     </nav>
@@ -237,42 +299,45 @@ export default function MainHeader({
                                 strokeColor="#1f2937"
                             />
                         )}
-                        <button
+                        <motion.button
                             className={`${menuButtonClassName} main-header-mobile-menu-button`}
-                            onClick={() => handleMenuToggle(true)}
-                            aria-label="Open menu"
+                            onClick={() => handleMenuToggle(!isMenuOpen)}
+                            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                             type="button"
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.05 }}
+                            transition={springResponsive}
                             style={{
-                                width: '28px',
-                                height: '20px',
+                                width: '44px',
+                                height: '44px',
                                 border: 0,
                                 background: 'transparent',
-                                padding: 0,
+                                padding: '10px 8px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                cursor: 'pointer'
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                borderRadius: '8px',
                             }}
                         >
-                            <span style={{
-                                height: '2px',
-                                background: '#414042',
-                                width: '100%',
-                                borderRadius: '2px'
-                            }} />
-                            <span style={{
-                                height: '2px',
-                                background: '#414042',
-                                width: '100%',
-                                borderRadius: '2px'
-                            }} />
-                            <span style={{
-                                height: '2px',
-                                background: '#414042',
-                                width: '100%',
-                                borderRadius: '2px'
-                            }} />
-                        </button>
+                            {[0, 1, 2].map((i) => (
+                                <motion.span
+                                    key={i}
+                                    custom={i}
+                                    variants={lineVariants}
+                                    animate={isMenuOpen ? 'open' : 'closed'}
+                                    style={{
+                                        height: '2px',
+                                        background: '#414042',
+                                        width: '100%',
+                                        borderRadius: '2px',
+                                        display: 'block',
+                                        transformOrigin: 'center',
+                                    }}
+                                />
+                            ))}
+                        </motion.button>
                     </div>
                 </div>
             </header>

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 
 type HomeHeroProps = {
     className?: string;
@@ -46,9 +46,9 @@ export default function HomeHero({
                 Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre
                 boutique en ligne.
             </p>
-            <Link href="/create-shop" className={ctaClassName}>
+            <LoadingLink href="/create-shop" className={ctaClassName}>
                 <span className={ctaTextClassName}>COMMENCEZ GRATUITEMENT !</span>
-            </Link>
+            </LoadingLink>
         </section>
     );
 }

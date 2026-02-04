@@ -7,6 +7,10 @@ import PageHeader from './PageHeader';
 import TopHeader from './TopHeader';
 import { DEFAULT_PRODUCT_DETAIL, DEFAULT_SIZES, DEFAULT_COLORS } from '@/lib/constants/mockData';
 import { useCart } from '@/components/CartContext';
+import LoadingButton from "@/components/LoadingButton";
+import LoadingLink from "@/components/LoadingLink";
+import { motion } from "framer-motion";
+import { chipVariants, iconButtonVariants } from "@/lib/interactions";
 
 type ProductDetailPageProps = {
     baseRoute: string;
@@ -38,7 +42,7 @@ export default function ProductDetailPage({
 
     const fullStars = Math.floor(product.rating);
     const hasHalfStar = product.rating % 1 !== 0;
-    
+
     // Calculate total cart count (sum of all item quantities)
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -73,7 +77,7 @@ export default function ProductDetailPage({
                         <div className="product-detail-rating">
                             {[...Array(fullStars)].map((_, i) => (
                                 <svg key={i} width="20" height="20" viewBox="0 0 24 24" fill="#FFD700">
-                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
                             ))}
                             {hasHalfStar && (
@@ -84,7 +88,7 @@ export default function ProductDetailPage({
                                             <stop offset="50%" stopColor="#E5E7EB" />
                                         </linearGradient>
                                     </defs>
-                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill={`url(#${gradientId})`}/>
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill={`url(#${gradientId})`} />
                                 </svg>
                             )}
                             <span className="product-detail-reviews">({product.reviews})</span>
@@ -96,13 +100,18 @@ export default function ProductDetailPage({
                         <h4 className="product-detail-label">Taille</h4>
                         <div className="product-detail-sizes">
                             {sizes.map((size) => (
-                                <button
+                                <motion.button
                                     key={size}
+                                    variants={chipVariants}
+                                    initial="idle"
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    animate={selectedSize === size ? "selected" : "idle"}
                                     className={`product-size-btn ${selectedSize === size ? 'active' : ''}`}
                                     onClick={() => setSelectedSize(size)}
                                 >
                                     {size}
-                                </button>
+                                </motion.button>
                             ))}
                         </div>
                     </div>
@@ -111,10 +120,15 @@ export default function ProductDetailPage({
                         <h4 className="product-detail-label">Couleur</h4>
                         <div className="product-detail-colors">
                             {colors.map((color, index) => (
-                                <button
+                                <motion.button
                                     key={index}
+                                    variants={chipVariants}
+                                    initial="idle"
+                                    whileHover="hover"
+                                    whileTap="tap"
+                                    animate={selectedColor === color ? "selected" : "idle"}
                                     className={`product-color-btn ${selectedColor === color ? 'active' : ''}`}
-                                    style={{ 
+                                    style={{
                                         backgroundColor: color,
                                         border: color === '#FFFFFF' ? '2px solid #e5e7eb' : 'none'
                                     }}
@@ -134,17 +148,29 @@ export default function ProductDetailPage({
             </div>
 
             <div className="product-detail-footer">
-                <button className="product-cart-icon-btn" onClick={() => router.push(`${baseRoute}/cart`)}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {cartCount > 0 && (
-                        <span className="product-cart-badge">{cartCount}</span>
-                    )}
-                </button>
-                <button className="product-add-to-cart-btn" onClick={() => router.push(`${baseRoute}/cart`)}>
+                <LoadingLink href={`${baseRoute}/cart`} className="product-cart-icon-btn">
+                    <motion.div
+                        variants={iconButtonVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {cartCount > 0 && (
+                            <span className="product-cart-badge">{cartCount}</span>
+                        )}
+                    </motion.div>
+                </LoadingLink>
+                <LoadingButton
+                    className="product-add-to-cart-btn"
+                    onClick={() => router.push(`${baseRoute}/cart`)}
+                    variant="primary"
+                    size="lg"
+                    style={{ flex: 1 }}
+                >
                     Commandez maintenant
-                </button>
+                </LoadingButton>
             </div>
         </div>
     );

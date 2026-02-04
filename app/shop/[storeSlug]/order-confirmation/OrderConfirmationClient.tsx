@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 import { format } from "date-fns";
 import StoreHeader from "@/components/StoreHeader";
 import type { ThemeConfig } from '@/components/themeConfig';
@@ -27,11 +28,11 @@ type OrderConfirmationClientProps = {
     orders: any[];
 };
 
-export default function OrderConfirmationClient({ 
-    storeSlug, 
-    theme, 
+export default function OrderConfirmationClient({
+    storeSlug,
+    theme,
     customization,
-    orders 
+    orders
 }: OrderConfirmationClientProps) {
     const getPageClassName = () => {
         const baseClass = 'order-confirmation-page-modern';
@@ -149,9 +150,9 @@ export default function OrderConfirmationClient({
                 )}
 
                 <div className="order-confirmation-actions-modern">
-                    <Link href={theme.baseRoute} className="order-confirmation-button-modern">
+                    <LoadingLink href={theme.baseRoute} className="order-confirmation-button-modern">
                         Trouver d&apos;autres produits
-                    </Link>
+                    </LoadingLink>
                 </div>
             </div>
         </div>

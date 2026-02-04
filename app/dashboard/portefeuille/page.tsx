@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
-import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 
 export default async function PortefeuillePage() {
     const session = await auth();
@@ -19,7 +19,7 @@ export default async function PortefeuillePage() {
 
     // Only fetch DELIVERED_AND_PAID orders (these are the only ones that contribute to wallet)
     const deliveredOrders = await prisma.order.findMany({
-        where: { 
+        where: {
             storeId: store.id,
             status: 'DELIVERED_AND_PAID'
         },
@@ -121,9 +121,9 @@ export default async function PortefeuillePage() {
                                     <span className="portefeuille-section-item-price green-price">{order.totalAmount} DT</span>
                                 </div>
                             ))}
-                            <Link href="/dashboard/portefeuille/withdraw" className="portefeuille-section-button" style={{ textDecoration: 'none', display: 'block' }}>
+                            <LoadingLink href="/dashboard/portefeuille/withdraw" className="portefeuille-section-button" style={{ textDecoration: 'none', display: 'block' }}>
                                 Recevez votre paiement
-                            </Link>
+                            </LoadingLink>
                         </div>
                     </div>
                 </div>
@@ -153,9 +153,9 @@ export default async function PortefeuillePage() {
                         </div>
                         {lastWithdrawal && (
                             <div className="portefeuille-section-items">
-                                <Link 
+                                <LoadingLink
                                     href="/dashboard/portefeuille/withdrawals"
-                                    style={{ 
+                                    style={{
                                         display: 'block',
                                         marginTop: '12px',
                                         fontSize: '14px',
@@ -165,7 +165,7 @@ export default async function PortefeuillePage() {
                                     }}
                                 >
                                     Voir l&apos;historique complet →
-                                </Link>
+                                </LoadingLink>
                             </div>
                         )}
                     </div>

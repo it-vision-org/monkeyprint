@@ -1,7 +1,8 @@
 'use client';
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "next/link"; // Keep Link for logic if needed, or replace if all used.
+import LoadingLink from "@/components/LoadingLink";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import type { Session } from 'next-auth';
@@ -15,12 +16,12 @@ import StoresSection from "@/components/StoresSection";
 import type { MenuItem } from "@/components/types";
 
 const menuItems: MenuItem[] = [
-    { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
-    { label: "Contactez-nous", href: "/contact", icon: "💬" },
+  { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
+  { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
 
 type HomeContentProps = {
-    initialSession?: Session | null;
+  initialSession?: Session | null;
 };
 
 export default function HomeContent({ initialSession }: HomeContentProps) {
@@ -35,17 +36,17 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
     router.refresh();
   };
 
-  const desktopMenuItems = session?.user 
+  const desktopMenuItems = session?.user
     ? [
-        ...menuItems,
-        { label: "Tableau de bord", href: "/dashboard", icon: "📊" },
-        { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogout }
-      ]
+      ...menuItems,
+      { label: "Tableau de bord", href: "/dashboard", icon: "📊" },
+      { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogout }
+    ]
     : [
-        ...menuItems,
-        { label: "Se connecter", href: "/login", icon: "👤" },
-        { label: "Créer une boutique", href: "/create-shop", icon: "➕" }
-      ];
+      ...menuItems,
+      { label: "Se connecter", href: "/login", icon: "👤" },
+      { label: "Créer une boutique", href: "/create-shop", icon: "➕" }
+    ];
 
   return (
     <>
@@ -103,7 +104,7 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
             subtitleClassName={styles.storesSubtitle}
             getStoreBoxClassName={(index) => {
               const variants = [styles.storeBox1, styles.storeBox2, styles.storeBox3];
-              return `${styles.storeBox} ${variants[index]}`;
+              return `${styles.storeBox} ${variants[index]} card-interactive`;
             }}
             showArrows={true}
             getArrowClassName={(index) => {
@@ -118,11 +119,10 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
             ]}
           />
 
-          {/* Footer */}
           <div className={styles.footerBar} aria-hidden="true" />
-          <Link href="/create-shop" className={styles.footerCta}>
+          <LoadingLink href="/create-shop" className={`${styles.footerCta} interactive`}>
             <span className={styles.footerCtaText}>COMMENCEZ GRATUITEMENT !</span>
-          </Link>
+          </LoadingLink>
         </div>
       </div>
 
@@ -147,19 +147,29 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
                 {desktopMenuItems.map((item, index) => (
                   <li key={index}>
                     {item.onClick ? (
-                      <button 
+                      <button
                         onClick={item.onClick}
                         className={desktopStyles.desktopNavMenuItem}
-                        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          font: 'inherit',
+                          color: 'inherit',
+                          padding: 0
+                        }}
                       >
                         <span className={desktopStyles.desktopNavMenuItemIcon}>{item.icon}</span>
                         {item.label}
                       </button>
                     ) : (
-                      <Link href={item.href} className={desktopStyles.desktopNavMenuItem}>
+                      <LoadingLink href={item.href} className={desktopStyles.desktopNavMenuItem}>
                         <span className={desktopStyles.desktopNavMenuItemIcon}>{item.icon}</span>
                         {item.label}
-                      </Link>
+                      </LoadingLink>
                     )}
                   </li>
                 ))}
@@ -210,9 +220,9 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
               <p className={desktopStyles.desktopHeroSubtitle}>
                 Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre boutique en ligne.
               </p>
-              <Link href="/create-shop" className={desktopStyles.desktopHeroCta}>
+              <LoadingLink href="/create-shop" className={desktopStyles.desktopHeroCta}>
                 COMMENCEZ GRATUITEMENT !
-              </Link>
+              </LoadingLink>
             </div>
           </section>
 
@@ -302,24 +312,24 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
                 { href: "/store/theme-2", image: "/theme-2.png", alt: "Theme 2" },
                 { href: "/store/theme-3", image: "/theme-3.png", alt: "Theme 3" }
               ].map((store, index) => (
-                <Link key={index} href={store.href} className={desktopStyles.desktopStoreBox}>
-                  <Image 
-                    src={store.image} 
-                    alt={store.alt} 
-                    width={400} 
+                <LoadingLink key={index} href={store.href} className={desktopStyles.desktopStoreBox} showSpinner={false}>
+                  <Image
+                    src={store.image}
+                    alt={store.alt}
+                    width={400}
                     height={400}
                     className={desktopStyles.desktopStoreBoxImage}
                   />
                   <div className={desktopStyles.desktopStoreArrow}>
-                    <Image 
-                      src="/Arrow.png" 
-                      alt="" 
-                      width={24} 
+                    <Image
+                      src="/Arrow.png"
+                      alt=""
+                      width={24}
                       height={24}
                       className={desktopStyles.desktopStoreArrowIcon}
                     />
                   </div>
-                </Link>
+                </LoadingLink>
               ))}
             </div>
           </section>
@@ -328,9 +338,9 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
           <section className={desktopStyles.desktopFooterSection}>
             <div className={desktopStyles.desktopFooterCtaContainer}>
               <div className={desktopStyles.desktopFooterCtaBar} aria-hidden="true" />
-              <Link href="/create-shop" className={desktopStyles.desktopFooterCta}>
+              <LoadingLink href="/create-shop" className={desktopStyles.desktopFooterCta}>
                 <span className={desktopStyles.desktopFooterCtaText}>COMMENCEZ GRATUITEMENT !</span>
-              </Link>
+              </LoadingLink>
             </div>
           </section>
         </div>

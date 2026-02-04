@@ -1,6 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import LoadingLink from './LoadingLink';
+import { motion } from 'framer-motion';
+import { cardVariants } from '@/lib/interactions';
 
 type CategoryCardProps = {
     image: string;
@@ -28,33 +31,43 @@ export default function CategoryCard({
     imageHeight = 160
 }: CategoryCardProps) {
     const content = (
-        <>
-            <Image 
-                src={image} 
-                alt={alt} 
-                width={imageWidth} 
-                height={imageHeight} 
+        <motion.div
+            variants={cardVariants}
+            initial="idle"
+            whileHover="hover"
+            whileTap="tap"
+            className={className}
+            style={{
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                borderRadius: 'inherit'
+            }}
+            onClick={onClick}
+        >
+            <Image
+                src={image}
+                alt={alt}
+                width={imageWidth}
+                height={imageHeight}
                 quality={95}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 className={imageClassName}
             />
             <span className={labelClassName}>{label}</span>
-        </>
+        </motion.div>
     );
 
     if (href) {
         return (
-            <a href={href} className={className} onClick={onClick}>
+            <LoadingLink href={href} className={className} style={{ display: 'block', textDecoration: 'none' }} showSpinner={false}>
                 {content}
-            </a>
+            </LoadingLink>
         );
     }
 
-    return (
-        <div className={className} onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
-            {content}
-        </div>
-    );
+    return content;
 }
 

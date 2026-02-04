@@ -1,68 +1,80 @@
 'use client';
 
 import { useCart, CartItem } from "./CartContext";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import LoadingButton from "./LoadingButton";
 
 export default function AddToCartButton({ product, frontUrl, storeName, storeSlug }: { product: any, frontUrl: string | null, storeName: string, storeSlug: string }) {
     const { addToCart } = useCart();
     const router = useRouter();
+    const [isAdding, setIsAdding] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
+    const [isBuying, setIsBuying] = useState(false);
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        setIsAdding(true);
+
+        // Simulate a small delay for "alive" feel
+        await new Promise(resolve => setTimeout(resolve, 600));
+
         addToCart({
             id: product.id,
             name: product.name,
             price: product.basePrice,
-            image: frontUrl || undefined, // frontUrl is resolved string
-            quantity: 1, // Default to 1
+            image: frontUrl || undefined,
+            quantity: 1,
             storeId: product.storeId,
             storeName: storeName,
             storeSlug: storeSlug
         });
+
+        setIsAdding(false);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
     };
 
-    const handleBuyNow = () => {
-        handleAddToCart();
+    const handleBuyNow = async () => {
+        setIsBuying(true);
+
+        // Simulate logic
+        addToCart({
+            id: product.id,
+            name: product.name,
+            price: product.basePrice,
+            image: frontUrl || undefined,
+            quantity: 1,
+            storeId: product.storeId,
+            storeName: storeName,
+            storeSlug: storeSlug
+        });
+
+        // We don't necessarily need a delay here as we're navigating
         router.push(`/shop/${storeSlug}/checkout`);
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+            <LoadingButton
                 onClick={handleAddToCart}
-                style={{
-                    width: '100%',
-                    padding: '16px',
-                    background: isAdded ? '#41eb5c' : '#ffffff',
-                    color: isAdded ? 'white' : '#000',
-                    border: '2px solid #000',
-                    borderColor: isAdded ? '#41eb5c' : '#000',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                }}
+                isLoading={isAdding}
+                isSuccess={isAdded}
+                variant={isAdded ? 'success' : 'outline'}
+                className="w-full"
+                style={{ width: '100%' }}
             >
-                {isAdded ? "Ajouté au panier !" : "Ajouter au panier"}
-            </button>
-            <button
+                {isAdded ? "Ajouté !" : "Ajouter au panier"}
+            </LoadingButton>
+
+            <LoadingButton
                 onClick={handleBuyNow}
-                style={{
-                    width: '100%',
-                    padding: '16px',
-                    background: '#000',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                }}
+                isLoading={isBuying}
+                variant="primary"
+                className="w-full"
+                style={{ width: '100%' }}
             >
                 Commander maintenant
-            </button>
+            </LoadingButton>
         </div>
     );
 }

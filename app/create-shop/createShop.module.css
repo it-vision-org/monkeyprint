@@ -551,11 +551,12 @@
 .createShopContainer main {
   position: relative;
   width: 100%;
-  height: calc(100vh - 56px);
+  min-height: calc(100vh - 56px);
+  margin-top: 56px;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 10;
-  padding-top: 0;
+  padding-top: 24px;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   box-sizing: border-box;
@@ -565,7 +566,8 @@
 @media (max-width: 768px) {
   .createShopContainer main {
     scroll-padding-top: 0;
-    padding-top: 20px;
+    padding-top: 24px;
+    margin-top: 56px;
   }
 }
 

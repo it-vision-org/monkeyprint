@@ -8,6 +8,8 @@ import Image from 'next/image';
 import styles from '../create-shop/createShop.module.css';
 import loginStyles from './login.module.css';
 import MainHeader from '@/components/MainHeader';
+import LoadingButton from '@/components/LoadingButton';
+import LoadingLink from '@/components/LoadingLink';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -45,7 +47,7 @@ export default function LoginPage() {
 
     return (
         <div className={styles.createShopContainer}>
-            <MainHeader 
+            <MainHeader
                 menuItems={[
                     { label: "Accueil", href: "/", icon: "🏠" },
                     { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
@@ -77,10 +79,10 @@ export default function LoginPage() {
                                     <h3>Adresse e-mail</h3>
                                     <span>Doit être rempli<span>*</span></span>
                                 </div>
-                                <input 
-                                    type="email" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)} 
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     className="cs-pill-input"
                                     required
                                     autoComplete="email"
@@ -91,10 +93,10 @@ export default function LoginPage() {
                                     <h3>Mot de passe</h3>
                                     <span>Doit être rempli<span>*</span></span>
                                 </div>
-                                <input 
-                                    type="password" 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)} 
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="cs-pill-input"
                                     required
                                     autoComplete="current-password"
@@ -103,23 +105,25 @@ export default function LoginPage() {
                                 {error && <p style={{ color: '#ff4444', marginTop: '16px', fontSize: '14px' }}>{error}</p>}
                             </div>
 
-                            <button
-                                className={`cs-primary-btn ${styles.step1Button}`}
+                            <LoadingButton
+                                className={`${styles.step1Button}`}
                                 type="submit"
-                                disabled={isLoading}
-                                style={{ marginTop: '24px' }}
+                                isLoading={isLoading}
+                                style={{ marginTop: '24px', width: '100%' }}
+                                variant="success"
+                                size="lg"
                             >
-                                {isLoading ? 'CONNEXION EN COURS...' : "SE CONNECTER"}
-                            </button>
+                                SE CONNECTER
+                            </LoadingButton>
                         </form>
 
                         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                            <Link 
-                                href="/create-shop" 
+                            <LoadingLink
+                                href="/create-shop"
                                 style={{ color: '#fff', textDecoration: 'underline', fontSize: '14px' }}
                             >
                                 Pas encore de compte ? Créer une boutique
-                            </Link>
+                            </LoadingLink>
                         </div>
                     </div>
                 </div>

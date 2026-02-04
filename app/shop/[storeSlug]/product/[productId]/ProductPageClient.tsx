@@ -3,6 +3,7 @@
 import { useCart } from "@/components/CartContext";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 import AddToCartButton from "@/components/AddToCartButton";
 import StoreHeader from "@/components/StoreHeader";
 import type { ThemeConfig } from '@/components/themeConfig';
@@ -40,7 +41,7 @@ export default function ProductPageClient({
     backUrl
 }: ProductPageClientProps) {
     const { items: cartItems } = useCart();
-    
+
     // Calculate cart count - filter by store
     const cartCount = cartItems
         .filter(item => item.storeSlug === storeSlug)
@@ -83,22 +84,22 @@ export default function ProductPageClient({
             />
 
             <div className="product-detail-container-modern">
-                <Link href={`/shop/${storeSlug}`} className="product-detail-back-modern">
+                <LoadingLink href={`/shop/${storeSlug}`} className="product-detail-back-modern">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <span>Back to Store</span>
-                </Link>
+                </LoadingLink>
 
                 <div className="product-detail-content-modern">
                     {/* Image Gallery */}
                     <div className="product-detail-gallery-modern">
                         {frontUrl && (
                             <div className="product-detail-image-wrapper-modern">
-                                <Image 
-                                    src={frontUrl} 
-                                    alt={product.name} 
-                                    width={600} 
+                                <Image
+                                    src={frontUrl}
+                                    alt={product.name}
+                                    width={600}
                                     height={600}
                                     className="product-detail-image-modern"
                                     priority
@@ -107,10 +108,10 @@ export default function ProductPageClient({
                         )}
                         {backUrl && (
                             <div className="product-detail-image-wrapper-modern">
-                                <Image 
-                                    src={backUrl} 
-                                    alt={`${product.name} - Back`} 
-                                    width={600} 
+                                <Image
+                                    src={backUrl}
+                                    alt={`${product.name} - Back`}
+                                    width={600}
                                     height={600}
                                     className="product-detail-image-modern"
                                 />
@@ -119,7 +120,7 @@ export default function ProductPageClient({
                         {!frontUrl && !backUrl && (
                             <div className="product-detail-image-placeholder-modern">
                                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                                    <path d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.105 20 20 19.105 20 18V6C20 4.895 19.105 4 18 4H6C4.895 4 4 4.895 4 6V18C4 19.105 4.895 20 6 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                                 <p>No image available</p>
                             </div>
@@ -141,11 +142,11 @@ export default function ProductPageClient({
                         )}
 
                         <div className="product-detail-add-to-cart-modern">
-                            <AddToCartButton 
-                                product={product} 
-                                frontUrl={frontUrl} 
-                                storeName={product.store.name} 
-                                storeSlug={storeSlug} 
+                            <AddToCartButton
+                                product={product}
+                                frontUrl={frontUrl}
+                                storeName={product.store.name}
+                                storeSlug={storeSlug}
                             />
                         </div>
                     </div>

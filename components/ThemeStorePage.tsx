@@ -11,6 +11,7 @@ import SectionTitle from '@/components/SectionTitle';
 import type { Product } from '@/components/types';
 import type { ThemeConfig } from './themeConfig';
 import { useCart } from '@/components/CartContext';
+import LoadingButton from "@/components/LoadingButton";
 
 type ThemeStorePageProps = {
     theme: ThemeConfig;
@@ -66,7 +67,7 @@ export default function ThemeStorePage({
 }: ThemeStorePageProps) {
     const router = useRouter();
     const { items: cartItems } = useCart();
-    
+
     // Calculate cart count - filter by store if storeSlug provided, otherwise show all
     const cartCount = storeSlug
         ? cartItems.filter(item => item.storeSlug === storeSlug).reduce((sum, item) => sum + item.quantity, 0)
@@ -92,14 +93,14 @@ export default function ThemeStorePage({
                 return (
                     <div className={theme.heroClassName}>
                         {heroContent.backgroundImage && (
-                            <Image 
-                                src={heroContent.backgroundImage} 
-                                alt="Background" 
-                                width={1200} 
-                                height={600} 
+                            <Image
+                                src={heroContent.backgroundImage}
+                                alt="Background"
+                                width={1200}
+                                height={600}
                                 quality={95}
                                 sizes="100vw"
-                                className="theme-1-hero-bg-image" 
+                                className="theme-1-hero-bg-image"
                             />
                         )}
                         <div className="theme-1-hero-content">
@@ -109,18 +110,18 @@ export default function ThemeStorePage({
                     </div>
                 );
             }
-            
+
             // Default simple variant
             return (
                 <div className={theme.heroClassName}>
                     {heroContent.image && (
-                        <Image 
-                            src={heroContent.image} 
-                            alt="Hero" 
-                            width={heroContent.imageWidth || 280} 
-                            height={heroContent.imageHeight || 280} 
+                        <Image
+                            src={heroContent.image}
+                            alt="Hero"
+                            width={heroContent.imageWidth || 280}
+                            height={heroContent.imageHeight || 280}
                             quality={95}
-                            className="theme-1-hero-image" 
+                            className="theme-1-hero-image"
                         />
                     )}
                     <div className="theme-1-hero-content">
@@ -137,14 +138,14 @@ export default function ThemeStorePage({
                 return (
                     <div className={theme.heroClassName}>
                         {heroContent.backgroundImage && (
-                            <Image 
-                                src={heroContent.backgroundImage} 
-                                alt="Background" 
-                                width={1200} 
-                                height={600} 
+                            <Image
+                                src={heroContent.backgroundImage}
+                                alt="Background"
+                                width={1200}
+                                height={600}
                                 quality={95}
                                 sizes="100vw"
-                                className="theme-2-hero-bg-image" 
+                                className="theme-2-hero-bg-image"
                             />
                         )}
                         <div className="theme-2-hero-content">
@@ -154,7 +155,7 @@ export default function ThemeStorePage({
                     </div>
                 );
             }
-            
+
             // Default circles variant
             return (
                 <div className={theme.heroClassName}>
@@ -162,14 +163,14 @@ export default function ThemeStorePage({
                         <div className="theme-2-hero-images-left">
                             {heroContent.circles.map((circle, idx) => (
                                 <div key={idx} className={circle.className}>
-                                    <Image 
-                                        src={circle.src} 
-                                        alt={`Child ${idx + 1}`} 
-                                        width={220} 
-                                        height={220} 
+                                    <Image
+                                        src={circle.src}
+                                        alt={`Child ${idx + 1}`}
+                                        width={220}
+                                        height={220}
                                         quality={95}
                                         sizes="110px"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                 </div>
                             ))}
@@ -179,15 +180,15 @@ export default function ThemeStorePage({
                         <h1 className="theme-2-hero-title">{heroContent.title}</h1>
                         <p className="theme-2-hero-text">{heroContent.subtitle}</p>
                         {heroContent.image && (
-                            <Image 
-                                src={heroContent.image} 
-                                alt="Teddy" 
-                                width={120} 
-                                height={120} 
+                            <Image
+                                src={heroContent.image}
+                                alt="Teddy"
+                                width={120}
+                                height={120}
                                 quality={95}
                                 sizes="60px"
-                                className="theme-2-hero-teddy" 
-                                style={{ objectFit: 'contain' }} 
+                                className="theme-2-hero-teddy"
+                                style={{ objectFit: 'contain' }}
                             />
                         )}
                     </div>
@@ -199,12 +200,12 @@ export default function ThemeStorePage({
             return (
                 <div className={theme.heroClassName}>
                     {heroContent.backgroundImage && (
-                        <Image 
-                            src={heroContent.backgroundImage} 
-                            alt="Pattern" 
-                            width={400} 
-                            height={300} 
-                            className="theme-3-hero-bg-image" 
+                        <Image
+                            src={heroContent.backgroundImage}
+                            alt="Pattern"
+                            width={400}
+                            height={300}
+                            className="theme-3-hero-bg-image"
                         />
                     )}
                     <div className="theme-3-hero-content">
@@ -297,9 +298,15 @@ export default function ThemeStorePage({
                         }}
                     />
                     {productsSection.showViewAll !== false && (
-                        <button className={theme.viewAllClassName} onClick={() => router.push(`${theme.baseRoute}/all-products`)}>
-                            View all
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+                            <LoadingButton
+                                variant="outline"
+                                className={theme.viewAllClassName}
+                                onClick={() => router.push(`${theme.baseRoute}/all-products`)}
+                            >
+                                View all
+                            </LoadingButton>
+                        </div>
                     )}
                 </section>
             )}

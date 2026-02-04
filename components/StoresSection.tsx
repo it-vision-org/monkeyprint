@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import Link from "next/link";
+import LoadingLink from "@/components/LoadingLink";
 
 type Store = {
     href: string;
@@ -41,22 +41,23 @@ export default function StoresSection({
             </div>
             <div className={subtitleClassName}>{subtitle}</div>
             {stores.map((store, index) => (
-                <Link 
+                <LoadingLink
                     key={index}
-                    href={store.href} 
+                    href={store.href}
                     className={getStoreBoxClassName(index)}
                     aria-label={`Theme ${index + 1} preview`}
+                    showSpinner={false}
                 >
-                    <Image 
-                        src={store.image} 
-                        alt={store.alt || `Theme ${index + 1}`} 
-                        width={store.imageWidth || 117} 
-                        height={store.imageHeight || 117} 
+                    <Image
+                        src={store.image}
+                        alt={store.alt || `Theme ${index + 1}`}
+                        width={store.imageWidth || 117}
+                        height={store.imageHeight || 117}
                     />
-                </Link>
+                </LoadingLink>
             ))}
             {showArrows && stores.map((_, index) => (
-                <div 
+                <div
                     key={`arrow-${index}`}
                     className={getArrowClassName(index)}
                     aria-hidden="true"

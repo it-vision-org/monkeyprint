@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import StoreHeader from '@/components/StoreHeader';
 import ProductCard from '@/components/ProductCard';
 import type { Product } from '@/components/types';
 import type { ThemeConfig } from './themeConfig';
 import { DEFAULT_SIZES } from '@/lib/constants/mockData';
 import { useCart } from '@/components/CartContext';
+import LoadingButton from "@/components/LoadingButton";
+import LoadingLink from "@/components/LoadingLink";
+import { motion } from "framer-motion";
+import { iconButtonVariants, chipVariants, springResponsive } from "@/lib/interactions";
 
 type AllProductsPageProps = {
     theme: ThemeConfig;
@@ -43,7 +48,7 @@ export default function AllProductsPage({
     const [selectedSort, setSelectedSort] = useState('default');
 
     const products: Product[] = initialProducts.length > 0 ? initialProducts : [];
-    
+
     // Calculate total cart count (sum of all item quantities)
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -80,55 +85,61 @@ export default function AllProductsPage({
 
                 <div className="all-products-toolbar-modern">
                     <div className="all-products-toolbar-left">
-                        <button 
-                            className="all-products-filter-btn-modern" 
+                        <motion.button
+                            variants={iconButtonVariants}
+                            whileTap="tap"
+                            whileHover="hover"
+                            className="all-products-filter-btn-modern"
                             onClick={() => setFilterOpen(true)}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M3 4H21L13 14V20L11 22V14L3 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M3 4H21L13 14V20L11 22V14L3 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                             <span>Filters</span>
-                        </button>
+                        </motion.button>
                     </div>
                     <div style={{ position: 'relative' }}>
-                        <button 
-                            className="all-products-sort-btn-modern" 
+                        <motion.button
+                            variants={iconButtonVariants}
+                            whileTap="tap"
+                            whileHover="hover"
+                            className="all-products-sort-btn-modern"
                             onClick={() => setSortOpen(!sortOpen)}
                         >
                             <span>Sort</span>
-                            <svg 
-                                width="16" 
-                                height="16" 
-                                viewBox="0 0 24 24" 
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
                                 fill="none"
                                 style={{ transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
                             >
-                                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                        </button>
+                        </motion.button>
                         {sortOpen && (
                             <>
                                 <div className="sort-dropdown-overlay-modern" onClick={() => setSortOpen(false)}></div>
                                 <div className="sort-dropdown-modern">
-                                    <button 
+                                    <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'default' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('default'); setSortOpen(false); }}
                                     >
                                         Default
                                     </button>
-                                    <button 
+                                    <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'price-asc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-asc'); setSortOpen(false); }}
                                     >
                                         Price: Low to High
                                     </button>
-                                    <button 
+                                    <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'price-desc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-desc'); setSortOpen(false); }}
                                     >
                                         Price: High to Low
                                     </button>
-                                    <button 
+                                    <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'rating' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('rating'); setSortOpen(false); }}
                                     >
@@ -143,7 +154,7 @@ export default function AllProductsPage({
                 {products.length === 0 ? (
                     <div className="all-products-empty-modern">
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                            <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         <h3>No products found</h3>
                         <p>Check back later for new products</p>
@@ -174,7 +185,7 @@ export default function AllProductsPage({
                             <h2>Filters</h2>
                             <button className="filter-modal-close-modern" onClick={() => setFilterOpen(false)}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
                         </div>
@@ -182,7 +193,7 @@ export default function AllProductsPage({
                         <div className="filter-modal-content-modern">
                             <div className="filter-categories-modern">
                                 {['TOUT', 'FEMME', 'HOMME', 'ENFANTS'].map((cat) => (
-                                    <button 
+                                    <button
                                         key={cat}
                                         className={`filter-category-tab-modern ${selectedCategory === cat ? 'active' : ''}`}
                                         onClick={() => setSelectedCategory(cat)}
@@ -193,19 +204,19 @@ export default function AllProductsPage({
                             </div>
 
                             <div className="filter-section-modern">
-                                <button 
+                                <button
                                     className="filter-section-header-modern"
                                     onClick={() => setTailleExpanded(!tailleExpanded)}
                                 >
                                     <span>Size</span>
-                                    <svg 
-                                        width="16" 
-                                        height="16" 
-                                        viewBox="0 0 24 24" 
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
                                         fill="none"
                                         style={{ transform: tailleExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
                                     >
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </button>
                                 {tailleExpanded && (
@@ -226,19 +237,19 @@ export default function AllProductsPage({
                             </div>
 
                             <div className="filter-section-modern">
-                                <button 
+                                <button
                                     className="filter-section-header-modern"
                                     onClick={() => setCouleurExpanded(!couleurExpanded)}
                                 >
                                     <span>Color</span>
-                                    <svg 
-                                        width="16" 
-                                        height="16" 
-                                        viewBox="0 0 24 24" 
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
                                         fill="none"
                                         style={{ transform: couleurExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
                                     >
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </button>
                                 {couleurExpanded && (
@@ -254,7 +265,7 @@ export default function AllProductsPage({
                                                 >
                                                     {selectedColor === color.value && (
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                                         </svg>
                                                     )}
                                                 </button>

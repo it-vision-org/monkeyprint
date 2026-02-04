@@ -12,6 +12,7 @@ import StepDots from '@/components/StepDots';
 import type { MenuItem } from '@/components/types';
 import { registerUser, createStore } from './actions';
 import MainHeader from '@/components/MainHeader';
+import LoadingButton from '@/components/LoadingButton';
 
 const createShopMenuItems: MenuItem[] = [
     { label: "Accueil", href: "/", icon: "🏠" },
@@ -106,9 +107,9 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                 </div>
             </div>
 
-            <button className={`cs-primary-btn ${styles.step2Button}`} onClick={() => setStep(3)} type="button">
+            <LoadingButton className={`cs-primary-btn ${styles.step2Button}`} onClick={() => setStep(3)} type="button">
                 SUIVANT
-            </button>
+            </LoadingButton>
         </div>
     );
 };
@@ -133,7 +134,7 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
             }
         } catch (storeError: any) {
             // If createStore redirects, it throws NEXT_REDIRECT which is expected
-            if (storeError?.digest?.startsWith('NEXT_REDIRECT') || 
+            if (storeError?.digest?.startsWith('NEXT_REDIRECT') ||
                 storeError?.message?.includes('NEXT_REDIRECT')) {
                 // This is expected - redirect is happening
                 return;
@@ -178,13 +179,13 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                     </p>
                 </div>
 
-                <button
+                <LoadingButton
                     className={`cs-primary-btn ${styles.step1Button}`}
                     type="submit"
-                    disabled={isLoading}
+                    isLoading={isLoading}
                 >
                     {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
-                </button>
+                </LoadingButton>
             </form>
         </div>
     );
@@ -223,7 +224,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
             } catch (storeError: any) {
                 // If createStore redirects, it throws NEXT_REDIRECT which is expected
                 // Don't show this as an error to the user
-                if (storeError?.digest?.startsWith('NEXT_REDIRECT') || 
+                if (storeError?.digest?.startsWith('NEXT_REDIRECT') ||
                     storeError?.message?.includes('NEXT_REDIRECT')) {
                     // This is expected - redirect is happening
                     return;
@@ -234,7 +235,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
             }
         } catch (e: any) {
             // Check if it's a redirect error (which is actually success)
-            if (e?.digest?.startsWith('NEXT_REDIRECT') || 
+            if (e?.digest?.startsWith('NEXT_REDIRECT') ||
                 e?.message?.includes('NEXT_REDIRECT')) {
                 // This is expected - redirect is happening, registration was successful
                 return;
@@ -277,10 +278,10 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         <h3>Entrez votre adresse e-mail<br />Ou numéro de téléphone</h3>
                         <span>Doit être rempli<span>*</span></span>
                     </div>
-                    <input 
-                        type="email" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="cs-pill-input"
                         required
                         autoComplete="email"
@@ -290,10 +291,10 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         <h3>Créer un mot de passe</h3>
                         <span>Doit être rempli<span>*</span></span>
                     </div>
-                    <input 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="cs-pill-input"
                         required
                         autoComplete="new-password"
@@ -314,13 +315,13 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     Sign in with Google
                 </button>
 
-                <button
+                <LoadingButton
                     className={`cs-primary-btn ${styles.step1Button}`}
                     type="submit"
-                    disabled={isLoading}
+                    isLoading={isLoading}
                 >
                     {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
-                </button>
+                </LoadingButton>
             </form>
         </div>
     );
@@ -349,7 +350,7 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
             <StepDots
                 currentStep={1}
                 totalSteps={3}
-                onStepClick={() => {}}
+                onStepClick={() => { }}
                 className={styles.stepDots}
                 dotClassName={styles.stepDot}
                 filledClassName={styles.filled}
@@ -360,19 +361,19 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                 <div className={styles.uploadArea} {...getRootProps()}>
                     <input {...getInputProps()} />
                     {logo ? (
-                        <Image 
-                            src={logo} 
-                            alt="Logo" 
-                            width={98} 
-                            height={98} 
-                            style={{ 
-                                borderRadius: '9px', 
+                        <Image
+                            src={logo}
+                            alt="Logo"
+                            width={98}
+                            height={98}
+                            style={{
+                                borderRadius: '9px',
                                 objectFit: 'contain',
                                 width: '100%',
                                 height: '100%',
                                 maxWidth: '100%',
                                 maxHeight: '100%'
-                            }} 
+                            }}
                         />
                     ) : (
                         <div className={styles.uploadIcon}>
@@ -446,13 +447,13 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                 </div>
             </div>
 
-            <button
+            <LoadingButton
                 className={`cs-primary-btn ${styles.step3Button}`}
                 onClick={() => setStep(2)}
                 type="button"
             >
                 SUIVANT
-            </button>
+            </LoadingButton>
         </div>
     );
 };
@@ -464,7 +465,7 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
     // Use initialSession if provided (from server), otherwise use client session
     const session = initialSession !== undefined ? initialSession : clientSession;
     const isLoggedIn = !!session?.user;
-    
+
     // Logical step flow:
     // Step 1: Store Details (name, logo, categories)
     // Step 2: Theme Selection
