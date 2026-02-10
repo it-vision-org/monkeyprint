@@ -221,7 +221,7 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
                 Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre boutique en ligne.
               </p>
               <LoadingLink href="/create-shop" className={desktopStyles.desktopHeroCta}>
-                COMMENCEZ GRATUITEMENT !
+                <span>COMMENCEZ GRATUITEMENT !</span>
               </LoadingLink>
             </div>
           </section>

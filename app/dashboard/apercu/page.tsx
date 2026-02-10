@@ -5,6 +5,7 @@ import LoadingLink from "@/components/LoadingLink";
 import Image from "next/image";
 import { getR2Url } from "@/lib/storage";
 import SalesChart from "./SalesChart";
+import styles from "./apercu.module.css";
 
 export default async function ApercuPage() {
     const session = await auth();
@@ -39,83 +40,82 @@ export default async function ApercuPage() {
         .reduce((sum: number, order: any) => sum + order.totalAmount, 0);
 
     const pendingOrdersCount = store.orders.filter((o: any) => o.status === 'PENDING').length;
-    // Or if PENDING means "Paid but not shipped", adjust status logic.
-    // For now, let's assume PENDING = New Order (Paid? or just created?). 
-    // Usually PENDING = Created but not paid. 
-    // Let's assume PAID is the valid status for sales.
-    // But for "Commandes en attente" (Pending Orders), it usually means "To be shipped".
-    // I will stick to a simple mapping: PENDING = To be processed (maybe waiting payment or shipping). 
-    // Let's assume for this POC: PENDING = Paid & Waiting Shipping.
-
-    // Actually, in many systems: Created -> Paid -> Shipped.
-    // Let's count "PENDING" as active orders awaiting action.
-
-    // Mocking change percentages for now as we don't have historical data structure easily accessible without complex queries
 
     // Resolve logo URL from R2
     const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
 
     return (
         <>
-
-            <div className="apercu-grid">
+            <div className={styles.grid}>
                 {/* Row 1: Ventes totales & Commandes en attente */}
-                <div className="apercu-card apercu-ventes">
-                    <h3 className="apercu-card-label">Ventes totales</h3>
-                    <div className="apercu-card-value">
-                        <span className="apercu-value">{totalSales.toFixed(0)}</span>
-                        <span className="apercu-currency">DT</span>
+                <div className={`${styles.card} ${styles.ventes}`}>
+                    <h3 className={styles.cardLabel}>Ventes totales</h3>
+                    <div className={styles.cardValue}>
+                        <span className={styles.value}>{totalSales.toFixed(0)}</span>
+                        <span className={styles.currency}>DT</span>
                     </div>
-                    <div className="apercu-change positive">
+                    <div className={`${styles.change} ${styles.changePositive}`}>
                         +0%
                     </div>
-                    <div className="apercu-card-subtitle">Depuis le mois dernier</div>
+                    <div className={styles.cardSubtitle}>Depuis le mois dernier</div>
                 </div>
 
-                <LoadingLink href="/dashboard/commandes?status=non-confirme" className="apercu-card apercu-commandes apercu-card-link">
-                    <h3 className="apercu-card-label">Commandes en attente</h3>
-                    <div className="apercu-card-value-simple">
+                <LoadingLink
+                    href="/dashboard/commandes?status=non-confirme"
+                    className={`${styles.card} ${styles.commandes} ${styles.cardLink}`}
+                >
+                    <h3 className={styles.cardLabel}>Commandes en attente</h3>
+                    <div className={styles.cardValueSimple}>
                         {pendingOrdersCount}
                     </div>
-                    <div className="apercu-change negative">
+                    <div className={`${styles.change} ${styles.changeNegative}`}>
                         -0%
                     </div>
-                    <div className="apercu-card-subtitle">Depuis le mois dernier</div>
+                    <div className={styles.cardSubtitle}>Depuis le mois dernier</div>
                 </LoadingLink>
 
                 {/* Row 2: Paiement en attente */}
-                <LoadingLink href="/dashboard/portefeuille" className="apercu-card apercu-paiement-attente apercu-card-link">
-                    <h3 className="apercu-card-label">Paiement en attente</h3>
-                    <div className="apercu-card-value">
-                        <span className="apercu-value">0</span>
-                        <span className="apercu-currency">DT</span>
+                <LoadingLink
+                    href="/dashboard/portefeuille"
+                    className={`${styles.card} ${styles.paiementAttente} ${styles.cardLink}`}
+                >
+                    <h3 className={styles.cardLabel}>Paiement en attente</h3>
+                    <div className={styles.cardValue}>
+                        <span className={styles.value}>0</span>
+                        <span className={styles.currency}>DT</span>
                     </div>
-                    <div className="apercu-change positive">
+                    <div className={`${styles.change} ${styles.changePositive}`}>
                         +0%
                     </div>
-                    <div className="apercu-card-subtitle">Depuis le mois dernier</div>
+                    <div className={styles.cardSubtitle}>Depuis le mois dernier</div>
                 </LoadingLink>
 
                 {/* Row 3: Paiement en cours */}
-                <LoadingLink href="/dashboard/portefeuille" className="apercu-card apercu-paiement-cours apercu-card-link">
-                    <div className="apercu-header-row">
-                        <h3 className="apercu-card-label">Paiement en cours</h3>
-                        <div className="apercu-date">{new Date().toLocaleDateString('fr-FR')}</div>
+                <LoadingLink
+                    href="/dashboard/portefeuille"
+                    className={`${styles.card} ${styles.paiementCours} ${styles.cardLink}`}
+                >
+                    <div className={styles.headerRow}>
+                        <h3 className={styles.cardLabel}>Paiement en cours</h3>
+                        <div className={styles.date}>{new Date().toLocaleDateString('fr-FR')}</div>
                     </div>
-                    <div className="apercu-subtitle-special">Le montant d&apos;argent que vous pouvez retirer !</div>
-                    <div className="apercu-card-value">
-                        <span className="apercu-value">0</span>
-                        <span className="apercu-currency">DT</span>
+                    <div className={styles.subtitleSpecial}>Le montant d&apos;argent que vous pouvez retirer !</div>
+                    <div className={styles.cardValue}>
+                        <span className={styles.value}>0</span>
+                        <span className={styles.currency}>DT</span>
                     </div>
-                    <div className="apercu-card-notice">Une fois prêt, un courriel vous sera envoyé.</div>
+                    <div className={styles.cardNotice}>Une fois prêt, un courriel vous sera envoyé.</div>
                 </LoadingLink>
 
                 {/* Row 4: Commandes retournées */}
-                <LoadingLink href="/dashboard/commandes?status=retours" className="apercu-card apercu-retournees apercu-card-link">
-                    <h3 className="apercu-card-label">Commandes retournées</h3>
-                    <div className="apercu-card-value-negative">
-                        <span className="apercu-value">-0</span>
-                        <span className="apercu-currency">DT</span>
+                <LoadingLink
+                    href="/dashboard/commandes?status=retours"
+                    className={`${styles.card} ${styles.retournees} ${styles.cardLink}`}
+                >
+                    <h3 className={styles.cardLabel}>Commandes retournées</h3>
+                    <div className={styles.cardValueNegative}>
+                        <span className={styles.value}>-0</span>
+                        <span className={styles.currency}>DT</span>
                     </div>
                 </LoadingLink>
 
@@ -125,5 +125,4 @@ export default async function ApercuPage() {
         </>
     );
 }
-
 

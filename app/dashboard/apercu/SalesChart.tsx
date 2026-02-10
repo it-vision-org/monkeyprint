@@ -32,10 +32,10 @@ export default function SalesChart() {
     const renderChart = () => {
         if (!data || data.data.length === 0) {
             return (
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     height: '100%',
                     color: '#9ca3af',
                     fontSize: '14px'
@@ -51,16 +51,19 @@ export default function SalesChart() {
         const minAmount = Math.min(...amounts, 0);
         const range = maxAmount - minAmount || maxAmount || 1;
 
-        // Chart dimensions
-        const padding = { top: 20, right: 50, bottom: 40, left: 60 };
-        const width = 600;
-        const height = 250;
+        // Chart dimensions - responsive padding
+        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+        const padding = isMobile
+            ? { top: 15, right: 35, bottom: 35, left: 45 }
+            : { top: 20, right: 50, bottom: 40, left: 60 };
+        const width = isMobile ? 400 : 600;
+        const height = isMobile ? 220 : 250;
         const chartWidth = width - padding.left - padding.right;
         const chartHeight = height - padding.top - padding.bottom;
 
         // Calculate points
         const points = chartData.map((point, index) => {
-            const x = chartData.length === 1 
+            const x = chartData.length === 1
                 ? padding.left + chartWidth / 2
                 : padding.left + (index / (chartData.length - 1 || 1)) * chartWidth;
             const normalizedAmount = range > 0 ? (point.amount - minAmount) / range : 0.5;
@@ -80,7 +83,7 @@ export default function SalesChart() {
             } else {
                 date = new Date(dateStr + 'T00:00:00');
             }
-            
+
             if (activeTab === 'today') {
                 return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
             } else if (activeTab === '7days') {
@@ -91,7 +94,7 @@ export default function SalesChart() {
         };
 
         // Y-axis labels
-        const yAxisSteps = 5;
+        const yAxisSteps = isMobile ? 4 : 5;
         const yAxisLabels = [];
         for (let i = 0; i <= yAxisSteps; i++) {
             const value = minAmount + (range * (i / yAxisSteps));
@@ -114,7 +117,7 @@ export default function SalesChart() {
                         opacity={i === 0 ? 1 : 0.5}
                     />
                 ))}
-                
+
                 {/* Y-axis */}
                 <line
                     x1={padding.left}
@@ -124,7 +127,7 @@ export default function SalesChart() {
                     stroke="#e5e7eb"
                     strokeWidth="1"
                 />
-                
+
                 {/* X-axis */}
                 <line
                     x1={padding.left}
@@ -139,9 +142,9 @@ export default function SalesChart() {
                 {yAxisLabels.map((label, i) => (
                     <text
                         key={i}
-                        x={padding.left - 10}
-                        y={label.y + 4}
-                        fontSize="12"
+                        x={padding.left - 8}
+                        y={label.y + 3}
+                        fontSize={isMobile ? "10" : "12"}
                         fill="#9ca3af"
                         textAnchor="end"
                         alignmentBaseline="middle"
@@ -193,19 +196,19 @@ export default function SalesChart() {
                 {/* X-axis labels */}
                 {points.map((point, index) => {
                     // Show labels for first, last, and evenly spaced middle points
-                    const showLabel = index === 0 || 
-                                    index === points.length - 1 || 
-                                    (points.length > 2 && index === Math.floor(points.length / 2)) ||
-                                    (points.length > 4 && index % Math.ceil(points.length / 4) === 0);
-                    
+                    const showLabel = index === 0 ||
+                        index === points.length - 1 ||
+                        (points.length > 2 && index === Math.floor(points.length / 2)) ||
+                        (points.length > 4 && index % Math.ceil(points.length / 4) === 0);
+
                     if (!showLabel) return null;
-                    
+
                     return (
                         <text
                             key={index}
                             x={point.x}
-                            y={height - padding.bottom + 20}
-                            fontSize="12"
+                            y={height - padding.bottom + (isMobile ? 18 : 20)}
+                            fontSize={isMobile ? "10" : "12"}
                             fill="#0ea5e9"
                             textAnchor="middle"
                             fontWeight="600"
@@ -256,10 +259,10 @@ export default function SalesChart() {
 
             <div className="apercu-chart-card">
                 {loading ? (
-                    <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         height: '300px',
                         color: '#9ca3af',
                         fontSize: '14px'
@@ -267,10 +270,10 @@ export default function SalesChart() {
                         Chargement...
                     </div>
                 ) : error ? (
-                    <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         height: '300px',
                         color: '#ef4444',
                         fontSize: '14px'
@@ -287,7 +290,7 @@ export default function SalesChart() {
                             </div>
                         </div>
                         <div className="apercu-chart-subtext">
-                            {data?.period || 'Aujourd\'hui'} 
+                            {data?.period || 'Aujourd\'hui'}
                             {data && data.previousTotal > 0 && (
                                 <span className={`apercu-chart-change ${data.changePercent >= 0 ? '' : 'negative'}`}>
                                     {data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(1)}%

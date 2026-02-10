@@ -410,19 +410,20 @@
   height: 64px;
   background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
   background-size: 200% 100%;
-  border: 3px solid #ffffff;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3),
-    0px 0px 40px rgba(255, 41, 195, 0.3);
+  border: 1px solid #ffffff;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
   border-radius: 32px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  text-decoration: none !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.3s ease, 
+              background-position 0.5s ease;
   font-family: "Inter", system-ui, sans-serif;
   font-style: normal;
   font-weight: 900;
   font-size: 18px;
   line-height: 22px;
   text-align: center;
-  color: #ffffff;
+  color: #ffffff !important;
   text-transform: uppercase;
   padding: 0 48px;
   position: relative;
@@ -430,37 +431,15 @@
   animation: fadeInUp 1.2s ease-out 0.4s both;
 }
 
-.desktopHeroCta::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
 .desktopHeroCta:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.4),
-    0px 0px 60px rgba(255, 41, 195, 0.4);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.25);
   background-position: 100% 0;
 }
 
-.desktopHeroCta:hover::before {
-  left: 100%;
-}
-
 .desktopHeroCta:active {
-  transform: translateY(2px) scale(0.97);
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.25),
-    0px 0px 20px rgba(255, 41, 195, 0.2);
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   transition-duration: 0.1s;
 }
 
@@ -849,54 +828,33 @@
   height: 72px;
   background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
   background-size: 200% 100%;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3),
-    0px 0px 40px rgba(255, 41, 195, 0.3);
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
   border-radius: 36px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  text-decoration: none !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.3s ease, 
+              background-position 0.5s ease;
   font-family: "Inter", system-ui, sans-serif;
   font-style: normal;
   font-weight: 900;
   font-size: 20px;
   line-height: 24px;
   text-align: center;
-  color: #ffffff;
+  color: #ffffff !important;
   text-transform: uppercase;
   margin: 0 auto;
   overflow: hidden;
 }
 
-.desktopFooterCta::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
 .desktopFooterCta:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.3),
-    0px 0px 60px rgba(255, 41, 195, 0.3);
+  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.3);
   background-position: 100% 0;
-}
-
-.desktopFooterCta:hover::before {
-  left: 100%;
 }
 
 .desktopFooterCta:active {
   transform: translateY(2px) scale(0.97);
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2),
-    0px 0px 20px rgba(255, 41, 195, 0.15);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
   transition-duration: 0.1s;
 }
 

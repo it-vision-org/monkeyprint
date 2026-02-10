@@ -1156,14 +1156,14 @@ input[type="radio"]:active {
   box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
-  transition: 
-    transform 0.35s var(--spring-responsive),
-    opacity 0.35s ease,
-    border-color 0.35s ease,
-    z-index 0.35s ease,
-    box-shadow 0.3s ease;
   z-index: 1;
   -webkit-tap-highlight-color: transparent;
+  
+  /* Extremely slow transition with high specificity override */
+  transition: transform 15s cubic-bezier(0.1, 0, 0, 1) !important,
+              opacity 12s ease-in-out !important,
+              box-shadow 8s ease-in-out !important,
+              border-color 8s ease-in-out !important;
 }
 
 .cs-theme-card img {
@@ -1194,6 +1194,31 @@ input[type="radio"]:active {
 
 .cs-theme-card.hidden {
   opacity: 0;
+}
+
+/* Completely disable hover/active movement to "remove the hover thing" */
+.cs-theme-carousel button.cs-theme-card:hover, 
+.cs-theme-carousel button.cs-theme-card:active {
+  /* Match the default state exactly to prevent any movement */
+  transform: translate(-50%, -50%) scale(0.85) !important;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3) !important;
+  transition: none !important; /* Keep it static when hovering */
+}
+
+/* Specific state matches for hover to ensure no jump */
+.cs-theme-carousel button.cs-theme-card.current:hover,
+.cs-theme-carousel button.cs-theme-card.current:active {
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+.cs-theme-carousel button.cs-theme-card.previous:hover,
+.cs-theme-carousel button.cs-theme-card.previous:active {
+  transform: translate(-120%, -50%) scale(0.75) !important;
+}
+
+.cs-theme-carousel button.cs-theme-card.next:hover,
+.cs-theme-carousel button.cs-theme-card.next:active {
+  transform: translate(20%, -50%) scale(0.75) !important;
 }
 
 .cs-theme-hint {
@@ -6049,19 +6074,70 @@ button.pu-mini-dot {
 
 @media (max-width: 480px) {
   .dash-container {
-    padding: 0 18px;
+    padding: 0 16px;
     width: 100%;
     box-sizing: border-box;
   }
 
   .dash-main .dash-container {
-    padding: 0 18px;
+    padding: 0 16px;
     width: 100%;
     box-sizing: border-box;
   }
 
   .apercu-grid {
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .apercu-card {
+    padding: 16px 14px;
+  }
+
+  .apercu-value {
+    font-size: 32px;
+  }
+
+  .apercu-commandes .apercu-card-value-simple {
+    font-size: 32px;
+  }
+
+  .apercu-card-label {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .apercu-currency {
+    font-size: 14px;
+  }
+
+  .apercu-change {
+    font-size: 12px;
+  }
+
+  .apercu-card-subtitle {
+    font-size: 9px;
+  }
+
+  .apercu-chart-title {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .apercu-chart-card {
+    padding: 18px 14px;
+  }
+
+  .apercu-chart-value {
+    font-size: 24px;
+  }
+
+  .apercu-chart-currency {
+    font-size: 18px;
+  }
+
+  .apercu-tab {
+    padding: 7px 14px;
+    font-size: 12px;
   }
 
   .dash-page-title {
@@ -6494,15 +6570,40 @@ button.pu-mini-dot {
   color: #0ea5e9;
 }
 
-/* Mobile Design for Aperçu - Match Screenshot Exactly */
+/* Desktop Design for Aperçu - Ensure Grid Layout */
+@media (min-width: 769px) {
+  .apercu-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px;
+  }
+
+  .apercu-card {
+    display: block !important;
+    width: auto !important;
+  }
+
+  .apercu-paiement-attente,
+  .apercu-paiement-cours,
+  .apercu-retournees,
+  .apercu-chart-section {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile Design for Aperçu - Complete Mobile Fix */
 @media (max-width: 768px) {
   .dashboard-page {
     background: #eff6fb;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
-    overflow-y: visible !important; /* Allow sticky to work */
+    overflow-y: visible !important;
     position: static !important;
+  }
+
+  .dash-main {
+    padding-top: 80px;
   }
 
   .apercu-shop-header {
@@ -6524,29 +6625,60 @@ button.pu-mini-dot {
     margin-top: 2px;
   }
 
+  /* Force single column layout on mobile */
   .apercu-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px;
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
+    padding: 0;
+    margin: 0;
   }
 
-  .apercu-paiement-attente,
-  .apercu-paiement-cours,
-  .apercu-retournees,
-  .apercu-chart-section {
-    grid-column: 1 / -1;
-  }
-
+  /* All cards take full width */
   .apercu-card {
-    padding: 20px var(--mobile-padding-x);
-    border-radius: 20px;
+    width: 100% !important;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Force all card content to be block level and stack */
+  .apercu-card > * {
+    width: 100%;
+    display: block !important;
   }
 
   .apercu-card-label {
     font-size: 14px;
     margin-bottom: 12px;
+    font-weight: 600;
+    display: block !important;
+  }
+
+  .apercu-card-value {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .apercu-card-value-simple {
+    display: block !important;
+    margin-bottom: 12px;
+  }
+
+  .apercu-card-value-negative {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline;
+    gap: 6px;
   }
 
   .apercu-value {
@@ -6565,74 +6697,131 @@ button.pu-mini-dot {
 
   .apercu-change {
     font-size: 14px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    display: block !important;
   }
 
   .apercu-card-subtitle {
-    font-size: 11px;
+    font-size: 12px;
+    line-height: 1.4;
+    display: block !important;
+  }
+
+  /* Paiement en cours specific - force vertical layout */
+  .apercu-header-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+    gap: 12px;
+  }
+
+  .apercu-header-row .apercu-card-label {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .apercu-date {
+    font-size: 14px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .apercu-subtitle-special {
+    font-size: 14px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    display: block !important;
+  }
+
+  .apercu-card-notice {
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.4;
+    display: block !important;
+  }
+
+  /* Chart Section */
+  .apercu-chart-section {
+    margin-top: 16px;
   }
 
   .apercu-chart-title {
-    font-size: 22px;
-    margin-bottom: 20px;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .apercu-chart-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-wrap: wrap;
+  }
+
+  .apercu-chart-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .apercu-tab {
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .apercu-chart-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .apercu-chart-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .apercu-chart-label {
+    font-size: 16px;
+    margin-bottom: 4px;
   }
 
   .apercu-chart-value {
     font-size: 32px;
   }
 
+  .apercu-chart-currency {
+    font-size: 22px;
+  }
+
+  .apercu-chart-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .apercu-chart-subtext {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
   .apercu-chart {
     height: 220px;
-    margin-top: 20px;
+    margin-top: 16px;
+    overflow: visible;
   }
 
   .apercu-chart-svg {
     width: 100%;
     height: 100%;
-  }
-
-  .apercu-tab {
-    padding: 10px 18px;
-    font-size: 14px;
-    border-radius: 10px;
-  }
-
-  .apercu-header-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
-  .apercu-date {
-    font-size: 14px;
-  }
-
-  .apercu-subtitle-special {
-    font-size: 14px;
-    margin-bottom: 14px;
-  }
-
-  .apercu-card-notice {
-    font-size: 13px;
-    margin-top: 10px;
-  }
-
-  .apercu-chart-card {
-    padding: 24px;
-  }
-
-  .apercu-chart-header {
-    margin-bottom: 6px;
-  }
-
-  .apercu-chart-label {
-    font-size: 18px;
-  }
-
-  .apercu-chart-subtext {
-    font-size: 14px;
-    margin-bottom: 24px;
+    overflow: visible;
   }
 
   /* Hide desktop nav completely for mobile */
@@ -6641,6 +6830,7 @@ button.pu-mini-dot {
     display: none !important;
   }
 }
+
 
 /* Desktop hidden for mobile-only design */
 @media (min-width: 769px) {
