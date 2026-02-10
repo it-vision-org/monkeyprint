@@ -13,6 +13,8 @@ import CartButton from './CartButton';
 import type { MenuItem } from './types';
 import { springResponsive, navLinkVariants } from '@/lib/interactions';
 
+import styles from './MainHeader.module.css';
+
 type MainHeaderProps = {
     // Logo customization
     logoAlt?: string;
@@ -27,11 +29,6 @@ type MainHeaderProps = {
 
     // Styling
     className?: string;
-    innerClassName?: string;
-    logoContainerClassName?: string;
-    logoClassName?: string;
-    logoTextClassName?: string;
-    menuButtonClassName?: string;
 
     // Mobile menu styling
     mobileMenuProps?: Partial<React.ComponentProps<typeof MobileMenu>>;
@@ -48,21 +45,6 @@ const defaultMenuItems: MenuItem[] = [
     { label: "Découvrez les boutiques", href: "/stores", icon: "🔥" },
     { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
-
-// Hamburger menu line animations
-const lineVariants = {
-    closed: {
-        rotate: 0,
-        y: 0,
-        opacity: 1,
-    },
-    open: (custom: number) => ({
-        rotate: custom === 0 ? 45 : custom === 2 ? -45 : 0,
-        y: custom === 0 ? 9 : custom === 2 ? -9 : 0,
-        opacity: custom === 1 ? 0 : 1,
-        transition: springResponsive,
-    }),
-};
 
 // Desktop nav link hover effect
 const navItemVariants = {
@@ -86,22 +68,15 @@ export default function MainHeader({
     cartHref = '/store/theme-1/cart',
     cartCount = 0,
     className = '',
-    innerClassName = '',
-    logoContainerClassName = '',
-    logoClassName = '',
-    logoTextClassName = '',
-    menuButtonClassName = '',
     mobileMenuProps = {},
     initialSession,
-    hasStore = true // Default to true for backward compatibility
+    hasStore = true
 }: MainHeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { data: clientSession } = useSession();
-    // Use initialSession if provided (from server), otherwise use client session
     const session = initialSession !== undefined ? initialSession : clientSession;
     const router = useRouter();
-    const pathname = usePathname();
 
     const handleMenuToggle = (open: boolean) => {
         setIsMenuOpen(open);
@@ -114,7 +89,6 @@ export default function MainHeader({
         router.refresh();
     };
 
-    // Build menu items with auth-aware links
     const allMenuItems: MenuItem[] = [
         ...menuItems,
         ...(session?.user
@@ -131,91 +105,27 @@ export default function MainHeader({
 
     return (
         <>
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .main-header-mobile-menu-button {
-                    display: flex;
-                }
-                .main-header-desktop-nav {
-                    display: none;
-                }
-                .main-header-inner {
-                    padding: 0 var(--mobile-padding-x, 18px);
-                }
-                @media (min-width: 769px) {
-                    .main-header-mobile-menu-button {
-                        display: none !important;
-                    }
-                    .main-header-desktop-nav {
-                        display: flex !important;
-                    }
-                    .main-header-inner {
-                        padding: 0 40px;
-                        max-width: 1200px;
-                        margin: 0 auto;
-                    }
-                }
-            `}} />
-            <header className={className} style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                width: '100%',
-                zIndex: 1000,
-                background: '#ffffff',
-                boxShadow: '0px 4px 11.4px -4px rgba(0, 0, 0, 0.25)'
-            }}>
-                <div className={`${innerClassName} main-header-inner`} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0 var(--mobile-padding-x, 18px)',
-                    height: '56px',
-                    maxWidth: '100%',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                }}>
-                    <LoadingLink href="/" className={logoContainerClassName} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        textDecoration: 'none'
-                    }} showSpinner={false}>
+            <header className={`${styles.header} ${className}`}>
+                <div className={styles.inner}>
+                    <LoadingLink href="/" className={styles.logoContainer} showSpinner={false}>
                         <Image
                             src="/logo.png"
                             alt={logoAlt}
-                            width={84}
-                            height={42}
-                            className={logoClassName}
+                            width={100}
+                            height={50}
+                            className={styles.logo}
                             priority
-                            style={{
-                                objectFit: 'contain',
-                                filter: logoFilter || undefined,
-                                height: '42px',
-                                width: 'auto'
-                            }}
+                            style={{ filter: logoFilter }}
                         />
                         {logoText && (
-                            <span className={logoTextClassName} style={{
-                                fontFamily: 'Inter, sans-serif',
-                                fontStyle: 'normal',
-                                fontWeight: 700,
-                                fontSize: '16px',
-                                lineHeight: '20px',
-                                color: '#242424'
-                            }}>
+                            <span className={styles.logoText}>
                                 {logoText}
                             </span>
                         )}
                     </LoadingLink>
 
                     {/* Desktop Navigation */}
-                    <nav className="main-header-desktop-nav" style={{
-                        display: 'none',
-                        alignItems: 'center',
-                        gap: '32px'
-                    }}>
+                    <nav className={styles.desktopNav}>
                         {allMenuItems.map((item, index) => (
                             item.onClick ? (
                                 <motion.button
@@ -225,35 +135,12 @@ export default function MainHeader({
                                     initial="initial"
                                     whileHover="hover"
                                     whileTap="tap"
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: '#242424',
-                                        fontSize: '16px',
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 500,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '8px 12px',
-                                        borderRadius: '8px',
-                                        position: 'relative',
-                                    }}
+                                    className={styles.navItem}
                                 >
                                     {item.icon && <span>{item.icon}</span>}
                                     {item.label}
                                     {isLoggingOut && item.label === "Se déconnecter" && (
-                                        <span style={{
-                                            marginLeft: 8,
-                                            display: 'inline-block',
-                                            width: 12,
-                                            height: 12,
-                                            border: '2px solid currentColor',
-                                            borderTopColor: 'transparent',
-                                            borderRadius: '50%',
-                                            animation: 'spin 1s linear infinite'
-                                        }} />
+                                        <span className={styles.spinner} />
                                     )}
                                 </motion.button>
                             ) : (
@@ -263,21 +150,10 @@ export default function MainHeader({
                                     initial="initial"
                                     whileHover="hover"
                                     whileTap="tap"
-                                    style={{ borderRadius: '8px' }}
                                 >
                                     <LoadingLink
                                         href={item.href}
-                                        style={{
-                                            color: '#242424',
-                                            textDecoration: 'none',
-                                            fontSize: '16px',
-                                            fontFamily: 'Inter, sans-serif',
-                                            fontWeight: 500,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '8px 12px',
-                                        }}
+                                        className={styles.navItem}
                                         showSpinner={true}
                                     >
                                         {item.icon && <span>{item.icon}</span>}
@@ -288,53 +164,37 @@ export default function MainHeader({
                         ))}
                     </nav>
 
-                    {/* Mobile Menu Button */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Right Section: Cart + Mobile Menu Button */}
+                    <div className={styles.rightSection}>
                         {showCart && (
                             <CartButton
                                 count={cartCount}
                                 href={cartHref}
-                                className=""
-                                badgeClassName=""
                                 strokeColor="#1f2937"
                             />
                         )}
                         <motion.button
-                            className={`${menuButtonClassName} main-header-mobile-menu-button`}
+                            className={styles.mobileMenuToggle}
                             onClick={() => handleMenuToggle(!isMenuOpen)}
                             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                             type="button"
                             whileTap={{ scale: 0.9 }}
                             whileHover={{ scale: 1.05 }}
-                            transition={springResponsive}
-                            style={{
-                                width: '44px',
-                                height: '44px',
-                                border: 0,
-                                background: 'transparent',
-                                padding: '10px 8px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                borderRadius: '8px',
-                            }}
                         >
                             {[0, 1, 2].map((i) => (
                                 <motion.span
                                     key={i}
-                                    custom={i}
-                                    variants={lineVariants}
-                                    animate={isMenuOpen ? 'open' : 'closed'}
-                                    style={{
-                                        height: '2px',
-                                        background: '#414042',
-                                        width: '100%',
-                                        borderRadius: '2px',
-                                        display: 'block',
-                                        transformOrigin: 'center',
+                                    className={styles.menuLine}
+                                    animate={isMenuOpen ? {
+                                        rotate: i === 0 ? 45 : i === 2 ? -45 : 0,
+                                        y: i === 0 ? 9 : i === 2 ? -9 : 0,
+                                        opacity: i === 1 ? 0 : 1
+                                    } : {
+                                        rotate: 0,
+                                        y: 0,
+                                        opacity: 1
                                     }}
+                                    transition={springResponsive}
                                 />
                             ))}
                         </motion.button>

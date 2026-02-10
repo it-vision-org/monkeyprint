@@ -2,53 +2,40 @@
 
 import Image from "next/image";
 import LoadingLink from "@/components/LoadingLink";
+import styles from './HomeHero.module.css';
 
 type HomeHeroProps = {
     className?: string;
-    titleClassName?: string;
-    subtitleClassName?: string;
-    ctaClassName?: string;
-    ctaTextClassName?: string;
-    rectClassName?: string;
-    monkeyClassName?: string;
-    coinsClassName?: string;
-    shopAddClassName?: string;
 };
 
 export default function HomeHero({
     className = '',
-    titleClassName = '',
-    subtitleClassName = '',
-    ctaClassName = '',
-    ctaTextClassName = '',
-    rectClassName = '',
-    monkeyClassName = '',
-    coinsClassName = '',
-    shopAddClassName = ''
 }: HomeHeroProps) {
     return (
-        <section className={className} aria-label="Hero">
-            <div className={rectClassName} />
-            <div className={monkeyClassName}>
-                <Image src="/Monkey.svg" alt="" width={343} height={357} priority />
+        <section className={`${styles.hero} ${className}`} aria-label="Hero">
+            <div className={styles.monkey}>
+                <Image src="/Monkey.svg" alt="" width={800} height={800} priority />
             </div>
-            <div className={coinsClassName}>
-                <Image src="/Coins.png" alt="" width={359} height={247} priority />
+            <div className={styles.coins}>
+                <Image src="/Coins.png" alt="" width={800} height={600} priority />
             </div>
-            <div className={shopAddClassName}>
-                <Image src="/shop-add.svg" alt="" width={80} height={80} priority />
+            <div className={styles.shopAdd}>
+                <Image src="/shop-add.svg" alt="" width={200} height={200} priority />
             </div>
-            <h1 className={titleClassName}>
-                GAGNEZ DE <span style={{ color: "#f3ff00" }}>L&apos;ARGENT GRATUITEMENT</span>, EN VENDANT SIMPLEMENT DES PRODUITS
-                MARCHANDS <span style={{ color: "black" }}>EN TUNISIE.</span>
-            </h1>
-            <p className={subtitleClassName}>
-                Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre
-                boutique en ligne.
-            </p>
-            <LoadingLink href="/create-shop" className={ctaClassName}>
-                <span className={ctaTextClassName}>COMMENCEZ GRATUITEMENT !</span>
-            </LoadingLink>
+
+            <div className={styles.content}>
+                <h1 className={styles.title}>
+                    GAGNEZ DE <span style={{ color: "#f3ff00" }}>L&apos;ARGENT GRATUITEMENT</span>, EN VENDANT SIMPLEMENT DES PRODUITS
+                    MARCHANDS <span style={{ color: "black" }}>EN TUNISIE.</span>
+                </h1>
+                <p className={styles.subtitle}>
+                    Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre
+                    boutique en ligne.
+                </p>
+                <LoadingLink href="/create-shop" className={styles.cta}>
+                    <span>COMMENCEZ GRATUITEMENT !</span>
+                </LoadingLink>
+            </div>
         </section>
     );
 }

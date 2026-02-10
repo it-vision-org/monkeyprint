@@ -1,11 +1,8 @@
-'use client';
-
 import Image from "next/image";
+import styles from './HowItWorks.module.css';
 
 type HowItWorksCard = {
     icon: string;
-    iconWidth?: number;
-    iconHeight?: number;
     title: string;
     description: string;
 };
@@ -13,57 +10,46 @@ type HowItWorksCard = {
 type HowItWorksProps = {
     title?: string;
     subtitle?: string;
-    titleClassName?: string;
-    subtitleClassName?: string;
-    cards: HowItWorksCard[];
-    getCardRectClassName: (index: number) => string;
-    getCardIconClassName: (index: number) => string;
-    getCardTextClassName: (index: number) => string;
-    getCardTitleClassName: (index: number) => string;
-    cardDescClassName?: string;
+    cards?: HowItWorksCard[];
 };
+
+const defaultCards: HowItWorksCard[] = [
+    { icon: "/Paper Plus.png", title: "Téléchargez votre conception", description: "Téléchargez facilement vos œuvres et voyez-les prendre vie sur des produits de qualité." },
+    { icon: "/Edit.png", title: "Personnaliser les produits", description: "Choisissez parmi nos t-shirts, sweats à capuche, mugs et plus encore." },
+    { icon: "/Home.png", title: "Créez votre boutique", description: "Créez votre propre boutique de marque et commencez à vendre immédiatement." },
+    { icon: "/Arrow.png", title: "Commencez à vendre", description: "Vous partagez, nous nous occupons de vos produits, de l'impression à l'expédition." }
+];
 
 export default function HowItWorks({
     title = "Comment ça marche",
     subtitle = "De la conception à la vente en quelques étapes simples",
-    titleClassName = '',
-    subtitleClassName = '',
-    cards,
-    getCardRectClassName,
-    getCardIconClassName,
-    getCardTextClassName,
-    getCardTitleClassName,
-    cardDescClassName = ''
+    cards = defaultCards
 }: HowItWorksProps) {
     return (
-        <>
-            <h2 className={titleClassName}>{title}</h2>
-            <p className={subtitleClassName}>{subtitle}</p>
-            {cards.map((card, index) => (
-                <div key={index}>
-                    <div className={getCardRectClassName(index)} />
-                    <div className={getCardIconClassName(index)}>
-                        <Image 
-                            src={card.icon} 
-                            alt="" 
-                            width={card.iconWidth || 56} 
-                            height={card.iconHeight || 56} 
-                        />
-                    </div>
-                    <div className={getCardTextClassName(index)}>
-                        <div className={getCardTitleClassName(index)}>
-                            {card.title.split('\n').map((line, idx) => (
-                                <span key={idx}>
-                                    {line}
-                                    {idx < card.title.split('\n').length - 1 && <br />}
-                                </span>
-                            ))}
+        <section className={styles.section}>
+            <h2 className={styles.title}>{title}</h2>
+            <p className={styles.subtitle}>{subtitle}</p>
+            <div className={styles.grid}>
+                {cards.map((card, index) => (
+                    <div key={index} className={`${styles.card} ${styles[`card${index + 1}`]}`}>
+                        <div className={styles.icon}>
+                            <Image
+                                src={card.icon}
+                                alt=""
+                                width={64}
+                                height={64}
+                            />
                         </div>
-                        <div className={cardDescClassName}>{card.description}</div>
+                        <div className={styles.cardContent}>
+                            <h3 className={styles.cardTitle}>
+                                {card.title}
+                            </h3>
+                            <p className={styles.cardDesc}>{card.description}</p>
+                        </div>
                     </div>
-                </div>
-            ))}
-        </>
+                ))}
+            </div>
+        </section>
     );
 }
 
