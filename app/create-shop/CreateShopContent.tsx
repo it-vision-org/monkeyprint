@@ -60,8 +60,8 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                 filledClassName={styles.filled}
             />
 
-            <div className="cs-card cs-card-summary">
-                <div className="cs-shop-badge">
+            <div className={`${styles['cs-card']} ${styles['cs-card-summary']}`}>
+                <div className={styles['cs-shop-badge']}>
                     {logo ? (
                         <Image src={logo} alt="Shop Logo" width={56} height={56} style={{ objectFit: 'contain', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
                     ) : (
@@ -71,10 +71,10 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                 <span>{shopName}</span>
             </div>
 
-            <div className="cs-theme-label">{themes[currentIndex]?.label}</div>
+            <div className={styles['cs-theme-label']}>{themes[currentIndex]?.label}</div>
 
-            <div className="cs-theme-section">
-                <div className="cs-theme-carousel">
+            <div className={styles['cs-theme-section']}>
+                <div className={styles['cs-theme-carousel']}>
                     {themes.map((theme, index) => {
                         const position = index - currentIndex;
                         let state = "hidden";
@@ -85,7 +85,7 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                             <button
                                 key={theme.id}
                                 type="button"
-                                className={`cs-theme-card ${state} ${selectedTheme === theme.id ? "selected" : ""}`}
+                                className={`${styles['cs-theme-card']} ${styles[state]} ${selectedTheme === theme.id ? styles.selected : ""}`}
                                 onClick={() => setSelectedTheme(theme.id)}
                             >
                                 <Image src={theme.image} alt={theme.label} width={960} height={540} />
@@ -93,13 +93,13 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                         );
                     })}
                 </div>
-                <div className="cs-theme-controls">
-                    <button type="button" onClick={handlePrev} className="cs-round-nav">
+                <div className={styles['cs-theme-controls']}>
+                    <button type="button" onClick={handlePrev} className={styles['cs-round-nav']}>
                         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                             <path d="M12.5 4.16669L7.5 10L12.5 15.8334" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" />
                         </svg>
                     </button>
-                    <button type="button" onClick={handleNext} className="cs-round-nav">
+                    <button type="button" onClick={handleNext} className={styles['cs-round-nav']}>
                         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                             <path d="M7.5 4.16669L12.5 10L7.5 15.8334" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" />
                         </svg>
@@ -107,7 +107,7 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                 </div>
             </div>
 
-            <LoadingButton className={`cs-primary-btn ${styles.step2Button}`} onClick={() => setStep(3)} type="button">
+            <LoadingButton className={`${styles['cs-primary-btn']} ${styles.step2Button}`} onClick={() => setStep(3)} type="button">
                 SUIVANT
             </LoadingButton>
         </div>
@@ -160,19 +160,19 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                 filledClassName={styles.filled}
             />
 
-            <div className="cs-card cs-card-profile">
-                <div className="cs-profile-picture">
+            <div className={`${styles['cs-card']} ${styles['cs-card-profile']}`}>
+                <div className={styles['cs-profile-picture']}>
                     {logo ? (
                         <Image src={logo} alt="Profile" width={96} height={96} style={{ objectFit: 'contain', borderRadius: '50%', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
                     ) : (
                         <Image src="/logo.png" alt="Profile" width={96} height={96} />
                     )}
                 </div>
-                <span className="cs-profile-username">{shopName}</span>
+                <span className={styles['cs-profile-username']}>{shopName}</span>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div className="cs-card">
+                <div className={styles['cs-card']}>
                     {error && <p style={{ color: 'red', marginTop: 10, marginBottom: 10 }}>{error}</p>}
                     <p style={{ textAlign: 'center', color: '#666', marginBottom: '20px' }}>
                         Vous êtes connecté. Cliquez sur le bouton ci-dessous pour créer votre boutique.
@@ -180,7 +180,7 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                 </div>
 
                 <LoadingButton
-                    className={`cs-primary-btn ${styles.step1Button}`}
+                    className={`${styles['cs-primary-btn']} ${styles.step1Button}`}
                     type="submit"
                     isLoading={isLoading}
                 >
@@ -261,20 +261,20 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                 filledClassName={styles.filled}
             />
 
-            <div className="cs-card cs-card-profile">
-                <div className="cs-profile-picture">
+            <div className={`${styles['cs-card']} ${styles['cs-card-profile']}`}>
+                <div className={styles['cs-profile-picture']}>
                     {logo ? (
                         <Image src={logo} alt="Profile" width={96} height={96} style={{ objectFit: 'contain', borderRadius: '50%', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
                     ) : (
                         <Image src="/logo.png" alt="Profile" width={96} height={96} />
                     )}
                 </div>
-                <span className="cs-profile-username">{shopName}</span>
+                <span className={styles['cs-profile-username']}>{shopName}</span>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div className="cs-card">
-                    <div className="cs-card-heading cs-heading-multiline">
+                <div className={styles['cs-card']}>
+                    <div className={`${styles['cs-card-heading']} ${styles['cs-heading-multiline']}`}>
                         <h3>Entrez votre adresse e-mail<br />Ou numéro de téléphone</h3>
                         <span>Doit être rempli<span>*</span></span>
                     </div>
@@ -282,12 +282,12 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="cs-pill-input"
+                        className={styles['cs-pill-input']}
                         required
                         autoComplete="email"
                     />
 
-                    <div className="cs-card-heading" style={{ marginTop: '8px' }}>
+                    <div className={styles['cs-card-heading']} style={{ marginTop: '8px' }}>
                         <h3>Créer un mot de passe</h3>
                         <span>Doit être rempli<span>*</span></span>
                     </div>
@@ -295,17 +295,17 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="cs-pill-input"
+                        className={styles['cs-pill-input']}
                         required
                         autoComplete="new-password"
                     />
                     {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
                 </div>
 
-                <div className="cs-divider-standalone">Ou</div>
+                <div className={styles['cs-divider-standalone']}>Ou</div>
 
                 {/* Google button kept as placeholder for UI consistency, non-functional for now */}
-                <button className="cs-google-btn" type="button">
+                <button className={styles['cs-google-btn']} type="button">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -316,7 +316,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                 </button>
 
                 <LoadingButton
-                    className={`cs-primary-btn ${styles.step1Button}`}
+                    className={`${styles['cs-primary-btn']} ${styles.step1Button}`}
                     type="submit"
                     isLoading={isLoading}
                 >
@@ -448,7 +448,7 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
             </div>
 
             <LoadingButton
-                className={`cs-primary-btn ${styles.step3Button}`}
+                className={`${styles['cs-primary-btn']} ${styles.step3Button}`}
                 onClick={() => setStep(2)}
                 type="button"
             >

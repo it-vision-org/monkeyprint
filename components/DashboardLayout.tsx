@@ -7,6 +7,7 @@ import LoadingButton from "@/components/LoadingButton";
 import LoadingLink from "@/components/LoadingLink";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import styles from "@/app/styles/dashboard.module.css";
 
 type CommandesStatus = "non-confirme" | "confirme" | "retours";
 
@@ -31,9 +32,9 @@ function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: st
   if (!storeInfo) return null;
 
   return (
-    <div className="dash-mobile-store-info">
+    <div className={styles['dash-mobile-store-info']}>
       {storeInfo.logoUrl && (
-        <div className="dash-mobile-store-logo">
+        <div className={styles['dash-mobile-store-logo']}>
           <Image
             src={storeInfo.logoUrl}
             alt={storeInfo.name}
@@ -43,7 +44,7 @@ function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: st
           />
         </div>
       )}
-      <div className="dash-mobile-store-name">{storeInfo.name}</div>
+      <div className={styles['dash-mobile-store-name']}>{storeInfo.name}</div>
     </div>
   );
 }
@@ -153,32 +154,32 @@ export default function DashboardLayout({
   }, [pathname, searchParams]);
 
   return (
-    <div className="dashboard-page">
-      <header className="dash-header">
-        <div className="dash-container">
+    <div className={styles['dashboard-page']}>
+      <header className={styles['dash-header']}>
+        <div className={styles['dash-container']}>
           <MobileStoreInfo storeInfo={storeInfo} />
-          <div className="dash-logo">
+          <div className={styles['dash-logo']}>
           </div>
 
-          <nav className="dash-nav">
-            <div className="dash-nav-indicator-wrapper" ref={navWrapperRef}>
+          <nav className={styles['dash-nav']}>
+            <div className={styles['dash-nav-indicator-wrapper']} ref={navWrapperRef}>
               <LoadingLink
                 href="/dashboard/apercu"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/apercu") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/apercu") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[0] = el; }}
               >
                 APERÇU
               </LoadingLink>
               <LoadingLink
                 href="/dashboard/produits"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/produits") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/produits") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[1] = el; }}
               >
                 PRODUITS
               </LoadingLink>
 
               <div
-                className="dash-nav-dropdown"
+                className={styles['dash-nav-dropdown']}
                 ref={(el) => {
                   commandesDropdownRef.current = el;
                   if (el) navItemRefs.current[2] = el;
@@ -186,41 +187,41 @@ export default function DashboardLayout({
               >
                 <button
                   type="button"
-                  className={`dash-nav-link dash-nav-link-button ${pathname.startsWith("/dashboard/commandes") ? "active" : ""}`}
+                  className={`${styles['dash-nav-link']} ${styles['dash-nav-link-button']} ${pathname.startsWith("/dashboard/commandes") ? styles.active : ""}`}
                   onClick={() => setCommandesDropdownOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={commandesDropdownOpen}
                 >
                   COMMANDES
-                  <span className={`dash-nav-caret ${commandesDropdownOpen ? "open" : ""}`} aria-hidden="true">
+                  <span className={`${styles['dash-nav-caret']} ${commandesDropdownOpen ? styles.open : ""}`} aria-hidden="true">
                     ▾
                   </span>
                 </button>
 
                 {commandesDropdownOpen && (
-                  <div className="dash-nav-dropdown-menu" role="menu">
+                  <div className={styles['dash-nav-dropdown-menu']} role="menu">
                     <LoadingLink
                       href="/dashboard/commandes?status=non-confirme"
-                      className={`dash-nav-dropdown-item ${commandesStatus === "non-confirme" ? "active" : ""}`}
+                      className={`${styles['dash-nav-dropdown-item']} ${commandesStatus === "non-confirme" ? styles.active : ""}`}
                       role="menuitem"
                     >
-                      <span className="dash-submenu-dot orange" aria-hidden="true"></span>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.orange}`} aria-hidden="true"></span>
                       Non confirmé
                     </LoadingLink>
                     <LoadingLink
                       href="/dashboard/commandes?status=confirme"
-                      className={`dash-nav-dropdown-item ${commandesStatus === "confirme" ? "active" : ""}`}
+                      className={`${styles['dash-nav-dropdown-item']} ${commandesStatus === "confirme" ? styles.active : ""}`}
                       role="menuitem"
                     >
-                      <span className="dash-submenu-dot green" aria-hidden="true"></span>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.green}`} aria-hidden="true"></span>
                       Confirmé
                     </LoadingLink>
                     <LoadingLink
                       href="/dashboard/commandes?status=retours"
-                      className={`dash-nav-dropdown-item ${commandesStatus === "retours" ? "active" : ""}`}
+                      className={`${styles['dash-nav-dropdown-item']} ${commandesStatus === "retours" ? styles.active : ""}`}
                       role="menuitem"
                     >
-                      <span className="dash-submenu-dot red" aria-hidden="true"></span>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.red}`} aria-hidden="true"></span>
                       Retours
                     </LoadingLink>
                   </div>
@@ -229,40 +230,40 @@ export default function DashboardLayout({
 
               <LoadingLink
                 href="/dashboard/portefeuille"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/portefeuille") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/portefeuille") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[3] = el; }}
               >
                 PORTEFEUILLE
               </LoadingLink>
               <LoadingLink
                 href="/dashboard/support"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/support") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/support") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[4] = el; }}
               >
                 SUPPORT
               </LoadingLink>
               <LoadingLink
                 href="/dashboard/theme"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/theme") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/theme") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[5] = el; }}
               >
                 THÈME
               </LoadingLink>
               <LoadingLink
                 href="/dashboard/compte"
-                className={`dash-nav-link ${isActivePath(pathname, "/dashboard/compte") ? "active" : ""}`}
+                className={`${styles['dash-nav-link']} ${isActivePath(pathname, "/dashboard/compte") ? styles.active : ""}`}
                 ref={(el) => { navItemRefs.current[6] = el; }}
               >
                 COMPTE
               </LoadingLink>
               {/* Optional Admin Link can be added here once useSession is integrated */}
-              <div className="dash-nav-indicator" ref={navIndicatorRef}></div>
+              <div className={styles['dash-nav-indicator']} ref={navIndicatorRef}></div>
             </div>
           </nav>
 
-          <div className="dash-actions">
+          <div className={styles['dash-actions']}>
             <LoadingButton
-              className="dash-visit-btn"
+              className={styles['dash-visit-btn']}
               onClick={handleVisitStore}
               title="VISITER LE MAGASIN"
               variant="outline"
@@ -272,7 +273,7 @@ export default function DashboardLayout({
             </LoadingButton>
           </div>
 
-          <button className="dash-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
+          <button className={styles['dash-mobile-menu-btn']} onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3 12H21M3 6H21M3 18H21" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -282,11 +283,11 @@ export default function DashboardLayout({
 
       {mobileMenuOpen && (
         <>
-          <div className="dash-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
-          <div className={`dash-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
-            <div className="dash-mobile-menu-header">
+          <div className={styles['dash-mobile-overlay']} onClick={() => setMobileMenuOpen(false)} />
+          <div className={`${styles['dash-mobile-menu']} ${mobileMenuOpen ? styles.open : ""}`}>
+            <div className={styles['dash-mobile-menu-header']}>
               <button
-                className="dash-visit-btn-mobile"
+                className={styles['dash-visit-btn-mobile']}
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleVisitStore();
@@ -310,7 +311,7 @@ export default function DashboardLayout({
                 Aperçu
               </LoadingLink>
 
-              <LoadingLink href="/dashboard/produits" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/produits") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/produits" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/produits") ? styles.active : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -320,9 +321,9 @@ export default function DashboardLayout({
                 Produits
               </LoadingLink>
 
-              <div className="dash-mobile-nav-section">
-                <button className="dash-mobile-nav-item commandes-toggle" onClick={() => setCommandesOpen((v) => !v)} type="button">
-                  <div className="dash-mobile-nav-item-left">
+              <div className={styles['dash-mobile-nav-section']}>
+                <button className={`${styles['dash-mobile-nav-item']} ${styles['commandes-toggle']}`} onClick={() => setCommandesOpen((v) => !v)} type="button">
+                  <div className={styles['dash-mobile-nav-item-left']}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M9 5H7C6.46957 5 5.96086 5.21071 5.58579 5.58579C5.21071 5.96086 5 6.46957 5 7V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V7C19 6.46957 18.7893 5.96086 18.4142 5.58579C18.0391 5.21071 17.5304 5 17 5H15"
@@ -343,30 +344,30 @@ export default function DashboardLayout({
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`dash-mobile-chevron ${commandesOpen ? "open" : ""}`}
+                    className={`${styles['dash-mobile-chevron']} ${commandesOpen ? styles.open : ""}`}
                   >
                     <path d="M18 15L12 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
                 {commandesOpen && (
-                  <div className="dash-mobile-submenu">
-                    <LoadingLink href="/dashboard/commandes?status=non-confirme" className="dash-mobile-submenu-item">
-                      <span className="dash-submenu-dot orange"></span>
+                  <div className={styles['dash-mobile-submenu']}>
+                    <LoadingLink href="/dashboard/commandes?status=non-confirme" className={styles['dash-mobile-submenu-item']}>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.orange}`}></span>
                       Non confirmé
                     </LoadingLink>
-                    <LoadingLink href="/dashboard/commandes?status=confirme" className="dash-mobile-submenu-item">
-                      <span className="dash-submenu-dot green"></span>
+                    <LoadingLink href="/dashboard/commandes?status=confirme" className={styles['dash-mobile-submenu-item']}>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.green}`}></span>
                       Confirmé
                     </LoadingLink>
-                    <LoadingLink href="/dashboard/commandes?status=retours" className="dash-mobile-submenu-item">
-                      <span className="dash-submenu-dot red"></span>
+                    <LoadingLink href="/dashboard/commandes?status=retours" className={styles['dash-mobile-submenu-item']}>
+                      <span className={`${styles['dash-submenu-dot']} ${styles.red}`}></span>
                       Retours
                     </LoadingLink>
                   </div>
                 )}
               </div>
 
-              <LoadingLink href="/dashboard/portefeuille" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/portefeuille") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/portefeuille" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/portefeuille") ? styles.active : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M21 8H3M21 8V16C21 16.5304 20.7893 17.0391 20.4142 17.4142C20.0391 17.7893 19.5304 18 19 18H5C4.46957 18 3.96086 17.7893 3.58579 17.4142C3.21071 17.0391 3 16.5304 3 16V8M21 8L19 3H5L3 8"
@@ -380,14 +381,14 @@ export default function DashboardLayout({
                 Portefeuille
               </LoadingLink>
 
-              <LoadingLink href="/dashboard/support" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/support") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/support" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/support") ? styles.active : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Support
               </LoadingLink>
 
-              <LoadingLink href="/dashboard/theme" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/theme") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/theme" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/theme") ? styles.active : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <circle cx="12" cy="12" r="2" fill="currentColor" />
@@ -399,7 +400,7 @@ export default function DashboardLayout({
                 Thème
               </LoadingLink>
 
-              <LoadingLink href="/dashboard/compte" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/compte") ? "active" : ""}`}>
+              <LoadingLink href="/dashboard/compte" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/compte") ? styles.active : ""}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
@@ -419,7 +420,7 @@ export default function DashboardLayout({
                 Compte
               </LoadingLink>
 
-              <Link href="/dashboard/parametres" className="dash-mobile-nav-item bordered">
+              <Link href="/dashboard/parametres" className={`${styles['dash-mobile-nav-item']} ${styles.bordered}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <path
@@ -433,7 +434,7 @@ export default function DashboardLayout({
                 Paramètres
               </Link>
 
-              <Link href="/logout" className="dash-mobile-nav-item logout">
+              <Link href="/logout" className={`${styles['dash-mobile-nav-item']} ${styles.logout}`}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
@@ -449,15 +450,15 @@ export default function DashboardLayout({
               </Link>
             </nav>
 
-            <div className="dash-mobile-logo">
+            <div className={styles['dash-mobile-logo']}>
               <Image src="/logo.png" alt="Monkey Print" width={180} height={60} style={{ objectFit: "contain" }} />
             </div>
           </div>
         </>
       )}
 
-      <main className="dash-main">
-        <div className="dash-container">{children}</div>
+      <main className={styles['dash-main']}>
+        <div className={styles['dash-container']}>{children}</div>
       </main>
 
     </div>

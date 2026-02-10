@@ -1,0 +1,106 @@
+/* Product Upload Styles Module */
+
+.product-upload-page,
+.pd-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #226894 0%, #01ab7b 100%);
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.pu-title, .pd-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0d9488;
+  margin: 0 0 40px 0;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.pu-section, .pd-content {
+  padding: 24px var(--mobile-padding-x);
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.pu-products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.pu-product-card {
+  aspect-ratio: 1;
+  background: #f5f5f5;
+  border: 3px solid #e0e0e0;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 8px;
+}
+
+.pu-product-card:hover {
+  border-color: #0d9488;
+}
+
+.pu-product-card.selected {
+  border-color: #0d9488;
+  background: #e6f7f5;
+}
+
+.pu-colors-container {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e5e7eb;
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.pu-color-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.pu-upload-zone {
+  border: 2px dashed #d0d0d0;
+  border-radius: 16px;
+  padding: 48px var(--mobile-padding-x);
+  text-align: center;
+  cursor: pointer;
+  background: #fafafa;
+}
+
+.pu-next-button, .pd-save {
+  width: 100%;
+  background: #0d9488;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 18px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .pu-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

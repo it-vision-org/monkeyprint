@@ -1,0 +1,377 @@
+/* Dashboard and Admin Styles Module */
+
+.dashboard-page {
+  /* No explicit background here, handled by page components or base */
+}
+
+.dash-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background: #ffffff;
+  box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.25);
+}
+
+.dash-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--mobile-padding-x, 18px);
+  height: 56px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dash-mobile-store-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-mobile-store-logo {
+  flex-shrink: 0;
+}
+
+.dash-mobile-store-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.dash-logo {
+  /* Placeholder */
+}
+
+.dash-nav {
+  display: flex;
+  align-items: center;
+}
+
+.dash-nav-indicator-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dash-nav-link {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dash-nav-link.active {
+  color: #0d9488;
+}
+
+.dash-nav-dropdown {
+  position: relative;
+}
+
+.dash-nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 160px;
+  z-index: 1001;
+}
+
+.dash-nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.dash-nav-dropdown-item:hover {
+  background: #f9fafb;
+}
+
+.dash-submenu-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dash-submenu-dot.orange { background: #f97316; }
+.dash-submenu-dot.green { background: #10b981; }
+.dash-submenu-dot.red { background: #ef4444; }
+
+.dash-nav-caret {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.dash-nav-caret.open {
+  transform: rotate(180deg);
+}
+
+.dash-nav-indicator {
+  position: absolute;
+  bottom: -4px;
+  height: 2px;
+  background: #0d9488;
+  transition: all 0.25s var(--spring-smooth);
+}
+
+.dash-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.dash-visit-btn {
+  /* Inherits from LoadingButton/ui-system */
+}
+
+@media (max-width: 1024px) {
+  .dash-nav {
+    display: none !important;
+  }
+}
+
+.dash-mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .dash-mobile-menu-btn {
+    display: block !important;
+  }
+}
+
+.dash-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+}
+
+.dash-mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100%;
+  background: white;
+  z-index: 2001;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-mobile-menu.open {
+  right: 0;
+}
+
+.dash-mobile-menu-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dash-mobile-nav {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.dash-mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.dash-mobile-nav-item.active {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.dash-mobile-submenu {
+  padding-left: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dash-main {
+  min-height: 100vh;
+}
+
+/* Admin Analytics */
+.admin-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.admin-analytics-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin-analytics-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 20px;
+}
+
+.admin-analytics-chart {
+  width: 100%;
+}
+
+.admin-chart-svg {
+  width: 100%;
+  height: auto;
+}
+
+.admin-analytics-section {
+  margin-top: 40px;
+}
+
+.admin-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+}
+
+.admin-top-stores {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-top-store-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+}
+
+.admin-top-store-rank {
+  font-size: 18px;
+  font-weight: 800;
+  color: #9ca3af;
+  min-width: 40px;
+}
+
+.admin-top-store-info {
+  flex: 1;
+}
+
+.admin-top-store-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.admin-top-store-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.admin-top-store-growth {
+  font-weight: 600;
+}
+
+.admin-top-store-growth.positive {
+  color: #10b981;
+}
+
+.admin-analytics-section {
+  margin-top: 32px;
+}
+
+.admin-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.admin-category-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-category-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-category-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-category-count {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.admin-category-bar {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.admin-category-bar-fill {
+  height: 100%;
+  background: #0d9488;
+}
+
+.admin-category-percentage {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d9488;
+  text-align: right;
+}

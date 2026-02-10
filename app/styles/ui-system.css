@@ -1,0 +1,159 @@
+/* ==========================================================================
+   GLOBAL TACTILE FEEDBACK SYSTEM
+   Premium micro-interactions for all interactive elements
+   ========================================================================== */
+
+/* Base interactive element - applied to buttons, links, cards */
+.interactive,
+button:not([disabled]),
+[role="button"]:not([disabled]),
+a.btn,
+.btn {
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    background-color var(--duration-fast) ease-out,
+    border-color var(--duration-fast) ease-out;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover state - lift effect */
+@media (hover: hover) {
+  .interactive:hover:not([disabled]),
+  button:not([disabled]):hover,
+  [role="button"]:not([disabled]):hover {
+    transform: scale(var(--scale-hover)) translateY(-1px);
+  }
+  
+  .interactive-subtle:hover:not([disabled]) {
+    transform: scale(var(--scale-hover-subtle));
+  }
+}
+
+/* Active/Pressed state - push down effect */
+.interactive:active:not([disabled]),
+button:not([disabled]):active,
+[role="button"]:not([disabled]):active {
+  transform: scale(var(--scale-tap));
+  transition-duration: var(--duration-instant);
+}
+
+.interactive-subtle:active:not([disabled]) {
+  transform: scale(var(--scale-tap-subtle));
+}
+
+/* Card interactive states */
+.card-interactive {
+  transition: 
+    transform var(--duration-normal) var(--spring-smooth),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .card-interactive:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.card-interactive:active {
+  transform: translateY(-4px) scale(0.99);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Link hover underline animation */
+.link-animated {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width var(--duration-normal) var(--ease-out-expo);
+}
+
+@media (hover: hover) {
+  .link-animated:hover::after {
+    width: 100%;
+  }
+}
+
+/* Input focus ring animation */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition: 
+    border-color var(--duration-fast) ease-out,
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    transform var(--duration-fast) var(--spring-responsive);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  transform: scale(1.005);
+}
+
+/* Checkbox and Radio tactile feedback */
+input[type="checkbox"],
+input[type="radio"] {
+  transition: transform var(--duration-instant) var(--spring-bounce);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:active,
+input[type="radio"]:active {
+  transform: scale(0.9);
+}
+
+/* Icon button specific styles */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: 
+    transform var(--duration-fast) var(--spring-responsive),
+    background-color var(--duration-fast) ease-out;
+}
+
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.icon-btn:active {
+  transform: scale(0.9) rotate(-5deg);
+}
+
+/* Ripple effect container (for JS-powered ripples) */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Loading and Shimmer helper classes */
+.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.shimmer {
+  /* Defined in animations.css, here we just ensure basic properties if needed */
+}

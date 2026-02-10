@@ -66,16 +66,16 @@ export default function LoginPage() {
                     <div className={styles.step1Container}>
                         <h2 className={styles.mainTitle}>Se connecter</h2>
 
-                        <div className="cs-card cs-card-profile" style={{ marginBottom: '24px' }}>
-                            <div className="cs-profile-picture">
+                        <div className={`${styles['cs-card']} ${styles['cs-card-profile']}`} style={{ marginBottom: '24px' }}>
+                            <div className={styles['cs-profile-picture']}>
                                 <Image src="/logo.png" alt="Monkey Print" width={96} height={96} />
                             </div>
-                            <span className="cs-profile-username">Monkey Print</span>
+                            <span className={styles['cs-profile-username']}>Monkey Print</span>
                         </div>
 
                         <form onSubmit={handleSubmit}>
-                            <div className="cs-card">
-                                <div className="cs-card-heading">
+                            <div className={styles['cs-card']}>
+                                <div className={styles['cs-card-heading']}>
                                     <h3>Adresse e-mail</h3>
                                     <span>Doit être rempli<span>*</span></span>
                                 </div>
@@ -83,13 +83,13 @@ export default function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="cs-pill-input"
+                                    className={styles['cs-pill-input']}
                                     required
                                     autoComplete="email"
                                     disabled={isLoading}
                                 />
 
-                                <div className="cs-card-heading" style={{ marginTop: '16px' }}>
+                                <div className={styles['cs-card-heading']} style={{ marginTop: '16px' }}>
                                     <h3>Mot de passe</h3>
                                     <span>Doit être rempli<span>*</span></span>
                                 </div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="cs-pill-input"
+                                    className={styles['cs-pill-input']}
                                     required
                                     autoComplete="current-password"
                                     disabled={isLoading}
