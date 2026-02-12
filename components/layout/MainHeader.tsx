@@ -10,6 +10,7 @@ import type { Session } from 'next-auth';
 import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import CartButton from '../ui/CartButton';
+import ConfirmModal from '../ui/ConfirmModal';
 import type { MenuItem } from '../types';
 import { springResponsive, navLinkVariants } from '@/lib/interactions';
 
@@ -74,6 +75,7 @@ export default function MainHeader({
 }: MainHeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const { data: clientSession } = useSession();
     const session = initialSession !== undefined ? initialSession : clientSession;
     const router = useRouter();
@@ -82,7 +84,13 @@ export default function MainHeader({
         setIsMenuOpen(open);
     };
 
-    const handleLogout = async () => {
+    const handleLogoutClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowLogoutConfirm(true);
+    };
+
+    const handleConfirmLogout = async () => {
+        setShowLogoutConfirm(false);
         setIsLoggingOut(true);
         await signOut({ redirect: false });
         router.push('/');
@@ -94,7 +102,7 @@ export default function MainHeader({
         ...(session?.user
             ? [
                 ...(hasStore ? [{ label: "Tableau de bord", href: "/dashboard", icon: "📊" }] : []),
-                { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogout }
+                { label: "Se déconnecter", href: "#", icon: "🚪", onClick: handleLogoutClick }
             ]
             : [
                 { label: "Se connecter", href: "/login", icon: "👤" },
@@ -208,6 +216,19 @@ export default function MainHeader({
                 items={allMenuItems}
                 {...mobileMenuProps}
             />
+
+            <ConfirmModal
+                isOpen={showLogoutConfirm}
+                onConfirm={handleConfirmLogout}
+                onCancel={() => setShowLogoutConfirm(false)}
+                message="Êtes-vous sûr de vouloir vous déconnecter ?"
+                confirmText="Se déconnecter"
+                cancelText="Annuler"
+                type="danger"
+            />
         </>
     );
 }
+
+// Fixed typo in allMenuItems above during previous turn, double checking:
+// (hasStore ? [{ label: "Tableau de bord", href: "/dashboard", icon: "📊" }] : [])

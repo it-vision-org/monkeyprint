@@ -2,6 +2,9 @@
 
 import { useEffect } from 'react';
 
+import { motion, AnimatePresence } from 'framer-motion';
+import styles from './ConfirmModal.module.css';
+
 type ConfirmModalProps = {
     isOpen: boolean;
     message: string;
@@ -23,7 +26,6 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
     useEffect(() => {
         if (isOpen) {
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
             return () => {
                 document.body.style.overflow = 'unset';
@@ -45,8 +47,6 @@ export default function ConfirmModal({
             };
         }
     }, [isOpen, onCancel]);
-
-    if (!isOpen) return null;
 
     // Handle multi-line messages (split by \n)
     const messageLines = message.split('\n');
@@ -106,75 +106,77 @@ export default function ConfirmModal({
     };
 
     return (
-        <div
-            className="confirm-modal-overlay"
-            onClick={onCancel}
-        >
-            <div
-                className="confirm-modal"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button
-                    className="confirm-modal-close"
-                    type="button"
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className={styles.overlay}
                     onClick={onCancel}
-                    aria-label="Close"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
                 >
-                    ×
-                </button>
-
-                <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-                    <div
-                        style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '50%',
-                            background: getIconBg(),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: '0 auto 16px',
-                        }}
+                    <motion.div
+                        className={styles.modal}
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     >
-                        {getIcon()}
-                    </div>
-                </div>
-
-                <div style={{ textAlign: 'center' }}>
-                    {messageLines.map((line, index) => (
-                        <p
-                            key={index}
-                            style={{
-                                fontSize: '17px',
-                                color: '#0d1c23',
-                                margin: index === 0 ? '0 0 8px 0' : '0 0 8px 0',
-                                lineHeight: '1.5',
-                                fontWeight: index === 0 ? 600 : 400,
-                            }}
+                        <button
+                            className={styles.closeButton}
+                            type="button"
+                            onClick={onCancel}
+                            aria-label="Close"
                         >
-                            {line}
-                        </p>
-                    ))}
-                </div>
+                            ×
+                        </button>
 
-                <div style={{ marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                    <button
-                        className="confirm-modal-button confirm-modal-button-cancel"
-                        onClick={onCancel}
-                    >
-                        {cancelText}
-                    </button>
-                    <button
-                        className="confirm-modal-button confirm-modal-button-confirm"
-                        onClick={onConfirm}
-                        style={{
-                            background: getConfirmButtonBg(),
-                        }}
-                    >
-                        {confirmText}
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <div className={styles.iconContainer}>
+                            <div
+                                className={styles.iconWrapper}
+                                style={{ background: getIconBg() }}
+                            >
+                                {getIcon()}
+                            </div>
+                        </div>
+
+                        <div className={styles.messageContainer}>
+                            {messageLines.map((line, index) => (
+                                <p
+                                    key={index}
+                                    className={index === 0 ? styles.title : styles.description}
+                                >
+                                    {line}
+                                </p>
+                            ))}
+                        </div>
+
+                        <div className={styles.buttonContainer}>
+                            <motion.button
+                                className={`${styles.button} ${styles.buttonCancel}`}
+                                onClick={onCancel}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                {cancelText}
+                            </motion.button>
+                            <motion.button
+                                className={`${styles.button} ${styles.buttonConfirm}`}
+                                onClick={onConfirm}
+                                style={{
+                                    background: getConfirmButtonBg(),
+                                }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                {confirmText}
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 }

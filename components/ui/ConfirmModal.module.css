@@ -1,0 +1,118 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 28, 35, 0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.closeButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    color: #a0aec0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: #f7fafc;
+    color: #4a5568;
+}
+
+.iconContainer {
+    margin-bottom: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.iconWrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.messageContainer {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0d1c23;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.description {
+    font-size: 16px;
+    color: #4a5568;
+    line-height: 1.5;
+}
+
+.buttonContainer {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.button {
+    flex: 1;
+    height: 48px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.buttonCancel {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.buttonCancel:hover {
+    background: #e5e7eb;
+}
+
+.buttonConfirm {
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.buttonConfirm:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}

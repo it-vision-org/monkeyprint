@@ -3,6 +3,7 @@
 import type { Session } from 'next-auth';
 import { LoadingLink, MainHeader, HomeHero, HowItWorks, StoresSection } from "@/components";
 import styles from "./home.module.css";
+import footerStyles from "@/components/features/FooterCTA.desktop.module.css";
 
 type HomeContentProps = {
   initialSession?: Session | null;
@@ -15,7 +16,7 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
       {/* NAV BAR */}
       <MainHeader initialSession={initialSession} showCart={false} />
 
-      <main>
+      <main className={styles.mobileContainer}>
         {/* HERO */}
         <HomeHero />
 
@@ -26,13 +27,24 @@ export default function HomeContent({ initialSession }: HomeContentProps) {
         <StoresSection />
 
         {/* FOOTER CTA */}
+        {/* Mobile View */}
         <section className={styles.footerCtaSection}>
+          <div className={styles.footerBar} aria-hidden="true" />
           <LoadingLink href="/create-shop" className={styles.footerCta}>
-            <span>COMMENCEZ GRATUITEMENT !</span>
+            <span className={styles.footerCtaText}>COMMENCEZ GRATUITEMENT !</span>
           </LoadingLink>
+        </section>
+
+        {/* Desktop View (Restored) */}
+        <section className={footerStyles.desktopFooterSection}>
+          <div className={footerStyles.desktopFooterCtaContainer}>
+            <div className={footerStyles.desktopFooterCtaBar} aria-hidden="true" />
+            <LoadingLink href="/create-shop" className={footerStyles.desktopFooterCta}>
+              <span className={footerStyles.desktopFooterCtaText}>COMMENCEZ GRATUITEMENT !</span>
+            </LoadingLink>
+          </div>
         </section>
       </main>
     </div>
   );
 }
-

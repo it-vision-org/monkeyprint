@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getR2Url } from "@/lib/storage";
 import Link from "next/link";
 import Image from "next/image";
+import { MainHeader } from "@/components";
 
 export default async function StoresPage() {
     const stores = await prisma.store.findMany({
@@ -19,7 +20,7 @@ export default async function StoresPage() {
 
     // Get logo URLs for all stores
     const storesWithLogos = await Promise.all(
-        stores.map(async (store: typeof stores[number]) => {
+        stores.map(async (store) => {
             const logoUrl = store.logoUrl ? await getR2Url(store.logoUrl) : null;
             return { ...store, logoUrl };
         })
@@ -27,34 +28,9 @@ export default async function StoresPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-            {/* Header */}
-            <header style={{
-                background: 'white',
-                padding: '20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                marginBottom: '40px'
-            }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                        <Image
-                            src="/logo.png"
-                            alt="Monkey Print"
-                            width={100}
-                            height={50}
-                            style={{ objectFit: 'contain' }}
-                        />
-                        <span style={{ fontSize: '18px', fontWeight: 700, color: '#000' }}>MONKEY PRINT</span>
-                    </Link>
-                    <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '16px' }}>Accueil</Link>
-                        <Link href="/stores" style={{ color: '#000', textDecoration: 'none', fontSize: '16px', fontWeight: 600 }}>Boutiques</Link>
-                        <Link href="/contact" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '16px' }}>Contact</Link>
-                    </nav>
-                </div>
-            </header>
-
+            <MainHeader />
             {/* Content */}
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 60px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px 60px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '60px' }}>
                     <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '16px', color: '#1f2937' }}>
                         Découvrez les boutiques
@@ -75,8 +51,8 @@ export default async function StoresPage() {
                         <p style={{ fontSize: '18px', color: '#6b7280', marginBottom: '24px' }}>
                             Aucune boutique disponible pour le moment.
                         </p>
-                        <Link 
-                            href="/create-shop" 
+                        <Link
+                            href="/create-shop"
                             style={{
                                 display: 'inline-block',
                                 background: '#000',
@@ -201,7 +177,7 @@ export default async function StoresPage() {
                                         }}>
                                             Visiter la boutique
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M5 12H19M19 12L12 5M19 12L12 19" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M5 12H19M19 12L12 5M19 12L12 19" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         </div>
                                     </div>
