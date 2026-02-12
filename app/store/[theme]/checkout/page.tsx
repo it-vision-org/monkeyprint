@@ -1,6 +1,6 @@
 'use client';
 
-import CheckoutPage from '@/components/CheckoutPage';
+import { CheckoutPage } from '@/components';
 import { useThemeFromRoute } from '@/hooks/useThemeFromRoute';
 
 export default function CheckoutPageRoute() {

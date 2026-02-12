@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface AdminOrderActionsProps {
     orderId: string;
@@ -125,17 +125,17 @@ export default function AdminOrderActions({ orderId, currentStatus }: AdminOrder
     const options = getStatusOptions();
 
     return (
-        <div style={{ 
-            padding: '20px', 
-            background: '#f9fafb', 
+        <div style={{
+            padding: '20px',
+            background: '#f9fafb',
             borderRadius: '12px',
             border: '1px solid #e5e7eb'
         }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Actions administrateur</h3>
             {error && (
-                <div style={{ 
-                    padding: '12px', 
-                    background: '#fee2e2', 
+                <div style={{
+                    padding: '12px',
+                    background: '#fee2e2',
                     border: '1px solid #fecaca',
                     borderRadius: '8px',
                     color: '#dc2626',
@@ -145,11 +145,11 @@ export default function AdminOrderActions({ orderId, currentStatus }: AdminOrder
                     {error}
                 </div>
             )}
-            
+
             {currentStatus === 'PENDING' && (
-                <div style={{ 
-                    padding: '12px', 
-                    background: '#fef3c7', 
+                <div style={{
+                    padding: '12px',
+                    background: '#fef3c7',
                     border: '1px solid #fde68a',
                     borderRadius: '8px',
                     color: '#92400e',

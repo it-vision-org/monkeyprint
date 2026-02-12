@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { getR2Url } from "@/lib/storage";
 import { notFound } from "next/navigation";
-import { themeConfigs } from '@/components/themeConfig';
+import { themeConfigs } from '@/components';
 import ProductPageClient from "./ProductPageClient";
 
 export default async function ProductPage({ params }: { params: Promise<{ storeSlug: string, productId: string }> }) {
     const { storeSlug, productId } = await params;
     const product = await prisma.product.findUnique({
         where: { id: productId },
-        include: { 
+        include: {
             store: {
                 include: {
                     themeCustomization: true
@@ -24,7 +24,7 @@ export default async function ProductPage({ params }: { params: Promise<{ storeS
 
     const themeId = (product.store.theme || 'theme-1') as keyof typeof themeConfigs;
     const theme = themeConfigs[themeId] || themeConfigs['theme-1'];
-    
+
     // Update baseRoute to use shop route
     const themeWithRoute = {
         ...theme,

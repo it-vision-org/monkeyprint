@@ -1,14 +1,16 @@
 'use client';
 
-import { useCart } from "@/components/CartContext";
+import {
+    useCart,
+    StoreHeader,
+    type ThemeConfig,
+    LoadingButton,
+    LoadingLink
+} from "@/components";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import StoreHeader from "@/components/StoreHeader";
-import type { ThemeConfig } from '@/components/themeConfig';
-import LoadingButton from "@/components/LoadingButton";
-import LoadingLink from "@/components/LoadingLink";
 
 type Customization = {
     primaryColor?: string | null;

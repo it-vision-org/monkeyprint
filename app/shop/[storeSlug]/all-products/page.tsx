@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getR2Url } from "@/lib/storage";
-import { themeConfigs } from '@/components/themeConfig';
-import AllProductsPage from '@/components/AllProductsPage';
-import type { Product } from '@/components/types';
+import { themeConfigs, AllProductsPage, type Product } from '@/components';
 import { notFound } from "next/navigation";
 
 export default async function StoreAllProductsPage({ params }: { params: Promise<{ storeSlug: string }> }) {
@@ -60,7 +58,7 @@ export default async function StoreAllProductsPage({ params }: { params: Promise
     );
 
     return (
-        <AllProductsPage 
+        <AllProductsPage
             theme={themeWithStoreRoute}
             products={productsWithImages}
         />

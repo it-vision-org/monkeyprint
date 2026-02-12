@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { updateProfile, updateStoreTheme } from "./actions";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 export default function CompteForm({ initialShopName, email, storeId, initialTheme }: { initialShopName: string, email: string, storeId: string, initialTheme: string }) {
     const { showAlert } = useAlert();
@@ -33,7 +33,7 @@ export default function CompteForm({ initialShopName, email, storeId, initialThe
 
     const handleThemeChange = async (themeId: string) => {
         if (themeId === selectedTheme) return;
-        
+
         setIsThemeSubmitting(true);
         setSelectedTheme(themeId);
 
@@ -43,7 +43,7 @@ export default function CompteForm({ initialShopName, email, storeId, initialThe
 
         const result = await updateStoreTheme(formData);
         setIsThemeSubmitting(false);
-        
+
         if (result?.error) {
             showAlert(result.error, 'error');
             setSelectedTheme(initialTheme); // Revert on error
@@ -114,80 +114,80 @@ export default function CompteForm({ initialShopName, email, storeId, initialThe
 
             {/* Theme Selection Section */}
             <div className="compte-form-section" style={{ marginTop: '32px' }}>
-            <div className="compte-form-section-header">
-                <div className="compte-form-section-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                <div className="compte-form-section-header">
+                    <div className="compte-form-section-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 className="compte-form-section-title">Thème de la boutique</h3>
+                        <p className="compte-form-section-desc">Choisissez le design de votre boutique</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="compte-form-section-title">Thème de la boutique</h3>
-                    <p className="compte-form-section-desc">Choisissez le design de votre boutique</p>
-                </div>
-            </div>
 
-            <div className="compte-form-body">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' }}>
-                    {themes.map((theme) => (
-                        <button
-                            key={theme.id}
-                            type="button"
-                            onClick={() => handleThemeChange(theme.id)}
-                            disabled={isThemeSubmitting}
-                            style={{
-                                position: 'relative',
-                                border: selectedTheme === theme.id ? '3px solid #0d9488' : '2px solid #e5e7eb',
-                                borderRadius: '12px',
-                                overflow: 'hidden',
-                                background: 'white',
-                                cursor: isThemeSubmitting ? 'not-allowed' : 'pointer',
-                                opacity: isThemeSubmitting ? 0.6 : 1,
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            <div style={{ aspectRatio: '16/9', position: 'relative' }}>
-                                <Image
-                                    src={theme.image}
-                                    alt={theme.label}
-                                    fill
-                                    style={{ objectFit: 'cover' }}
-                                />
-                            </div>
-                            <div style={{ padding: '12px', textAlign: 'center' }}>
-                                <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: '#111827' }}>
-                                    {theme.label}
-                                </p>
-                            </div>
-                            {selectedTheme === theme.id && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '8px',
-                                    right: '8px',
-                                    width: '24px',
-                                    height: '24px',
-                                    background: '#0d9488',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
+                <div className="compte-form-body">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                        {themes.map((theme) => (
+                            <button
+                                key={theme.id}
+                                type="button"
+                                onClick={() => handleThemeChange(theme.id)}
+                                disabled={isThemeSubmitting}
+                                style={{
+                                    position: 'relative',
+                                    border: selectedTheme === theme.id ? '3px solid #0d9488' : '2px solid #e5e7eb',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    background: 'white',
+                                    cursor: isThemeSubmitting ? 'not-allowed' : 'pointer',
+                                    opacity: isThemeSubmitting ? 0.6 : 1,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <div style={{ aspectRatio: '16/9', position: 'relative' }}>
+                                    <Image
+                                        src={theme.image}
+                                        alt={theme.label}
+                                        fill
+                                        style={{ objectFit: 'cover' }}
+                                    />
                                 </div>
-                            )}
-                        </button>
-                    ))}
+                                <div style={{ padding: '12px', textAlign: 'center' }}>
+                                    <p style={{ margin: 0, fontWeight: 600, fontSize: '14px', color: '#111827' }}>
+                                        {theme.label}
+                                    </p>
+                                </div>
+                                {selectedTheme === theme.id && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        width: '24px',
+                                        height: '24px',
+                                        background: '#0d9488',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </div>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                    {isThemeSubmitting && (
+                        <p style={{ marginTop: '12px', color: '#666', fontSize: '14px', textAlign: 'center' }}>
+                            Mise à jour du thème...
+                        </p>
+                    )}
                 </div>
-                {isThemeSubmitting && (
-                    <p style={{ marginTop: '12px', color: '#666', fontSize: '14px', textAlign: 'center' }}>
-                        Mise à jour du thème...
-                    </p>
-                )}
             </div>
-        </div>
         </>
     );
 }

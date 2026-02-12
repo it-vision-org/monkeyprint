@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { updateTicketStatusAndPriority } from '../actions';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface TicketEditModalProps {
     ticketId: string;
@@ -13,12 +13,12 @@ interface TicketEditModalProps {
     onClose: () => void;
 }
 
-export default function TicketEditModal({ 
-    ticketId, 
-    currentStatus, 
-    currentPriority, 
-    isOpen, 
-    onClose 
+export default function TicketEditModal({
+    ticketId,
+    currentStatus,
+    currentPriority,
+    isOpen,
+    onClose
 }: TicketEditModalProps) {
     const router = useRouter();
     const { showAlert } = useAlert();
@@ -88,11 +88,11 @@ export default function TicketEditModal({
 
     const handleSave = async () => {
         setIsUpdating(true);
-        
+
         const result = await updateTicketStatusAndPriority(ticketId, selectedStatus, selectedPriority);
-        
+
         setIsUpdating(false);
-        
+
         if (result?.success) {
             showAlert("Ticket mis à jour", 'success');
             onClose();
@@ -108,7 +108,7 @@ export default function TicketEditModal({
     const currentPriorityConfig = getPriorityConfig(currentPriority);
 
     return (
-        <div 
+        <div
             className="admin-status-modal-overlay"
             onClick={(e) => {
                 if (!isUpdating && e.target === e.currentTarget) {
@@ -116,7 +116,7 @@ export default function TicketEditModal({
                 }
             }}
         >
-            <div 
+            <div
                 className="admin-status-modal"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -127,16 +127,16 @@ export default function TicketEditModal({
                 >
                     ×
                 </button>
-                
+
                 <h2 className="admin-status-modal-title">
                     Modifier le ticket
                 </h2>
-                
+
                 <div className="admin-status-modal-content">
                     {/* Status Selection */}
                     <div className="admin-status-modal-section">
                         <label className="admin-status-modal-section-label">
-                            Statut actuel: <span style={{ 
+                            Statut actuel: <span style={{
                                 padding: '4px 10px',
                                 borderRadius: '6px',
                                 fontSize: '13px',
@@ -164,8 +164,8 @@ export default function TicketEditModal({
                                         }}
                                     >
                                         <span style={{ fontSize: '20px', marginBottom: '4px' }}>{status.emoji}</span>
-                                        <span style={{ 
-                                            fontSize: '14px', 
+                                        <span style={{
+                                            fontSize: '14px',
                                             fontWeight: 600,
                                             color: isSelected ? config.color : '#374151'
                                         }}>
@@ -180,7 +180,7 @@ export default function TicketEditModal({
                     {/* Priority Selection */}
                     <div className="admin-status-modal-section">
                         <label className="admin-status-modal-section-label">
-                            Priorité actuelle: <span style={{ 
+                            Priorité actuelle: <span style={{
                                 padding: '4px 10px',
                                 borderRadius: '6px',
                                 fontSize: '13px',
@@ -207,8 +207,8 @@ export default function TicketEditModal({
                                             borderWidth: isSelected ? '2px' : '1px',
                                         }}
                                     >
-                                        <span style={{ 
-                                            fontSize: '14px', 
+                                        <span style={{
+                                            fontSize: '14px',
                                             fontWeight: 600,
                                             color: isSelected ? config.color : '#374151'
                                         }}>

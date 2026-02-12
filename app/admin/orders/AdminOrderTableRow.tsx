@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface AdminOrderTableRowProps {
     order: {
@@ -225,7 +225,7 @@ export default function AdminOrderTableRow({ order }: AdminOrderTableRowProps) {
 
             {/* Status Selection Modal */}
             {isStatusModalOpen && (
-                <div 
+                <div
                     className="admin-status-modal-overlay"
                     onClick={(e) => {
                         e.stopPropagation();
@@ -234,7 +234,7 @@ export default function AdminOrderTableRow({ order }: AdminOrderTableRowProps) {
                         }
                     }}
                 >
-                    <div 
+                    <div
                         className="admin-status-modal"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -245,11 +245,11 @@ export default function AdminOrderTableRow({ order }: AdminOrderTableRowProps) {
                         >
                             ×
                         </button>
-                        
+
                         <h2 className="admin-status-modal-title">
                             Changer le statut de la commande
                         </h2>
-                        
+
                         <p className="admin-status-modal-subtitle">
                             Statut actuel: <strong>{getStatusLabel(order.status)}</strong>
                         </p>
@@ -268,7 +268,7 @@ export default function AdminOrderTableRow({ order }: AdminOrderTableRowProps) {
                                     }}
                                 >
                                     <div className="admin-status-modal-option-content">
-                                        <span 
+                                        <span
                                             className="admin-status-modal-option-label"
                                             style={{ color: option.color }}
                                         >

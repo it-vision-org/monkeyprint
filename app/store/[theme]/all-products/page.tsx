@@ -1,6 +1,6 @@
 'use client';
 
-import AllProductsPage from '@/components/AllProductsPage';
+import { AllProductsPage } from '@/components';
 import { useThemeFromRoute } from '@/hooks/useThemeFromRoute';
 
 export default function AllProductsPageRoute() {

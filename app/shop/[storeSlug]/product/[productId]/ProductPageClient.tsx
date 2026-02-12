@@ -1,12 +1,13 @@
 'use client';
 
-import { useCart } from "@/components/CartContext";
+import {
+    useCart,
+    LoadingLink,
+    AddToCartButton,
+    StoreHeader,
+    type ThemeConfig
+} from "@/components";
 import Image from "next/image";
-import Link from "next/link";
-import LoadingLink from "@/components/LoadingLink";
-import AddToCartButton from "@/components/AddToCartButton";
-import StoreHeader from "@/components/StoreHeader";
-import type { ThemeConfig } from '@/components/themeConfig';
 import type { Product, Store } from '@prisma/client';
 
 type Customization = {

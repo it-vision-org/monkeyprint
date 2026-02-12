@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import MainHeader from '@/components/MainHeader';
-import type { MenuItem } from '@/components/types';
+import { MainHeader, type MenuItem } from '@/components';
 
 const contactMenuItems: MenuItem[] = [
     { label: "Accueil", href: "/", icon: "🏠" },

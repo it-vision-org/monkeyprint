@@ -3,7 +3,7 @@
 import { confirmOrder } from '../actions';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface OrderDetailActionsProps {
     orderId: string;
@@ -43,9 +43,9 @@ export default function OrderDetailActions({ orderId, currentStatus }: OrderDeta
     // Only show confirmation button for PENDING orders
     if (currentStatus !== 'PENDING') {
         return (
-            <div style={{ 
-                padding: '20px', 
-                background: '#f9fafb', 
+            <div style={{
+                padding: '20px',
+                background: '#f9fafb',
                 borderRadius: '12px',
                 border: '1px solid #e5e7eb'
             }}>
@@ -57,17 +57,17 @@ export default function OrderDetailActions({ orderId, currentStatus }: OrderDeta
     }
 
     return (
-        <div style={{ 
-            padding: '20px', 
-            background: '#f9fafb', 
+        <div style={{
+            padding: '20px',
+            background: '#f9fafb',
             borderRadius: '12px',
             border: '1px solid #e5e7eb'
         }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Actions</h3>
             {error && (
-                <div style={{ 
-                    padding: '12px', 
-                    background: '#fee2e2', 
+                <div style={{
+                    padding: '12px',
+                    background: '#fee2e2',
                     border: '1px solid #fecaca',
                     borderRadius: '8px',
                     color: '#dc2626',

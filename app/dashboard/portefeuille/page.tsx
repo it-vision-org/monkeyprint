@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
-import LoadingLink from "@/components/LoadingLink";
+import { LoadingLink } from "@/components";
 
 export default async function PortefeuillePage() {
     const session = await auth();

@@ -3,7 +3,7 @@
 import { confirmOrder, deleteOrder } from "./actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import { motion } from "framer-motion";
 import { iconButtonVariants } from "@/lib/interactions";
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { addMessage } from "../actions";
 import { useRouter } from "next/navigation";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import ImageUploadZone from '../components/ImageUploadZone';
 
 export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
@@ -34,18 +34,18 @@ export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
         // Create FormData manually to avoid issues with hidden file inputs
         const form = e.currentTarget;
         const formData = new FormData();
-        
+
         // Add text content
         const content = (form.querySelector('[name="content"]') as HTMLTextAreaElement)?.value;
         if (content) {
             formData.append('content', content);
         }
-        
+
         // Add image file if present
         if (imageFile && imageFile instanceof File && imageFile.size > 0) {
             formData.append('image', imageFile);
         }
-        
+
         const result = await addMessage(ticketId, formData);
 
         setIsSubmitting(false);
@@ -64,8 +64,8 @@ export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
     return (
         <div className="support-message-form-container">
             <form onSubmit={handleSubmit} className="support-message-form">
-                <textarea 
-                    name="content" 
+                <textarea
+                    name="content"
                     required
                     className="support-textarea"
                     rows={4}
@@ -79,7 +79,7 @@ export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
                     selectedImage={selectedImage}
                     imageFile={imageFile}
                 />
-                <button 
+                <button
                     type="submit"
                     className="support-btn support-btn-primary"
                     disabled={isSubmitting}

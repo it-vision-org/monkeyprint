@@ -1,10 +1,8 @@
 'use client';
 
 import Link from "next/link";
-import LoadingLink from "@/components/LoadingLink";
+import { LoadingLink, StoreHeader, type ThemeConfig } from "@/components";
 import { format } from "date-fns";
-import StoreHeader from "@/components/StoreHeader";
-import type { ThemeConfig } from '@/components/themeConfig';
 import Image from "next/image";
 
 type Customization = {

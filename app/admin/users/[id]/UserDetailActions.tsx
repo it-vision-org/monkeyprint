@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface UserDetailActionsProps {
     userId: string;
@@ -17,12 +17,12 @@ export default function UserDetailActions({ userId, currentRole }: UserDetailAct
 
     const handleRoleChange = async (newRole: string) => {
         if (isLoading) return;
-        
+
         const confirmed = await confirm(`Êtes-vous sûr de vouloir changer le rôle de cet utilisateur en ${newRole === 'ADMIN' ? 'Administrateur' : 'Utilisateur'}?`, 'warning');
         if (!confirmed) {
             return;
         }
-        
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/admin/users/${userId}/role`, {

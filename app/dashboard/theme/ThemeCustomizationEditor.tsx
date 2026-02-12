@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import { SketchPicker, ColorResult } from 'react-color';
 import type { ThemeCustomization, ThemeId } from '@/lib/types/theme';
 import { themeDefaults } from '@/lib/types/theme';
@@ -47,7 +47,7 @@ export default function ThemeCustomizationEditor() {
       if (!response.ok) throw new Error('Failed to load customization');
       const data = await response.json();
       setCurrentTheme(data.theme || 'theme-1');
-      
+
       const defaults = themeDefaults[data.theme || 'theme-1'] || {};
       setCustomization({
         ...defaults,
@@ -66,25 +66,25 @@ export default function ThemeCustomizationEditor() {
     // Validate all color fields before saving
     const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor'];
     const errors: Record<string, string> = {};
-    
+
     colorFields.forEach(field => {
       const value = customization[field as keyof ThemeCustomizationData] as string;
       if (value && !isValidHexColor(value)) {
         errors[field] = 'Format de couleur invalide. Utilisez #RRGGBB (ex: #3b82f6)';
       }
     });
-    
+
     if (Object.keys(errors).length > 0) {
       setColorErrors(errors);
       showAlert('Veuillez corriger les erreurs de validation avant d\'enregistrer', 'error');
       return;
     }
-    
+
     setIsSaving(true);
     try {
       const toSave = partial ? { ...customization, ...partial } : customization;
       const { theme, ...customizationData } = toSave;
-      
+
       const response = await fetch('/api/theme-customization', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -92,7 +92,7 @@ export default function ThemeCustomizationEditor() {
       });
 
       if (!response.ok) throw new Error('Failed to save customization');
-      
+
       const result = await response.json();
       setCustomization({ ...customization, ...result.customization });
       setColorErrors({}); // Clear errors on success
@@ -117,7 +117,7 @@ export default function ThemeCustomizationEditor() {
   const updateField = (field: keyof ThemeCustomizationData, value: any) => {
     const updated = { ...customization, [field]: value };
     setCustomization(updated);
-    
+
     // Validate color fields
     const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor'];
     if (colorFields.includes(field)) {
@@ -160,19 +160,19 @@ export default function ThemeCustomizationEditor() {
 
   const handleThemeChange = async (themeId: ThemeId) => {
     if (themeId === currentTheme) return;
-    
+
     setIsChangingTheme(true);
     try {
       const formData = new FormData();
       formData.append('theme', themeId);
-      
+
       const storeInfoResponse = await fetch('/api/store-info');
       if (!storeInfoResponse.ok) throw new Error('Failed to get store info');
       const storeInfo = await storeInfoResponse.json();
-      
+
       if (!storeInfo.id) throw new Error('Store ID not found');
       formData.append('storeId', storeInfo.id);
-      
+
       const updateResponse = await fetch('/api/store-theme', {
         method: 'PUT',
         body: formData,
@@ -182,7 +182,7 @@ export default function ThemeCustomizationEditor() {
         const errorData = await updateResponse.json();
         throw new Error(errorData.error || 'Failed to update theme');
       }
-      
+
       setCurrentTheme(themeId);
       // Reload customization with new theme defaults
       await loadCustomization();
@@ -201,10 +201,10 @@ export default function ThemeCustomizationEditor() {
       label: 'Vue d\'ensemble',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="14" y="3" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="14" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="3" y="14" width="7" height="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -213,8 +213,8 @@ export default function ThemeCustomizationEditor() {
       label: 'Couleurs',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M12 2V22M2 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12 2V22M2 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -223,8 +223,8 @@ export default function ThemeCustomizationEditor() {
       label: 'Section Hero',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="4" width="18" height="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <rect x="3" y="4" width="18" height="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -233,11 +233,11 @@ export default function ThemeCustomizationEditor() {
       label: 'Contenu',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M16 13H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M10 9H9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M16 13H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M10 9H9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -246,9 +246,9 @@ export default function ThemeCustomizationEditor() {
       label: 'Images',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M21 15L16 10L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M21 15L16 10L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -257,9 +257,9 @@ export default function ThemeCustomizationEditor() {
       label: 'Mise en page',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M9 21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M3 9H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -268,7 +268,7 @@ export default function ThemeCustomizationEditor() {
       label: 'Typographie',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 20L10 4M14 20L20 4M3 12H11M13 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M4 20L10 4M14 20L20 4M3 12H11M13 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
     },
@@ -330,9 +330,9 @@ export default function ThemeCustomizationEditor() {
           </div>
 
           {/* Modern Sidebar Layout */}
-          <div 
+          <div
             className="theme-layout"
-            style={{ 
+            style={{
               display: 'grid',
               gridTemplateColumns: '280px 1fr',
               gap: '32px',
@@ -340,211 +340,211 @@ export default function ThemeCustomizationEditor() {
               alignItems: 'flex-start'
             }}
           >
-          {/* Vertical Sidebar Menu */}
-          <aside 
-            className="theme-sidebar"
-            style={{
-              position: 'sticky',
-              top: '24px',
-              background: 'white',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-              maxHeight: 'calc(100vh - 120px)',
-              overflowY: 'auto'
-            }}
-          >
-            <nav 
-              className="theme-nav"
-              style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
-            >
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
-                
-                return (
-                  <div key={tab.id} style={{ position: 'relative' }}>
-                    <button
-                      type="button"
-                      className="theme-nav-item"
-                      onClick={() => setActiveTab(tab.id)}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '14px 16px',
-                        border: 'none',
-                        background: isActive 
-                          ? 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)' 
-                          : 'transparent',
-                        color: isActive ? 'white' : '#4b5563',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: isActive ? 600 : 500,
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        position: 'relative',
-                        zIndex: 2,
-                        textAlign: 'left',
-                        boxShadow: isActive 
-                          ? '0 4px 12px rgba(13, 148, 136, 0.25)' 
-                          : 'none',
-                        transform: isActive ? 'translateX(4px)' : 'translateX(0)'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = '#f3f4f6';
-                          e.currentTarget.style.color = '#111827';
-                          e.currentTarget.style.transform = 'translateX(2px)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = 'transparent';
-                          e.currentTarget.style.color = '#4b5563';
-                          e.currentTarget.style.transform = 'translateX(0)';
-                        }
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '20px',
-                        height: '20px',
-                        flexShrink: 0,
-                        opacity: isActive ? 1 : 0.7,
-                        transition: 'opacity 0.2s'
-                      }}>
-                        {tab.icon}
-                      </div>
-                      <span style={{ flex: 1 }}>{tab.label}</span>
-                      {isActive && (
-                        <div style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          background: 'white',
-                          boxShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
-                          animation: 'pulse 2s infinite'
-                        }} />
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </nav>
-            
-            {/* Decorative gradient at bottom */}
-            <div style={{
-              height: '20px',
-              background: 'linear-gradient(to bottom, transparent, rgba(243, 244, 246, 0.8))',
-              marginTop: '12px',
-              borderRadius: '0 0 16px 16px',
-              pointerEvents: 'none'
-            }} />
-          </aside>
-
-          {/* Tab Content */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="compte-form-section">
-          {activeTab === 'overview' && (
-            <OverviewTab 
-              customization={customization} 
-              currentTheme={currentTheme}
-              onThemeChange={handleThemeChange}
-              isChangingTheme={isChangingTheme}
-            />
-          )}
-          {activeTab === 'colors' && (
-            <ColorsTab 
-              customization={customization}
-              updateField={updateField}
-              showColorPicker={showColorPicker}
-              setShowColorPicker={setShowColorPicker}
-              colorPickerRef={colorPickerRef}
-              currentTheme={currentTheme}
-              colorErrors={colorErrors}
-            />
-          )}
-          {activeTab === 'hero' && (
-            <HeroTab 
-              customization={customization} 
-              updateField={updateField}
-              handleImageUpload={handleImageUpload}
-            />
-          )}
-          {activeTab === 'content' && (
-            <ContentTab 
-              customization={customization} 
-              updateField={updateField}
-            />
-          )}
-          {activeTab === 'images' && (
-            <ImagesTab 
-              customization={customization} 
-              updateField={updateField}
-              handleImageUpload={handleImageUpload}
-            />
-          )}
-          {activeTab === 'layout' && (
-            <LayoutTab 
-              customization={customization} 
-              updateField={updateField}
-            />
-          )}
-          {activeTab === 'typography' && (
-            <TypographyTab 
-              customization={customization} 
-              updateField={updateField}
-            />
-          )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => saveCustomization()}
-              disabled={isSaving || hasValidationErrors()}
-              className="compte-submit-btn"
-              style={{ 
-                marginTop: '32px',
-                opacity: hasValidationErrors() ? 0.6 : 1,
-                cursor: hasValidationErrors() ? 'not-allowed' : 'pointer',
-                width: '100%'
+            {/* Vertical Sidebar Menu */}
+            <aside
+              className="theme-sidebar"
+              style={{
+                position: 'sticky',
+                top: '24px',
+                background: 'white',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '12px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                maxHeight: 'calc(100vh - 120px)',
+                overflowY: 'auto'
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span>{isSaving ? 'Enregistrement...' : 'Enregistrer toutes les modifications'}</span>
-            </button>
-            {hasValidationErrors() && (
-              <p style={{ 
-                marginTop: '12px', 
-                fontSize: '14px', 
-                color: '#ef4444',
-                textAlign: 'center'
-              }}>
-                Veuillez corriger les erreurs de validation avant d'enregistrer
-              </p>
-            )}
+              <nav
+                className="theme-nav"
+                style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+              >
+                {tabs.map((tab) => {
+                  const isActive = activeTab === tab.id;
+
+                  return (
+                    <div key={tab.id} style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className="theme-nav-item"
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '14px 16px',
+                          border: 'none',
+                          background: isActive
+                            ? 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)'
+                            : 'transparent',
+                          color: isActive ? 'white' : '#4b5563',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: isActive ? 600 : 500,
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          zIndex: 2,
+                          textAlign: 'left',
+                          boxShadow: isActive
+                            ? '0 4px 12px rgba(13, 148, 136, 0.25)'
+                            : 'none',
+                          transform: isActive ? 'translateX(4px)' : 'translateX(0)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = '#f3f4f6';
+                            e.currentTarget.style.color = '#111827';
+                            e.currentTarget.style.transform = 'translateX(2px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = '#4b5563';
+                            e.currentTarget.style.transform = 'translateX(0)';
+                          }
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '20px',
+                          height: '20px',
+                          flexShrink: 0,
+                          opacity: isActive ? 1 : 0.7,
+                          transition: 'opacity 0.2s'
+                        }}>
+                          {tab.icon}
+                        </div>
+                        <span style={{ flex: 1 }}>{tab.label}</span>
+                        {isActive && (
+                          <div style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: 'white',
+                            boxShadow: '0 0 8px rgba(255, 255, 255, 0.8)',
+                            animation: 'pulse 2s infinite'
+                          }} />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </nav>
+
+              {/* Decorative gradient at bottom */}
+              <div style={{
+                height: '20px',
+                background: 'linear-gradient(to bottom, transparent, rgba(243, 244, 246, 0.8))',
+                marginTop: '12px',
+                borderRadius: '0 0 16px 16px',
+                pointerEvents: 'none'
+              }} />
+            </aside>
+
+            {/* Tab Content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="compte-form-section">
+                {activeTab === 'overview' && (
+                  <OverviewTab
+                    customization={customization}
+                    currentTheme={currentTheme}
+                    onThemeChange={handleThemeChange}
+                    isChangingTheme={isChangingTheme}
+                  />
+                )}
+                {activeTab === 'colors' && (
+                  <ColorsTab
+                    customization={customization}
+                    updateField={updateField}
+                    showColorPicker={showColorPicker}
+                    setShowColorPicker={setShowColorPicker}
+                    colorPickerRef={colorPickerRef}
+                    currentTheme={currentTheme}
+                    colorErrors={colorErrors}
+                  />
+                )}
+                {activeTab === 'hero' && (
+                  <HeroTab
+                    customization={customization}
+                    updateField={updateField}
+                    handleImageUpload={handleImageUpload}
+                  />
+                )}
+                {activeTab === 'content' && (
+                  <ContentTab
+                    customization={customization}
+                    updateField={updateField}
+                  />
+                )}
+                {activeTab === 'images' && (
+                  <ImagesTab
+                    customization={customization}
+                    updateField={updateField}
+                    handleImageUpload={handleImageUpload}
+                  />
+                )}
+                {activeTab === 'layout' && (
+                  <LayoutTab
+                    customization={customization}
+                    updateField={updateField}
+                  />
+                )}
+                {activeTab === 'typography' && (
+                  <TypographyTab
+                    customization={customization}
+                    updateField={updateField}
+                  />
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => saveCustomization()}
+                disabled={isSaving || hasValidationErrors()}
+                className="compte-submit-btn"
+                style={{
+                  marginTop: '32px',
+                  opacity: hasValidationErrors() ? 0.6 : 1,
+                  cursor: hasValidationErrors() ? 'not-allowed' : 'pointer',
+                  width: '100%'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>{isSaving ? 'Enregistrement...' : 'Enregistrer toutes les modifications'}</span>
+              </button>
+              {hasValidationErrors() && (
+                <p style={{
+                  marginTop: '12px',
+                  fontSize: '14px',
+                  color: '#ef4444',
+                  textAlign: 'center'
+                }}>
+                  Veuillez corriger les erreurs de validation avant d'enregistrer
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
 
 // Tab Components
-function OverviewTab({ 
-  customization, 
+function OverviewTab({
+  customization,
   currentTheme,
   onThemeChange,
   isChangingTheme
-}: { 
-  customization: ThemeCustomizationData; 
+}: {
+  customization: ThemeCustomizationData;
   currentTheme: ThemeId;
   onThemeChange: (theme: ThemeId) => void;
   isChangingTheme: boolean;
@@ -572,10 +572,10 @@ function OverviewTab({
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <rect x="14" y="3" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <rect x="14" y="14" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <rect x="3" y="14" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3" y="3" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="14" y="3" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="14" y="14" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="3" y="14" width="7" height="7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -588,17 +588,17 @@ function OverviewTab({
         <div className="compte-input-wrapper" style={{ marginBottom: '32px' }}>
           <label className="compte-input-label">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>Choisir un thème</span>
           </label>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: '20px', 
-            marginTop: '12px' 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '20px',
+            marginTop: '12px'
           }}>
             {themes.map((theme) => (
               <button
@@ -667,10 +667,10 @@ function OverviewTab({
           <p style={{ marginTop: '8px', fontSize: '14px', color: '#6b7280' }}>{themeDescriptions[currentTheme]}</p>
           <p style={{ marginTop: '12px' }}>
             <strong>Couleur principale:</strong>{' '}
-            <span style={{ 
-              display: 'inline-block', 
-              width: '20px', 
-              height: '20px', 
+            <span style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '20px',
               background: customization.primaryColor || '#3b82f6',
               borderRadius: '4px',
               verticalAlign: 'middle',
@@ -685,15 +685,15 @@ function OverviewTab({
   );
 }
 
-function ColorsTab({ 
-  customization, 
-  updateField, 
-  showColorPicker, 
+function ColorsTab({
+  customization,
+  updateField,
+  showColorPicker,
   setShowColorPicker,
   colorPickerRef,
   currentTheme,
   colorErrors
-}: { 
+}: {
   customization: ThemeCustomizationData;
   updateField: (field: keyof ThemeCustomizationData, value: any) => void;
   showColorPicker: string | null;
@@ -704,7 +704,7 @@ function ColorsTab({
 }) {
   // Get theme-specific defaults
   const themeDefaultsForCurrentTheme = themeDefaults[currentTheme] || themeDefaults['theme-1'];
-  
+
   const colorFields = [
     { key: 'primaryColor', label: 'Couleur principale', default: themeDefaultsForCurrentTheme.primaryColor || '#3b82f6' },
     { key: 'secondaryColor', label: 'Couleur secondaire', default: themeDefaultsForCurrentTheme.secondaryColor || '#8b5cf6' },
@@ -721,7 +721,7 @@ function ColorsTab({
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -734,7 +734,7 @@ function ColorsTab({
           const fieldKey = field.key;
           const hasError = !!colorErrors[fieldKey];
           const currentValue = (customization[fieldKey as keyof ThemeCustomizationData] as string) || '';
-          
+
           return (
             <div key={fieldKey} className="compte-input-wrapper">
               <label className="compte-input-label">
@@ -767,7 +767,7 @@ function ColorsTab({
                       updateField(fieldKey as keyof ThemeCustomizationData, value);
                     }}
                     placeholder={field.default}
-                    style={{ 
+                    style={{
                       flex: 1,
                       borderColor: hasError ? '#ef4444' : undefined
                     }}
@@ -782,9 +782,9 @@ function ColorsTab({
                   )}
                 </div>
                 {hasError && (
-                  <p style={{ 
-                    margin: 0, 
-                    fontSize: '13px', 
+                  <p style={{
+                    margin: 0,
+                    fontSize: '13px',
                     color: '#ef4444',
                     paddingLeft: '72px'
                   }}>
@@ -800,11 +800,11 @@ function ColorsTab({
   );
 }
 
-function HeroTab({ 
-  customization, 
+function HeroTab({
+  customization,
   updateField,
   handleImageUpload
-}: { 
+}: {
   customization: ThemeCustomizationData;
   updateField: (field: keyof ThemeCustomizationData, value: any) => void;
   handleImageUpload: (file: File, field: 'heroImageUrl' | 'heroBackgroundUrl' | 'categoryWomanImageUrl' | 'categoryManImageUrl' | 'categoryKidsImageUrl') => void;
@@ -816,7 +816,7 @@ function HeroTab({
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="4" width="18" height="16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3" y="4" width="18" height="16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -894,7 +894,7 @@ function ContentTab({ customization, updateField }: { customization: ThemeCustom
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -951,8 +951,8 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       label: 'Femme',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M7 22V16L9 14V9C9 8.4 9.4 8 10 8H14C14.6 8 15 8.4 15 9V14L17 16V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M7 22V16L9 14V9C9 8.4 9.4 8 10 8H14C14.6 8 15 8.4 15 9V14L17 16V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
       ref: fileInputRefs.woman,
@@ -964,8 +964,8 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       label: 'Homme',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M7 22V16L9 14V9C9 8.4 9.4 8 10 8H14C14.6 8 15 8.4 15 9V14L17 16V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M7 22V16L9 14V9C9 8.4 9.4 8 10 8H14C14.6 8 15 8.4 15 9V14L17 16V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
       ref: fileInputRefs.man,
@@ -977,8 +977,8 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       label: 'Enfants',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M6 22V20C6 17.8 7.8 16 10 16H14C16.2 16 18 17.8 18 20V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M6 22V20C6 17.8 7.8 16 10 16H14C16.2 16 18 17.8 18 20V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
       ref: fileInputRefs.kids,
@@ -992,9 +992,9 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="8.5" cy="8.5" r="1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 15L16 10L5 21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="8.5" cy="8.5" r="1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M21 15L16 10L5 21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -1003,14 +1003,14 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
         </div>
       </div>
       <div className="compte-form-body">
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '24px',
           marginTop: '8px'
         }}>
           {categories.map((category) => (
-            <div 
+            <div
               key={category.key}
               style={{
                 background: 'white',
@@ -1026,9 +1026,9 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
               }}
             >
               {/* Category Header */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
                 gap: '12px',
                 marginBottom: '8px'
               }}>
@@ -1046,18 +1046,18 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                   {category.icon}
                 </div>
                 <div>
-                  <h4 style={{ 
-                    margin: 0, 
-                    fontSize: '18px', 
-                    fontWeight: 600, 
-                    color: '#111827' 
+                  <h4 style={{
+                    margin: 0,
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    color: '#111827'
                   }}>
                     {category.label}
                   </h4>
-                  <p style={{ 
-                    margin: '4px 0 0 0', 
-                    fontSize: '13px', 
-                    color: '#6b7280' 
+                  <p style={{
+                    margin: '4px 0 0 0',
+                    fontSize: '13px',
+                    color: '#6b7280'
                   }}>
                     Image de catégorie
                   </p>
@@ -1065,7 +1065,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
               </div>
 
               {/* Image Preview */}
-              <div 
+              <div
                 className="category-image-preview"
                 style={{
                   position: 'relative',
@@ -1089,7 +1089,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                       quality={95}
                       style={{ objectFit: 'cover' }}
                     />
-                    <div 
+                    <div
                       className="image-overlay"
                       style={{
                         position: 'absolute',
@@ -1106,9 +1106,9 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                       }}
                     >
                       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'white' }}>
-                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M17 8L12 3L7 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M17 8L12 3L7 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12 3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                   </>
@@ -1121,9 +1121,9 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                     color: '#9ca3af'
                   }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M21 15L16 10L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M21 15L16 10L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <p style={{ margin: 0, fontSize: '14px', fontWeight: 500 }}>
                       Aucune image
@@ -1167,9 +1167,9 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 8L12 3L7 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M17 8L12 3L7 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 3V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {category.currentImage ? 'Changer' : 'Télécharger'}
                 </button>
@@ -1201,7 +1201,7 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
                     }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 )}
@@ -1244,8 +1244,8 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
             marginTop: '2px'
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 16V12M12 8H12.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 16V12M12 8H12.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <div style={{ flex: 1 }}>
@@ -1253,8 +1253,8 @@ function ImagesTab({ customization, updateField, handleImageUpload }: { customiz
               Astuce
             </h4>
             <p style={{ margin: 0, fontSize: '14px', color: '#047857', lineHeight: '1.6' }}>
-              Les images de catégories sont affichées dans la section "Categories" de votre boutique. 
-              Utilisez des images de haute qualité (ratio 3:4 recommandé) pour un meilleur rendu. 
+              Les images de catégories sont affichées dans la section "Categories" de votre boutique.
+              Utilisez des images de haute qualité (ratio 3:4 recommandé) pour un meilleur rendu.
               Si aucune image n'est téléchargée, l'image par défaut sera utilisée.
             </p>
           </div>
@@ -1276,7 +1276,7 @@ function LayoutTab({ customization, updateField }: { customization: ThemeCustomi
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
@@ -1321,7 +1321,7 @@ function TypographyTab({ customization, updateField }: { customization: ThemeCus
       <div className="compte-form-section-header">
         <div className="compte-form-section-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 20L10 4M14 20L20 4M3 12H11M13 12H21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 20L10 4M14 20L20 4M3 12H11M13 12H21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>

@@ -7,9 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../create-shop/createShop.module.css';
 import loginStyles from './login.module.css';
-import MainHeader from '@/components/MainHeader';
-import LoadingButton from '@/components/LoadingButton';
-import LoadingLink from '@/components/LoadingLink';
+import { MainHeader, LoadingButton, LoadingLink } from '@/components';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');

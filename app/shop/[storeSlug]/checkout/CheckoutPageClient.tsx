@@ -1,16 +1,18 @@
 'use client';
 
-import { useCart } from "@/components/CartContext";
+import {
+    useCart,
+    useAlert,
+    StoreHeader,
+    type ThemeConfig,
+    LoadingButton,
+    LoadingLink
+} from "@/components";
 import { useState } from "react";
 import { placeOrder } from "@/app/checkout/actions";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAlert } from '@/components/AlertContext';
 import Link from "next/link";
-import StoreHeader from "@/components/StoreHeader";
-import type { ThemeConfig } from '@/components/themeConfig';
-import LoadingButton from "@/components/LoadingButton";
-import LoadingLink from "@/components/LoadingLink";
 import { TUNISIAN_CITIES } from '@/lib/constants/mockData';
 
 type Customization = {

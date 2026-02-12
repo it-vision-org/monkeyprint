@@ -1,6 +1,6 @@
 'use client';
 
-import CartPage from '@/components/CartPage';
+import { CartPage } from '@/components';
 import { useThemeFromRoute } from '@/hooks/useThemeFromRoute';
 import { DEFAULT_CART_ITEMS } from '@/lib/constants/mockData';
 
@@ -12,10 +12,10 @@ export default function CartPageRoute() {
     }
 
     return (
-        <CartPage 
-            baseRoute={baseRoute} 
-            initialItems={DEFAULT_CART_ITEMS} 
-            gradientId={gradientId('cart')} 
+        <CartPage
+            baseRoute={baseRoute}
+            initialItems={DEFAULT_CART_ITEMS}
+            gradientId={gradientId('cart')}
         />
     );
 }

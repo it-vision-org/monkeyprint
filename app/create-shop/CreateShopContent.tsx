@@ -8,11 +8,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import styles from './createShop.module.css';
-import StepDots from '@/components/StepDots';
-import type { MenuItem } from '@/components/types';
+import { StepDots, MainHeader, LoadingButton, type MenuItem } from '@/components';
 import { registerUser, createStore } from './actions';
-import MainHeader from '@/components/MainHeader';
-import LoadingButton from '@/components/LoadingButton';
 
 const createShopMenuItems: MenuItem[] = [
     { label: "Accueil", href: "/", icon: "🏠" },

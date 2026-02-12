@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import LoadingLink from "@/components/LoadingLink";
+import { LoadingLink } from "@/components";
 import Image from "next/image";
 import { getR2Url } from "@/lib/storage";
 import SalesChart from "./SalesChart";

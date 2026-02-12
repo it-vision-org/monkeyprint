@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createTicket } from "./actions";
 import { useRouter } from "next/navigation";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import ImageUploadZone from './components/ImageUploadZone';
 
 export default function CreateTicketForm() {
@@ -35,21 +35,21 @@ export default function CreateTicketForm() {
         // Create FormData manually to avoid issues with hidden file inputs
         const form = e.currentTarget;
         const formData = new FormData();
-        
+
         // Add form fields
         const subject = (form.querySelector('[name="subject"]') as HTMLInputElement)?.value;
         const content = (form.querySelector('[name="content"]') as HTMLTextAreaElement)?.value;
         const priority = (form.querySelector('[name="priority"]') as HTMLSelectElement)?.value || 'NORMAL';
-        
+
         if (subject) formData.append('subject', subject);
         if (content) formData.append('content', content);
         if (priority) formData.append('priority', priority);
-        
+
         // Add image file if present
         if (imageFile && imageFile instanceof File && imageFile.size > 0) {
             formData.append('image', imageFile);
         }
-        
+
         const result = await createTicket(formData);
 
         setIsSubmitting(false);
@@ -68,7 +68,7 @@ export default function CreateTicketForm() {
 
     if (!isOpen) {
         return (
-            <button 
+            <button
                 className="dash-add-btn"
                 onClick={() => setIsOpen(true)}
                 aria-label="Créer un ticket"
@@ -86,7 +86,7 @@ export default function CreateTicketForm() {
             <div className="support-create-modal-content">
                 <div className="support-create-modal-header">
                     <h2>Nouveau ticket de support</h2>
-                    <button 
+                    <button
                         className="support-create-modal-close"
                         onClick={() => setIsOpen(false)}
                         aria-label="Fermer"
@@ -99,10 +99,10 @@ export default function CreateTicketForm() {
                 <form onSubmit={handleSubmit} className="support-create-form">
                     <div className="support-form-group">
                         <label htmlFor="subject">Sujet *</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="subject"
-                            name="subject" 
+                            name="subject"
                             required
                             className="support-input"
                             placeholder="Résumé de votre problème..."
@@ -110,9 +110,9 @@ export default function CreateTicketForm() {
                     </div>
                     <div className="support-form-group">
                         <label htmlFor="priority">Priorité</label>
-                        <select 
+                        <select
                             id="priority"
-                            name="priority" 
+                            name="priority"
                             className="support-input"
                             defaultValue="NORMAL"
                         >
@@ -124,9 +124,9 @@ export default function CreateTicketForm() {
                     </div>
                     <div className="support-form-group">
                         <label htmlFor="content">Message *</label>
-                        <textarea 
+                        <textarea
                             id="content"
-                            name="content" 
+                            name="content"
                             required
                             className="support-textarea"
                             rows={6}
@@ -142,7 +142,7 @@ export default function CreateTicketForm() {
                         imageFile={imageFile}
                     />
                     <div className="support-form-actions">
-                        <button 
+                        <button
                             type="button"
                             className="support-btn support-btn-secondary"
                             onClick={() => setIsOpen(false)}
@@ -150,7 +150,7 @@ export default function CreateTicketForm() {
                         >
                             Annuler
                         </button>
-                        <button 
+                        <button
                             type="submit"
                             className="support-btn support-btn-primary"
                             disabled={isSubmitting}

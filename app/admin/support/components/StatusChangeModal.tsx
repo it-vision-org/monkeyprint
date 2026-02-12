@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { updateTicketStatus } from '../actions';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface StatusChangeModalProps {
     ticketId: string;
@@ -12,11 +12,11 @@ interface StatusChangeModalProps {
     onClose: () => void;
 }
 
-export default function StatusChangeModal({ 
-    ticketId, 
-    currentStatus, 
-    isOpen, 
-    onClose 
+export default function StatusChangeModal({
+    ticketId,
+    currentStatus,
+    isOpen,
+    onClose
 }: StatusChangeModalProps) {
     const router = useRouter();
     const { showAlert } = useAlert();
@@ -67,11 +67,11 @@ export default function StatusChangeModal({
         }
 
         setIsUpdating(true);
-        
+
         const result = await updateTicketStatus(ticketId, selectedStatus);
-        
+
         setIsUpdating(false);
-        
+
         if (result?.success) {
             showAlert("Statut mis à jour", 'success');
             onClose();
@@ -86,7 +86,7 @@ export default function StatusChangeModal({
     const currentStatusConfig = getStatusConfig(currentStatus);
 
     return (
-        <div 
+        <div
             className="admin-status-modal-overlay"
             onClick={(e) => {
                 if (!isUpdating && e.target === e.currentTarget) {
@@ -94,7 +94,7 @@ export default function StatusChangeModal({
                 }
             }}
         >
-            <div 
+            <div
                 className="admin-status-modal"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -105,13 +105,13 @@ export default function StatusChangeModal({
                 >
                     ×
                 </button>
-                
+
                 <h2 className="admin-status-modal-title">
                     Changer le statut
                 </h2>
-                
+
                 <p className="admin-status-modal-subtitle">
-                    Statut actuel: <strong style={{ 
+                    Statut actuel: <strong style={{
                         padding: '4px 10px',
                         borderRadius: '6px',
                         fontSize: '13px',
@@ -141,8 +141,8 @@ export default function StatusChangeModal({
                                     }}
                                 >
                                     <span style={{ fontSize: '20px', marginBottom: '4px' }}>{status.emoji}</span>
-                                    <span style={{ 
-                                        fontSize: '14px', 
+                                    <span style={{
+                                        fontSize: '14px',
                                         fontWeight: 600,
                                         color: isSelected ? config.color : '#374151'
                                     }}>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { respondToTicket } from "../actions";
 import { useRouter } from "next/navigation";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import ImageUploadZone from '../../../dashboard/support/components/ImageUploadZone';
 import StatusChangeModal from '../components/StatusChangeModal';
 
@@ -36,19 +36,19 @@ export default function TicketResponseForm({ ticketId, currentStatus }: { ticket
         // Create FormData manually to avoid issues with hidden file inputs
         const form = e.currentTarget;
         const formData = new FormData();
-        
+
         // Add text content
         const content = (form.querySelector('[name="content"]') as HTMLTextAreaElement)?.value;
         if (content) {
             formData.append('content', content);
         }
-        
+
         // Add status
         const statusInput = form.querySelector('[name="status"]') as HTMLInputElement;
         if (statusInput?.value) {
             formData.append('status', statusInput.value);
         }
-        
+
         // Add image file if present
         if (imageFile && imageFile instanceof File && imageFile.size > 0) {
             formData.append('image', imageFile);
@@ -123,31 +123,31 @@ export default function TicketResponseForm({ ticketId, currentStatus }: { ticket
                         <span style={{ fontSize: '12px', marginLeft: '4px' }}>✎</span>
                     </button>
                 </div>
-            <form onSubmit={handleSubmit} className="support-message-form">
-                <textarea 
-                    name="content" 
-                    required
-                    className="support-textarea"
-                    rows={6}
-                    placeholder="Tapez votre réponse..."
-                />
-                <ImageUploadZone
-                    id="response-image"
-                    label="Ajouter une image (optionnel)"
-                    onImageSelect={handleImageSelect}
-                    onImageRemove={handleImageRemove}
-                    selectedImage={selectedImage}
-                    imageFile={imageFile}
-                />
-                <input type="hidden" name="status" value={currentStatus} />
-                <button 
-                    type="submit"
-                    className="support-btn support-btn-primary"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Envoi...' : 'Envoyer la réponse'}
-                </button>
-            </form>
+                <form onSubmit={handleSubmit} className="support-message-form">
+                    <textarea
+                        name="content"
+                        required
+                        className="support-textarea"
+                        rows={6}
+                        placeholder="Tapez votre réponse..."
+                    />
+                    <ImageUploadZone
+                        id="response-image"
+                        label="Ajouter une image (optionnel)"
+                        onImageSelect={handleImageSelect}
+                        onImageRemove={handleImageRemove}
+                        selectedImage={selectedImage}
+                        imageFile={imageFile}
+                    />
+                    <input type="hidden" name="status" value={currentStatus} />
+                    <button
+                        type="submit"
+                        className="support-btn support-btn-primary"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Envoi...' : 'Envoyer la réponse'}
+                    </button>
+                </form>
             </div>
 
             <StatusChangeModal

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { deleteProduct } from './actions';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface ProductCardProps {
     product: {
@@ -126,12 +126,12 @@ export default function ProductCard({ product, imageUrl }: ProductCardProps) {
 
                 <div className="produit-image-container">
                     {imageUrl ? (
-                        <Image 
-                            src={imageUrl} 
-                            alt={product.name} 
-                            width={300} 
+                        <Image
+                            src={imageUrl}
+                            alt={product.name}
+                            width={300}
                             height={300}
-                            style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                     ) : (
                         <div style={{ width: '100%', height: 180, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Img</div>

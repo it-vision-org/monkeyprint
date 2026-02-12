@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
-import { themeConfigs } from '@/components/themeConfig';
+import { themeConfigs } from '@/components';
 
 const themeMetadata: Record<string, { name: string; description: string; preview: string }> = {
     'theme-1': {
@@ -46,12 +46,12 @@ export default function StoreThemeSelection() {
                         return (
                             <div key={themeId} className="theme-card" onClick={() => router.push(`/store/${themeId}`)}>
                                 <div className={`theme-preview ${themeId}-preview`}>
-                                    <Image 
-                                        src={metadata.preview} 
-                                        alt={metadata.name} 
-                                        width={300} 
-                                        height={500} 
-                                        style={{ objectFit: 'cover' }} 
+                                    <Image
+                                        src={metadata.preview}
+                                        alt={metadata.name}
+                                        width={300}
+                                        height={500}
+                                        style={{ objectFit: 'cover' }}
                                     />
                                 </div>
                                 <div className="theme-card-info">

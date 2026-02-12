@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 interface StoreDetailActionsProps {
     storeId: string;
@@ -17,7 +17,7 @@ export default function StoreDetailActions({ storeId, currentStatus }: StoreDeta
 
     const handleStatusChange = async (newStatus: string) => {
         if (isLoading) return;
-        
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/admin/stores/${storeId}/status`, {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { themeConfigs } from '@/components/themeConfig';
+import { themeConfigs } from '@/components';
 import { notFound } from "next/navigation";
 import { getR2Url } from "@/lib/storage";
 import { format } from "date-fns";
@@ -27,7 +27,7 @@ export default async function OrderConfirmationPage({
 
     const themeId = (store.theme || 'theme-1') as keyof typeof themeConfigs;
     const theme = themeConfigs[themeId] || themeConfigs['theme-1'];
-    
+
     const themeWithRoute = {
         ...theme,
         baseRoute: `/shop/${storeSlug}`
@@ -40,7 +40,7 @@ export default async function OrderConfirmationPage({
     if (orderIds.length > 0) {
         // Filter orders to only show orders from this store
         orders = await prisma.order.findMany({
-            where: { 
+            where: {
                 id: { in: orderIds },
                 storeId: store.id
             },
@@ -86,7 +86,7 @@ export default async function OrderConfirmationPage({
                     `
                 }} />
             )}
-            <OrderConfirmationClient 
+            <OrderConfirmationClient
                 storeSlug={storeSlug}
                 theme={themeWithRoute}
                 customization={customization ? {

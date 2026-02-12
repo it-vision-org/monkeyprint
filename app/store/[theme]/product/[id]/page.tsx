@@ -1,6 +1,6 @@
 'use client';
 
-import ProductDetailPage from '@/components/ProductDetailPage';
+import { ProductDetailPage } from '@/components';
 import { useThemeFromRoute } from '@/hooks/useThemeFromRoute';
 
 export default function ProductDetailPageRoute() {
@@ -11,10 +11,10 @@ export default function ProductDetailPageRoute() {
     }
 
     return (
-        <ProductDetailPage 
-            baseRoute={baseRoute} 
-            showTopHeader={true} 
-            gradientId={gradientId('detail')} 
+        <ProductDetailPage
+            baseRoute={baseRoute}
+            showTopHeader={true}
+            gradientId={gradientId('detail')}
         />
     );
 }

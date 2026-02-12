@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 
 export default function WithdrawPage() {
     const router = useRouter();
@@ -32,7 +32,7 @@ export default function WithdrawPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!amount || parseFloat(amount) <= 0) {
             showAlert('Veuillez entrer un montant valide', 'warning');
             return;
@@ -75,11 +75,11 @@ export default function WithdrawPage() {
         <div className="portefeuille-main">
             <div className="portefeuille-container">
                 <div style={{ marginBottom: '24px' }}>
-                    <Link 
-                        href="/dashboard/portefeuille" 
-                        style={{ 
-                            display: 'inline-flex', 
-                            alignItems: 'center', 
+                    <Link
+                        href="/dashboard/portefeuille"
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
                             gap: '8px',
                             color: '#2563eb',
                             textDecoration: 'none',
@@ -88,16 +88,16 @@ export default function WithdrawPage() {
                         }}
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                         Retour au portefeuille
                     </Link>
                     <h1 className="portefeuille-page-title">Demander un retrait</h1>
                 </div>
 
-                <div style={{ 
-                    background: 'white', 
-                    borderRadius: '12px', 
+                <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
                     padding: '24px',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                     maxWidth: '600px'
@@ -108,9 +108,9 @@ export default function WithdrawPage() {
                         </div>
                     ) : (
                         <>
-                            <div style={{ 
-                                background: '#f0f9ff', 
-                                borderRadius: '8px', 
+                            <div style={{
+                                background: '#f0f9ff',
+                                borderRadius: '8px',
                                 padding: '16px',
                                 marginBottom: '24px',
                                 border: '1px solid #bae6fd'
@@ -125,7 +125,7 @@ export default function WithdrawPage() {
 
                             <form onSubmit={handleSubmit}>
                                 <div style={{ marginBottom: '24px' }}>
-                                    <label style={{ 
+                                    <label style={{
                                         display: 'block',
                                         fontSize: '14px',
                                         fontWeight: 600,
@@ -174,7 +174,7 @@ export default function WithdrawPage() {
                                 </div>
 
                                 <div style={{ marginBottom: '24px' }}>
-                                    <label style={{ 
+                                    <label style={{
                                         display: 'block',
                                         fontSize: '14px',
                                         fontWeight: 600,

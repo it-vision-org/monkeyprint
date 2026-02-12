@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components';
 import Image from 'next/image';
 import * as fabric from 'fabric';
 // @ts-ignore - react-color types
@@ -44,7 +44,7 @@ type ProductColor = {
 
 export default function ProductConfigManager() {
     const { showAlert } = useAlert();
-    
+
     const [productTypes, setProductTypes] = useState<ProductType[]>([]);
     const [colors, setColors] = useState<ProductColor[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ export default function ProductConfigManager() {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [newColorName, setNewColorName] = useState('');
     const [newColorHex, setNewColorHex] = useState('#000000');
-    
+
     // Image upload states
     const [frontImageFile, setFrontImageFile] = useState<File | null>(null);
     const [backImageFile, setBackImageFile] = useState<File | null>(null);
@@ -87,7 +87,7 @@ export default function ProductConfigManager() {
             const parsedTypes = await Promise.all((typesData.productTypes || []).map(async (pt: any) => {
                 let imageUrl = pt.image;
                 let backImageUrl = pt.backImage;
-                
+
                 // If image is R2 key (not starting with http or /), get public URL via API
                 if (pt.image && !pt.image.startsWith('http') && !pt.image.startsWith('/')) {
                     try {
@@ -106,7 +106,7 @@ export default function ProductConfigManager() {
                         imageUrl = `https://pub-a54043a6fb8443aaa3cf47aa98675227.r2.dev/${pt.image}`;
                     }
                 }
-                
+
                 if (pt.backImage && !pt.backImage.startsWith('http') && !pt.backImage.startsWith('/')) {
                     try {
                         const urlRes = await fetch('/api/admin/get-r2-url', {
@@ -134,7 +134,7 @@ export default function ProductConfigManager() {
                     printAreaBack: pt.printAreaBack ? JSON.parse(pt.printAreaBack) : null,
                 };
             }));
-            
+
             setProductTypes(parsedTypes);
             setColors(colorsData.colors || []);
         } catch (error) {
@@ -147,7 +147,7 @@ export default function ProductConfigManager() {
 
     const handleEdit = async (item: ProductType) => {
         setEditingId(item.id);
-        
+
         // Load image URLs (already converted in loadData)
         const frontUrl = item.image;
         const backUrl = item.backImage;
@@ -160,7 +160,7 @@ export default function ProductConfigManager() {
         setSelectedColors(item.availableColorIds || []);
         setFrontImagePreview(frontUrl);
         setBackImagePreview(backUrl);
-        
+
         // Load qualities for this product type
         try {
             const qualitiesRes = await fetch(`/api/admin/product-types/${item.id}/qualities`);
@@ -170,7 +170,7 @@ export default function ProductConfigManager() {
             console.error('Error loading qualities:', error);
             setQualities([]);
         }
-        
+
         setShowModal(true);
     };
 
@@ -188,13 +188,13 @@ export default function ProductConfigManager() {
             printAreaRatioBack: 0.8,
         });
         setSelectedColors([]);
-        setQualities([{ 
-            id: `new-${Date.now()}`, 
-            name: 'Normal', 
-            price: 0, 
-            displayOrder: 0, 
-            isDefault: true, 
-            isActive: true 
+        setQualities([{
+            id: `new-${Date.now()}`,
+            name: 'Normal',
+            price: 0,
+            displayOrder: 0,
+            isDefault: true,
+            isActive: true
         }]);
         setFrontImagePreview(null);
         setBackImagePreview(null);
@@ -221,7 +221,7 @@ export default function ProductConfigManager() {
             }
 
             const data = await response.json();
-            
+
             if (type === 'front') {
                 setFormData(prev => ({ ...prev, image: data.key }));
                 setFrontImagePreview(data.url);
@@ -266,7 +266,7 @@ export default function ProductConfigManager() {
                 }
             };
             reader.readAsDataURL(file);
-            
+
             // Auto-upload the file after a small delay to ensure preview is set
             setTimeout(async () => {
                 await handleFileUpload(file, type);
@@ -385,11 +385,11 @@ export default function ProductConfigManager() {
 
                 for (const quality of qualities) {
                     if (!quality.name) continue; // Skip empty qualities
-                    
+
                     const qualityUrl = quality.id.startsWith('new')
                         ? `/api/admin/product-types/${productTypeId}/qualities`
                         : `/api/admin/product-types/${productTypeId}/qualities/${quality.id}`;
-                    
+
                     await fetch(qualityUrl, {
                         method: quality.id.startsWith('new') ? 'POST' : 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -418,7 +418,7 @@ export default function ProductConfigManager() {
         setDeletingId(id);
         try {
             console.log('Attempting to delete product type:', id);
-            const response = await fetch(`/api/admin/product-types/${id}`, { 
+            const response = await fetch(`/api/admin/product-types/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -436,7 +436,7 @@ export default function ProductConfigManager() {
             const result = await response.json();
             console.log('Delete result:', result);
             const deletedCount = result.deletedProductsCount || 0;
-            
+
             showAlert(
                 `Supprimé avec succès${deletedCount > 0 ? ` (${deletedCount} produit${deletedCount > 1 ? 's' : ''} supprimé${deletedCount > 1 ? 's' : ''})` : ''}`,
                 'success'
@@ -460,10 +460,10 @@ export default function ProductConfigManager() {
 
     if (loading) {
         return (
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 minHeight: '400px',
                 flexDirection: 'column',
                 gap: '20px'
@@ -621,7 +621,7 @@ export default function ProductConfigManager() {
                             </button>
                         </div>
 
-                                            <div style={{
+                        <div style={{
                             width: '100%',
                             aspectRatio: '4/5',
                             background: 'linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%)',
@@ -663,11 +663,11 @@ export default function ProductConfigManager() {
                         }}>
                             <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: 600 }}>
                                 {type.basePrice}DT
-                                            </span>
-                    </div>
+                            </span>
+                        </div>
 
                         {type.availableColorIds && Array.isArray(type.availableColorIds) && type.availableColorIds.length > 0 && (
-                        <div style={{
+                            <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
@@ -678,9 +678,9 @@ export default function ProductConfigManager() {
                                 </span>
                             </div>
                         )}
-                            </div>
+                    </div>
                 ))}
-                            </div>
+            </div>
 
             {/* Modal - Complete rewrite with all new features */}
             {showModal && (
@@ -721,7 +721,7 @@ export default function ProductConfigManager() {
                     editingId={editingId}
                 />
             )}
-            </div>
+        </div>
     );
 }
 
@@ -847,9 +847,9 @@ function ProductEditModal({
         // Check if image is external and needs proxying to avoid CORS issues
         const isExternalUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
         const isLocalhost = imageUrl.includes('localhost') || imageUrl.startsWith('/');
-        
+
         // Use proxy for external URLs (like R2), otherwise use the original URL
-        const finalImageUrl = (isExternalUrl && !isLocalhost) 
+        const finalImageUrl = (isExternalUrl && !isLocalhost)
             ? `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
             : imageUrl;
 
@@ -925,7 +925,7 @@ function ProductEditModal({
                 // Get dimensions with scaling applied
                 const width = Math.round((rect.width || 0) * (rect.scaleX || 1));
                 const height = Math.round((rect.height || 0) * (rect.scaleY || 1));
-                
+
                 // Convert from center-origin to top-left coordinates for storage
                 // This maintains backward compatibility with the dashboard
                 const centerX = Math.round(rect.left || 0);
@@ -959,29 +959,29 @@ function ProductEditModal({
         return canvas;
     }, [setFormData]);
     return (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
             padding: '20px',
         }} onClick={onClose}>
-                    <div style={{
-                        background: 'white',
-                        padding: '32px',
+            <div style={{
+                background: 'white',
+                padding: '32px',
                 borderRadius: '20px',
                 maxWidth: '1200px',
                 width: '100%',
-                        maxHeight: '90vh',
-                        overflow: 'auto',
+                maxHeight: '90vh',
+                overflow: 'auto',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-                    }} onClick={(e) => e.stopPropagation()}>
+            }} onClick={(e) => e.stopPropagation()}>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -990,7 +990,7 @@ function ProductEditModal({
                 }}>
                     <h3 style={{ fontSize: '28px', fontWeight: 700, color: '#0d1c23', margin: 0 }}>
                         {editingId ? 'Modifier le Produit' : 'Ajouter un Produit'}
-                        </h3>
+                    </h3>
                     <button
                         onClick={onClose}
                         style={{
@@ -1007,17 +1007,17 @@ function ProductEditModal({
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                     {/* Basic Info */}
-                                <div>
+                    <div>
                         <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Informations de Base</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
                                     Nom du Produit *
                                 </label>
-                                    <input
-                                        type="text"
-                                        value={formData.name || ''}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                <input
+                                    type="text"
+                                    value={formData.name || ''}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -1025,16 +1025,16 @@ function ProductEditModal({
                                         borderRadius: '10px',
                                         fontSize: '14px',
                                     }}
-                                    />
-                                </div>
-                                <div>
+                                />
+                            </div>
+                            <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
                                     Slug *
                                 </label>
-                                    <input
-                                        type="text"
-                                        value={formData.slug || ''}
-                                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                <input
+                                    type="text"
+                                    value={formData.slug || ''}
+                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -1042,17 +1042,17 @@ function ProductEditModal({
                                         borderRadius: '10px',
                                         fontSize: '14px',
                                     }}
-                                    />
-                                </div>
-                                </div>
+                                />
+                            </div>
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
-                                <div>
+                            <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
                                     Prix de Base (DT) *
                                 </label>
-                                    <input
-                                        type="number"
-                                        value={formData.basePrice || ''}
+                                <input
+                                    type="number"
+                                    value={formData.basePrice || ''}
                                     onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || 0 })}
                                     style={{
                                         width: '100%',
@@ -1061,16 +1061,16 @@ function ProductEditModal({
                                         borderRadius: '10px',
                                         fontSize: '14px',
                                     }}
-                                    />
-                                </div>
-                                <div>
+                                />
+                            </div>
+                            <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
                                     Ordre d'Affichage
                                 </label>
-                                    <input
-                                        type="number"
-                                        value={formData.displayOrder || 0}
-                                        onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })}
+                                <input
+                                    type="number"
+                                    value={formData.displayOrder || 0}
+                                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })}
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -1078,27 +1078,27 @@ function ProductEditModal({
                                         borderRadius: '10px',
                                         fontSize: '14px',
                                     }}
-                                    />
-                                </div>
+                                />
+                            </div>
                         </div>
                         <div style={{ marginTop: '16px' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.isActive !== false}
-                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                        />
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isActive !== false}
+                                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                />
                                 <span style={{ fontWeight: 600, fontSize: '14px' }}>Produit Actif</span>
-                                    </label>
-                                </div>
-                            </div>
+                            </label>
+                        </div>
+                    </div>
 
                     {/* Image Upload with Drag and Drop */}
-                                <div>
+                    <div>
                         <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>Images du Produit</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                             {/* Front Image */}
-                                <div>
+                            <div>
                                 <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600, fontSize: '14px' }}>
                                     Image Front *
                                 </label>
@@ -1117,7 +1117,7 @@ function ProductEditModal({
                                                 const reader = new FileReader();
                                                 reader.onload = () => setFrontImagePreview(reader.result as string);
                                                 reader.readAsDataURL(file);
-                                                
+
                                                 // Auto-upload after preview is set
                                                 setTimeout(async () => {
                                                     await handleFileUpload(file, 'front');
@@ -1208,13 +1208,13 @@ function ProductEditModal({
                                         </>
                                     )}
                                 </div>
-                                </div>
+                            </div>
 
                             {/* Back Image */}
-                                <div>
+                            <div>
                                 <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600, fontSize: '14px' }}>
                                     Image Back
-                                    </label>
+                                </label>
                                 <div
                                     onDragOver={(e) => handleDragOver(e, 'back')}
                                     onDrop={(e) => handleDrop(e, 'back')}
@@ -1230,7 +1230,7 @@ function ProductEditModal({
                                                 const reader = new FileReader();
                                                 reader.onload = () => setBackImagePreview(reader.result as string);
                                                 reader.readAsDataURL(file);
-                                                
+
                                                 // Auto-upload after preview is set
                                                 setTimeout(async () => {
                                                     await handleFileUpload(file, 'back');
@@ -1492,7 +1492,7 @@ function ProductEditModal({
                                 + Ajouter Couleur
                             </button>
                         </div>
-                        
+
                         {colors.length === 0 ? (
                             <div style={{
                                 padding: '40px',
@@ -1537,55 +1537,55 @@ function ProductEditModal({
                                     borderRadius: '12px',
                                 }}>
                                     {colors.map((color: ProductColor) => {
-                                    const isSelected = selectedColors.includes(color.id);
-                                    return (
-                                        <button
-                                            key={color.id}
-                                            type="button"
-                                            onClick={() => toggleColor(color.id)}
-                                            style={{
-                                                padding: '12px',
-                                                borderRadius: '10px',
-                                                border: isSelected ? '2px solid #41eb5c' : '2px solid #e5e7eb',
-                                                background: isSelected ? '#f0fdf4' : '#ffffff',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                transition: 'all 0.2s',
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.borderColor = '#41eb5c';
-                                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.borderColor = '#e5e7eb';
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                }
-                                            }}
-                                        >
-                                            <div style={{
-                                                width: '40px',
-                                                height: '40px',
-                                                borderRadius: '10px',
-                                                background: color.hex,
-                                                border: '1px solid #e5e7eb',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                            }} />
-                                            <span style={{ fontSize: '12px', fontWeight: 600 }}>
-                                                {color.name}
-                                            </span>
-                                            {isSelected && (
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#41eb5c" strokeWidth="3">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </button>
-                                    );
+                                        const isSelected = selectedColors.includes(color.id);
+                                        return (
+                                            <button
+                                                key={color.id}
+                                                type="button"
+                                                onClick={() => toggleColor(color.id)}
+                                                style={{
+                                                    padding: '12px',
+                                                    borderRadius: '10px',
+                                                    border: isSelected ? '2px solid #41eb5c' : '2px solid #e5e7eb',
+                                                    background: isSelected ? '#f0fdf4' : '#ffffff',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.borderColor = '#41eb5c';
+                                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isSelected) {
+                                                        e.currentTarget.style.borderColor = '#e5e7eb';
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                    }
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    borderRadius: '10px',
+                                                    background: color.hex,
+                                                    border: '1px solid #e5e7eb',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                }} />
+                                                <span style={{ fontSize: '12px', fontWeight: 600 }}>
+                                                    {color.name}
+                                                </span>
+                                                {isSelected && (
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#41eb5c" strokeWidth="3">
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        );
                                     })}
                                 </div>
                                 {colors.filter((c: ProductColor) => !c.isActive).length > 0 && (
@@ -1650,7 +1650,7 @@ function ProductEditModal({
                                         ×
                                     </button>
                                 </div>
-                                
+
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
@@ -1670,7 +1670,7 @@ function ProductEditModal({
                                             }}
                                         />
                                     </div>
-                                    
+
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>
                                             Couleur
@@ -1709,7 +1709,7 @@ function ProductEditModal({
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <SketchPicker
                                             color={newColorHex}
@@ -1717,7 +1717,7 @@ function ProductEditModal({
                                             presetColors={['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A']}
                                         />
                                     </div>
-                                    
+
                                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                                         <button
                                             onClick={() => setShowColorPicker(false)}
@@ -1740,7 +1740,7 @@ function ProductEditModal({
                                                     showAlert('Veuillez remplir le nom et la couleur', 'warning');
                                                     return;
                                                 }
-                                                
+
                                                 try {
                                                     const response = await fetch('/api/admin/product-colors', {
                                                         method: 'POST',
@@ -1752,18 +1752,18 @@ function ProductEditModal({
                                                             isActive: true,
                                                         }),
                                                     });
-                                                    
+
                                                     if (!response.ok) {
                                                         const error = await response.json();
                                                         throw new Error(error.error || 'Erreur');
                                                     }
-                                                    
+
                                                     const data = await response.json();
-                                                    
+
                                                     // Add to colors list and select it
                                                     setColors([...colors, data.color]);
                                                     setSelectedColors([...selectedColors, data.color.id]);
-                                                    
+
                                                     setShowColorPicker(false);
                                                     setNewColorName('');
                                                     setNewColorHex('#000000');
@@ -1793,7 +1793,7 @@ function ProductEditModal({
                     )}
 
                     {/* Qualities per Product */}
-                                <div>
+                    <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h4 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>
                                 Qualités pour ce Produit
@@ -1813,7 +1813,7 @@ function ProductEditModal({
                             >
                                 + Ajouter Qualité
                             </button>
-                                </div>
+                        </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {qualities.map((quality: ProductTypeQuality) => (
                                 <div
@@ -1880,8 +1880,8 @@ function ProductEditModal({
                                             >
                                                 ×
                                             </button>
-                                )}
-                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -1894,40 +1894,40 @@ function ProductEditModal({
 
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-                            <button
+                        <button
                             onClick={onClose}
-                                style={{
+                            style={{
                                 padding: '12px 24px',
                                 background: '#f3f4f6',
-                                    color: '#0d1c23',
-                                    border: 'none',
+                                color: '#0d1c23',
+                                border: 'none',
                                 borderRadius: '10px',
-                                    cursor: 'pointer',
-                                    fontWeight: 600,
+                                cursor: 'pointer',
+                                fontWeight: 600,
                                 fontSize: '14px',
-                                }}
-                            >
-                                Annuler
-                            </button>
-                            <button
+                            }}
+                        >
+                            Annuler
+                        </button>
+                        <button
                             onClick={onSave}
-                                style={{
+                            style={{
                                 padding: '12px 24px',
                                 background: 'linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)',
-                                    color: 'white',
-                                    border: 'none',
+                                color: 'white',
+                                border: 'none',
                                 borderRadius: '10px',
-                                    cursor: 'pointer',
+                                cursor: 'pointer',
                                 fontWeight: 700,
                                 fontSize: '14px',
                                 boxShadow: '0 4px 16px rgba(65, 235, 92, 0.3)',
-                                }}
-                            >
-                                Enregistrer
-                            </button>
-                        </div>
+                            }}
+                        >
+                            Enregistrer
+                        </button>
                     </div>
                 </div>
+            </div>
         </div>
     );
 }
