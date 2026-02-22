@@ -3,13 +3,15 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   background: transparent;
   margin: 0;
   overflow-x: hidden;
   overflow-y: hidden;
   padding-top: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 769px) {
@@ -531,25 +533,24 @@
   color: #ffffff;
 }
 
-/* SUIVANT Button */
+/* SUIVANT Button - Fixed absolute positioning */
 .nextButton {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   padding: 18px 60px;
   gap: 10px;
-  position: absolute;
-  width: 188px;
+  position: relative; /* Changed from absolute */
+  width: 100%;
+  max-width: 280px;
   height: 57px;
-  left: 97px;
-  top: 714px;
+  margin: 24px auto; /* Centered with margin */
   background: #41eb5c;
   border-radius: 30px;
   border: none;
   cursor: pointer;
   z-index: 6;
   justify-content: center;
-  align-items: center;
 }
 
 .nextButtonText {
@@ -568,7 +569,7 @@
 .createShopContainer main {
   position: relative;
   width: 100%;
-  min-height: calc(100vh - 56px);
+  height: calc(100dvh - 56px); /* Fixed height for internal scrolling */
   margin-top: 56px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -594,11 +595,11 @@
   position: relative;
   width: 100%;
   min-height: auto;
-  padding: 25px var(--mobile-padding-x) 180px; /* Increased bottom padding */
+  padding: 25px var(--mobile-padding-x) calc(80px + env(safe-area-inset-bottom));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* Increased gap */
+  gap: 24px;
   z-index: 10;
   flex-shrink: 0;
 }
@@ -1952,6 +1953,7 @@
   flex-direction: column;
   gap: 14px;
   width: 100%;
+  margin-top: 32px; /* Added margin to separate from cards */
 }
 
 @media (min-width: 769px) {

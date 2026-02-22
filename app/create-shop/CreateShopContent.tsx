@@ -475,13 +475,15 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                 </div>
             </div>
 
-            <LoadingButton
-                className={`${styles['cs-primary-btn']} ${styles.step3Button}`}
-                onClick={() => setStep(2)}
-                type="button"
-            >
-                SUIVANT
-            </LoadingButton>
+            <div className={styles.buttonGroup}>
+                <LoadingButton
+                    className={`${styles['cs-primary-btn']} ${styles.step3Button}`}
+                    onClick={() => setStep(2)}
+                    type="button"
+                >
+                    SUIVANT
+                </LoadingButton>
+            </div>
         </div>
     );
 };
