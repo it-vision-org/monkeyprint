@@ -24,6 +24,9 @@ export default function ThemeCustomizationEditor() {
   const [showColorPicker, setShowColorPicker] = useState<string | null>(null);
   const [isChangingTheme, setIsChangingTheme] = useState(false);
   const [colorErrors, setColorErrors] = useState<Record<string, string>>({});
+  const [storeSlug, setStoreSlug] = useState('');
+  const [isUpdatingSlug, setIsUpdatingSlug] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
 
   // Load customization data
@@ -49,6 +52,12 @@ export default function ThemeCustomizationEditor() {
       const data = await response.json();
       setCurrentTheme(data.theme || 'theme-1');
 
+      const infoResponse = await fetch('/api/store-info');
+      if (infoResponse.ok) {
+        const info = await infoResponse.json();
+        setStoreSlug(info.slug || '');
+      }
+
       const defaults = themeDefaults[data.theme || 'theme-1'] || {};
       setCustomization({
         ...defaults,
@@ -63,6 +72,49 @@ export default function ThemeCustomizationEditor() {
     }
   };
 
+  const handleUpdateSlug = async () => {
+    setIsUpdatingSlug(true);
+    try {
+      const response = await fetch('/api/store-info', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: storeSlug })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erreur lors de la mise à jour du lien');
+      }
+      setNotification({ message: 'Le lien de votre boutique a été mis à jour avec succès.', type: 'success' });
+    } catch (error: any) {
+      console.error('Error updating slug:', error);
+      setNotification({ message: error.message || 'Erreur lors de la mise à jour du lien', type: 'error' });
+    } finally {
+      setIsUpdatingSlug(false);
+    }
+  };
+
+  const handleSectionReset = (fieldKeys: Array<keyof ThemeCustomizationData>) => {
+    const defaults = themeDefaults[currentTheme] || {};
+    const updated = { ...customization };
+
+    fieldKeys.forEach(key => {
+      if (key in defaults) {
+        (updated as any)[key] = (defaults as any)[key];
+      }
+    });
+
+    setCustomization(updated);
+
+    // Clear validation errors for these fields
+    setColorErrors(prev => {
+      const next = { ...prev };
+      fieldKeys.forEach(key => delete next[key as string]);
+      return next;
+    });
+
+    setNotification({ message: 'La section a été réinitialisée aux paramètres d\'origine.', type: 'success' });
+  };
+
   const saveCustomization = async (partial?: Partial<ThemeCustomizationData>) => {
     // Validate all color fields before saving
     const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor'];
@@ -72,13 +124,13 @@ export default function ThemeCustomizationEditor() {
       const val = (partial && partial[field as keyof ThemeCustomizationData]) || customization[field as keyof ThemeCustomizationData];
       const stringValue = typeof val === 'string' ? val : '';
       if (stringValue && !isValidHexColor(stringValue)) {
-        errors[field] = 'Format de couleur invalide. Utilisez #RRGGBB (ex: #3b82f6)';
+        errors[field] = 'Format invalide. Utilisez #RRGGBB (ex: #3b82f6) ou rgba(r,g,b,a)';
       }
     });
 
     if (Object.keys(errors).length > 0) {
       setColorErrors(errors);
-      showAlert('Veuillez corriger les erreurs de validation avant d\'enregistrer', 'error');
+      setNotification({ message: 'Veuillez corriger les erreurs de validation avant d\'enregistrer', type: 'error' });
       return;
     }
 
@@ -98,10 +150,10 @@ export default function ThemeCustomizationEditor() {
       const result = await response.json();
       setCustomization({ ...customization, ...result.customization });
       setColorErrors({}); // Clear errors on success
-      showAlert('Personnalisations enregistrées avec succès', 'success');
+      setNotification({ message: 'Vos modifications ont été enregistrées avec succès.', type: 'success' });
     } catch (error) {
       console.error('Error saving customization:', error);
-      showAlert('Erreur lors de l\'enregistrement', 'error');
+      setNotification({ message: 'Erreur lors de l\'enregistrement', type: 'error' });
     } finally {
       setIsSaving(false);
     }
@@ -110,8 +162,11 @@ export default function ThemeCustomizationEditor() {
   // Validate hex color format
   const isValidHexColor = (color: string): boolean => {
     if (!color) return true; // Allow empty (will use default)
-    const hex = color.startsWith('#') ? color.slice(1) : color;
-    return /^[0-9A-Fa-f]{6}$/.test(hex);
+    // Accept hex format: #RGB or #RRGGBB
+    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color)) return true;
+    // Accept rgba/rgb format
+    if (/^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(,\s*[\d.]+\s*)?\)$/.test(color)) return true;
+    return false;
   };
 
   const updateField = (field: keyof ThemeCustomizationData, value: any) => {
@@ -122,7 +177,7 @@ export default function ThemeCustomizationEditor() {
     const colorFields = ['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor'];
     if (colorFields.includes(field)) {
       if (value && !isValidHexColor(value)) {
-        setColorErrors((prev: Record<string, string>) => ({ ...prev, [field]: 'Format de couleur invalide. Utilisez #RRGGBB (ex: #3b82f6)' }));
+        setColorErrors((prev: Record<string, string>) => ({ ...prev, [field]: 'Format invalide. Utilisez #RRGGBB (ex: #3b82f6) ou rgba(r,g,b,a)' }));
       } else {
         setColorErrors((prev: Record<string, string>) => {
           const newErrors = { ...prev };
@@ -150,10 +205,10 @@ export default function ThemeCustomizationEditor() {
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
       updateField(field, data.url);
-      showAlert('Image téléchargée avec succès', 'success');
+      setNotification({ message: 'L\'image a été téléchargée et mise à jour avec succès.', type: 'success' });
     } catch (error) {
       console.error('Error uploading image:', error);
-      showAlert('Erreur lors du téléchargement de l\'image', 'error');
+      setNotification({ message: 'Erreur lors du téléchargement de l\'image', type: 'error' });
     }
   };
 
@@ -184,10 +239,10 @@ export default function ThemeCustomizationEditor() {
 
       setCurrentTheme(themeId);
       await loadCustomization();
-      showAlert('Thème mis à jour avec succès', 'success');
+      setNotification({ message: 'Le thème a été changé avec succès.', type: 'success' });
     } catch (error: any) {
       console.error('Error changing theme:', error);
-      showAlert(error.message || 'Erreur lors du changement de thème', 'error');
+      setNotification({ message: error.message || 'Erreur lors du changement de thème', type: 'error' });
     } finally {
       setIsChangingTheme(false);
     }
@@ -331,11 +386,6 @@ export default function ThemeCustomizationEditor() {
                   </>
                 )}
               </button>
-              {hasValidationErrors() && (
-                <p style={{ marginTop: '12px', fontSize: '12px', color: '#ef4444', textAlign: 'center' }}>
-                  Veuillez corriger les erreurs avant d'enregistrer
-                </p>
-              )}
             </div>
           </aside>
 
@@ -346,6 +396,11 @@ export default function ThemeCustomizationEditor() {
                 currentTheme={currentTheme}
                 onThemeChange={handleThemeChange}
                 isChangingTheme={isChangingTheme}
+                storeSlug={storeSlug}
+                setStoreSlug={setStoreSlug}
+                handleUpdateSlug={handleUpdateSlug}
+                isUpdatingSlug={isUpdatingSlug}
+                onReset={() => handleSectionReset(['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor', 'heroTitle', 'heroSubtitle', 'heroVariant', 'heroImageUrl', 'heroBackgroundUrl', 'bestSellerTitle', 'productsTitle', 'categoriesTitle', 'categoryWomanImageUrl', 'categoryManImageUrl', 'categoryKidsImageUrl', 'layoutDensity', 'productCardStyle', 'fontFamily', 'headingFontWeight', 'bodyFontWeight'])}
               />
             )}
             {activeTab === 'colors' && (
@@ -357,6 +412,7 @@ export default function ThemeCustomizationEditor() {
                 colorPickerRef={colorPickerRef}
                 currentTheme={currentTheme}
                 colorErrors={colorErrors}
+                onReset={() => handleSectionReset(['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor', 'textColor', 'headingColor', 'headerBackgroundColor', 'headerTextColor'])}
               />
             )}
             {activeTab === 'hero' && (
@@ -364,12 +420,14 @@ export default function ThemeCustomizationEditor() {
                 customization={customization}
                 updateField={updateField}
                 handleImageUpload={handleImageUpload}
+                onReset={() => handleSectionReset(['heroTitle', 'heroSubtitle', 'heroVariant', 'heroImageUrl', 'heroBackgroundUrl'])}
               />
             )}
             {activeTab === 'content' && (
               <ContentTab
                 customization={customization}
                 updateField={updateField}
+                onReset={() => handleSectionReset(['bestSellerTitle', 'productsTitle', 'categoriesTitle'])}
               />
             )}
             {activeTab === 'images' && (
@@ -377,29 +435,81 @@ export default function ThemeCustomizationEditor() {
                 customization={customization}
                 updateField={updateField}
                 handleImageUpload={handleImageUpload}
+                onReset={() => handleSectionReset(['categoryWomanImageUrl', 'categoryManImageUrl', 'categoryKidsImageUrl'])}
               />
             )}
             {activeTab === 'layout' && (
               <LayoutTab
                 customization={customization}
                 updateField={updateField}
+                onReset={() => handleSectionReset(['layoutDensity', 'productCardStyle'])}
               />
             )}
             {activeTab === 'typography' && (
               <TypographyTab
                 customization={customization}
                 updateField={updateField}
+                onReset={() => handleSectionReset(['fontFamily', 'headingFontWeight', 'bodyFontWeight'])}
               />
             )}
           </div>
         </div>
       </div>
+
+      {/* Notification Modal */}
+      {notification && (
+        <div className={styles.successOverlay}>
+          <div className={styles.successModal}>
+            <div className={notification.type === 'success' ? styles.successIcon : styles.errorIcon}>
+              {notification.type === 'success' ? (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <h3 className={styles.successTitle}>
+              {notification.type === 'success' ? 'Succès !' : 'Oups !'}
+            </h3>
+            <p className={styles.successText}>{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className={notification.type === 'success' ? styles.successBtn : styles.errorBtn}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // Tab Components
-function OverviewTab({ currentTheme, onThemeChange, isChangingTheme, customization }: { currentTheme: ThemeId; onThemeChange: (id: ThemeId) => void; isChangingTheme: boolean; customization: ThemeCustomizationData }) {
+function OverviewTab({
+  currentTheme,
+  onThemeChange,
+  isChangingTheme,
+  customization,
+  storeSlug,
+  setStoreSlug,
+  handleUpdateSlug,
+  isUpdatingSlug,
+  onReset
+}: {
+  currentTheme: ThemeId;
+  onThemeChange: (id: ThemeId) => void;
+  isChangingTheme: boolean;
+  customization: ThemeCustomizationData;
+  storeSlug: string;
+  setStoreSlug: (slug: string) => void;
+  handleUpdateSlug: () => void;
+  isUpdatingSlug: boolean;
+  onReset: () => void;
+}) {
   const themeDescriptions: Record<ThemeId, string> = {
     'theme-1': 'Minimalist, clean, modern typography',
     'theme-2': 'Bold colors, high contrast, dynamic',
@@ -427,6 +537,14 @@ function OverviewTab({ currentTheme, onThemeChange, isChangingTheme, customizati
           <h3 className={styles.themeSectionTitle}>Vue d'ensemble</h3>
           <p className={styles.themeSectionDesc}>Choisissez et personnalisez votre thème</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser tout
+        </button>
       </div>
       <div className={styles.themeBody}>
         {/* Theme Selection */}
@@ -504,6 +622,34 @@ function OverviewTab({ currentTheme, onThemeChange, isChangingTheme, customizati
             </p>
           </div>
         </div>
+
+        {/* Slug Update */}
+        <div className={styles.themeInputWrapper} style={{ marginTop: '30px' }}>
+          <label className={styles.themeInputLabel}>
+            <span>Lien de la boutique (Slug)</span>
+          </label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input
+              type="text"
+              className={styles.themeInput}
+              value={storeSlug}
+              onChange={(e) => setStoreSlug(e.target.value)}
+              placeholder="votre-boutique"
+            />
+            <button
+              type="button"
+              className={styles.themeSubmitBtn}
+              style={{ width: 'auto', padding: '0 20px', minWidth: '120px' }}
+              onClick={handleUpdateSlug}
+              disabled={isUpdatingSlug || !storeSlug.trim()}
+            >
+              {isUpdatingSlug ? 'Mise à jour...' : 'Mettre à jour'}
+            </button>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+            Lien actuel : http://localhost:3000/shop/{storeSlug}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -516,7 +662,8 @@ function ColorsTab({
   setShowColorPicker,
   colorPickerRef,
   currentTheme,
-  colorErrors
+  colorErrors,
+  onReset
 }: {
   customization: ThemeCustomizationData;
   updateField: (field: keyof ThemeCustomizationData, value: any) => void;
@@ -525,6 +672,7 @@ function ColorsTab({
   colorPickerRef: React.RefObject<HTMLDivElement | null>;
   currentTheme: ThemeId;
   colorErrors: Record<string, string>;
+  onReset: () => void;
 }) {
   const themeDefaultsForCurrentTheme = themeDefaults[currentTheme] || themeDefaults['theme-1'];
 
@@ -551,6 +699,14 @@ function ColorsTab({
           <h3 className={styles.themeSectionTitle}>Couleurs</h3>
           <p className={styles.themeSectionDesc}>Personnalisez la palette de couleurs de votre boutique</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.colorGrid}>
@@ -627,11 +783,13 @@ function ColorsTab({
 function HeroTab({
   customization,
   updateField,
-  handleImageUpload
+  handleImageUpload,
+  onReset
 }: {
   customization: ThemeCustomizationData;
   updateField: (field: keyof ThemeCustomizationData, value: any) => void;
   handleImageUpload: (file: File, field: 'heroImageUrl' | 'heroBackgroundUrl' | 'categoryWomanImageUrl' | 'categoryManImageUrl' | 'categoryKidsImageUrl') => void;
+  onReset: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -647,6 +805,14 @@ function HeroTab({
           <h3 className={styles.themeSectionTitle}>Section Hero</h3>
           <p className={styles.themeSectionDesc}>Personnalisez la section principale de votre boutique</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.themeInputWrapper}>
@@ -729,7 +895,15 @@ function HeroTab({
   );
 }
 
-function ContentTab({ customization, updateField }: { customization: ThemeCustomizationData; updateField: (field: keyof ThemeCustomizationData, value: any) => void }) {
+function ContentTab({
+  customization,
+  updateField,
+  onReset
+}: {
+  customization: ThemeCustomizationData;
+  updateField: (field: keyof ThemeCustomizationData, value: any) => void;
+  onReset: () => void;
+}) {
   return (
     <div className={styles.themeSection}>
       <div className={styles.themeSectionHeader}>
@@ -742,6 +916,14 @@ function ContentTab({ customization, updateField }: { customization: ThemeCustom
           <h3 className={styles.themeSectionTitle}>Contenu</h3>
           <p className={styles.themeSectionDesc}>Personnalisez les titres et descriptions des sections</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.themeInputWrapper}>
@@ -782,11 +964,13 @@ function ContentTab({ customization, updateField }: { customization: ThemeCustom
 function ImagesTab({
   customization,
   updateField,
-  handleImageUpload
+  handleImageUpload,
+  onReset
 }: {
   customization: ThemeCustomizationData;
   updateField: (field: keyof ThemeCustomizationData, value: any) => void;
   handleImageUpload: (file: File, field: 'heroImageUrl' | 'heroBackgroundUrl' | 'categoryWomanImageUrl' | 'categoryManImageUrl' | 'categoryKidsImageUrl') => void;
+  onReset: () => void;
 }) {
   const fileInputRefs = {
     woman: useRef<HTMLInputElement>(null),
@@ -847,6 +1031,14 @@ function ImagesTab({
           <h3 className={styles.themeSectionTitle}>Images de catégories</h3>
           <p className={styles.themeSectionDesc}>Personnalisez les images affichées pour chaque catégorie de produits</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.categoryGrid}>
@@ -924,7 +1116,15 @@ function ImagesTab({
   );
 }
 
-function LayoutTab({ customization, updateField }: { customization: ThemeCustomizationData; updateField: (field: keyof ThemeCustomizationData, value: any) => void }) {
+function LayoutTab({
+  customization,
+  updateField,
+  onReset
+}: {
+  customization: ThemeCustomizationData;
+  updateField: (field: keyof ThemeCustomizationData, value: any) => void;
+  onReset: () => void;
+}) {
   return (
     <div className={styles.themeSection}>
       <div className={styles.themeSectionHeader}>
@@ -937,6 +1137,14 @@ function LayoutTab({ customization, updateField }: { customization: ThemeCustomi
           <h3 className={styles.themeSectionTitle}>Mise en page</h3>
           <p className={styles.themeSectionDesc}>Ajustez la disposition et l'espacement</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.themeInputWrapper}>
@@ -969,7 +1177,15 @@ function LayoutTab({ customization, updateField }: { customization: ThemeCustomi
   );
 }
 
-function TypographyTab({ customization, updateField }: { customization: ThemeCustomizationData; updateField: (field: keyof ThemeCustomizationData, value: any) => void }) {
+function TypographyTab({
+  customization,
+  updateField,
+  onReset
+}: {
+  customization: ThemeCustomizationData;
+  updateField: (field: keyof ThemeCustomizationData, value: any) => void;
+  onReset: () => void;
+}) {
   return (
     <div className={styles.themeSection}>
       <div className={styles.themeSectionHeader}>
@@ -982,6 +1198,14 @@ function TypographyTab({ customization, updateField }: { customization: ThemeCus
           <h3 className={styles.themeSectionTitle}>Typographie</h3>
           <p className={styles.themeSectionDesc}>Choisissez les polices et styles de texte</p>
         </div>
+        <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 20V14H17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M20.49 9A9.5 9.5 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9.5 9.5 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Réinitialiser
+        </button>
       </div>
       <div className={styles.themeBody}>
         <div className={styles.themeInputWrapper}>

@@ -16,8 +16,8 @@ export default function SectionTitle({
     subtitleClassName = ''
 }: SectionTitleProps) {
     return (
-        <div className={className} style={{ textAlign: 'center', marginBottom: subtitle ? '8px' : '4px' }}>
-            <h2 className={titleClassName}>{title}</h2>
+        <div className={className}>
+            <h2 className={titleClassName || className}>{title}</h2>
             {subtitle && <p className={subtitleClassName}>{subtitle}</p>}
         </div>
     );

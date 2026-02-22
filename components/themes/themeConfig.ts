@@ -11,6 +11,7 @@ export type ThemeConfig = {
     sectionTitleClassName?: string;
     productCardClassName?: string;
     productImageClassName?: string;
+    productInfoClassName?: string;
     productNameClassName?: string;
     productPriceClassName?: string;
     productRatingClassName?: string;
@@ -36,6 +37,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         sectionTitleClassName: 'theme-1-section-title',
         productCardClassName: 'theme-1-product-card',
         productImageClassName: 'theme-1-product-image',
+        productInfoClassName: 'theme-1-product-info',
         productNameClassName: 'theme-1-product-name',
         productPriceClassName: 'theme-1-product-price',
         productRatingClassName: 'theme-1-product-rating',
@@ -43,6 +45,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         categoryLabelClassName: 'theme-1-category-label',
         viewAllClassName: 'theme-1-view-all',
         scrollButtonClassName: 'theme-1-scroll-btn',
+        cartStrokeColor: '#000000',
     },
     'theme-2': {
         id: 'theme-2',
@@ -57,6 +60,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         sectionTitleClassName: 'theme-2-section-title',
         productCardClassName: 'theme-2-product-card',
         productImageClassName: 'theme-2-product-image',
+        productInfoClassName: 'theme-2-product-info',
         productNameClassName: 'theme-2-product-name',
         productPriceClassName: 'theme-2-product-price',
         productRatingClassName: 'theme-2-product-rating',
@@ -64,6 +68,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         categoryLabelClassName: 'theme-2-category-label',
         viewAllClassName: 'theme-2-view-all',
         scrollButtonClassName: 'theme-2-scroll-btn',
+        cartStrokeColor: '#000000',
     },
     'theme-3': {
         id: 'theme-3',
@@ -78,6 +83,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         sectionTitleClassName: 'theme-3-section-title',
         productCardClassName: 'theme-3-product-card',
         productImageClassName: 'theme-3-product-image',
+        productInfoClassName: 'theme-3-product-info',
         productNameClassName: 'theme-3-product-name',
         productPriceClassName: 'theme-3-product-price',
         productRatingClassName: 'theme-3-product-rating',
@@ -86,6 +92,6 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         viewAllClassName: 'theme-3-view-all',
         scrollButtonClassName: 'theme-3-scroll-btn',
         logoFilter: 'brightness(0) invert(1)',
-        cartStrokeColor: '#ffffff',
+        cartStrokeColor: '#C5A059',
     },
 };

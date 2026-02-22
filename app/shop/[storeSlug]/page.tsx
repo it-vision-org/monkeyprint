@@ -113,8 +113,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
 
     if (heroVariant === 'simple') {
         heroContent = {
-            title: customization?.heroTitle || store.name,
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes chez ${store.name}`,
+            title: customization?.heroTitle || store.name || 'My Store',
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes chez ${store.name || 'our boutique'}`,
             image: customHeroImage,
             imageWidth: 280,
             imageHeight: 280,
@@ -124,8 +124,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
         // Ensure we always have a hero image for circles variant
         const heroImageForCircles = customHeroImage || defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
         heroContent = {
-            title: customization?.heroTitle || store.name,
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes for kids, chez ${store.name}`,
+            title: customization?.heroTitle || store.name || 'My Store',
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes for kids, chez ${store.name || 'us'}`,
             variant: 'circles',
             circles: heroImageForCircles ? [
                 { src: heroImageForCircles, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
@@ -137,8 +137,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
     } else {
         // background variant
         heroContent = {
-            title: customization?.heroTitle || store.name,
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes\nchez ${store.name}`,
+            title: customization?.heroTitle || store.name || 'My Store',
+            subtitle: customization?.heroSubtitle || `Explore the finest clothes\nchez ${store.name || 'our boutique'}`,
             variant: 'background',
             backgroundImage: customHeroBackground
         };

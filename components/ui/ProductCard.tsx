@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import LoadingLink from './LoadingLink';
 import StarRating from './StarRating';
 import type { Product } from '../types';
@@ -17,6 +17,9 @@ type ProductCardProps = {
     priceClassName?: string;
     ratingClassName?: string;
     reviewsClassName?: string;
+    infoClassName?: string;
+    customVariants?: Variants;
+    disableAnimation?: boolean;
 };
 
 export default function ProductCard({
@@ -28,7 +31,10 @@ export default function ProductCard({
     nameClassName = '',
     priceClassName = '',
     ratingClassName = '',
-    reviewsClassName = ''
+    reviewsClassName = '',
+    infoClassName = '',
+    customVariants,
+    disableAnimation = false
 }: ProductCardProps) {
     const imageSource = imageSrc || product.image || '/mock-shirt.png';
 
@@ -38,10 +44,10 @@ export default function ProductCard({
     return (
         <LoadingLink href={href} className={className} style={{ display: 'block', textDecoration: 'none' }} showSpinner={false}>
             <motion.div
-                variants={productCardVariants}
-                initial="idle"
-                whileHover="hover"
-                whileTap="tap"
+                variants={disableAnimation ? undefined : (customVariants || productCardVariants)}
+                initial={disableAnimation ? undefined : "idle"}
+                whileHover={disableAnimation ? undefined : "hover"}
+                whileTap={disableAnimation ? undefined : "tap"}
                 style={{ cursor: 'pointer', height: '100%' }}
             >
                 <div className={imageClassName}>
@@ -50,17 +56,21 @@ export default function ProductCard({
                         alt={product.name}
                         width={100}
                         height={100}
-                        style={{ objectFit: 'contain' }}
+                        style={{ width: '100%', height: '100%' }}
                     />
                 </div>
-                <h3 className={nameClassName}>{product.name}</h3>
-                <p className={priceClassName}>{product.price}</p>
-                <StarRating
-                    rating={product.rating}
-                    reviews={product.reviews}
-                    className={ratingClassName}
-                    reviewsClassName={finalReviewsClassName}
-                />
+                <div className={infoClassName}>
+                    <div style={{ flex: 1 }}>
+                        <h3 className={nameClassName}>{product.name}</h3>
+                        <p className={priceClassName}>{product.price}</p>
+                    </div>
+                    <StarRating
+                        rating={product.rating}
+                        reviews={product.reviews}
+                        className={ratingClassName}
+                        reviewsClassName={finalReviewsClassName}
+                    />
+                </div>
             </motion.div>
         </LoadingLink>
     );

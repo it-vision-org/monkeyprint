@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
+import { Geist, Geist_Mono, DM_Sans, Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider, SessionProviderWrapper, AlertProvider } from "@/components";
 
@@ -19,6 +19,16 @@ const dmSans = DM_Sans({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Monkey Print",
   description: "Gagnez de l'argent gratuitement en vendant des produits marchands en Tunisie.",
@@ -32,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${inter.variable} ${outfit.variable} antialiased`}
       >
         <SessionProviderWrapper>
           <CartProvider>

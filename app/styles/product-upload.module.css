@@ -510,25 +510,122 @@
   text-align: center;
 }
 
-/* Loading & Spinner */
-.puLoading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
-
-.puSpinner {
-  width: 52px;
-  height: 52px;
-  border: 4px solid rgba(0, 0, 0, 0.08);
-  border-top-color: #41eb5c;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Enhanced Mockup Generation UI */
+.puProgressContainer {
+  width: 100%;
+  background: #f3f4f6;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+  margin: 24px 0 12px;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.puProgressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #41eb5c, #10b981);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.puProgressBar::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  animation: progressGlow 2s infinite;
+}
+
+@keyframes progressGlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.puProgressStep {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d1c23;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.puProgressSubtext {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  font-style: italic;
+}
+
+.puErrorContainer {
+  background: #fef2f2;
+  border: 2px solid #fee2e2;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 16px;
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.puErrorIcon {
+  width: 48px;
+  height: 48px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.puErrorTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #991b1b;
+  margin-bottom: 8px;
+}
+
+.puErrorText {
+  font-size: 14px;
+  color: #b91c1c;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.puRetryBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.puRetryBtn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
 /* AI Grid */

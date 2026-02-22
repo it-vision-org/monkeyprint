@@ -1,0 +1,21 @@
+/* ==========================================================================
+   MONKEY PRINT PREMIUM THEME SYSTEM
+   Complete rewrite of store themes with distinct personalities
+   Each theme is now modularized into its own CSS file.
+   ========================================================================== */
+
+/* Theme 1: Aura - Ultra-Modern Minimalist */
+@import "./themes/theme-1.css";
+
+/* Theme 2: Pop - Bold & Vibrant */
+@import "./themes/theme-2.css";
+
+/* Theme 3: Zenith - Elegant Luxury */
+@import "./themes/theme-3.css";
+
+/* -------------------- Shared Theme Utilities -------------------- */
+/* These persist across themes for consistent layout behavior */
+
+/* Add any truly global theme-related overrides here if needed */
+@import "./shop-pages.css";
+@import "./checkout-flow.css";

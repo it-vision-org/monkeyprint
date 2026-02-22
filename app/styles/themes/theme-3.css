@@ -1,0 +1,618 @@
+/* ==========================================================================
+   THEME 3: AURORA VANGUARD — HYPER-LUXURY KINETIC
+   Concept: Iridescent glass, liquid mesh gradients, multi-layered depth,
+   and fluid spring animations. Designed to "WOW" with every interaction.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap');
+
+/* ──────────────────────────────────────────────
+   BASE SCOPE & TOKENS
+   ────────────────────────────────────────────── */
+.theme-3-page,
+.all-products-theme-3,
+.cart-theme-3,
+.checkout-theme-3,
+.product-detail-theme-3,
+.order-confirmation-theme-3 {
+  /* Dynamic Mesh Palette */
+  --theme-primary:   #6366f1;   /* Electric Indigo */
+  --theme-secondary: #ec4899;   /* Bright Pink */
+  --theme-accent:    #8b5cf6;   /* Royal Violet */
+  --theme-bg:        #0f172a;   /* Deep Midnight */
+  --theme-text:      #f1f5f9;   /* Slate White */
+  --theme-heading:   #ffffff;
+  --theme-card-bg:   rgba(30, 41, 59, 0.7);
+  --theme-glass:     rgba(255, 255, 255, 0.05);
+  
+  /* Precision Shadows */
+  --shadow-sm: 0 5px 15px rgba(0,0,0,0.2);
+  --shadow-md: 0 20px 40px rgba(0,0,0,0.4);
+  --shadow-lg: 0 40px 80px rgba(0,0,0,0.6);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.3);
+
+  font-family: 'Outfit', sans-serif;
+  background: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ──────────────────────────────────────────────
+   LIVING BACKGROUND — Dynamic Mesh Gradient
+   ────────────────────────────────────────────── */
+.theme-3-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  z-index: -2;
+}
+
+/* Moving Aurora Blobs */
+.theme-3-page::after {
+  content: '';
+  position: fixed;
+  width: 150vw;
+  height: 150vh;
+  top: -25vh; left: -25vw;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+  z-index: -1;
+  filter: blur(100px);
+  animation: auroraFlow 30s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes auroraFlow {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  50%  { transform: translate(100px, 50px) rotate(5deg); }
+  100% { transform: translate(-50px, 100px) rotate(-5deg); }
+}
+
+/* ──────────────────────────────────────────────
+   HEADER — Iridescent Glass
+   ────────────────────────────────────────────── */
+.theme-3-header {
+  position: sticky;
+  top: 16px;
+  z-index: 100;
+  margin: 0 24px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 16px 32px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: var(--shadow-md);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-3-header:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Header Container override */
+.theme-3-header > div {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+}
+
+/* Store Logo Filter */
+.theme-3-header img {
+  filter: brightness(0) invert(1);
+  transition: transform 0.3s ease;
+}
+.theme-3-header:hover img {
+  transform: scale(1.05);
+}
+
+/* Cart Button */
+.theme-3-cart-btn {
+  background: var(--theme-primary);
+  color: white;
+  border-radius: 16px;
+  width: 50px; height: 50px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+.theme-3-cart-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  background: var(--theme-accent);
+}
+.theme-3-cart-badge {
+  position: absolute;
+  top: -8px; right: -8px;
+  background: var(--theme-secondary);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 3px solid var(--theme-bg);
+}
+
+/* ──────────────────────────────────────────────
+   HERO — AURORA VANGUARD SPLIT
+   ────────────────────────────────────────────── */
+.theme-3-hero {
+  min-height: 85vh;
+  margin: 40px 24px;
+  padding: 60px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px;
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+}
+
+/* Hero Aurora Glow — Floating light source */
+.theme-3-hero-aurora-glow {
+  position: absolute;
+  top: -20%; right: -10%;
+  width: 60%; height: 60%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: 1;
+  pointer-events: none;
+  animation: pulseGlow 10s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { opacity: 0.5; transform: scale(1); }
+  to   { opacity: 1; transform: scale(1.2); }
+}
+
+/* Floating Tag */
+.theme-3-hero-tag {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--theme-primary);
+  margin-bottom: 24px;
+  animation: floatTag 3s ease-in-out infinite;
+}
+
+@keyframes floatTag {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Hero Content Area */
+.theme-3-hero-content {
+  z-index: 5;
+  padding: 0;
+  background: transparent !important;
+  position: relative;
+}
+
+/* Hero Actions */
+.theme-3-hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+/* Hero Title — Syne Font with Gradient */
+.theme-3-hero-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3rem, 6vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: white;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+
+/* Splitting words for color effects via em */
+.theme-3-hero-title em {
+  font-style: normal;
+  display: block;
+  background: linear-gradient(90deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+}
+
+.theme-3-hero-text {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  max-width: 500px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 40px;
+}
+
+/* Floating 3D Elements in Hero */
+.theme-3-hero-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 30px;
+  box-shadow: var(--shadow-lg);
+  transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+  transition: transform 0.8s ease;
+}
+.theme-3-hero:hover .theme-3-hero-bg-image {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.02);
+}
+
+@media(max-width: 991px) {
+  .theme-3-hero { grid-template-columns: 1fr; padding: 40px 30px; text-align: center; }
+  .theme-3-hero-text { margin-left: auto; margin-right: auto; }
+  .theme-3-hero-bg-image { width: 100%; height: auto; max-height: 400px; transform: none; }
+}
+
+/* ──────────────────────────────────────────────
+   PRODUCT CARDS — THE MASTERPIECE
+   ────────────────────────────────────────────── */
+.theme-3-section {
+  padding: 100px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.theme-3-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 60px;
+  color: white;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.theme-3-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 6px;
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-secondary));
+  border-radius: 10px;
+}
+
+/* Grid Layouts */
+.theme-3-products-grid, .theme-3-products-grid-full {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px;
+}
+
+/* The Card Itself */
+.theme-3-product-card {
+  text-decoration: none;
+  background: var(--theme-card-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  padding: 16px;
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.theme-3-product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.theme-3-product-card:hover {
+  transform: translateY(-15px) scale(1.02);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+}
+
+.theme-3-product-card:hover::before {
+  opacity: 1;
+}
+
+/* Product Image Wrapper */
+.theme-3-product-image {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #1e293b;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.theme-3-product-image img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-3-product-card:hover .theme-3-product-image img {
+  transform: scale(1.15) rotate(2deg);
+}
+
+/* Reveal tint overlay on hover */
+.theme-3-product-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.4));
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.theme-3-product-card:hover .theme-3-product-image::before {
+  opacity: 1;
+}
+
+/* Glass Detail Reveal on Hover */
+.theme-3-product-image::after {
+  content: 'VIEW ITEM';
+  position: absolute;
+  bottom: 0px; left: 0; right: 0;
+  background: rgba(99, 102, 241, 0.95);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 16px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 3px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 2;
+}
+
+.theme-3-product-card:hover .theme-3-product-image::after {
+  transform: translateY(0);
+}
+
+/* Product Info */
+.theme-3-product-info {
+  padding: 8px;
+}
+
+.theme-3-product-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.theme-3-product-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ffffff, var(--theme-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Multi-layered Animated Shadow for Cards */
+.theme-3-section .theme-3-product-card {
+  animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardEntrance {
+  0% { opacity: 0; transform: translateY(50px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ──────────────────────────────────────────────
+   BUTTONS — MAGNETIC NEON
+   ────────────────────────────────────────────── */
+.theme-3-btn, .theme-3-view-all, .cart-checkout-btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 40px;
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-accent));
+  color: white;
+  border-radius: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+}
+
+.theme-3-btn::before, .theme-3-view-all::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.theme-3-btn:hover, .theme-3-view-all:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.5);
+}
+
+.theme-3-btn:hover::before, .theme-3-view-all:hover::before {
+  left: 100%;
+}
+
+/* ──────────────────────────────────────────────
+   CATEGORIES — Iridescent Glass Glow
+   ────────────────────────────────────────────── */
+.theme-3-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.theme-3-category {
+  height: 350px;
+  border-radius: 32px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.5s ease;
+}
+
+.theme-3-category:hover {
+  transform: scale(1.03);
+}
+
+.theme-3-category img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s ease;
+}
+
+.theme-3-category:hover img {
+  transform: scale(1.1);
+}
+
+.theme-3-category-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 30px;
+  background: linear-gradient(to top, rgba(15,23,42,0.9), transparent);
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-family: 'Syne', sans-serif;
+  text-transform: uppercase;
+}
+
+/* ──────────────────────────────────────────────
+   PRODUCT DETAIL — HYPERTECH
+   ────────────────────────────────────────────── */
+.product-detail-theme-3 {
+  background: var(--theme-bg) !important;
+}
+
+.product-detail-theme-3 .product-detail-container-modern {
+  max-width: 1200px;
+  padding: 40px 24px;
+}
+
+.product-detail-theme-3 .product-detail-content-modern {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 48px;
+  padding: 40px;
+  margin-top: 40px;
+}
+
+.product-detail-theme-3 .product-detail-image-wrapper-modern {
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  aspect-ratio: 1/1;
+}
+
+.product-detail-theme-3 .product-detail-name-modern {
+  font-family: 'Syne', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff, var(--theme-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.product-detail-theme-3 .product-detail-price-modern {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--theme-primary);
+  margin-bottom: 32px;
+}
+
+/* Button overrides for LoadingButton in Detail */
+.product-detail-theme-3 .product-detail-add-to-cart-modern button {
+  height: 64px !important;
+  border-radius: 20px !important;
+  font-weight: 800 !important;
+  font-size: 1.1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  transition: all 0.4s ease !important;
+}
+
+.product-detail-theme-3 .product-detail-add-to-cart-modern button:first-child {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: white !important;
+}
+
+.product-detail-theme-3 .product-detail-add-to-cart-modern button:last-child {
+  background: linear-gradient(90deg, var(--theme-primary), var(--theme-accent)) !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* ──────────────────────────────────────────────
+   MOBILE SCALE
+   ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .theme-3-header { padding: 12px 20px !important; margin: 0 12px; top: 10px; }
+  .theme-3-hero { margin: 20px 12px; border-radius: 24px; }
+  .theme-3-hero-title { font-size: 3rem; }
+  .theme-3-products-grid { grid-template-columns: 1fr; }
+  .product-detail-theme-3 .product-detail-content-modern { grid-template-columns: 1fr; padding: 20px; border-radius: 32px; }
+  .product-detail-theme-3 .product-detail-name-modern { font-size: 2.5rem; }
+}
+
+/* ──────────────────────────────────────────────
+   ANIMATION OVERRIDE
+   Make sure stagger works automatically
+   ────────────────────────────────────────────── */
+.theme-3-products-grid .theme-3-product-card:nth-child(1) { animation-delay: 0.1s; }
+.theme-3-products-grid .theme-3-product-card:nth-child(2) { animation-delay: 0.2s; }
+.theme-3-products-grid .theme-3-product-card:nth-child(3) { animation-delay: 0.3s; }
+.theme-3-products-grid .theme-3-product-card:nth-child(4) { animation-delay: 0.4s; }
+.theme-3-products-grid .theme-3-product-card:nth-child(5) { animation-delay: 0.5s; }
+.theme-3-products-grid .theme-3-product-card:nth-child(6) { animation-delay: 0.6s; }

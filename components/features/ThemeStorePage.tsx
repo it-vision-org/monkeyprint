@@ -197,22 +197,40 @@ export default function ThemeStorePage({
         }
 
         if (theme.id === 'theme-3') {
+            // Helper to split title and wrap last word in em for gradient effect
+            const renderTitle = (title: string) => {
+                const words = title.split(' ');
+                if (words.length <= 1) return title;
+                const last = words.pop();
+                return (
+                    <>
+                        {words.join(' ')} <em>{last}</em>
+                    </>
+                );
+            };
+
             return (
                 <div className={theme.heroClassName}>
+                    <div className="theme-3-hero-aurora-glow"></div>
                     {heroContent.backgroundImage && (
                         <Image
                             src={heroContent.backgroundImage}
-                            alt="Pattern"
-                            width={400}
-                            height={300}
+                            alt="Background"
+                            width={800}
+                            height={600}
                             className="theme-3-hero-bg-image"
+                            priority
                         />
                     )}
                     <div className="theme-3-hero-content">
-                        <h1 className="theme-3-hero-title">{heroContent.title}</h1>
+                        <div className="theme-3-hero-tag">New Collection 2025</div>
+                        <h1 className="theme-3-hero-title">{renderTitle(heroContent.title)}</h1>
                         {heroContent.subtitle.split('\n').map((line, idx) => (
                             <p key={idx} className="theme-3-hero-text">{line}</p>
                         ))}
+                        <div className="theme-3-hero-actions">
+                            <button className="theme-3-btn">Explore Now</button>
+                        </div>
                     </div>
                 </div>
             );
@@ -243,8 +261,8 @@ export default function ThemeStorePage({
             {renderHero()}
 
             {bestSellerSection && (
-                <section className={`${theme.sectionClassName} ${theme.id === 'theme-1' ? 'theme-1-best-seller-section' : ''}`}>
-                    <SectionTitle title={bestSellerSection.title} className={`${theme.sectionTitleClassName} ${theme.id === 'theme-2' || theme.id === 'theme-3' ? 'theme-2-section-title-white' : ''}`} />
+                <section className={theme.sectionClassName}>
+                    <SectionTitle title={bestSellerSection.title} className={theme.sectionTitleClassName} />
                     <ProductCarousel
                         products={bestSellerSection.products || products.slice(0, 3)}
                         baseHref={theme.baseRoute}
@@ -254,17 +272,19 @@ export default function ThemeStorePage({
                         productCardProps={{
                             className: theme.productCardClassName,
                             imageClassName: theme.productImageClassName,
+                            infoClassName: theme.productInfoClassName,
                             nameClassName: theme.productNameClassName,
                             priceClassName: theme.productPriceClassName,
-                            ratingClassName: theme.productRatingClassName
-                        }}
+                            ratingClassName: theme.productRatingClassName,
+                            disableAnimation: theme.id === 'theme-2' || theme.id === 'theme-3'
+                        } as any}
                     />
                 </section>
             )}
 
             {categories.length > 0 && (
                 <section className={theme.sectionClassName}>
-                    <SectionTitle title="Categories" className={`${theme.sectionTitleClassName} ${theme.id === 'theme-2' || theme.id === 'theme-3' ? 'theme-2-section-title-white' : ''}`} />
+                    <SectionTitle title="Categories" className={theme.sectionTitleClassName} />
                     <div className={`${theme.id}-categories`}>
                         {categories.map((category, idx) => (
                             <CategoryCard
@@ -283,8 +303,8 @@ export default function ThemeStorePage({
             )}
 
             {productsSection && (
-                <section className={`${theme.sectionClassName} ${theme.id === 'theme-2' ? 'theme-2-products-section' : ''}`}>
-                    <SectionTitle title={productsSection.title} className={`${theme.sectionTitleClassName} ${theme.id === 'theme-2' || theme.id === 'theme-3' ? 'theme-2-section-title-white' : ''}`} />
+                <section className={theme.sectionClassName}>
+                    <SectionTitle title={productsSection.title} className={theme.sectionTitleClassName} />
                     <ProductGrid
                         products={productsSection.products || products}
                         baseHref={theme.baseRoute}
@@ -292,10 +312,12 @@ export default function ThemeStorePage({
                         productCardProps={{
                             className: theme.productCardClassName,
                             imageClassName: theme.productImageClassName,
+                            infoClassName: theme.productInfoClassName,
                             nameClassName: theme.productNameClassName,
                             priceClassName: theme.productPriceClassName,
-                            ratingClassName: theme.productRatingClassName
-                        }}
+                            ratingClassName: theme.productRatingClassName,
+                            disableAnimation: theme.id === 'theme-2' || theme.id === 'theme-3'
+                        } as any}
                     />
                     {productsSection.showViewAll !== false && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>

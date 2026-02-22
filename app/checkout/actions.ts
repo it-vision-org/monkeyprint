@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
-    name: z.string().min(2),
-    phoneNumber: z.string().min(8), // Assuming Tunisian phone numbers
-    address: z.string().min(5),
-    city: z.string().min(2),
-    items: z.string(), // JSON string of items
+    name: z.string().min(1, 'Name is required'),
+    phoneNumber: z.string().min(6, 'Phone number must be at least 6 digits'),
+    address: z.string().min(2, 'Address is required'),
+    city: z.string().min(1, 'City is required'),
+    items: z.string().min(1, 'Items are required'),
 });
 
 export async function placeOrder(formData: FormData) {
@@ -23,7 +23,9 @@ export async function placeOrder(formData: FormData) {
     const validatedFields = checkoutSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
-        return { error: 'Invalid form data' };
+        console.error('Checkout validation failed:', validatedFields.error.flatten());
+        const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0];
+        return { error: firstError || 'Invalid form data. Please check all fields.' };
     }
 
     const { name, phoneNumber, address, city, items } = validatedFields.data;

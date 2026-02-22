@@ -42,12 +42,40 @@ export default function ProductDetailsPage() {
     const [genderSelectionModalOpen, setGenderSelectionModalOpen] = useState(false);
     const [selectedGenderForMockup, setSelectedGenderForMockup] = useState<string>("homme");
     const [mockupLoading, setMockupLoading] = useState(false);
+    const [mockupProgress, setMockupProgress] = useState(0);
+    const [mockupStatus, setMockupStatus] = useState("");
+    const [mockupError, setMockupError] = useState<string | null>(null);
     const [generatedMockups, setGeneratedMockups] = useState<string[]>([]);
     const [isRenderingDesign, setIsRenderingDesign] = useState(true);
     const [combinedDesignImage, setCombinedDesignImage] = useState<string | null>(null);
     const [customPrompt, setCustomPrompt] = useState<string>("");
     const [isFirstProduct, setIsFirstProduct] = useState<boolean>(true);
     const [minPrice, setMinPrice] = useState<number>(55);
+
+    // Progress bar simulation logic
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (mockupLoading && mockupProgress < 90) {
+            interval = setInterval(() => {
+                setMockupProgress(prev => {
+                    if (prev < 40) return prev + 2; // Faster at start
+                    if (prev < 70) return prev + 1; // Slower in middle
+                    if (prev < 90) return prev + 0.5; // Very slow near end
+                    return prev;
+                });
+            }, 800);
+        }
+        return () => clearInterval(interval);
+    }, [mockupLoading, mockupProgress]);
+
+    // Status message logic based on progress
+    useEffect(() => {
+        if (mockupProgress < 20) setMockupStatus("Initialisation du moteur de rendu...");
+        else if (mockupProgress < 40) setMockupStatus("Conversion de votre design...");
+        else if (mockupProgress < 60) setMockupStatus("Application des textures et ombres...");
+        else if (mockupProgress < 85) setMockupStatus("Génération des variantes IA...");
+        else setMockupStatus("Finalisation de vos maquettes...");
+    }, [mockupProgress]);
     const [pricingSettings, setPricingSettings] = useState<any>(null);
 
     // Pricing UI States
@@ -607,25 +635,28 @@ export default function ProductDetailsPage() {
     };
 
     const profit = useMemo(() => {
-        if (!pricingSettings) return 0;
+        const sellingPrice = parseFloat(productPrice) || 0;
+        const costPrice = totalPrice || 0;
 
-        const base = parseFloat(productPrice) || 0;
-        const display = parseFloat(displayPrice) || 0;
+        if (!pricingSettings) {
+            const delta = sellingPrice - costPrice;
+            return delta > 0 ? delta : 0;
+        }
 
         switch (pricingSettings.profitCalculationType) {
             case 'PERCENTAGE':
                 if (pricingSettings.profitPercentage) {
-                    return (base * pricingSettings.profitPercentage) / 100;
+                    return (sellingPrice * pricingSettings.profitPercentage) / 100;
                 }
                 return 0;
             case 'FIXED':
                 return pricingSettings.profitFixedAmount || 0;
             case 'DIFFERENCE':
             default:
-                const delta = display - base;
+                const delta = sellingPrice - costPrice;
                 return delta > 0 ? delta : 0;
         }
-    }, [productPrice, displayPrice, pricingSettings]);
+    }, [productPrice, totalPrice, pricingSettings]);
 
     const handleDescriptionChange = (value: string) => {
         setDescription(value);
@@ -649,6 +680,8 @@ export default function ProductDetailsPage() {
         closeGenderSelectionModal();
         setMockupModalOpen(true);
         setMockupLoading(true);
+        setMockupProgress(0);
+        setMockupError(null);
         setGeneratedMockups([]);
 
         try {
@@ -735,14 +768,17 @@ export default function ProductDetailsPage() {
 
             if (data.success && data.images && data.images.length > 0) {
                 console.log('Setting mockups:', data.images.length, 'images');
-                setGeneratedMockups(data.images);
-                setMockupLoading(false); // Stop loading when images are successfully set
+                setMockupProgress(100);
+                setTimeout(() => {
+                    setGeneratedMockups(data.images);
+                    setMockupLoading(false);
+                }, 500);
             } else {
                 throw new Error('No images returned from API');
             }
         } catch (error: any) {
             console.error('Error generating mockups:', error);
-            showAlert(`Erreur lors de la génération des maquettes: ${error.message}`, 'error');
+            setMockupError(error.message || "Une erreur inconnue est survenue.");
             setMockupLoading(false);
         }
     };
@@ -762,8 +798,16 @@ export default function ProductDetailsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
+        const sellingPrice = parseFloat(productPrice) || 0;
+        const costPrice = totalPrice || 0;
+
         if (!productName || !productPrice) {
             showAlert("Veuillez remplir le nom et le prix du produit.", 'warning');
+            return;
+        }
+
+        if (sellingPrice < costPrice) {
+            showAlert(`Le prix de vente (${sellingPrice}DT) ne peut pas être inférieur au prix de revient (${costPrice}DT). Vous devez augmenter votre prix pour couvrir les frais de production.`, 'error');
             return;
         }
 
@@ -1848,14 +1892,38 @@ export default function ProductDetailsPage() {
                         <button className={styles.puPopupClose} type="button" onClick={closeMockupModal} disabled={mockupLoading}>
                             ×
                         </button>
-                        <h2 className={styles.puPopupTitle}>Choisissez une maquette</h2>
+                        <h2 className={styles.puPopupTitle}>
+                            {mockupLoading ? "Génération en cours" : mockupError ? "Oups !" : "Choisissez une maquette"}
+                        </h2>
+
                         {mockupLoading ? (
-                            <div className={styles.puLoading}>
-                                <div className={styles.puSpinner} />
-                                <p>Génération des maquettes en cours...</p>
-                                <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                                    Cela peut prendre quelques instants
-                                </p>
+                            <div style={{ padding: '20px 0' }}>
+                                <div className={styles.puProgressStep}>{mockupStatus}</div>
+                                <div className={styles.puProgressContainer}>
+                                    <div
+                                        className={styles.puProgressBar}
+                                        style={{ width: `${mockupProgress}%` }}
+                                    />
+                                </div>
+                                <div className={styles.puProgressSubtext}>
+                                    Cela prend environ 60 secondes. Ne fermez pas cette fenêtre.
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+                                    <div className={styles.puSpinner} />
+                                </div>
+                            </div>
+                        ) : mockupError ? (
+                            <div className={styles.puErrorContainer}>
+                                <div className={styles.puErrorIcon}>!</div>
+                                <div className={styles.puErrorTitle}>Échec de la génération</div>
+                                <div className={styles.puErrorText}>{mockupError}</div>
+                                <button
+                                    type="button"
+                                    className={styles.puRetryBtn}
+                                    onClick={handleGenerateMockup}
+                                >
+                                    Réessayer la génération
+                                </button>
                             </div>
                         ) : generatedMockups.length > 0 ? (
                             <div className={styles.puAiGrid}>
