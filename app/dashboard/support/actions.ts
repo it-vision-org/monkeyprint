@@ -108,7 +108,8 @@ export async function addMessage(ticketId: string, formData: FormData) {
                 ticketId,
                 content,
                 imageUrl,
-                isAdmin: false
+                isAdmin: false,
+                isRead: true, // Auto-mark read if user sends
             }
         });
 
@@ -123,5 +124,41 @@ export async function addMessage(ticketId: string, formData: FormData) {
     } catch (error) {
         console.error('Error adding message:', error);
         return { error: 'Failed to add message' };
+    }
+}
+
+export async function markMessagesAsRead(ticketId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { error: "Not authenticated" };
+
+    try {
+        // Find user
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email as string }
+        });
+        if (!user) return { error: "User not found" };
+
+        // Verify ticket
+        const ticket = await prisma.supportTicket.findUnique({
+            where: { id: ticketId }
+        });
+        if (!ticket || ticket.userId !== user.id) {
+            return { error: "Unauthorized" };
+        }
+
+        await prisma.supportTicketMessage.updateMany({
+            where: {
+                ticketId,
+                isAdmin: true,
+                isRead: false
+            },
+            data: { isRead: true }
+        });
+        revalidatePath('/dashboard/support');
+        revalidatePath(`/dashboard/support/${ticketId}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error marking messages as read:', error);
+        return { error: 'Failed to update read status' };
     }
 }

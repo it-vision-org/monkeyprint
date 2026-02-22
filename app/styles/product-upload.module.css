@@ -1,7 +1,6 @@
-/* Product Upload Styles Module */
+/* Product Upload Styles Module - Ported from OldMonkey */
 
-.product-upload-page,
-.pd-page {
+.productUploadPage {
   min-height: 100vh;
   background: linear-gradient(180deg, #226894 0%, #01ab7b 100%);
   display: flex;
@@ -12,95 +11,1497 @@
   position: relative;
 }
 
-.pu-title, .pd-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #0d9488;
-  margin: 0 0 40px 0;
-  text-align: left;
-  line-height: 1.3;
-}
-
-.pu-section, .pd-content {
-  padding: 24px var(--mobile-padding-x);
-  margin-bottom: 16px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.pu-products-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.pu-product-card {
-  aspect-ratio: 1;
-  background: #f5f5f5;
-  border: 3px solid #e0e0e0;
-  border-radius: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  padding: 8px;
-}
-
-.pu-product-card:hover {
-  border-color: #0d9488;
-}
-
-.pu-product-card.selected {
-  border-color: #0d9488;
-  background: #e6f7f5;
-}
-
-.pu-colors-container {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #e5e7eb;
-  padding: 24px;
-  border-radius: 20px;
-}
-
-.pu-color-swatch {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* Breakout rules to allow full-width in dashboard layout */
+:global(.dash-main) .productUploadPage {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   position: relative;
-  border: 2px solid transparent;
+  z-index: 1;
+  min-height: calc(100vh - 80px);
+  margin-top: -80px;
+  margin-bottom: -40px;
+  left: 0;
+  right: 0;
+  overflow-y: visible !important;
+  overflow-x: visible !important;
+  height: auto !important;
 }
 
-.pu-upload-zone {
-  border: 2px dashed #d0d0d0;
-  border-radius: 16px;
-  padding: 48px var(--mobile-padding-x);
-  text-align: center;
-  cursor: pointer;
-  background: #fafafa;
+:global(.dash-main):has(.productUploadPage) {
+  padding: 0 !important;
+  padding-top: 80px !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  min-height: calc(100vh - 80px) !important;
+  max-height: none !important;
 }
 
-.pu-next-button, .pd-save {
-  width: 100%;
-  background: #0d9488;
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 18px;
-  border: none;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+@media (max-width: 900px) {
+  /* Hide static summary on mobile as sticky bar covers it */
+  .puSummary {
+    display: none;
+  }
+}
+
+:global(.dash-main):has(.productUploadPage) :global(.dash-container) {
+  padding: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 @media (max-width: 768px) {
-  .pu-products-grid {
-    grid-template-columns: repeat(3, 1fr);
+  :global(.dash-main):has(.productUploadPage) {
+    padding-top: 64px !important;
   }
+
+  :global(.dash-main) .productUploadPage {
+    margin-top: -64px;
+    margin-bottom: -20px;
+  }
+  
+  :global(.dash-main):has(.productUploadPage) .puMobileMain {
+    padding-top: 96px !important;
+  }
+}
+
+:global(.dashboard-page):has(.productUploadPage) {
+  background: transparent !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: 100vh !important;
+}
+
+.expanded {}
+.locked {
+  border-color: #f29c1f !important;
+  box-shadow: 0 0 0 3px rgba(242, 156, 31, 0.3) !important;
+}
+
+.productUploadPage::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.productUploadPage::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      ellipse 2006.98px 1094.27px at -1271.4px 169.37px,
+      rgba(255, 44, 47, 0.4) 0%,
+      transparent 78.42%
+    ),
+    radial-gradient(
+      ellipse 1935.86px 1717.69px at -1548.05px -128.27px,
+      rgba(255, 44, 44, 0.4) 0%,
+      transparent 77.14%
+    ),
+    radial-gradient(
+      ellipse 1935.86px 1717.69px at -1362.55px 438.72px,
+      rgba(255, 227, 44, 0.4) 0%,
+      transparent 77.14%
+    ),
+    radial-gradient(
+      ellipse 2006.98px 1094.27px at -1529.26px 46.47px,
+      rgba(255, 227, 44, 0.4) 0%,
+      transparent 78.42%
+    );
+  filter: blur(152.987px);
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Intro Section */
+.puIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.puIntroTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #41eb5c;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.puIntroLine {
+  width: 120px;
+  height: 3px;
+  border-radius: 999px;
+  background: #41eb5c;
+}
+
+/* Card Styles */
+.puCard {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px;
+  padding: 24px 22px 26px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #0d1c23;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 0.3s ease;
+}
+
+.puCardTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+.puCardSubtitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.puCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Product Grid */
+.puProductGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .puProductGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .puProductGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .puProductGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.puProductCell {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.06);
+  padding: 16px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 100%;
+  border-style: solid;
+}
+
+.puProductCell.active {
+  border-color: #41eb5c;
+  box-shadow: 0 8px 24px rgba(65, 235, 92, 0.18);
+  transform: translateY(-2px);
+}
+
+.puProductCell:hover:not(.active) {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.puProductBadge {
+  position: absolute;
+  top: -12px;
+  left: -6px;
+  background: #f29c1f;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 6px 12px rgba(242, 156, 31, 0.35);
+}
+
+.puProductImage {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.puProductImage img {
+    max-width: 100%;
+    height: auto;
+}
+
+.puProductLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+}
+
+/* Color Wrapper */
+.puColorWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.puColorHero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 20px;
+  overflow: visible;
+}
+
+.puShirt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s ease;
+}
+
+.puShirt.active {
+  z-index: 100 !important;
+}
+
+.puColorSwatches,
+.puMiniSwatches {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.puColorDot,
+.puMiniDot {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease,
+    box-shadow 0.2s ease;
+  opacity: 0.5;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  font: inherit;
+}
+
+.puColorDot.active,
+.puMiniDot.active {
+  border-color: #41eb5c;
+  border-width: 4px;
+  transform: scale(1.1);
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(65, 235, 92, 0.4);
+}
+
+.puColorDot.active.selected,
+.puMiniDot.active.selected {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(65, 235, 92, 0.4);
+}
+
+.puMiniDot {
+  width: 32px;
+  height: 32px;
+}
+
+/* Price Widget Styles */
+.puPriceTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f29c1f;
+  text-transform: uppercase;
+}
+
+/* Quality Section */
+.puQualityRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.puQualityPill {
+  flex: 1 1 30%;
+  border-radius: 16px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0d1c23;
+  cursor: pointer;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.puQualityPill:hover:not(.active) {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 1);
+}
+
+.puQualityPill.active {
+  border-color: #41eb5c;
+  background: rgba(65, 235, 92, 0.15);
+  color: #044217;
+  box-shadow: 0 2px 8px rgba(65, 235, 92, 0.2);
+}
+
+.puQualityLabel {
+  display: block;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.puQualityPrice {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Summary Section */
+.puSummary {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 14px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.puSummaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.puSummaryTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+  color: #f29c1f;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Next CTA */
+.puNextCta {
+  width: 100%;
+  border-radius: 999px;
+  border: none;
+  padding: 18px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #41eb5c 0%, #2dd64a 100%);
+  color: #053017;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(65, 235, 92, 0.3);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.puNextCta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 38px rgba(65, 235, 92, 0.4);
+}
+
+.puNextCta:active {
+    transform: translateY(0);
+}
+
+/* Popup / Modal */
+.puPopupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 1000;
+}
+
+.puPopup {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.puPopupClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  color: #999999;
+  cursor: pointer;
+}
+
+.puPopupTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 24px;
+  color: #0d1c23;
+  text-align: center;
+}
+
+/* Loading & Spinner */
+.puLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.puSpinner {
+  width: 52px;
+  height: 52px;
+  border: 4px solid rgba(0, 0, 0, 0.08);
+  border-top-color: #41eb5c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* AI Grid */
+.puAiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.puAiImageCard {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease;
+  background: none;
+}
+
+.puAiImageCard:hover {
+  transform: scale(1.03);
+}
+
+.puAiImageCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile Price Bar (from pu-cart-xxx) */
+.puCartContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 101;
+}
+
+.puCartContainerMobile {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  position: sticky;
+  top: 56px;
+  z-index: 999;
+}
+
+.puCartBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f29c1f 0%, #e68a00 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0 0 20px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(242, 156, 31, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.puCartContent {
+  display: flex;
+  align-items: center;
+}
+
+.puCartTotal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.puCartPrice {
+  letter-spacing: 0.02em;
+}
+
+.puCartTotal svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.puCartTotal svg.expanded {
+  transform: rotate(180deg);
+}
+
+.puCartDetails {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 0 0 24px 24px;
+  color: #1a1a1a;
+  font-size: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: none;
+  z-index: 100;
+  box-sizing: border-box;
+  animation: puDetailsSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes puDetailsSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.puCartDetailsHeader {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+}
+
+.puCartDetailsTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+
+.puCartItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.puCartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.puCartItemInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+}
+
+.puCartItemPrice {
+  font-weight: 600;
+  color: #111;
+}
+
+.puCartTotalLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.puCartTotalPrice {
+  font-size: 16px;
+  font-weight: 800;
+  color: #f29c1f;
+}
+
+.puCartTotalLine {
+  padding: 20px 16px;
+  margin-top: 4px;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #fef3e7 0%, #fde68a 100%);
+  border-radius: 16px;
+  border: 2px solid #f29c1f;
+  box-shadow: 0 2px 8px rgba(242, 156, 31, 0.2);
+  font-weight: 800;
+  font-size: 16px;
+  color: #f29c1f;
+}
+
+.puPriceWidgetDesktop {
+  display: none;
+}
+
+/* Desktop Price Widget */
+@media (min-width: 900px) {
+  .puCartContainerMobile {
+    display: none;
+  }
+
+  .puPriceWidgetDesktop {
+    display: flex;
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 95;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .puPriceWidgetTrigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f29c1f 0%, #e68a00 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(242, 156, 31, 0.4),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 140px;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .puPriceWidgetTrigger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(242, 156, 31, 0.5),
+      0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .puPriceWidgetTriggerPrice {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .puPriceWidgetPanel {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 0;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .puPriceWidgetDesktop.expanded .puPriceWidgetPanel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+  }
+
+  .puPriceWidgetHeader {
+    background: linear-gradient(135deg, #f29c1f 0%, #e68a00 100%);
+    color: #ffffff;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .puPriceWidgetHeaderIcon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .puPriceWidgetHeaderTitle {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .puPriceWidgetContent {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .puPriceWidgetItems {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .puPriceWidgetItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+  }
+
+  .puPriceWidgetItem:hover {
+    background: #f3f4f6;
+    border-color: #f29c1f;
+    transform: translateX(2px);
+  }
+
+  .puPriceWidgetItemInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .puPriceWidgetItemIcon {
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  .puPriceWidgetItemIcon svg {
+    color: #f29c1f;
+  }
+
+  .puPriceWidgetItemLabel {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .puPriceWidgetItemPrice {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .puPriceWidgetTotal {
+    padding: 20px;
+    background: linear-gradient(135deg, #fef3e7 0%, #fde68a 100%);
+    border-radius: 16px;
+    border: 2px solid #f29c1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .puPriceWidgetTotalLabel {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #1a1a1a;
+  }
+
+  .puPriceWidgetTotalPrice {
+    font-size: 28px;
+    font-weight: 800;
+    color: #f29c1f;
+    line-height: 1;
+  }
+}
+
+.puPriceWidgetItemLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.puPriceWidgetItemPrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Details Page Specific Styles */
+.pdIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pdIntroTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #41eb5c;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.pdIntroLine {
+  width: 120px;
+  height: 3px;
+  border-radius: 999px;
+  background: #41eb5c;
+}
+
+.pdCard {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px;
+  padding: 24px 22px 26px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #0d1c23;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 0.3s ease;
+}
+
+.pdDesignPreviewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .pdDesignPreviewGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.pdLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.pdLabel span {
+  color: #ff3b3b;
+  margin-left: 4px;
+}
+
+.pdRequiredNote {
+  font-size: 12px;
+  color: rgba(13, 28, 35, 0.6);
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.pdField {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pdGenderRow {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pdRadioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.pdRadioOption input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #41eb5c;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pdRadioOption input[type="checkbox"]:checked {
+  background: #41eb5c;
+  border-color: #41eb5c;
+}
+
+.pdRadioOption input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.pdRadioLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d1c23;
+  user-select: none;
+}
+
+.pdInputWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.pdInput {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  padding: 14px 18px;
+  padding-right: 50px;
+  font-size: 15px;
+  font-weight: 500;
+  background: #ffffff;
+  color: #0d1c23;
+  box-sizing: border-box;
+}
+
+.pdInputSuffix {
+  position: absolute;
+  right: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(13, 28, 35, 0.6);
+  pointer-events: none;
+}
+
+.pdInput:focus {
+  outline: none;
+  border-color: #41eb5c;
+  box-shadow: 0 0 0 3px rgba(65, 235, 92, 0.22);
+}
+
+.pdPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pdProfit {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pdProfitLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(13, 28, 35, 0.6);
+}
+
+.pdProfitPill {
+  background: #41eb5c;
+  color: #053017;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pdTextarea {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  min-height: 140px;
+  font-size: 15px;
+  resize: none;
+  background: #ffffff;
+  color: #0d1c23;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.pdTextarea:focus {
+  outline: none;
+  border-color: #41eb5c;
+}
+
+.pdTextareaCounter {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  text-align: right;
+  margin-top: -4px;
+}
+
+.pdSubmit {
+  width: 100%;
+  border-radius: 999px;
+  border: none;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: #41eb5c;
+  color: #053017;
+  cursor: pointer;
+  box-shadow: 0 18px 32px rgba(65, 235, 92, 0.32);
+  transition: all 0.2s ease;
+}
+
+.pdActionRow {
+  display: flex;
+  gap: 12px;
+}
+
+.pdActionPrimary {
+  flex: 1;
+  border-radius: 30px;
+  border: none;
+  padding: 14px 0;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  background: linear-gradient(90deg, #00a6ff 0%, #007bff 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdActionPrimary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 118, 255, 0.3);
+}
+
+.pdActionRefresh {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: #ff3b3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.pdActionRefresh:hover {
+    transform: scale(1.05);
+    background: #ef4444;
+}
+
+/* Responsive Overrides */
+/* Base mobile-first styles */
+.puMobileMain {
+  padding: 28px 16px 60px;
+  padding-top: calc(56px + 56px + 50px + 28px);
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.puMobileFlow {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Desktop overrides - must come AFTER base styles */
+@media (min-width: 900px) {
+  .puMobileMain,
+  .pdMain {
+    padding: 48px 40px 104px;
+    padding-top: calc(56px + 48px);
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  .puMobileFlow,
+  .pdFlow {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+/* Spinner Animation */
+@keyframes pu-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.puSpinner {
+  width: 38px;
+  height: 38px;
+  border: 3.5px solid rgba(255, 255, 255, 0.2);
+  border-top: 3.5px solid #ffffff;
+  border-radius: 50%;
+  animation: pu-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.puUploadCard {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 36px 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.puUploadCard:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.puUploadCard svg {
+  stroke: #226894;
+  margin: 0 auto;
+}
+
+.puUploadCard p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.puUploadCard span {
+  font-size: 12px;
+  color: rgba(13, 28, 35, 0.65);
+}
+
+.puUploadCard.active {
+  border-color: #41eb5c;
+  background: rgba(65, 235, 92, 0.12);
+}
+
+.puAiButton {
+  background: linear-gradient(90deg, #00a6ff 0%, #007bff 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 0;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.puDesignCard {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.puDesignFigure {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.puDesignFrame {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  border: 2px solid #0d9488;
+}
+
+.puDesignGrid,
+.pdDesignGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+}
+
+.puGridDot,
+.pdGridDot {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(53, 87, 255, 0.3);
+  border: 1px solid rgba(53, 87, 255, 0.5);
+}
+
+.puPreviewLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(13, 28, 35, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.puDesignRefresh {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.puDesignResize {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.puPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: rgba(13, 28, 35, 0.25);
+  border: 2px dashed rgba(13, 28, 35, 0.25);
+  border-radius: 14px;
+}
+
+.pdRadioLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d1c23;
+  user-select: none;
+}
+
+.pdRadioOption.active .pdRadioLabel {
+  color: #0d1c23;
+}
+
+.pdPreviewCard {
+  background: #f5f5f5;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.pdPreviewImage {
+  position: relative;
+  display: inline-flex;
+}
+
+.pdPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pdInputWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.pdProfit {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pdProfitLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(13, 28, 35, 0.6);
+}
+
+.pdProfitPill {
+  background: #41eb5c;
+  color: #053017;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
 }

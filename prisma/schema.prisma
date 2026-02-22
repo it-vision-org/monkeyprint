@@ -158,6 +158,7 @@ model SupportTicketMessage {
   content   String   @db.Text
   imageUrl  String? // R2 URL for attached image
   isAdmin   Boolean  @default(false) // true if message is from admin, false if from user
+  isRead    Boolean  @default(false) // true if read by the other party
   createdAt DateTime @default(now())
 
   // Relations

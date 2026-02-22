@@ -30,31 +30,32 @@ export default function HowItWorks({
     return (
         <>
             {/* Mobile View */}
-            <h2 className={styles.title}>{title}</h2>
-            <p className={styles.subtitle}>{subtitle}</p>
-            {cards.map((card, index) => {
-                const i = index + 1;
-                const isEven = i % 2 === 0;
-                return (
-                    <div key={index}>
-                        <div className={`${styles.cardRect} ${styles[`card${i}Rect`]}`} />
-                        <div className={`${styles.cardIcon} ${styles[`card${i}Icon`]}`}>
-                            <Image src={card.icon} alt="" width={56} height={56} />
-                        </div>
-                        <div className={`${styles.cardText} ${styles[`card${i}Text`]}`}>
-                            <div className={`${styles.cardTitle} ${styles[`cardTitle${i}`]}`}>
-                                {card.title.split('\n').map((line, idx) => (
-                                    <span key={idx}>
-                                        {line}
-                                        {idx < card.title.split('\n').length - 1 && <br />}
-                                    </span>
-                                ))}
+            <section className={styles.section}>
+                <h2 className={styles.title}>{title}</h2>
+                <p className={styles.subtitle}>{subtitle}</p>
+                {cards.map((card, index) => {
+                    const i = index + 1;
+                    return (
+                        <div key={index}>
+                            <div className={`${styles.cardRect} ${styles[`card${i}Rect`]}`} />
+                            <div className={`${styles.cardIcon} ${styles[`card${i}Icon`]}`}>
+                                <Image src={card.icon} alt="" width={56} height={56} />
                             </div>
-                            <div className={styles.cardDesc}>{card.description}</div>
+                            <div className={`${styles.cardText} ${styles[`card${i}Text`]}`}>
+                                <div className={`${styles.cardTitle} ${styles[`cardTitle${i}`]}`}>
+                                    {card.title.split('\n').map((line, idx) => (
+                                        <span key={idx}>
+                                            {line}
+                                            {idx < card.title.split('\n').length - 1 && <br />}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className={styles.cardDesc}>{card.description}</div>
+                            </div>
                         </div>
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </section>
 
             {/* Desktop View */}
             <section className={desktopStyles.desktopHowItWorksSection}>

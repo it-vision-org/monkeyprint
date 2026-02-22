@@ -5,6 +5,7 @@ import { getR2Url } from "@/lib/storage";
 import { format } from "date-fns";
 import Link from "next/link";
 import OrderDetailActions from "./OrderDetailActions";
+import styles from "../../../styles/commandes.module.css";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -82,135 +83,101 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     };
 
     return (
-        <div className="commandes-page">
-            <div className="commandes-main">
-                <div className="commandes-container">
+        <div className={styles.commandesPage}>
+            <div className={styles.commandesMain}>
+                <div className={styles.commandesContainer}>
                     <div style={{ marginBottom: '24px' }}>
-                        <Link 
-                            href="/dashboard/commandes" 
-                            style={{ 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: '8px',
-                                color: '#2563eb',
-                                textDecoration: 'none',
-                                fontSize: '14px',
-                                marginBottom: '24px'
-                            }}
+                        <Link
+                            href="/dashboard/commandes"
+                            className={styles.backLink}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                <path d="M19 12H5M12 19l-7-7 7-7" />
                             </svg>
                             Retour aux commandes
                         </Link>
-                        <h1 className="commandes-title">Détails de la commande #{order.id.slice(0, 8)}</h1>
+                        <h1 className={styles.commandesTitle}>Détails de la commande #{order.id.slice(0, 8)}</h1>
                     </div>
 
                     {/* Order Header */}
-                    <div className="commande-card" style={{ marginBottom: '24px' }}>
-                        <div className="commande-card-header">
+                    <div className={styles.commandeCard} style={{ marginBottom: '24px' }}>
+                        <div className={styles.commandeCardHeader}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                    <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                    <div className={styles.commandeId}>#{order.id.slice(0, 8)}</div>
                                     {order.deletionRequested && (
-                                        <div style={{ 
-                                            fontSize: '12px', 
-                                            color: '#f59e0b', 
-                                            padding: '4px 10px',
-                                            background: '#fef3c7',
-                                            borderRadius: '6px',
-                                            fontWeight: 600,
-                                            border: '1px solid #fde68a'
-                                        }}>
+                                        <div className={styles.deletionBadge}>
                                             Suppression demandée
                                         </div>
                                     )}
                                 </div>
-                                <div style={{ 
-                                    display: 'inline-block',
-                                    padding: '6px 12px',
-                                    borderRadius: '6px',
+                                <div className={styles.statusIndicator} style={{
                                     background: getStatusColor(order.status) + '20',
-                                    color: getStatusColor(order.status),
-                                    fontSize: '14px',
-                                    fontWeight: 600
+                                    color: getStatusColor(order.status)
                                 }}>
                                     {getStatusLabel(order.status)}
                                 </div>
                             </div>
-                            <div className="commande-header-right">
-                                <div className="commande-date">{format(order.createdAt, "dd/MM/yyyy à HH:mm")}</div>
+                            <div className={styles.commandeHeaderRight}>
+                                <div className={styles.commandeDate}>{format(order.createdAt, "dd/MM/yyyy à HH:mm")}</div>
                             </div>
                         </div>
                     </div>
 
                     {/* Customer Information */}
-                    <div className="commande-card" style={{ marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Informations client</h2>
-                        <div className="commande-card-body">
-                            <div className="commande-row">
-                                <div className="commande-label">Nom</div>
-                                <div className="commande-value">{order.customer.name || '-'}</div>
+                    <div className={styles.commandeCard} style={{ marginBottom: '24px' }}>
+                        <h2 className={styles.sectionTitle}>Informations client</h2>
+                        <div className={styles.commandeCardBody}>
+                            <div className={styles.commandeRow}>
+                                <div className={styles.commandeLabel}>Nom</div>
+                                <div className={styles.commandeValue}>{order.customer.name || '-'}</div>
                             </div>
-                            <div className="commande-row">
-                                <div className="commande-label">Téléphone</div>
-                                <div className="commande-value">{order.customer.phoneNumber}</div>
+                            <div className={styles.commandeRow}>
+                                <div className={styles.commandeLabel}>Téléphone</div>
+                                <div className={styles.commandeValue}>{order.customer.phoneNumber}</div>
                             </div>
-                            <div className="commande-row">
-                                <div className="commande-label">Adresse</div>
-                                <div className="commande-value">{order.customer.address || '-'}</div>
+                            <div className={styles.commandeRow}>
+                                <div className={styles.commandeLabel}>Adresse</div>
+                                <div className={styles.commandeValue}>{order.customer.address || '-'}</div>
                             </div>
                         </div>
                     </div>
 
                     {/* Order Items */}
-                    <div className="commande-card" style={{ marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Articles commandés</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div className={styles.commandeCard} style={{ marginBottom: '24px' }}>
+                        <h2 className={styles.sectionTitle}>Articles commandés</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {itemsWithImages.map((item) => (
-                                <div 
-                                    key={item.id} 
-                                    style={{ 
-                                        display: 'flex', 
-                                        gap: '16px', 
-                                        padding: '16px',
-                                        background: '#f9fafb',
-                                        borderRadius: '12px'
-                                    }}
+                                <div
+                                    key={item.id}
+                                    className={styles.itemCard}
                                 >
                                     {item.imageUrl && (
-                                        <img 
-                                            src={item.imageUrl} 
+                                        <img
+                                            src={item.imageUrl}
                                             alt={item.product.name}
-                                            style={{ 
-                                                width: '80px', 
-                                                height: '80px', 
-                                                objectFit: 'contain',
-                                                background: 'white',
-                                                borderRadius: '8px',
-                                                padding: '8px'
-                                            }}
+                                            className={styles.itemImage}
                                         />
                                     )}
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
+                                    <div className={styles.itemInfo}>
+                                        <div className={styles.itemName}>
                                             {item.product.name}
                                         </div>
                                         {item.size && (
-                                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
+                                            <div className={styles.itemMeta}>
                                                 Taille: {item.size}
                                             </div>
                                         )}
                                         {item.color && (
-                                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
+                                            <div className={styles.itemMeta}>
                                                 Couleur: {item.color}
                                             </div>
                                         )}
-                                        <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                        <div className={styles.itemMeta}>
                                             Quantité: {item.quantity}
                                         </div>
                                     </div>
-                                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563eb' }}>
+                                    <div className={styles.itemPrice}>
                                         {item.price} DT
                                     </div>
                                 </div>
@@ -219,30 +186,24 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     </div>
 
                     {/* Order Summary */}
-                    <div className="commande-card">
-                        <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Résumé</h2>
-                        <div className="commande-card-body">
-                            <div className="commande-row">
-                                <div className="commande-label">Sous-total</div>
-                                <div className="commande-value">{order.totalAmount} DT</div>
+                    <div className={styles.commandeCard}>
+                        <h2 className={styles.sectionTitle}>Résumé</h2>
+                        <div className={styles.commandeCardBody}>
+                            <div className={styles.commandeRow}>
+                                <div className={styles.commandeLabel}>Sous-total</div>
+                                <div className={styles.commandeValue}>{order.totalAmount} DT</div>
                             </div>
-                            <div className="commande-row" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '12px', marginTop: '12px' }}>
-                                <div className="commande-label" style={{ fontSize: '18px', fontWeight: 600 }}>Total</div>
-                                <div className="commande-total">{order.totalAmount} DT</div>
+                            <div className={`${styles.commandeRow} ${styles.totalRow}`}>
+                                <div className={styles.commandeLabel} style={{ fontSize: '18px', fontWeight: 600 }}>Total</div>
+                                <div className={styles.commandeTotal}>{order.totalAmount} DT</div>
                             </div>
                         </div>
                     </div>
 
                     {/* Note: Status updates after confirmation are admin-only */}
                     {order.status === 'PENDING' && (
-                        <div style={{ 
-                            marginTop: '24px', 
-                            padding: '16px', 
-                            background: '#f9fafb', 
-                            borderRadius: '12px',
-                            border: '1px solid #e5e7eb'
-                        }}>
-                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                        <div className={styles.infoBox}>
+                            <p style={{ margin: 0 }}>
                                 Une fois confirmée, seuls les administrateurs peuvent modifier le statut de cette commande.
                             </p>
                         </div>

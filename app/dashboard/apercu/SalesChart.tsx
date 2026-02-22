@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getSalesTrend, type SalesTrendData, type SalesDataPoint } from './actions';
+import styles from './apercu.module.css';
 
 type Period = 'today' | '7days' | '30days' | 'custom';
 
@@ -38,7 +39,8 @@ export default function SalesChart() {
                     justifyContent: 'center',
                     height: '100%',
                     color: '#9ca3af',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    fontWeight: 500
                 }}>
                     Aucune donnée disponible
                 </div>
@@ -54,10 +56,10 @@ export default function SalesChart() {
         // Chart dimensions - responsive padding
         const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
         const padding = isMobile
-            ? { top: 15, right: 35, bottom: 35, left: 45 }
-            : { top: 20, right: 50, bottom: 40, left: 60 };
-        const width = isMobile ? 400 : 600;
-        const height = isMobile ? 220 : 250;
+            ? { top: 20, right: 20, bottom: 40, left: 45 }
+            : { top: 30, right: 20, bottom: 40, left: 60 };
+        const width = isMobile ? 400 : 800;
+        const height = isMobile ? 220 : 320;
         const chartWidth = width - padding.left - padding.right;
         const chartHeight = height - padding.top - padding.bottom;
 
@@ -71,12 +73,17 @@ export default function SalesChart() {
             return { x, y, ...point };
         });
 
-        // Generate polyline points string
         const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ');
 
-        // Format labels based on period
+        // Fill polygon points for gradient
+        let polygonPoints = '';
+        if (points.length > 1) {
+            polygonPoints = `${points[0].x},${height - padding.bottom} ` +
+                polylinePoints +
+                ` ${points[points.length - 1].x},${height - padding.bottom}`;
+        }
+
         const formatLabel = (dateStr: string) => {
-            // Handle both date format (YYYY-MM-DD) and datetime format (YYYY-MM-DDTHH:00)
             let date: Date;
             if (dateStr.includes('T') && dateStr.includes(':')) {
                 date = new Date(dateStr);
@@ -93,7 +100,6 @@ export default function SalesChart() {
             }
         };
 
-        // Y-axis labels
         const yAxisSteps = isMobile ? 4 : 5;
         const yAxisLabels = [];
         for (let i = 0; i <= yAxisSteps; i++) {
@@ -103,8 +109,27 @@ export default function SalesChart() {
         }
 
         return (
-            <svg viewBox={`0 0 ${width} ${height}`} className="apercu-chart-svg" preserveAspectRatio="xMidYMid meet">
-                {/* Grid lines */}
+            <svg viewBox={`0 0 ${width} ${height}`} className={styles.chartSvgWrapper} preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <linearGradient id="chartLineGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#c026d3" />
+                    </linearGradient>
+                    <linearGradient id="chartFillGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#c026d3" stopOpacity="0.0" />
+                    </linearGradient>
+                </defs>
+
+                {/* Area Fill */}
+                {points.length > 1 && (
+                    <polygon
+                        points={polygonPoints}
+                        fill="url(#chartFillGradient)"
+                    />
+                )}
+
+                {/* Grid horizontal lines */}
                 {yAxisLabels.map((label, i) => (
                     <line
                         key={i}
@@ -112,40 +137,21 @@ export default function SalesChart() {
                         y1={label.y}
                         x2={width - padding.right}
                         y2={label.y}
-                        stroke={i === 0 ? "#e5e7eb" : "#e5e7eb"}
-                        strokeWidth={i === 0 ? 1 : 0.5}
-                        opacity={i === 0 ? 1 : 0.5}
+                        stroke="#f1f5f9"
+                        strokeWidth="1.5"
                     />
                 ))}
-
-                {/* Y-axis */}
-                <line
-                    x1={padding.left}
-                    y1={padding.top}
-                    x2={padding.left}
-                    y2={height - padding.bottom}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                />
-
-                {/* X-axis */}
-                <line
-                    x1={padding.left}
-                    y1={height - padding.bottom}
-                    x2={width - padding.right}
-                    y2={height - padding.bottom}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                />
 
                 {/* Y-axis labels */}
                 {yAxisLabels.map((label, i) => (
                     <text
                         key={i}
-                        x={padding.left - 8}
-                        y={label.y + 3}
-                        fontSize={isMobile ? "10" : "12"}
-                        fill="#9ca3af"
+                        x={padding.left - 16}
+                        y={label.y}
+                        fontFamily="inherit"
+                        fontSize={isMobile ? "11" : "13"}
+                        fontWeight="600"
+                        fill="#94a3b8"
                         textAnchor="end"
                         alignmentBaseline="middle"
                     >
@@ -158,8 +164,8 @@ export default function SalesChart() {
                     <polyline
                         points={polylinePoints}
                         fill="none"
-                        stroke="#0ea5e9"
-                        strokeWidth="3"
+                        stroke="url(#chartLineGradient)"
+                        strokeWidth="4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
@@ -169,24 +175,24 @@ export default function SalesChart() {
                         y1={height - padding.bottom}
                         x2={points[0].x}
                         y2={points[0].y}
-                        stroke="#0ea5e9"
-                        strokeWidth="3"
+                        stroke="url(#chartLineGradient)"
+                        strokeWidth="4"
                         strokeLinecap="round"
                     />
                 )}
 
                 {/* Data points */}
                 {points.map((point, index) => (
-                    <g key={index}>
+                    <g key={index} className={styles.chartPointGroup}>
                         <circle
                             cx={point.x}
                             cy={point.y}
-                            r="4"
-                            fill="#0ea5e9"
-                            stroke="white"
-                            strokeWidth="2"
+                            r="6"
+                            fill="white"
+                            stroke="#c026d3"
+                            strokeWidth="3"
+                            className={styles.chartDot}
                         />
-                        {/* Tooltip on hover */}
                         <title>
                             {formatLabel(point.date)}: {point.amount.toFixed(2)} DT ({point.count} commande{point.count !== 1 ? 's' : ''})
                         </title>
@@ -195,7 +201,6 @@ export default function SalesChart() {
 
                 {/* X-axis labels */}
                 {points.map((point, index) => {
-                    // Show labels for first, last, and evenly spaced middle points
                     const showLabel = index === 0 ||
                         index === points.length - 1 ||
                         (points.length > 2 && index === Math.floor(points.length / 2)) ||
@@ -207,9 +212,10 @@ export default function SalesChart() {
                         <text
                             key={index}
                             x={point.x}
-                            y={height - padding.bottom + (isMobile ? 18 : 20)}
-                            fontSize={isMobile ? "10" : "12"}
-                            fill="#0ea5e9"
+                            y={height - padding.bottom + (isMobile ? 24 : 28)}
+                            fontFamily="inherit"
+                            fontSize={isMobile ? "11" : "13"}
+                            fill="#94a3b8"
                             textAnchor="middle"
                             fontWeight="600"
                         >
@@ -222,83 +228,77 @@ export default function SalesChart() {
     };
 
     return (
-        <div className="apercu-chart-section">
-            <h3 className="apercu-chart-title">Tendance des ventes</h3>
-
-            <div className="apercu-chart-tabs">
-                <button
-                    className={`apercu-tab ${activeTab === 'today' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('today')}
-                >
-                    Aujourd&apos;hui
-                </button>
-                <button
-                    className={`apercu-tab ${activeTab === '7days' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('7days')}
-                >
-                    7 Jours
-                </button>
-                <button
-                    className={`apercu-tab ${activeTab === '30days' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('30days')}
-                >
-                    30 Jours
-                </button>
-                <button
-                    className={`apercu-tab ${activeTab === 'custom' ? 'active' : ''}`}
-                    onClick={() => {
-                        // For now, custom will use last 60 days
-                        // In a full implementation, you'd show a date picker
-                        setActiveTab('30days');
-                    }}
-                    title="Personnalisé (à venir)"
-                >
-                    Personnalisé
-                </button>
+        <div className={styles.chartSection}>
+            <div className={styles.chartHeaderArea}>
+                <div>
+                    <h3 className={styles.chartTitle}>Tendance des ventes</h3>
+                    <p className={styles.chartSubtitle}>Suivi chronologique de vos revenus</p>
+                </div>
+                <div className={styles.chartTabs}>
+                    <button
+                        className={`${styles.chartTab} ${activeTab === 'today' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('today')}
+                    >
+                        Aujourd&apos;hui
+                    </button>
+                    <button
+                        className={`${styles.chartTab} ${activeTab === '7days' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('7days')}
+                    >
+                        7 Jours
+                    </button>
+                    <button
+                        className={`${styles.chartTab} ${activeTab === '30days' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('30days')}
+                    >
+                        30 Jours
+                    </button>
+                </div>
             </div>
 
-            <div className="apercu-chart-card">
+            <div className={styles.chartCardBody}>
                 {loading ? (
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height: '300px',
+                        height: '320px',
                         color: '#9ca3af',
-                        fontSize: '14px'
+                        fontSize: '15px',
+                        fontWeight: 500
                     }}>
-                        Chargement...
+                        Chargement de l&apos;analyse...
                     </div>
                 ) : error ? (
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height: '300px',
+                        height: '320px',
                         color: '#ef4444',
-                        fontSize: '14px'
+                        fontSize: '15px',
+                        fontWeight: 500
                     }}>
                         {error}
                     </div>
                 ) : (
                     <>
-                        <div className="apercu-chart-header">
-                            <div className="apercu-chart-label">Ventes</div>
-                            <div className="apercu-chart-value-row">
-                                <span className="apercu-chart-value">{data?.total.toFixed(0) || 0}</span>
-                                <span className="apercu-chart-currency"> DT</span>
+                        <div className={styles.chartSummaryHeader}>
+                            <div className={styles.chartSummaryValueRow}>
+                                <span className={styles.chartSummaryValue}>{data?.total.toFixed(0) || 0}</span>
+                                <span className={styles.chartSummaryCurrency}>DT</span>
+                            </div>
+                            <div className={styles.chartSummarySubtext}>
+                                {data?.period || 'Aujourd\'hui'}
+                                {data && data.previousTotal > 0 && (
+                                    <span className={`${styles.change} ${data.changePercent >= 0 ? styles.changePositiveChart : styles.changeNegativeChart}`}>
+                                        {data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(1)}%
+                                    </span>
+                                )}
                             </div>
                         </div>
-                        <div className="apercu-chart-subtext">
-                            {data?.period || 'Aujourd\'hui'}
-                            {data && data.previousTotal > 0 && (
-                                <span className={`apercu-chart-change ${data.changePercent >= 0 ? '' : 'negative'}`}>
-                                    {data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(1)}%
-                                </span>
-                            )}
-                        </div>
 
-                        <div className="apercu-chart">
+                        <div className={styles.chartGraphWrapper}>
                             {renderChart()}
                         </div>
                     </>
@@ -307,4 +307,3 @@ export default function SalesChart() {
         </div>
     );
 }
-

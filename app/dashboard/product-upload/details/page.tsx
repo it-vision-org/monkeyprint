@@ -4,9 +4,10 @@ import Image from "next/image";
 // Note: Using document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import styles from "../../../styles/product-upload.module.css";
 // ProductUploadHeader removed - using dashboard layout instead
 import { combineDesigns } from "@/lib/utils/designRenderer";
-import { useAlert } from '@/components/AlertContext';
+import { useAlert } from '@/components/providers/AlertContext';
 
 type GenderOption = {
     id: string;
@@ -49,6 +50,19 @@ export default function ProductDetailsPage() {
     const [minPrice, setMinPrice] = useState<number>(55);
     const [pricingSettings, setPricingSettings] = useState<any>(null);
 
+    // Pricing UI States
+    const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
+    const [desktopPriceExpanded, setDesktopPriceExpanded] = useState(false);
+    const [desktopPriceLocked, setDesktopPriceLocked] = useState(false);
+
+    // Pricing Data States (Loaded from sessionStorage)
+    const [basePrice, setBasePrice] = useState(0);
+    const [designFee, setDesignFee] = useState(0);
+    const [qualityPrice, setQualityPrice] = useState(0);
+    const [selectedQualityLabel, setSelectedQualityLabel] = useState("Cotton");
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [productTypeLabel, setProductTypeLabel] = useState("T-Shirt");
+
     // Load design data and product data on mount
     useEffect(() => {
         const savedDesign = sessionStorage.getItem("uploadedDesign");
@@ -58,6 +72,14 @@ export default function ProductDetailsPage() {
         console.log('Details page loading - savedEditorData:', savedEditorData?.substring(0, 200));
         console.log('Details page loading - savedDesign:', savedDesign);
         console.log('Details page loading - editingProductId:', editingProductId);
+
+        // Load pricing data from previous step
+        setBasePrice(parseFloat(sessionStorage.getItem("productBasePrice") || "20"));
+        setDesignFee(parseFloat(sessionStorage.getItem("productDesignFee") || "0"));
+        setQualityPrice(parseFloat(sessionStorage.getItem("productQualityPrice") || "0"));
+        setSelectedQualityLabel(sessionStorage.getItem("productQualityLabel") || "Cotton");
+        setTotalPrice(parseFloat(sessionStorage.getItem("productTotalPrice") || "20"));
+        setProductTypeLabel(sessionStorage.getItem("productTypeLabel") || "T-Shirt");
 
         // If editing, load product data
         if (editingProductId) {
@@ -367,14 +389,14 @@ export default function ProductDetailsPage() {
                                 if (frontImagePath) {
                                     const fallbackImg = document.createElement('img') as HTMLImageElement;
                                     fallbackImg.crossOrigin = 'anonymous';
-                                    
+
                                     // Proxy R2 URLs if needed
                                     const isExternalUrl = frontImagePath.startsWith('http://') || frontImagePath.startsWith('https://');
                                     const isLocalhost = frontImagePath.includes('localhost') || frontImagePath.startsWith('/');
-                                    const finalSrc = (isExternalUrl && !isLocalhost) 
+                                    const finalSrc = (isExternalUrl && !isLocalhost)
                                         ? `/api/proxy-image?url=${encodeURIComponent(frontImagePath)}`
                                         : frontImagePath;
-                                    
+
                                     fallbackImg.onload = () => resolve(fallbackImg);
                                     fallbackImg.onerror = reject;
                                     fallbackImg.src = finalSrc;
@@ -385,14 +407,14 @@ export default function ProductDetailsPage() {
                                 reject(new Error('Failed to load product image'));
                             }
                         };
-                        
+
                         // Proxy R2 URLs if needed (external URLs that aren't localhost)
                         const isExternalUrl = imagePath.startsWith('http://') || imagePath.startsWith('https://');
                         const isLocalhost = imagePath.includes('localhost') || imagePath.startsWith('/');
-                        const finalSrc = (isExternalUrl && !isLocalhost) 
+                        const finalSrc = (isExternalUrl && !isLocalhost)
                             ? `/api/proxy-image?url=${encodeURIComponent(imagePath)}`
                             : imagePath;
-                        
+
                         img.src = finalSrc;
                     });
                 };
@@ -586,10 +608,10 @@ export default function ProductDetailsPage() {
 
     const profit = useMemo(() => {
         if (!pricingSettings) return 0;
-        
+
         const base = parseFloat(productPrice) || 0;
         const display = parseFloat(displayPrice) || 0;
-        
+
         switch (pricingSettings.profitCalculationType) {
             case 'PERCENTAGE':
                 if (pricingSettings.profitPercentage) {
@@ -747,7 +769,7 @@ export default function ProductDetailsPage() {
 
         // Check if user has selected a mockup or we need to use combined image
         let finalImage = selectedMockup;
-        
+
         if (!finalImage) {
             // If no mockup selected, generate and use the combined image
             finalImage = combinedDesignImage || await generateCombinedImage();
@@ -767,7 +789,7 @@ export default function ProductDetailsPage() {
             formData.append('price', productPrice);
             formData.append('type', sessionStorage.getItem("productType") || 'tshirt');
             formData.append('designData', designEditorData || '{}');
-            
+
             // Send only the final mockup image
             formData.append('mockupImage', finalImage);
 
@@ -810,31 +832,334 @@ export default function ProductDetailsPage() {
 
     const displayTotalPrice = parseFloat(productPrice) || minPrice;
 
+    // Mobile sticky price bar
+    const MobilePriceBar = () => (
+        <div className={`${styles.puCartContainer} ${styles.puCartContainerMobile}`}>
+            <button
+                className={styles.puCartBar}
+                type="button"
+                aria-expanded={mobilePriceExpanded}
+                onClick={() => setMobilePriceExpanded((prev) => !prev)}
+            >
+                <div className={styles.puCartContent}>
+                    <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                    </svg>
+                </div>
+                <div className={styles.puCartTotal}>
+                    <span className={styles.puCartPrice}>{totalPrice}DT</span>
+                    <svg
+                        width="16"
+                        height="10"
+                        viewBox="0 0 16 10"
+                        fill="none"
+                        className={mobilePriceExpanded ? styles.expanded : ""}
+                    >
+                        <path
+                            d="M1 1L8 8L15 1"
+                            stroke="white"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </div>
+            </button>
+            {mobilePriceExpanded && (
+                <div className={`${styles.puCartDetails} ${styles.puCartDetailsMobile}`}>
+                    <div className={styles.puCartDetailsHeader}>
+                        <h3 className={styles.puCartDetailsTitle}>Détails du prix</h3>
+                    </div>
+                    <div className={styles.puCartItems}>
+                        <div className={styles.puCartItem}>
+                            <div className={styles.puCartItemInfo}>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                                    <path d="M3 6h18" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                                <span>
+                                    Articles ({productTypeLabel})
+                                </span>
+                            </div>
+                            <span className={styles.puCartItemPrice}>{basePrice}DT</span>
+                        </div>
+                        <div className={styles.puCartItem}>
+                            <div className={styles.puCartItemInfo}>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                                </svg>
+                                <span>Design</span>
+                            </div>
+                            <span className={styles.puCartItemPrice}>{designFee}DT</span>
+                        </div>
+                        <div className={styles.puCartItem}>
+                            <div className={styles.puCartItemInfo}>
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                    <path d="M2 17l10 5 10-5" />
+                                    <path d="M2 12l10 5 10-5" />
+                                </svg>
+                                <span className={styles.puPriceWidgetItemLabel}>
+                                    Quality ({selectedQualityLabel})
+                                </span>
+                            </div>
+                            <span className={styles.puCartItemPrice}>{qualityPrice}DT</span>
+                        </div>
+                    </div>
+                    <div className={styles.puCartTotalLine}>
+                        <span className={styles.puCartTotalLabel}>Total</span>
+                        <span className={styles.puCartTotalPrice}>{totalPrice}DT</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    // Desktop floating price widget
+    const DesktopPriceWidget = () => {
+        const handleToggle = () => {
+            if (desktopPriceLocked) {
+                setDesktopPriceLocked(false);
+                setDesktopPriceExpanded(false);
+            } else {
+                setDesktopPriceLocked(true);
+                setDesktopPriceExpanded(true);
+            }
+        };
+
+        const handleMouseEnter = () => {
+            if (!desktopPriceLocked) {
+                setDesktopPriceExpanded(true);
+            }
+        };
+
+        const handleMouseLeave = () => {
+            if (!desktopPriceLocked) {
+                setDesktopPriceExpanded(false);
+            }
+        };
+
+        return (
+            <div
+                className={`${styles.puPriceWidgetDesktop} ${desktopPriceExpanded ? styles.expanded : ""} ${desktopPriceLocked ? styles.locked : ""}`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <button
+                    className={styles.puPriceWidgetTrigger}
+                    type="button"
+                    onClick={handleToggle}
+                    aria-label="Voir le récapitulatif des prix"
+                >
+                    <div className={styles.puPriceWidgetTriggerIcon}>
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                        </svg>
+                    </div>
+                    <div className={styles.puPriceWidgetTriggerPrice}>{totalPrice}DT</div>
+                </button>
+
+                <div className={styles.puPriceWidgetPanel}>
+                    <div className={styles.puPriceWidgetHeader}>
+                        <div className={styles.puPriceWidgetHeaderIcon}>
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+                            </svg>
+                        </div>
+                        <div className={styles.puPriceWidgetHeaderTitle}>Récapitulatif</div>
+                    </div>
+                    <div className={styles.puPriceWidgetContent}>
+                        <div className={styles.puPriceWidgetItems}>
+                            <div className={styles.puPriceWidgetItem}>
+                                <div className={styles.puPriceWidgetItemInfo}>
+                                    <div className={styles.puPriceWidgetItemIcon}>
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                                            <path d="M3 6h18" />
+                                            <path d="M16 10a4 4 0 0 1-8 0" />
+                                        </svg>
+                                    </div>
+                                    <span className={styles.puPriceWidgetItemLabel}>
+                                        Articles ({productTypeLabel})
+                                    </span>
+                                </div>
+                                <span className={styles.puPriceWidgetItemPrice}>
+                                    {basePrice}DT
+                                </span>
+                            </div>
+                            <div className={styles.puPriceWidgetItem}>
+                                <div className={styles.puPriceWidgetItemInfo}>
+                                    <div className={styles.puPriceWidgetItemIcon}>
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                                        </svg>
+                                    </div>
+                                    <span className={styles.puPriceWidgetItemLabel}>Design</span>
+                                </div>
+                                <span className={styles.puPriceWidgetItemPrice}>
+                                    {designFee}DT
+                                </span>
+                            </div>
+                            <div className={styles.puPriceWidgetItem}>
+                                <div className={styles.puPriceWidgetItemInfo}>
+                                    <div className={styles.puPriceWidgetItemIcon}>
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                            <path d="M2 17l10 5 10-5" />
+                                            <path d="M2 12l10 5 10-5" />
+                                        </svg>
+                                    </div>
+                                    <span className={styles.puPriceWidgetItemLabel}>
+                                        Quality ({selectedQualityLabel})
+                                    </span>
+                                </div>
+                                <span className={styles.puPriceWidgetItemPrice}>
+                                    {qualityPrice}DT
+                                </span>
+                            </div>
+                        </div>
+                        <div className={styles.puPriceWidgetTotal}>
+                            <div className={styles.puPriceWidgetTotalLabel}>Total</div>
+                            <div className={styles.puPriceWidgetTotalPrice}>{totalPrice}DT</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="product-upload-page">
-            <main className="pu-mobile-main">
-                <div className="pu-mobile-flow">
-                    <div className="pd-intro">
-                        <p className="pd-intro-title">
-                            {sessionStorage.getItem("editingProductId") 
-                                ? "Modifiez les détails de votre produit" 
+        <div className={styles.productUploadPage}>
+            <MobilePriceBar />
+            <DesktopPriceWidget />
+            <main className={styles.puMobileMain} style={{ paddingBottom: mobilePriceExpanded ? "260px" : "120px" }}>
+                <div className={styles.puMobileFlow}>
+                    <button
+                        onClick={handleBack}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '15px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            marginBottom: '6px',
+                            padding: '8px 0',
+                            transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Retour à l'édition
+                    </button>
+                    <div className={styles.pdIntro}>
+                        <p className={styles.pdIntroTitle}>
+                            {sessionStorage.getItem("editingProductId")
+                                ? "Modifiez les détails de votre produit"
                                 : "Dernière étape, remplissez la description de votre produit"}
                         </p>
-                        <span className="pd-intro-line" />
+                        <span className={styles.pdIntroLine} />
                     </div>
 
-                    <section className="pd-card">
-                        <h3 className="pu-card-subtitle" style={{ marginBottom: '20px', fontSize: '16px', fontWeight: 700, color: '#000' }}>
+                    <section className={styles.pdCard}>
+                        <h3 className={styles.puCardSubtitle} style={{ marginBottom: '20px', fontSize: '16px', fontWeight: 700, color: '#000' }}>
                             Aperçu de votre design
                         </h3>
 
-                        <div className="pd-preview-card" style={{
-                            background: 'linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%)',
-                            borderRadius: '20px',
-                            padding: '24px',
-                            marginBottom: '20px',
-                            border: '2px solid rgba(65, 235, 92, 0.2)',
-                        }}>
+                        <div className={styles.pdPreviewCard}>
                             {isRenderingDesign ? (
                                 <div style={{
                                     display: 'flex',
@@ -844,16 +1169,11 @@ export default function ProductDetailsPage() {
                                     flexDirection: 'column',
                                     gap: '12px'
                                 }}>
-                                    <div className="pu-spinner" style={{ width: '40px', height: '40px', borderWidth: '3px' }} />
-                                    <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>Chargement du design...</p>
+                                    <div className={styles.puSpinner} />
+                                    <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px', margin: 0 }}>Chargement du design...</p>
                                 </div>
                             ) : (
-                                <div className="pd-design-preview-grid" style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '1fr 1fr',
-                                    gap: '20px',
-                                    alignItems: 'center',
-                                }}>
+                                <div className={styles.pdDesignPreviewGrid}>
                                     {/* Front Design */}
                                     <div style={{
                                         background: '#fff',
@@ -1033,13 +1353,13 @@ export default function ProductDetailsPage() {
                             </div>
                         )}
 
-                        <div className="pd-action-row" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                            <button type="button" className="pd-action-primary" onClick={openGenderSelectionModal} style={{ flex: '1', minWidth: '200px' }}>
+                        <div className={styles.pdActionRow}>
+                            <button type="button" className={styles.pdActionPrimary} onClick={openGenderSelectionModal} style={{ flex: '1', minWidth: '200px' }}>
                                 GÉNÉRER UNE MAQUETTE
                             </button>
                             <button
                                 type="button"
-                                className="pd-action-refresh"
+                                className={styles.pdActionRefresh}
                                 onClick={() => designEditorData && renderUserDesigns(designEditorData)}
                                 title="Actualiser l'aperçu"
                             >
@@ -1143,15 +1463,15 @@ export default function ProductDetailsPage() {
                         )}
                     </section>
 
-                    <section className="pd-card">
-                        <div className="pd-field">
-                            <div className="pd-label">
+                    <section className={styles.pdCard}>
+                        <div className={styles.pdField}>
+                            <div className={styles.pdLabel}>
                                 Sélectionner le sexe du produit :<span>*</span>
                             </div>
-                            <div className="pd-required-note">Doit être rempli*</div>
-                            <div className="pd-gender-row">
+                            <div className={styles.pdRequiredNote}>Doit être rempli*</div>
+                            <div className={styles.pdGenderRow}>
                                 {GENDER_OPTIONS.slice(0, 3).map((option) => (
-                                    <label key={option.id} className={`pd-radio-option ${selectedGenders.includes(option.id) ? "active" : ""}`}>
+                                    <label key={option.id} className={`${styles.pdRadioOption} ${selectedGenders.includes(option.id) ? styles.active : ""}`}>
                                         <input
                                             type="checkbox"
                                             checked={selectedGenders.includes(option.id)}
@@ -1163,58 +1483,58 @@ export default function ProductDetailsPage() {
                                                 }
                                             }}
                                         />
-                                        <span className="pd-radio-label">{option.label}</span>
+                                        <span className={styles.pdRadioLabel}>{option.label}</span>
                                     </label>
                                 ))}
                             </div>
                         </div>
                     </section>
 
-                    <section className="pd-card">
-                        <div className="pd-field">
-                            <label htmlFor="product-name" className="pd-label">
+                    <section className={styles.pdCard}>
+                        <div className={styles.pdField}>
+                            <label htmlFor="product-name" className={styles.pdLabel}>
                                 Nom du produit :<span>*</span>
                             </label>
-                            <div className="pd-required-note">Doit être rempli*</div>
+                            <div className={styles.pdRequiredNote}>Doit être rempli*</div>
                             <input
                                 id="product-name"
-                                className="pd-input"
+                                className={styles.pdInput}
                                 type="text"
                                 value={productName}
                                 onChange={(event) => setProductName(event.target.value)}
                             />
                         </div>
 
-                        <div className="pd-field">
-                            <div className="pd-label">
+                        <div className={styles.pdField}>
+                            <div className={styles.pdLabel}>
                                 Prix du produit :<span>*</span>
                             </div>
-                            <div className="pd-required-note">Doit être rempli*</div>
-                            <div className="pd-price-row">
-                                <div className="pd-input-wrapper">
+                            <div className={styles.pdRequiredNote}>Doit être rempli*</div>
+                            <div className={styles.pdPriceRow}>
+                                <div className={styles.pdInputWrapper}>
                                     <input
-                                        className="pd-input"
+                                        className={styles.pdInput}
                                         type="number"
                                         min={minPrice}
                                         value={productPrice}
                                         onChange={(event) => setProductPrice(event.target.value)}
                                     />
-                                    <span className="pd-input-suffix">DT</span>
+                                    <span className={styles.pdInputSuffix}>DT</span>
                                 </div>
-                                <div className="pd-profit">
-                                    <span className="pd-profit-label">Tu prends</span>
-                                    <button type="button" className="pd-profit-pill">{profit.toFixed(0)}DT</button>
+                                <div className={styles.pdProfit}>
+                                    <span className={styles.pdProfitLabel}>Tu prends</span>
+                                    <button type="button" className={styles.pdProfitPill}>{profit.toFixed(0)}DT</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="pd-field">
-                            <label htmlFor="display-price" className="pd-label">
+                        <div className={styles.pdField}>
+                            <label htmlFor="display-price" className={styles.pdLabel}>
                                 Prix affiché :
                             </label>
                             <input
                                 id="display-price"
-                                className="pd-input"
+                                className={styles.pdInput}
                                 type="number"
                                 min={productPrice}
                                 value={displayPrice}
@@ -1222,24 +1542,24 @@ export default function ProductDetailsPage() {
                             />
                         </div>
 
-                        <div className="pd-field">
-                            <label htmlFor="description" className="pd-label">
+                        <div className={styles.pdField}>
+                            <label htmlFor="description" className={styles.pdLabel}>
                                 Description :
                             </label>
                             <textarea
                                 id="description"
-                                className="pd-textarea"
+                                className={styles.pdTextarea}
                                 value={description}
                                 maxLength={3000}
                                 onChange={(event) => handleDescriptionChange(event.target.value)}
                             />
-                            <div className="pd-textarea-counter">3000 Personnages</div>
+                            <div className={styles.pdTextareaCounter}>3000 Personnages</div>
                         </div>
                     </section>
 
-                    <button className="pd-submit" type="button" onClick={handleSubmit}>
-                        {sessionStorage.getItem("editingProductId") 
-                            ? "ENREGISTRER LES MODIFICATIONS" 
+                    <button className={styles.pdSubmit} type="button" onClick={handleSubmit}>
+                        {sessionStorage.getItem("editingProductId")
+                            ? "ENREGISTRER LES MODIFICATIONS"
                             : (isFirstProduct ? "VOTRE SITE WEB EST PRÊT" : "PUBLIER LE PRODUIT")}
                     </button>
                 </div>
@@ -1247,9 +1567,9 @@ export default function ProductDetailsPage() {
 
             {/* Gender Selection Modal - Overhauled */}
             {genderSelectionModalOpen && (
-                <div className="pu-popup-overlay" onClick={closeGenderSelectionModal}>
+                <div className={styles.puPopupOverlay} onClick={closeGenderSelectionModal}>
                     <div
-                        className="pu-popup"
+                        className={styles.puPopup}
                         onClick={(event) => event.stopPropagation()}
                         style={{
                             maxWidth: '600px',
@@ -1257,7 +1577,7 @@ export default function ProductDetailsPage() {
                         }}
                     >
                         <button
-                            className="pu-popup-close"
+                            className={styles.puPopupClose}
                             type="button"
                             onClick={closeGenderSelectionModal}
                             style={{
@@ -1271,7 +1591,7 @@ export default function ProductDetailsPage() {
                         </button>
 
                         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                            <h2 className="pu-popup-title" style={{
+                            <h2 className={styles.puPopupTitle} style={{
                                 fontSize: '28px',
                                 fontWeight: 700,
                                 color: '#0d1c23',
@@ -1471,25 +1791,9 @@ export default function ProductDetailsPage() {
                             <button
                                 type="button"
                                 onClick={closeGenderSelectionModal}
+                                className={styles.pdActionSecondary}
                                 style={{
-                                    padding: '14px 32px',
-                                    borderRadius: '12px',
-                                    border: '2px solid #e5e7eb',
-                                    backgroundColor: '#ffffff',
-                                    cursor: 'pointer',
-                                    fontSize: '15px',
-                                    fontWeight: 600,
-                                    color: '#4b5563',
-                                    transition: 'all 0.2s',
-                                    minWidth: '120px',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = '#d1d5db';
-                                    e.currentTarget.style.backgroundColor = '#f9fafb';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = '#e5e7eb';
-                                    e.currentTarget.style.backgroundColor = '#ffffff';
+                                    minWidth: "120px",
                                 }}
                             >
                                 Annuler
@@ -1498,7 +1802,7 @@ export default function ProductDetailsPage() {
                                 type="button"
                                 onClick={handleGenerateMockup}
                                 disabled={selectedGenderForMockup === 'custom' && (!customPrompt || customPrompt.trim().length === 0)}
-                                className="pd-action-primary"
+                                className={styles.pdActionPrimary}
                                 style={{
                                     padding: '14px 32px',
                                     borderRadius: '12px',
@@ -1539,24 +1843,24 @@ export default function ProductDetailsPage() {
 
             {/* Mockup Selection Modal */}
             {mockupModalOpen && (
-                <div className="pu-popup-overlay" onClick={() => !mockupLoading && closeMockupModal()}>
-                    <div className="pu-popup" onClick={(event) => event.stopPropagation()}>
-                        <button className="pu-popup-close" type="button" onClick={closeMockupModal} disabled={mockupLoading}>
+                <div className={styles.puPopupOverlay} onClick={() => !mockupLoading && closeMockupModal()}>
+                    <div className={styles.puPopup} onClick={(event) => event.stopPropagation()}>
+                        <button className={styles.puPopupClose} type="button" onClick={closeMockupModal} disabled={mockupLoading}>
                             ×
                         </button>
-                        <h2 className="pu-popup-title">Choisissez une maquette</h2>
+                        <h2 className={styles.puPopupTitle}>Choisissez une maquette</h2>
                         {mockupLoading ? (
-                            <div className="pu-loading">
-                                <div className="pu-spinner" />
+                            <div className={styles.puLoading}>
+                                <div className={styles.puSpinner} />
                                 <p>Génération des maquettes en cours...</p>
                                 <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
                                     Cela peut prendre quelques instants
                                 </p>
                             </div>
                         ) : generatedMockups.length > 0 ? (
-                            <div className="pu-ai-grid">
+                            <div className={styles.puAiGrid}>
                                 {generatedMockups.map((url, index) => (
-                                    <button key={index} type="button" className="pu-ai-image-card" onClick={() => handleSelectMockup(url)}>
+                                    <button key={index} type="button" className={styles.puAiImageCard} onClick={() => handleSelectMockup(url)}>
                                         <Image src={url} alt={`Maquette ${index + 1}`} width={200} height={200} style={{ objectFit: 'cover' }} />
                                     </button>
                                 ))}

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { getR2Url } from "@/lib/storage";
 import EditProductForm from "./EditProductForm";
+import styles from "../../../../styles/produits.module.css";
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -28,10 +29,10 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     const imageUrl = product.previewFront ? await getR2Url(product.previewFront) : null;
 
     return (
-        <div className="produits-main">
-            <div className="produits-container">
-                <div className="produits-title-row">
-                    <h1 className="produits-page-title">Modifier le produit</h1>
+        <div className={styles.produitsMain}>
+            <div className={styles.produitsContainer}>
+                <div className={styles.produitsTitleRow}>
+                    <h1 className={styles.produitsPageTitle}>Modifier le produit</h1>
                 </div>
 
                 <EditProductForm product={product} imageUrl={imageUrl} />

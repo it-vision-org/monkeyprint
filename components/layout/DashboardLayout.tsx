@@ -154,11 +154,28 @@ export default function DashboardLayout({
     }, [pathname, searchParams]);
 
     return (
-        <div className={styles['dashboard-page']}>
+        <div className={`${styles['dashboard-page']} dashboard-page`}>
             <header className={styles['dash-header']}>
                 <div className={styles['dash-container']}>
                     <MobileStoreInfo storeInfo={storeInfo} />
                     <div className={styles['dash-logo']}>
+                        {storeInfo?.logoUrl ? (
+                            <Image
+                                src={storeInfo.logoUrl}
+                                alt={storeInfo.name}
+                                width={40}
+                                height={40}
+                                style={{ objectFit: 'contain' }}
+                            />
+                        ) : (
+                            <Image
+                                src="/logo.png"
+                                alt="Monkey Print"
+                                width={120}
+                                height={40}
+                                style={{ objectFit: 'contain' }}
+                            />
+                        )}
                     </div>
 
                     <nav className={styles['dash-nav']}>
@@ -295,15 +312,15 @@ export default function DashboardLayout({
                             >
                                 VISITER LE MAGASIN
                             </button>
-                            <button className="dash-mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
+                            <button className={styles['dash-mobile-menu-close']} onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
                         </div>
 
-                        <nav className="dash-mobile-nav">
-                            <LoadingLink href="/dashboard/apercu" className={`dash-mobile-nav-item ${pathname.startsWith("/dashboard/apercu") ? "active" : ""}`}>
+                        <nav className={styles['dash-mobile-nav']}>
+                            <LoadingLink href="/dashboard/apercu" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/apercu") ? styles.active : ""}`}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -457,8 +474,8 @@ export default function DashboardLayout({
                 </>
             )}
 
-            <main className={styles['dash-main']}>
-                <div className={styles['dash-container']}>{children}</div>
+            <main className={`${styles['dash-main']} dash-main`}>
+                <div className={`${styles['dash-content']} dash-content`}>{children}</div>
             </main>
 
         </div>

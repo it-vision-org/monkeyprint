@@ -1,3 +1,4 @@
+/* Main container */
 .main {
   width: 100%;
   max-width: 1600px;
@@ -7,33 +8,38 @@
   box-sizing: border-box;
 }
 
-/* Container to maintain the 390px Figma layout on mobile */
+/* Responsive main container wrapper */
 .mobileContainer {
   position: relative;
   width: 100%;
-  max-width: 390px;
-  min-height: 1636px;
-  background: #ffffff;
   margin: 0 auto;
-  overflow-x: hidden;
   box-sizing: border-box;
+  background: transparent;
 }
 
+/* Mobile-only styles for the container */
 @media (max-width: 768px) {
   .main {
     padding-top: 0 !important;
   }
   .mobileContainer {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    max-width: 390px; /* Force the mobile design width */
     min-height: 1636px;
+    background: #ffffff;
+    overflow-x: hidden;
   }
 }
 
+/* Desktop-only styles for the container */
 @media (min-width: 769px) {
   .main {
     padding-top: 90px;
+  }
+  .mobileContainer {
+    max-width: 100%;
+    width: 100%;
+    min-height: auto;
+    padding-bottom: 100px;
   }
 }
 

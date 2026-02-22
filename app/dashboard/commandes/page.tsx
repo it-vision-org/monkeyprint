@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import OrderActions from "./OrderActions";
+import styles from "../../styles/commandes.module.css";
 
 export default async function CommandesPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
     const session = await auth();
@@ -139,38 +140,38 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
     const config = getStatusConfig();
 
     return (
-        <div className="commandes-page">
-            <div className="commandes-main">
-                <div className="commandes-container">
-                    <div className="commandes-status-tabs">
+        <div className={styles.commandesPage}>
+            <div className={styles.commandesMain}>
+                <div className={styles.commandesContainer}>
+                    <div className={styles.commandesStatusTabs}>
                         <Link
                             href={`/dashboard/commandes?status=non-confirme${query ? `&q=${encodeURIComponent(query)}` : ''}`}
-                            className={`commandes-status-tab orange ${statusParam === 'non-confirme' ? 'active' : ''}`}
+                            className={`${styles.commandesStatusTab} ${statusParam === 'non-confirme' ? styles.active : ''}`}
                         >
-                            <span className="dash-submenu-dot orange"></span>
+                            <span className={`${styles.dashSubmenuDot} ${styles.orange}`}></span>
                             Non confirmé
                         </Link>
                         <Link
                             href={`/dashboard/commandes?status=confirme${query ? `&q=${encodeURIComponent(query)}` : ''}`}
-                            className={`commandes-status-tab green ${statusParam === 'confirme' ? 'active' : ''}`}
+                            className={`${styles.commandesStatusTab} ${statusParam === 'confirme' ? styles.active : ''}`}
                         >
-                            <span className="dash-submenu-dot green"></span>
+                            <span className={`${styles.dashSubmenuDot} ${styles.green}`}></span>
                             Confirmé
                         </Link>
                         <Link
                             href={`/dashboard/commandes?status=retours${query ? `&q=${encodeURIComponent(query)}` : ''}`}
-                            className={`commandes-status-tab red ${statusParam === 'retours' ? 'active' : ''}`}
+                            className={`${styles.commandesStatusTab} ${statusParam === 'retours' ? styles.active : ''}`}
                         >
-                            <span className="dash-submenu-dot red"></span>
+                            <span className={`${styles.dashSubmenuDot} ${styles.red}`}></span>
                             Retours
                         </Link>
                     </div>
 
-                    <div className="commandes-header">
-                        <h1 className="commandes-title">
+                    <div className={styles.commandesHeader}>
+                        <h1 className={styles.commandesTitle}>
                             {config.title}
                             {statusParam === 'confirme' && (
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="title-check">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.titleCheck}>
                                     <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             )}
@@ -178,99 +179,83 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                     </div>
 
                     {config.showAlert && (
-                        <div className="commandes-alert">
+                        <div className={styles.commandesAlert}>
                             Les articles retournés revendus vous feront gagner le montant total du produit !
                         </div>
                     )}
 
-                    <div className="commandes-search-bar">
-                        <form action="/dashboard/commandes" method="get" className="commandes-search" style={{ width: '100%', display: 'flex' }}>
+                    <div className={styles.commandesSearchBar}>
+                        <form action="/dashboard/commandes" method="get" className={styles.commandesSearch} style={{ width: '100%', display: 'flex' }}>
                             <input type="hidden" name="status" value={statusParam} />
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: '12px', position: 'absolute', pointerEvents: 'none' }}>
                                 <circle cx="11" cy="11" r="8" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 <path d="M21 21L16.65 16.65" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 name="q"
-                                placeholder="Rechercher par ID, nom, téléphone ou adresse..." 
+                                placeholder="Rechercher par ID, nom, téléphone ou adresse..."
                                 defaultValue={query}
                                 style={{ width: '100%', paddingLeft: '40px' }}
                             />
                         </form>
-                        {/* Removed Date Picker mock for now, keep simplistic */}
                     </div>
 
-                    <div className="commandes-list">
+                    <div className={styles.commandesList}>
                         {orders.length === 0 ? (
                             <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
                                 Aucune commande trouvée.
                             </div>
                         ) : (
                             orders.map((order: typeof orders[number]) => (
-                                <Link 
-                                    key={order.id} 
+                                <Link
+                                    key={order.id}
                                     href={`/dashboard/commandes/${order.id}`}
                                     style={{ textDecoration: 'none', color: 'inherit' }}
                                 >
-                                    <div className="commande-card" style={{ cursor: 'pointer' }}>
-                                        <div className="commande-card-header">
+                                    <div className={styles.commandeCard}>
+                                        <div className={styles.commandeCardHeader}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                <div className="commande-id">#{order.id.slice(0, 8)}</div>
+                                                <div className={styles.commandeId}>#{order.id.slice(0, 8)}</div>
                                                 {order.deletionRequested && (
-                                                    <div style={{ 
-                                                        fontSize: '11px', 
-                                                        color: '#f59e0b', 
-                                                        padding: '4px 8px',
-                                                        background: '#fef3c7',
-                                                        borderRadius: '4px',
-                                                        fontWeight: 600,
-                                                        border: '1px solid #fde68a'
-                                                    }}>
+                                                    <div className={styles.deletionBadge}>
                                                         Suppression demandée
                                                     </div>
                                                 )}
                                                 {statusParam === 'confirme' && (
-                                                    <div style={{ 
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px',
-                                                        padding: '4px 10px',
-                                                        borderRadius: '4px',
+                                                    <div className={styles.statusBadge} style={{
                                                         background: getStatusColor(order.status) + '20',
-                                                        color: getStatusColor(order.status),
-                                                        fontSize: '12px',
-                                                        fontWeight: 600
+                                                        color: getStatusColor(order.status)
                                                     }}>
                                                         <span>{getStatusEmoji(order.status)}</span>
                                                         <span>{getStatusLabel(order.status)}</span>
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="commande-header-right">
-                                                <div className="commande-date">{format(order.createdAt, "dd/MM/yyyy")}</div>
+                                            <div className={styles.commandeHeaderRight}>
+                                                <div className={styles.commandeDate}>{format(order.createdAt, "dd/MM/yyyy")}</div>
                                                 <OrderActions orderId={order.id} status={order.status} deletionRequested={order.deletionRequested} />
                                             </div>
                                         </div>
-                                    <div className="commande-card-body">
-                                        <div className="commande-row">
-                                            <div className="commande-label">Nom</div>
-                                            <div className="commande-value">{order.customer.name || '-'}</div>
-                                        </div>
-                                        <div className="commande-row">
-                                            <div className="commande-label">Adress</div>
-                                            <div className="commande-value">{order.customer.address || '-'}</div>
-                                        </div>
-                                        <div className="commande-row">
-                                            <div className="commande-label">Numero</div>
-                                            <div className="commande-value">{order.customer.phoneNumber}</div>
-                                        </div>
-                                        <div className="commande-row">
-                                            <div className="commande-label">Total</div>
-                                            <div className="commande-total">{order.totalAmount} DT</div>
+                                        <div className={styles.commandeCardBody}>
+                                            <div className={styles.commandeRow}>
+                                                <div className={styles.commandeLabel}>Nom</div>
+                                                <div className={styles.commandeValue}>{order.customer.name || '-'}</div>
+                                            </div>
+                                            <div className={styles.commandeRow}>
+                                                <div className={styles.commandeLabel}>Adress</div>
+                                                <div className={styles.commandeValue}>{order.customer.address || '-'}</div>
+                                            </div>
+                                            <div className={styles.commandeRow}>
+                                                <div className={styles.commandeLabel}>Numero</div>
+                                                <div className={styles.commandeValue}>{order.customer.phoneNumber}</div>
+                                            </div>
+                                            <div className={styles.commandeRow}>
+                                                <div className={styles.commandeLabel}>Total</div>
+                                                <div className={styles.commandeTotal}>{order.totalAmount} DT</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                                 </Link>
                             ))
                         )}

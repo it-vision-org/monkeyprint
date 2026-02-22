@@ -104,9 +104,22 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                 </div>
             </div>
 
-            <LoadingButton className={`${styles['cs-primary-btn']} ${styles.step2Button}`} onClick={() => setStep(3)} type="button">
-                SUIVANT
-            </LoadingButton>
+            <div className={styles.buttonGroup}>
+                <button
+                    type="button"
+                    className={styles.backBtn}
+                    onClick={() => setStep(1)}
+                >
+                    RETOUR
+                </button>
+                <LoadingButton
+                    className={styles['cs-primary-btn']}
+                    onClick={() => setStep(3)}
+                    type="button"
+                >
+                    SUIVANT
+                </LoadingButton>
+            </div>
         </div>
     );
 };
@@ -176,13 +189,22 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                     </p>
                 </div>
 
-                <LoadingButton
-                    className={`${styles['cs-primary-btn']} ${styles.step1Button}`}
-                    type="submit"
-                    isLoading={isLoading}
-                >
-                    {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
-                </LoadingButton>
+                <div className={styles.buttonGroup}>
+                    <button
+                        type="button"
+                        className={styles.backBtn}
+                        onClick={() => setStep(2)}
+                    >
+                        RETOUR
+                    </button>
+                    <LoadingButton
+                        className={styles['cs-primary-btn']}
+                        type="submit"
+                        isLoading={isLoading}
+                    >
+                        {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
+                    </LoadingButton>
+                </div>
             </form>
         </div>
     );
@@ -312,13 +334,22 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     Sign in with Google
                 </button>
 
-                <LoadingButton
-                    className={`${styles['cs-primary-btn']} ${styles.step1Button}`}
-                    type="submit"
-                    isLoading={isLoading}
-                >
-                    {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
-                </LoadingButton>
+                <div className={styles.buttonGroup}>
+                    <button
+                        type="button"
+                        className={styles.backBtn}
+                        onClick={() => setStep(2)}
+                    >
+                        RETOUR
+                    </button>
+                    <LoadingButton
+                        className={styles['cs-primary-btn']}
+                        type="submit"
+                        isLoading={isLoading}
+                    >
+                        {isLoading ? 'CREATION EN COURS...' : "CRÉER LA BOUTIQUE"}
+                    </LoadingButton>
+                </div>
             </form>
         </div>
     );

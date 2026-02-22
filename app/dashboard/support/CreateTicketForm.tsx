@@ -5,6 +5,7 @@ import { createTicket } from "./actions";
 import { useRouter } from "next/navigation";
 import { useAlert } from '@/components';
 import ImageUploadZone from './components/ImageUploadZone';
+import styles from "../../styles/support.module.css";
 
 export default function CreateTicketForm() {
     const [isOpen, setIsOpen] = useState(false);
@@ -69,25 +70,26 @@ export default function CreateTicketForm() {
     if (!isOpen) {
         return (
             <button
-                className="dash-add-btn"
+                className={`${styles.supportBtn} ${styles.supportBtnPrimary}`}
                 onClick={() => setIsOpen(true)}
                 aria-label="Créer un ticket"
             >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5V19M5 12H19" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
+                Créer un ticket
             </button>
         );
     }
 
     return (
-        <div className="support-create-modal">
-            <div className="support-create-modal-overlay" onClick={() => setIsOpen(false)}></div>
-            <div className="support-create-modal-content">
-                <div className="support-create-modal-header">
+        <div className={styles.supportCreateModal}>
+            <div className={styles.supportCreateModalOverlay} onClick={() => setIsOpen(false)}></div>
+            <div className={styles.supportCreateModalContent}>
+                <div className={styles.supportCreateModalHeader}>
                     <h2>Nouveau ticket de support</h2>
                     <button
-                        className="support-create-modal-close"
+                        className={styles.supportCreateModalClose}
                         onClick={() => setIsOpen(false)}
                         aria-label="Fermer"
                     >
@@ -96,24 +98,24 @@ export default function CreateTicketForm() {
                         </svg>
                     </button>
                 </div>
-                <form onSubmit={handleSubmit} className="support-create-form">
-                    <div className="support-form-group">
+                <form onSubmit={handleSubmit} className={styles.supportCreateForm}>
+                    <div className={styles.supportFormGroup}>
                         <label htmlFor="subject">Sujet *</label>
                         <input
                             type="text"
                             id="subject"
                             name="subject"
                             required
-                            className="support-input"
+                            className={styles.supportInput}
                             placeholder="Résumé de votre problème..."
                         />
                     </div>
-                    <div className="support-form-group">
+                    <div className={styles.supportFormGroup}>
                         <label htmlFor="priority">Priorité</label>
                         <select
                             id="priority"
                             name="priority"
-                            className="support-input"
+                            className={styles.supportInput}
                             defaultValue="NORMAL"
                         >
                             <option value="LOW">Basse</option>
@@ -122,13 +124,13 @@ export default function CreateTicketForm() {
                             <option value="URGENT">Urgente</option>
                         </select>
                     </div>
-                    <div className="support-form-group">
+                    <div className={styles.supportFormGroup}>
                         <label htmlFor="content">Message *</label>
                         <textarea
                             id="content"
                             name="content"
                             required
-                            className="support-textarea"
+                            className={styles.supportTextarea}
                             rows={6}
                             placeholder="Décrivez votre problème en détail..."
                         />
@@ -141,10 +143,10 @@ export default function CreateTicketForm() {
                         selectedImage={selectedImage}
                         imageFile={imageFile}
                     />
-                    <div className="support-form-actions">
+                    <div className={styles.supportFormActions}>
                         <button
                             type="button"
-                            className="support-btn support-btn-secondary"
+                            className={`${styles.supportBtn} ${styles.supportBtnSecondary}`}
                             onClick={() => setIsOpen(false)}
                             disabled={isSubmitting}
                         >
@@ -152,7 +154,7 @@ export default function CreateTicketForm() {
                         </button>
                         <button
                             type="submit"
-                            className="support-btn support-btn-primary"
+                            className={`${styles.supportBtn} ${styles.supportBtnPrimary}`}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Création...' : 'Créer le ticket'}

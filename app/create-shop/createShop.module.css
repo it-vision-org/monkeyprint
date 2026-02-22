@@ -13,21 +13,38 @@
 }
 
 @media (min-width: 769px) {
-  /* Prevent any scrolling on desktop - make it exactly like other steps */
+  /* Allow scrolling on desktop if content overflows */
   .createShopContainer {
     max-width: 100%;
     min-height: 100vh;
     height: 100vh;
-    max-height: 100vh;
-    overflow-y: hidden !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
     padding-top: 0;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom scrollbar for better desktop experience */
+  .createShopContainer::-webkit-scrollbar {
+    width: 6px;
+  }
+  .createShopContainer::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .createShopContainer::-webkit-scrollbar-thumb {
+    background: rgba(65, 235, 92, 0.3);
+    border-radius: 10px;
+  }
+  .createShopContainer::-webkit-scrollbar-thumb:hover {
+    background: rgba(65, 235, 92, 0.5);
   }
 
   .createShopContainer main {
-    height: 100vh;
-    max-height: 100vh;
-    overflow-y: hidden !important;
+    min-height: calc(100vh - 90px);
+    height: auto;
+    overflow-y: visible !important;
     overflow-x: hidden !important;
   }
 }
@@ -142,8 +159,8 @@
   left: 0;
   right: 0;
   top: 0px;
-  background: #ffffff;
-  box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0px 4px 11.4px -4px rgba(0, 0, 0, 0.15);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -571,18 +588,17 @@
   }
 }
 
-/* Step 1, 2, and 3 Containers */
 .step1Container,
 .step2Container,
 .step3Container {
   position: relative;
   width: 100%;
   min-height: auto;
-  padding: 25px var(--mobile-padding-x) 120px;
+  padding: 25px var(--mobile-padding-x) 180px; /* Increased bottom padding */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 24px; /* Increased gap */
   z-index: 10;
   flex-shrink: 0;
 }
@@ -767,19 +783,19 @@
   .step1Container,
   .step2Container,
   .step3Container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 100px 40px 80px;
+    padding: 80px 40px 150px;
     min-height: auto;
-    height: 100vh;
-    max-height: 100vh;
+    height: auto;
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow-y: hidden;
+    overflow-y: visible;
     overflow-x: hidden;
     box-sizing: border-box;
     justify-content: flex-start;
+    gap: 32px;
   }
 
   /* Step 3 Cards Desktop - EXACTLY like Step 1 and 2 cards - no special treatment */
@@ -905,6 +921,10 @@
   .step2Container .cs-theme-card {
     width: min(600px, 60vw);
     height: 400px;
+    /* Ensure desktop override also has the fast transition */
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 1s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
   .step2Container .cs-round-nav {
@@ -1644,35 +1664,36 @@
   transform: none;
 }
 
-.cs-ghost-btn {
+.cs-ghost-btn,
+.backBtn {
   width: 100%;
   border-radius: 999px;
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.12);
+  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: 
-    transform var(--duration-fast) var(--spring-responsive),
-    background-color var(--duration-fast) ease-out,
-    border-color var(--duration-fast) ease-out,
-    box-shadow var(--duration-normal) var(--ease-out-expo);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   -webkit-tap-highlight-color: transparent;
 }
 
-.cs-ghost-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.85);
-  transform: translateY(-1px) scale(1.01);
+.cs-ghost-btn:hover,
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
 }
 
-.cs-ghost-btn:active {
-  transform: translateY(0) scale(0.97);
-  transition-duration: var(--duration-instant);
+.cs-ghost-btn:active,
+.backBtn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .cs-card-summary {
@@ -1780,11 +1801,10 @@
   z-index: 1;
   -webkit-tap-highlight-color: transparent;
   
-  /* Extremely slow transition with high specificity override */
-  transition: transform 15s cubic-bezier(0.1, 0, 0, 1) !important,
-              opacity 12s ease-in-out !important,
-              box-shadow 8s ease-in-out !important,
-              border-color 8s ease-in-out !important;
+  /* Fast 1s transition for snappy feel */
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 1s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .cs-theme-card img {
@@ -1793,53 +1813,55 @@
   object-fit: cover;
 }
 
-.cs-theme-card.current {
+/* Transition applied to states as well for maximum reliability */
+.current {
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, -50%) scale(1);
   border-color: #41eb5c;
   z-index: 3;
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.cs-theme-card.previous {
+.previous {
   opacity: 0.6;
   transform: translate(-120%, -50%) scale(0.75);
   z-index: 2;
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.cs-theme-card.next {
+.next {
   opacity: 0.6;
   transform: translate(20%, -50%) scale(0.75);
   z-index: 2;
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.cs-theme-card.hidden {
+.hidden {
   opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+  pointer-events: none;
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Completely disable hover/active movement to "remove the hover thing" */
 .cs-theme-carousel button.cs-theme-card:hover, 
 .cs-theme-carousel button.cs-theme-card:active {
-  /* Match the default state exactly to prevent any movement */
-  transform: translate(-50%, -50%) scale(0.85) !important;
+  /* Match the default shadow but don't override transform or scale */
   box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3) !important;
-  transition: none !important; /* Keep it static when hovering */
-}
-
-/* Specific state matches for hover to ensure no jump */
-.cs-theme-carousel button.cs-theme-card.current:hover,
-.cs-theme-carousel button.cs-theme-card.current:active {
   transform: translate(-50%, -50%) scale(1) !important;
+  cursor: default;
 }
 
-.cs-theme-carousel button.cs-theme-card.previous:hover,
-.cs-theme-carousel button.cs-theme-card.previous:active {
-  transform: translate(-120%, -50%) scale(0.75) !important;
+/* Ensure next/previous cards also don't react to hover */
+.cs-theme-carousel button.previous:hover,
+.cs-theme-carousel button.previous:active {
+    transform: translate(-120%, -50%) scale(0.75) !important;
 }
 
-.cs-theme-carousel button.cs-theme-card.next:hover,
-.cs-theme-carousel button.cs-theme-card.next:active {
-  transform: translate(20%, -50%) scale(0.75) !important;
+.cs-theme-carousel button.next:hover,
+.cs-theme-carousel button.next:active {
+    transform: translate(20%, -50%) scale(0.75) !important;
 }
 
 .cs-theme-hint {
@@ -1875,7 +1897,7 @@
 
 .cs-round-nav:hover {
   background: #35d04a;
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(65, 235, 92, 0.4);
 }
 
@@ -1924,10 +1946,28 @@
   flex-shrink: 0;
 }
 
-.cs-dual-actions {
+.cs-dual-actions,
+.buttonGroup {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .buttonGroup {
+    flex-direction: row;
+    justify-content: center;
+    max-width: 600px;
+    margin: 48px auto 0;
+    gap: 20px;
+  }
+  
+  .buttonGroup button,
+  .buttonGroup :global(.loading-button) {
+    flex: 1;
+    margin: 0 !important;
+  }
 }
 
 @media (min-width: 900px) {

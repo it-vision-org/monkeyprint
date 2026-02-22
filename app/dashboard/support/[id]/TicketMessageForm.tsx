@@ -5,6 +5,7 @@ import { addMessage } from "../actions";
 import { useRouter } from "next/navigation";
 import { useAlert } from '@/components';
 import ImageUploadZone from '../components/ImageUploadZone';
+import styles from "../../../styles/support.module.css";
 
 export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,12 +63,13 @@ export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
     };
 
     return (
-        <div className="support-message-form-container">
-            <form onSubmit={handleSubmit} className="support-message-form">
+        <div className={styles.messageFormCard}>
+            <h3 className={styles.messageFormTitle}>Répondre au ticket</h3>
+            <form onSubmit={handleSubmit} className={styles.supportCreateForm}>
                 <textarea
                     name="content"
                     required
-                    className="support-textarea"
+                    className={styles.supportTextarea}
                     rows={4}
                     placeholder="Tapez votre message..."
                 />
@@ -79,13 +81,15 @@ export default function TicketMessageForm({ ticketId }: { ticketId: string }) {
                     selectedImage={selectedImage}
                     imageFile={imageFile}
                 />
-                <button
-                    type="submit"
-                    className="support-btn support-btn-primary"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Envoi...' : 'Envoyer'}
-                </button>
+                <div className={styles.supportFormActions}>
+                    <button
+                        type="submit"
+                        className={`${styles.supportBtn} ${styles.supportBtnPrimary}`}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Envoi...' : 'Envoyer'}
+                    </button>
+                </div>
             </form>
         </div>
     );

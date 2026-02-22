@@ -6,6 +6,7 @@ import Link from "next/link";
 import TicketMessageForm from "./TicketMessageForm";
 import { getR2Url } from "@/lib/storage";
 import Image from "next/image";
+import styles from "../../../styles/support.module.css";
 
 export default async function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await auth();
@@ -31,6 +32,19 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
 
     if (!ticket || ticket.userId !== user.id) {
         redirect("/dashboard/support");
+    }
+
+    // Mark any unread admin messages as read since the user is viewing the ticket
+    const hasUnread = ticket.messages.some(m => m.isAdmin && !m.isRead);
+    if (hasUnread) {
+        await prisma.supportTicketMessage.updateMany({
+            where: {
+                ticketId: id,
+                isAdmin: true,
+                isRead: false
+            },
+            data: { isRead: true }
+        });
     }
 
     const getStatusConfig = (status: string) => {
@@ -79,21 +93,21 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
     };
 
     return (
-        <div className="support-detail-page">
-            <div className="support-detail-header">
-                <Link href="/dashboard/support" className="support-back-link">
+        <div className={styles.supportDetailPage}>
+            <div className={styles.supportDetailHeader}>
+                <Link href="/dashboard/support" className={styles.supportBackLink}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Retour aux tickets
                 </Link>
-                <h1 className="dash-page-title">{ticket.subject}</h1>
-                <div className="support-detail-meta">
+                <h1 className={styles.pageTitle} style={{ fontSize: '24px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>{ticket.subject}</h1>
+                <div className={styles.supportDetailMeta}>
                     {(() => {
                         const statusConfig = getStatusConfig(ticket.status);
                         return (
-                            <span 
-                                className="support-ticket-status"
+                            <span
+                                className={styles.supportTicketStatus}
                                 style={{ backgroundColor: statusConfig.bgColor, color: statusConfig.color }}
                             >
                                 <span style={{ marginRight: '6px' }}>{statusConfig.emoji}</span>
@@ -101,56 +115,56 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                             </span>
                         );
                     })()}
-                    <span 
-                        className="support-ticket-priority"
+                    <span
+                        className={styles.supportTicketPriority}
                         style={{ backgroundColor: getPriorityColor(ticket.priority) + '20', color: getPriorityColor(ticket.priority) }}
                     >
                         {getPriorityLabel(ticket.priority)}
                     </span>
-                    <span className="support-detail-date">
+                    <span className={styles.supportDetailDate}>
                         Créé le {format(ticket.createdAt, "dd/MM/yyyy à HH:mm")}
                     </span>
                 </div>
             </div>
 
-            <div className="support-messages">
+            <div className={styles.supportMessages}>
                 {(await Promise.all(ticket.messages.map(async (message: typeof ticket.messages[number]) => {
                     const imageUrl = message.imageUrl ? await getR2Url(message.imageUrl) : null;
                     return { message, imageUrl };
                 }))).map(({ message, imageUrl }) => (
-                    <div 
-                        key={message.id} 
-                        className={`support-message ${message.isAdmin ? 'support-message-admin' : 'support-message-user'}`}
+                    <div
+                        key={message.id}
+                        className={`${styles.supportMessage} ${message.isAdmin ? styles.supportMessageAdmin : styles.supportMessageUser}`}
                     >
-                        <div className="support-message-header">
-                            <div className="support-message-author-badge">
+                        <div className={styles.supportMessageHeader}>
+                            <div className={styles.supportMessageAuthorBadge}>
                                 {message.isAdmin ? (
                                     <>
-                                        <span className="support-message-icon">👨‍💼</span>
-                                        <span className="support-message-author-label">Support</span>
+                                        <span className={styles.supportMessageIcon}>👨‍💼</span>
+                                        <span className={styles.supportMessageAuthorLabel}>Support</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span className="support-message-icon">👤</span>
-                                        <span className="support-message-author-label">Vous</span>
+                                        <span className={styles.supportMessageIcon}>👤</span>
+                                        <span className={styles.supportMessageAuthorLabel}>Vous</span>
                                     </>
                                 )}
                             </div>
-                            <span className="support-message-date">
+                            <span className={styles.supportMessageDate}>
                                 {format(message.createdAt, "dd/MM/yyyy à HH:mm")}
                             </span>
                         </div>
-                        <div className="support-message-content">
+                        <div className={styles.supportMessageContent}>
                             {message.content.split('\n').map((line: string, i: number) => (
                                 <p key={i}>{line}</p>
                             ))}
                         </div>
                         {imageUrl && (
-                            <div className="support-message-image">
-                                <Image 
-                                    src={imageUrl} 
-                                    alt="Attachment" 
-                                    width={400} 
+                            <div className={styles.supportMessageImage}>
+                                <Image
+                                    src={imageUrl}
+                                    alt="Attachment"
+                                    width={400}
                                     height={400}
                                     style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
                                 />

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { springResponsive, navLinkVariants } from '@/lib/interactions';
 
@@ -22,7 +22,13 @@ export default function LoadingLink({
     ...props
 }: LoadingLinkProps) {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        setIsLoading(false);
+    }, [pathname, searchParams]);
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         if (isLoading) {
@@ -34,12 +40,19 @@ export default function LoadingLink({
             onClick(e);
         }
 
-        if (!e.defaultPrevented) {
-            e.preventDefault();
-            setIsLoading(true);
+        if (href === pathname) {
+            setIsLoading(false);
+            return;
+        }
 
-            // Use router.push for client-side navigation
-            router.push(href);
+        if (!e.defaultPrevented) {
+            // Only start loading if we're actually navigating to a new route
+            // or if it's a different query param
+            if (href !== pathname && !href.startsWith('#')) {
+                setIsLoading(true);
+                // Use router.push for client-side navigation
+                router.push(href);
+            }
         }
     };
 

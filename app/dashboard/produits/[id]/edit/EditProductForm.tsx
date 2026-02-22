@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { updateProduct } from '../../actions';
+import styles from '../../../../styles/produits.module.css';
 
 interface EditProductFormProps {
     product: {
@@ -53,47 +54,27 @@ export default function EditProductForm({ product, imageUrl }: EditProductFormPr
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px 0' }}>
+        <div className={styles.editFormContainer}>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px' }}>
+                <div className={styles.editFormGrid}>
                     {/* Product Image */}
                     <div>
-                        <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: 600 }}>Image du produit</h3>
-                        {imageUrl ? (
-                            <div style={{ 
-                                width: '100%', 
-                                aspectRatio: '1', 
-                                background: '#f3f4f6', 
-                                borderRadius: '12px',
-                                overflow: 'hidden',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <img 
-                                    src={imageUrl} 
+                        <h3 className={styles.sectionTitle}>Image du produit</h3>
+                        <div className={styles.imagePreview}>
+                            {imageUrl ? (
+                                <img
+                                    src={imageUrl}
                                     alt={product.name}
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'contain' 
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain'
                                     }}
                                 />
-                            </div>
-                        ) : (
-                            <div style={{ 
-                                width: '100%', 
-                                aspectRatio: '1', 
-                                background: '#f3f4f6', 
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#9ca3af'
-                            }}>
-                                Aucune image
-                            </div>
-                        )}
+                            ) : (
+                                <span style={{ color: '#9ca3af' }}>Aucune image</span>
+                            )}
+                        </div>
                         <p style={{ marginTop: '12px', fontSize: '14px', color: '#6b7280' }}>
                             Type: {product.type}
                         </p>
@@ -101,144 +82,67 @@ export default function EditProductForm({ product, imageUrl }: EditProductFormPr
 
                     {/* Product Details */}
                     <div>
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                fontSize: '14px', 
-                                fontWeight: 600,
-                                color: '#374151'
-                            }}>
-                                Nom du produit <span style={{ color: '#ef4444' }}>*</span>
+                        <div className={styles.formGroup}>
+                            <label className={styles.inputLabel}>
+                                Nom du produit <span className={styles.required}>*</span>
                             </label>
                             <input
                                 type="text"
+                                className={styles.formInput}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '8px',
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s'
-                                }}
-                                onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-                                onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                             />
                         </div>
 
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                fontSize: '14px', 
-                                fontWeight: 600,
-                                color: '#374151'
-                            }}>
-                                Prix (DT) <span style={{ color: '#ef4444' }}>*</span>
+                        <div className={styles.formGroup}>
+                            <label className={styles.inputLabel}>
+                                Prix (DT) <span className={styles.required}>*</span>
                             </label>
                             <input
                                 type="number"
                                 step="0.01"
                                 min="0"
+                                className={styles.formInput}
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 required
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '8px',
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s'
-                                }}
-                                onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-                                onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                             />
                         </div>
 
-                        <div style={{ marginBottom: '24px' }}>
-                            <label style={{ 
-                                display: 'block', 
-                                marginBottom: '8px', 
-                                fontSize: '14px', 
-                                fontWeight: 600,
-                                color: '#374151'
-                            }}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.inputLabel}>
                                 Description
                             </label>
                             <textarea
+                                className={`${styles.formInput} ${styles.formTextarea}`}
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={6}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '8px',
-                                    fontSize: '16px',
-                                    outline: 'none',
-                                    resize: 'vertical',
-                                    fontFamily: 'inherit',
-                                    transition: 'border-color 0.2s'
-                                }}
-                                onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-                                onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                             />
                         </div>
                     </div>
                 </div>
 
                 {error && (
-                    <div style={{ 
-                        padding: '12px 16px', 
-                        background: '#fee2e2', 
-                        border: '1px solid #fecaca',
-                        borderRadius: '8px',
-                        color: '#dc2626',
-                        marginBottom: '24px'
-                    }}>
+                    <div className={styles.errorBox}>
                         {error}
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <div className={styles.formActions}>
                     <button
                         type="button"
                         onClick={() => router.back()}
                         disabled={isSubmitting}
-                        style={{
-                            padding: '12px 24px',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '8px',
-                            background: 'white',
-                            color: '#374151',
-                            fontSize: '16px',
-                            fontWeight: 500,
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            opacity: isSubmitting ? 0.5 : 1
-                        }}
+                        className={styles.btnSecondary}
                     >
                         Annuler
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        style={{
-                            padding: '12px 24px',
-                            border: 'none',
-                            borderRadius: '8px',
-                            background: '#2563eb',
-                            color: 'white',
-                            fontSize: '16px',
-                            fontWeight: 500,
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            opacity: isSubmitting ? 0.5 : 1
-                        }}
+                        className={styles.btnPrimary}
                     >
                         {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
                     </button>

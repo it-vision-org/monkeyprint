@@ -29,38 +29,40 @@ export default function StoresSection({
     return (
         <>
             {/* Mobile View */}
-            <div id="stores" className={styles.title}>
-                {title}
-            </div>
-            <div className={styles.subtitle}>{subtitle}</div>
-
-            {stores.map((store, index) => (
-                <LoadingLink
-                    key={index}
-                    href={store.href}
-                    className={`${styles.storeBox} ${styles[`storeBox${index + 1}`]}`}
-                    aria-label={`Theme ${index + 1} preview`}
-                    showSpinner={false}
-                >
-                    <Image
-                        src={store.image}
-                        alt={store.alt || `Theme ${index + 1}`}
-                        width={117}
-                        height={117}
-                        className={styles.image}
-                    />
-                </LoadingLink>
-            ))}
-
-            {stores.map((_, index) => (
-                <div
-                    key={`arrow-${index}`}
-                    className={`${styles.arrow} ${styles[`storeArrowDot${index + 1}`]}`}
-                    aria-hidden="true"
-                >
-                    <span className={styles.arrowStroke} />
+            <section className={styles.section}>
+                <div id="stores" className={styles.title}>
+                    {title}
                 </div>
-            ))}
+                <div className={styles.subtitle}>{subtitle}</div>
+
+                {stores.map((store, index) => (
+                    <LoadingLink
+                        key={index}
+                        href={store.href}
+                        className={`${styles.storeBox} ${styles[`storeBox${index + 1}`]}`}
+                        aria-label={`Theme ${index + 1} preview`}
+                        showSpinner={false}
+                    >
+                        <Image
+                            src={store.image}
+                            alt={store.alt || `Theme ${index + 1}`}
+                            width={117}
+                            height={117}
+                            className={styles.image}
+                        />
+                    </LoadingLink>
+                ))}
+
+                {stores.map((_, index) => (
+                    <div
+                        key={`arrow-${index}`}
+                        className={`${styles.arrow} ${styles[`storeArrowDot${index + 1}`]}`}
+                        aria-hidden="true"
+                    >
+                        <span className={styles.arrowStroke} />
+                    </div>
+                ))}
+            </section>
 
             {/* Desktop View */}
             <section className={desktopStyles.desktopStoresSection} id="stores-desktop">

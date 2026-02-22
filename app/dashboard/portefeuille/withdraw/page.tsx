@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAlert } from '@/components';
+import styles from "../../styles/portefeuille.module.css";
 
 export default function WithdrawPage() {
     const router = useRouter();
@@ -72,66 +73,40 @@ export default function WithdrawPage() {
     };
 
     return (
-        <div className="portefeuille-main">
-            <div className="portefeuille-container">
+        <div className={styles.portefeuilleMain}>
+            <div className={styles.portefeuilleContainer}>
                 <div style={{ marginBottom: '24px' }}>
                     <Link
                         href="/dashboard/portefeuille"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            color: '#2563eb',
-                            textDecoration: 'none',
-                            fontSize: '14px',
-                            marginBottom: '24px'
-                        }}
+                        className={styles.backLink}
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                         Retour au portefeuille
                     </Link>
-                    <h1 className="portefeuille-page-title">Demander un retrait</h1>
+                    <h1 className={styles.portefeuillePageTitle}>Demander un retrait</h1>
                 </div>
 
-                <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '24px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    maxWidth: '600px'
-                }}>
+                <div className={styles.withdrawalFormContainer}>
                     {isLoadingBalance ? (
                         <div style={{ padding: '40px', textAlign: 'center' }}>
                             Chargement...
                         </div>
                     ) : (
                         <>
-                            <div style={{
-                                background: '#f0f9ff',
-                                borderRadius: '8px',
-                                padding: '16px',
-                                marginBottom: '24px',
-                                border: '1px solid #bae6fd'
-                            }}>
-                                <div style={{ fontSize: '14px', color: '#0369a1', marginBottom: '8px' }}>
+                            <div className={styles.availableBalanceCard}>
+                                <div className={styles.availableBalanceLabel}>
                                     Montant disponible
                                 </div>
-                                <div style={{ fontSize: '32px', fontWeight: 700, color: '#0284c7' }}>
+                                <div className={styles.availableBalanceValue}>
                                     {availableAmount.toFixed(2)} DT
                                 </div>
                             </div>
 
                             <form onSubmit={handleSubmit}>
-                                <div style={{ marginBottom: '24px' }}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontSize: '14px',
-                                        fontWeight: 600,
-                                        marginBottom: '8px',
-                                        color: '#374151'
-                                    }}>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>
                                         Montant à retirer (DT)
                                     </label>
                                     <input
@@ -143,44 +118,19 @@ export default function WithdrawPage() {
                                         onChange={(e) => setAmount(e.target.value)}
                                         placeholder="0.00"
                                         required
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '8px',
-                                            fontSize: '16px',
-                                            outline: 'none',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                        onFocus={(e) => e.currentTarget.style.borderColor = '#2563eb'}
-                                        onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
+                                        className={styles.formInput}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setAmount(availableAmount.toFixed(2))}
-                                        style={{
-                                            marginTop: '8px',
-                                            padding: '6px 12px',
-                                            background: 'transparent',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '6px',
-                                            fontSize: '14px',
-                                            color: '#6b7280',
-                                            cursor: 'pointer'
-                                        }}
+                                        className={styles.useMaxButton}
                                     >
                                         Utiliser tout le montant disponible
                                     </button>
                                 </div>
 
-                                <div style={{ marginBottom: '24px' }}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontSize: '14px',
-                                        fontWeight: 600,
-                                        marginBottom: '8px',
-                                        color: '#374151'
-                                    }}>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>
                                         Détails bancaires (optionnel)
                                     </label>
                                     <textarea
@@ -188,54 +138,21 @@ export default function WithdrawPage() {
                                         onChange={(e) => setBankDetails(e.target.value)}
                                         placeholder="Nom de la banque, numéro de compte, IBAN, etc."
                                         rows={4}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            outline: 'none',
-                                            resize: 'vertical',
-                                            fontFamily: 'inherit',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                        onFocus={(e) => e.currentTarget.style.borderColor = '#2563eb'}
-                                        onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
+                                        className={styles.formTextarea}
                                     />
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                                <div className={styles.submitButtonGroup}>
                                     <button
                                         type="submit"
                                         disabled={isLoading || !amount || parseFloat(amount) <= 0}
-                                        style={{
-                                            flex: 1,
-                                            padding: '12px 24px',
-                                            background: isLoading ? '#9ca3af' : '#2563eb',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '16px',
-                                            fontWeight: 600,
-                                            cursor: isLoading ? 'not-allowed' : 'pointer',
-                                            transition: 'background 0.2s'
-                                        }}
+                                        className={styles.submitButton}
                                     >
                                         {isLoading ? 'Traitement...' : 'Demander le retrait'}
                                     </button>
                                     <Link
                                         href="/dashboard/portefeuille"
-                                        style={{
-                                            padding: '12px 24px',
-                                            background: 'white',
-                                            color: '#374151',
-                                            border: '1px solid #d1d5db',
-                                            borderRadius: '8px',
-                                            fontSize: '16px',
-                                            fontWeight: 600,
-                                            textDecoration: 'none',
-                                            display: 'inline-block'
-                                        }}
+                                        className={styles.cancelButton}
                                     >
                                         Annuler
                                     </Link>

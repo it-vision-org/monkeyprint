@@ -154,15 +154,24 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
         // Calculate available space for canvas
         if (mobile) {
-            // Mobile: leave room for toolbar (70px) and header (60px), some padding
+            // Mobile: use a fixed aspect ratio based on width to prevent layout thrashing on scroll
+            // because window.innerHeight changes constantly on mobile browsers when scrolling
             const availableWidth = window.innerWidth - 40;
-            const availableHeight = window.innerHeight - 220;
             const w = Math.min(availableWidth, 380);
-            const h = Math.min(availableHeight, w * 1.25);
-            setCanvasSize({ w: Math.floor(w), h: Math.floor(h) });
+            const h = w * 1.25; // Fixed aspect ratio 400:500
+
+            setCanvasSize(prev => {
+                const newW = Math.floor(w);
+                const newH = Math.floor(h);
+                if (prev.w === newW && prev.h === newH) return prev;
+                return { w: newW, h: newH };
+            });
         } else {
             // Desktop: standard size within constraints
-            setCanvasSize({ w: 400, h: 500 });
+            setCanvasSize(prev => {
+                if (prev.w === 400 && prev.h === 500) return prev;
+                return { w: 400, h: 500 };
+            });
         }
     }, []);
 
@@ -230,7 +239,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             let printH: number;
             let printX: number;
             let printY: number;
-            
+
             if (areaToUse && areaToUse.width && areaToUse.height) {
                 // Use configured print area coordinates
                 // The coordinates are relative to the canvas used in admin (400x500)
@@ -239,7 +248,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 const adminCanvasHeight = 500;
                 const scaleX = canvas.getWidth() / adminCanvasWidth;
                 const scaleY = canvas.getHeight() / adminCanvasHeight;
-                
+
                 // Round coordinates for pixel-perfect alignment
                 printX = Math.round(areaToUse.x * scaleX);
                 printY = Math.round(areaToUse.y * scaleY);
@@ -315,11 +324,11 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         // Get images from sessionStorage (these should be set from the database when product type is selected)
         const frontImage = sessionStorage.getItem("productTypeImage");
         const backImage = sessionStorage.getItem("productTypeBackImage");
-        
+
         // Use only R2 images from sessionStorage, no fallbacks
         const frontImageSrc = frontImage;
         const backImageSrc = backImage || frontImage; // Use front image as back if back doesn't exist
-        
+
         const loadImg = (src: string | null): Promise<HTMLImageElement | null> => new Promise(res => {
             if (!src) {
                 res(null);
@@ -332,12 +341,12 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 console.warn('Failed to load product image:', src);
                 res(null);
             };
-            
+
             // If the image is from R2 (external domain), proxy it through our API to avoid CORS issues
             // Check if it's an external URL (starts with http:// or https://) and not from localhost
             const isExternalUrl = src.startsWith('http://') || src.startsWith('https://');
             const isLocalhost = src.includes('localhost') || src.startsWith('/');
-            
+
             if (isExternalUrl && !isLocalhost) {
                 // Proxy through our API endpoint
                 const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
@@ -363,23 +372,23 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
     useEffect(() => {
         loadProductImages();
-        
+
         // Listen for storage changes to reload images when product type changes
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'productTypeImage' || e.key === 'productTypeBackImage') {
                 loadProductImages();
             }
         };
-        
+
         // Also listen for custom storage events (for same-tab updates)
         const handleCustomStorage = () => {
             loadProductImages();
         };
-        
+
         window.addEventListener('storage', handleStorageChange);
         // Listen for custom event that we can trigger from the same tab
         window.addEventListener('productImagesUpdated', handleCustomStorage);
-        
+
         return () => {
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('productImagesUpdated', handleCustomStorage);
@@ -487,15 +496,15 @@ export default function DesignEditor({ productType, productColor, initialDesign,
     // Force save function - saves immediately without debounce
     const forceSaveDesign = useCallback(() => {
         if (!mainCanvas.current || isInitializing.current) return;
-        
+
         designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
         const designData = JSON.stringify(designsRef.current);
-        
+
         console.log('Force saving design:', designData.substring(0, 200));
-        
+
         // Update parent state
         onDesignChange?.(designData);
-        
+
         // Auto-save to sessionStorage
         if (typeof window !== 'undefined') {
             sessionStorage.setItem("designEditorData", designData);
@@ -514,17 +523,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             if (mainCanvas.current) {
                 designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
                 const designData = JSON.stringify(designsRef.current);
-                
+
                 console.log('Auto-saving design:', designData.substring(0, 200));
-                
+
                 // Update parent state
                 onDesignChange?.(designData);
-                
+
                 // Auto-save to sessionStorage
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem("designEditorData", designData);
                 }
-                
+
                 pushToHistory();
             }
         }, 300);
@@ -866,19 +875,19 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 if (saveTimeoutRef.current) {
                     clearTimeout(saveTimeoutRef.current);
                 }
-                
+
                 // Force immediate save
                 designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
                 const designData = JSON.stringify(designsRef.current);
-                
+
                 console.log('Unmounting, force saving design:', designData.substring(0, 200));
-                
+
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem("designEditorData", designData);
                 }
                 onDesignChange?.(designData);
             }
-            
+
             if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
             try { canvas.dispose(); } catch { }
             mainCanvas.current = null;
@@ -929,19 +938,19 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
     const switchSide = async (side: Side) => {
         if (side === currentSideRef.current || !mainCanvas.current) return;
-        
+
         // Save current side before switching (immediate, no debounce)
         designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
         const designData = JSON.stringify(designsRef.current);
-        
+
         console.log('Switching side, saving design:', designData.substring(0, 200));
-        
+
         // Auto-save to sessionStorage when switching sides
         if (typeof window !== 'undefined') {
             sessionStorage.setItem("designEditorData", designData);
         }
         onDesignChange?.(designData);
-        
+
         setCurrentSide(side);
         currentSideRef.current = side;
         await loadDesign(mainCanvas.current, designsRef.current[side], side);
@@ -1336,8 +1345,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                 <button
                                                     className={styles.techniqueBtn}
                                                     style={{
-                                                        background: bgRemovalTechnique === 'conservative' 
-                                                            ? 'linear-gradient(135deg, #10b981, #059669)' 
+                                                        background: bgRemovalTechnique === 'conservative'
+                                                            ? 'linear-gradient(135deg, #10b981, #059669)'
                                                             : 'rgba(0,0,0,0.05)',
                                                         color: bgRemovalTechnique === 'conservative' ? 'white' : '#475569',
                                                         border: `2px solid ${bgRemovalTechnique === 'conservative' ? '#10b981' : 'rgba(0,0,0,0.08)'}`,
@@ -1349,8 +1358,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                 <button
                                                     className={styles.techniqueBtn}
                                                     style={{
-                                                        background: bgRemovalTechnique === 'moderate' 
-                                                            ? 'linear-gradient(135deg, #6366f1, #4f46e5)' 
+                                                        background: bgRemovalTechnique === 'moderate'
+                                                            ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
                                                             : 'rgba(0,0,0,0.05)',
                                                         color: bgRemovalTechnique === 'moderate' ? 'white' : '#475569',
                                                         border: `2px solid ${bgRemovalTechnique === 'moderate' ? '#6366f1' : 'rgba(0,0,0,0.08)'}`,
@@ -1362,8 +1371,8 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                 <button
                                                     className={styles.techniqueBtn}
                                                     style={{
-                                                        background: bgRemovalTechnique === 'aggressive' 
-                                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+                                                        background: bgRemovalTechnique === 'aggressive'
+                                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
                                                             : 'rgba(0,0,0,0.05)',
                                                         color: bgRemovalTechnique === 'aggressive' ? 'white' : '#475569',
                                                         border: `2px solid ${bgRemovalTechnique === 'aggressive' ? '#ef4444' : 'rgba(0,0,0,0.08)'}`,
@@ -1383,7 +1392,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                         }}
                                                         onClick={async () => {
                                                             if (isRemovingBg || !selected || !mainCanvas.current) return;
-                                                            
+
                                                             // Check if selected object is an image
                                                             if (!(selected instanceof fabric.FabricImage)) {
                                                                 alert('Please select an image to remove background');
@@ -1397,13 +1406,13 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                 // Get the image's data URL
                                                                 const img = selected as fabric.FabricImage;
                                                                 const imgElement = img.getElement() as HTMLImageElement;
-                                                                
+
                                                                 // Get the original image source URL
                                                                 let imageSrc = imgElement.src;
-                                                                
+
                                                                 // If it's a blob URL, we need to convert it to data URL
                                                                 let imageDataUrl: string;
-                                                                
+
                                                                 if (imageSrc.startsWith('data:')) {
                                                                     // Already a data URL
                                                                     imageDataUrl = imageSrc;
@@ -1428,17 +1437,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                         reader.readAsDataURL(blob);
                                                                     });
                                                                 }
-                                                                
+
                                                                 // If we still don't have a data URL, create one from the image element
                                                                 if (!imageDataUrl || !imageDataUrl.startsWith('data:')) {
                                                                     const tempCanvas = document.createElement('canvas');
                                                                     const naturalWidth = imgElement.naturalWidth || img.width || 800;
                                                                     const naturalHeight = imgElement.naturalHeight || img.height || 800;
-                                                                    
+
                                                                     tempCanvas.width = naturalWidth;
                                                                     tempCanvas.height = naturalHeight;
                                                                     const tempCtx = tempCanvas.getContext('2d');
-                                                                    
+
                                                                     if (!tempCtx) {
                                                                         throw new Error('Could not get canvas context');
                                                                     }
@@ -1455,7 +1464,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
                                                                     // Draw the image to the canvas at full resolution
                                                                     tempCtx.drawImage(imgElement, 0, 0, naturalWidth, naturalHeight);
-                                                                    
+
                                                                     // Get the data URL
                                                                     imageDataUrl = tempCanvas.toDataURL('image/png');
                                                                 }
@@ -1472,9 +1481,9 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                     headers: {
                                                                         'Content-Type': 'application/json',
                                                                     },
-                                                                    body: JSON.stringify({ 
+                                                                    body: JSON.stringify({
                                                                         imageDataUrl,
-                                                                        technique: bgRemovalTechnique 
+                                                                        technique: bgRemovalTechnique
                                                                     }),
                                                                 });
 
@@ -1484,14 +1493,14 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                 }
 
                                                                 const data = await response.json();
-                                                                
+
                                                                 if (!data.success || !data.imageDataUrl) {
                                                                     throw new Error('Invalid response from server');
                                                                 }
 
                                                                 // Replace the image with the processed version
                                                                 const processedDataUrl = data.imageDataUrl;
-                                                                
+
                                                                 // Create new image from processed data URL
                                                                 fabric.FabricImage.fromURL(processedDataUrl).then((newImg: fabric.FabricImage) => {
                                                                     if (!mainCanvas.current) return;
@@ -1514,7 +1523,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                     mainCanvas.current.add(newImg);
                                                                     mainCanvas.current.setActiveObject(newImg);
                                                                     mainCanvas.current.renderAll();
-                                                                    
+
                                                                     // Mark as processed and preserve original image reference
                                                                     const id = (newImg as any).id || currentId;
                                                                     (newImg as any).id = id;
@@ -1524,7 +1533,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                         setOriginalImages(prev => ({ ...prev, [id]: imageDataUrl }));
                                                                     }
                                                                     setSelected(newImg);
-                                                                    
+
                                                                     saveCurrentDesign();
                                                                     setIsRemovingBg(false);
                                                                 }).catch((err) => {
@@ -1539,32 +1548,32 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                 setIsRemovingBg(false);
                                                             }
                                                         }}
-                                                    disabled={isRemovingBg}
-                                                >
-                                                    {isRemovingBg ? (
-                                                        <>
-                                                            <span className={styles.miniSpinner}></span>
-                                                            Processing...
-                                                        </>
-                                                    ) : (
-                                                        <>✨ Apply {bgRemovalTechnique.charAt(0).toUpperCase() + bgRemovalTechnique.slice(1)}</>
-                                                    )}
-                                                </button>
-                                                <button
-                                                    className={styles.techniqueBtn}
-                                                    style={{
-                                                        flex: 1,
-                                                        background: 'rgba(0,0,0,0.05)',
-                                                        color: '#475569',
-                                                        border: '1px solid rgba(0,0,0,0.08)',
-                                                    }}
-                                                    onClick={() => setShowTechniqueSelector(false)}
-                                                    disabled={isRemovingBg}
-                                                >
-                                                    Cancel
-                                                </button>
+                                                        disabled={isRemovingBg}
+                                                    >
+                                                        {isRemovingBg ? (
+                                                            <>
+                                                                <span className={styles.miniSpinner}></span>
+                                                                Processing...
+                                                            </>
+                                                        ) : (
+                                                            <>✨ Apply {bgRemovalTechnique.charAt(0).toUpperCase() + bgRemovalTechnique.slice(1)}</>
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        className={styles.techniqueBtn}
+                                                        style={{
+                                                            flex: 1,
+                                                            background: 'rgba(0,0,0,0.05)',
+                                                            color: '#475569',
+                                                            border: '1px solid rgba(0,0,0,0.08)',
+                                                        }}
+                                                        onClick={() => setShowTechniqueSelector(false)}
+                                                        disabled={isRemovingBg}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
                                         )}
                                     </div>
                                 )}
@@ -1582,11 +1591,11 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                 className={styles.undoRemoveBgBtn}
                                                 onClick={async () => {
                                                     if (!selected || !mainCanvas.current) return;
-                                                    
+
                                                     const img = selected as fabric.FabricImage;
                                                     const id = (img as any).id;
                                                     const originalDataUrl = originalImages[id];
-                                                    
+
                                                     if (!originalDataUrl) {
                                                         alert('Original image not found');
                                                         return;
@@ -1615,7 +1624,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                             mainCanvas.current.add(originalImg);
                                                             mainCanvas.current.setActiveObject(originalImg);
                                                             mainCanvas.current.renderAll();
-                                                            
+
                                                             // Clear the background removal flag
                                                             setHasRemovedBg(prev => {
                                                                 const newState = { ...prev };
@@ -1623,7 +1632,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                                                 return newState;
                                                             });
                                                             setSelected(originalImg);
-                                                            
+
                                                             saveCurrentDesign();
                                                         }).catch((err) => {
                                                             console.error('Error restoring original image:', err);
@@ -1658,7 +1667,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             {/* Image Options Modal */}
             {showImageOptions && (
                 <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); } }}>
-                    <div 
+                    <div
                         className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
                         onClick={(e) => e.stopPropagation()}
                         onDragOver={!showAIPrompt && generatedImages.length === 0 ? handleDragOver : undefined}
@@ -1666,11 +1675,11 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                         onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
                     >
                         <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
-                        
+
                         {!showAIPrompt && generatedImages.length === 0 && (
                             <>
                                 <h3 className={styles.modalTitle}>Add Image</h3>
-                                <div 
+                                <div
                                     className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ''}`}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
@@ -1745,7 +1754,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 {/* Show history if available when prompt is open */}
                                 {aiImageHistory.length > 0 && (
                                     <>
@@ -1773,7 +1782,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                 <h3 className={styles.modalTitle}>
                                     {generatedImages.length > 0 ? 'New Generated Images' : 'Previous Generated Images'}
                                 </h3>
-                                
+
                                 {/* Show current batch if available */}
                                 {generatedImages.length > 0 && (
                                     <div className={styles.generatedImagesGrid}>
@@ -1816,9 +1825,9 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                                 <div className={styles.regenerateSection}>
                                     <button
                                         className={styles.regenerateBtn}
-                                        onClick={() => { 
-                                            setGeneratedImages([]); 
-                                            setShowAIPrompt(true); 
+                                        onClick={() => {
+                                            setGeneratedImages([]);
+                                            setShowAIPrompt(true);
                                         }}
                                     >
                                         Generate New Images
