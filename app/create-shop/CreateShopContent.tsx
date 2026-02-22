@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -575,8 +575,11 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
                 <div className={styles.backgroundGradient4}></div>
             </div>
 
+
             {/* Nav Bar */}
-            <MainHeader menuItems={createShopMenuItems} initialSession={initialSession} hasStore={hasStore} />
+            <Suspense fallback={<div style={{ height: '80px', background: 'white' }} />}>
+                <MainHeader menuItems={createShopMenuItems} initialSession={initialSession} hasStore={hasStore} />
+            </Suspense>
 
             {/* Main Content */}
             <main>

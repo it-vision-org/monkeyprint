@@ -9,7 +9,17 @@ import styles from '../create-shop/createShop.module.css';
 import loginStyles from './login.module.css';
 import { MainHeader, LoadingButton, LoadingLink } from '@/components';
 
+import { Suspense } from 'react';
+
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<div style={{ minHeight: '100vh', background: '#000' }} />}>
+            <LoginContent />
+        </Suspense>
+    );
+}
+
+function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');

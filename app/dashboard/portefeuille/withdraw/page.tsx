@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAlert } from '@/components';
-import styles from "../../styles/portefeuille.module.css";
+import styles from "../../../styles/portefeuille.module.css";
 
 export default function WithdrawPage() {
     const router = useRouter();

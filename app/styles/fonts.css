@@ -1,0 +1,13 @@
+/* ==========================================================================
+   GLOBAL GOOGLE FONTS
+   Moved to a dedicated file to ensure @import rules are at the top of the bundle.
+   ========================================================================== */
+
+/* Theme 1 Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* Theme 2 Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+
+/* Theme 3 Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap');

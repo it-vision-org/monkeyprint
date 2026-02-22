@@ -1,5 +1,5 @@
-import { themeConfigs } from '@/components/themeConfig';
-import type { ThemeConfig } from '@/components/themeConfig';
+import type { ThemeConfig } from '@/components/themes/themeConfig';
+import { themeConfigs } from '@/components/themes/themeConfig';
 
 /**
  * Extracts theme ID from a route path

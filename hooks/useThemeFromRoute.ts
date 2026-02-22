@@ -1,9 +1,8 @@
 'use client';
 
+import type { ThemeConfig } from '@/components/themes/themeConfig';
+import { getGradientId, getThemeFromPath } from '@/lib/utils/theme';
 import { usePathname } from 'next/navigation';
-import { getThemeFromPath, getGradientId } from '@/lib/utils/theme';
-import { themeConfigs } from '@/components/themeConfig';
-import type { ThemeConfig } from '@/components/themeConfig';
 
 /**
  * Hook to get theme configuration from current route

@@ -1,5 +1,5 @@
+import type { CartItem } from '@/components/features/CartPage';
 import type { Product } from '@/components/types';
-import type { CartItem } from '@/components/CartPage';
 
 /**
  * Default mock products for testing
@@ -15,20 +15,20 @@ export const DEFAULT_PRODUCTS: Product[] = Array(6).fill({
  * Default mock cart items
  */
 export const DEFAULT_CART_ITEMS: CartItem[] = [
-    { 
-        id: 1, 
-        name: "T-Shirt Circles", 
-        price: 50, 
+    {
+        id: 1,
+        name: "T-Shirt Circles",
+        price: 50,
         sizes: [
             { size: 'L', quantity: 10 },
             { size: 'S', quantity: 22 },
             { size: 'M', quantity: 5 }
         ]
     },
-    { 
-        id: 2, 
-        name: "T-Shirt Circles", 
-        price: 50, 
+    {
+        id: 2,
+        name: "T-Shirt Circles",
+        price: 50,
         sizes: [
             { size: 'S', quantity: 1 }
         ]
@@ -68,7 +68,7 @@ export const DEFAULT_CHECKOUT_ITEMS = [
  * Tunisian cities for checkout form
  */
 export const TUNISIAN_CITIES = [
-    'Tunis', 'Sfax', 'Sousse', 'Kairouan', 'Bizerte', 'Gabès', 'Ariana', 
+    'Tunis', 'Sfax', 'Sousse', 'Kairouan', 'Bizerte', 'Gabès', 'Ariana',
     'Gafsa', 'Monastir', 'Ben Arous', 'Kasserine', 'Médenine', 'Nabeul',
     'Tataouine', 'Béja', 'Jendouba', 'Mahdia', 'Sidi Bouzid', 'Siliana',
     'Kébili', 'Tozeur', 'Manouba', 'Zaghouan', 'La Marsa', 'Hammamet'

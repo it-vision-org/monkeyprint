@@ -9,6 +9,13 @@ const contactMenuItems: MenuItem[] = [
     { label: "Contactez-nous", href: "/contact", icon: "💬" },
 ];
 
+import { Suspense } from 'react';
+
+// Wrap MainHeader in a separate component to manage its suspense requirements
+function ContactHeader({ menuItems }: { menuItems: MenuItem[] }) {
+    return <MainHeader menuItems={menuItems} />;
+}
+
 export default function ContactPage() {
     const [formData, setFormData] = useState({
         name: '',
@@ -45,7 +52,9 @@ export default function ContactPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-            <MainHeader menuItems={contactMenuItems} />
+            <Suspense fallback={<div style={{ height: '80px', background: 'white' }} />}>
+                <ContactHeader menuItems={contactMenuItems} />
+            </Suspense>
             <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
                 {/* Contact Form */}
                 <div style={{

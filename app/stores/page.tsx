@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { MainHeader } from "@/components";
 
+import { Suspense } from 'react';
+
 export default async function StoresPage() {
     const stores = await prisma.store.findMany({
         where: {
@@ -28,7 +30,9 @@ export default async function StoresPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-            <MainHeader />
+            <Suspense fallback={<div style={{ height: '80px', background: 'white' }} />}>
+                <MainHeader />
+            </Suspense>
             {/* Content */}
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px 60px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '60px' }}>
