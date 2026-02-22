@@ -639,8 +639,7 @@ export default function ProductDetailsPage() {
         const costPrice = totalPrice || 0;
 
         if (!pricingSettings) {
-            const delta = sellingPrice - costPrice;
-            return delta > 0 ? delta : 0;
+            return sellingPrice - costPrice;
         }
 
         switch (pricingSettings.profitCalculationType) {
@@ -653,8 +652,7 @@ export default function ProductDetailsPage() {
                 return pricingSettings.profitFixedAmount || 0;
             case 'DIFFERENCE':
             default:
-                const delta = sellingPrice - costPrice;
-                return delta > 0 ? delta : 0;
+                return sellingPrice - costPrice;
         }
     }, [productPrice, totalPrice, pricingSettings]);
 
@@ -1557,7 +1555,7 @@ export default function ProductDetailsPage() {
                             <div className={styles.pdPriceRow}>
                                 <div className={styles.pdInputWrapper}>
                                     <input
-                                        className={styles.pdInput}
+                                        className={`${styles.pdInput} ${profit < 0 ? styles.inputError : ""}`}
                                         type="number"
                                         min={minPrice}
                                         value={productPrice}
@@ -1566,8 +1564,10 @@ export default function ProductDetailsPage() {
                                     <span className={styles.pdInputSuffix}>DT</span>
                                 </div>
                                 <div className={styles.pdProfit}>
-                                    <span className={styles.pdProfitLabel}>Tu prends</span>
-                                    <button type="button" className={styles.pdProfitPill}>{profit.toFixed(0)}DT</button>
+                                    <span className={styles.pdProfitLabel}>{profit < 0 ? "Perte" : "Tu prends"}</span>
+                                    <button type="button" className={`${styles.pdProfitPill} ${profit < 0 ? styles.error : ""}`}>
+                                        {profit.toFixed(0)}DT
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1601,7 +1601,13 @@ export default function ProductDetailsPage() {
                         </div>
                     </section>
 
-                    <button className={styles.pdSubmit} type="button" onClick={handleSubmit}>
+                    <button
+                        className={styles.pdSubmit}
+                        type="button"
+                        onClick={handleSubmit}
+                        disabled={profit < 0 || isSubmitting}
+                        style={profit < 0 ? { opacity: 0.5, cursor: 'not-allowed', filter: 'grayscale(1)' } : {}}
+                    >
                         {sessionStorage.getItem("editingProductId")
                             ? "ENREGISTRER LES MODIFICATIONS"
                             : (isFirstProduct ? "VOTRE SITE WEB EST PRÊT" : "PUBLIER LE PRODUIT")}
