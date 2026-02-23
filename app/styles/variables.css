@@ -2,6 +2,12 @@
   --background: #ffffff;
   --foreground: #171717;
   --mobile-padding-x: 18px;
+  --header-height-mobile: 56px;
+  --header-height-desktop: 90px;
+  --safe-bottom: env(safe-area-inset-bottom);
+  --viewport-height: 100vh;
+  --viewport-height: 100dvh;
+  
   
   /* Interaction timing variables */
   --spring-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);

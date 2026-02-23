@@ -1,13 +1,11 @@
-/* STORE CREATION 1 - Main Container */
 .createShopContainer {
   position: relative;
   width: 100%;
   max-width: 100%;
-  height: 100dvh; /* Use dynamic viewport height for mobile */
+  min-height: 100dvh;
   background: transparent;
   margin: 0;
   overflow-x: hidden;
-  overflow-y: hidden;
   padding-top: 0;
   box-sizing: border-box;
   display: flex;
@@ -569,15 +567,20 @@
 .createShopContainer main {
   position: relative;
   width: 100%;
-  height: calc(100dvh - 56px); /* Fixed height for internal scrolling */
-  margin-top: 56px;
-  overflow-y: auto;
+  flex: 1; /* Allow content to dictate height */
+  margin-top: var(--header-height-mobile, 56px);
+  overflow-y: visible; /* Use body scroll */
   overflow-x: hidden;
   z-index: 10;
   padding-top: 24px;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
   box-sizing: border-box;
+}
+
+/* Ensure inputs aren't covered by fixed header when focused */
+.createShopContainer input,
+.createShopContainer textarea {
+  scroll-margin-top: calc(var(--header-height-mobile, 56px) + 24px);
 }
 
 /* Ensure content in main doesn't scroll under navbar */

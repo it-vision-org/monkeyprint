@@ -3,8 +3,9 @@ html {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  /* Ensure sticky works */
   height: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 80px; /* Account for fixed header when scrolling to inputs */
 }
 
 body {
@@ -12,8 +13,8 @@ body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  /* Ensure sticky works - don't set overflow-y hidden */
   min-height: 100%;
+  min-height: 100dvh;
   position: relative;
   background: var(--background);
   color: var(--foreground);

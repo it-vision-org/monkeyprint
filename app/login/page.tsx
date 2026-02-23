@@ -69,7 +69,7 @@ function LoginContent() {
                 <div className={styles.backgroundGradient4}></div>
             </div>
 
-            <main style={{ position: 'relative', zIndex: 2, padding: '20px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
+            <main style={{ position: 'relative', zIndex: 2, padding: '20px', minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
                 <div className={loginStyles.loginFormContainer}>
                     <div className={styles.step1Container}>
                         <h2 className={styles.mainTitle}>Se connecter</h2>

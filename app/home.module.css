@@ -1,10 +1,10 @@
-/* Main container */
 .main {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
   background: #ffffff;
   min-height: 100vh;
+  min-height: 100dvh;
   box-sizing: border-box;
 }
 
@@ -17,16 +17,17 @@
   background: transparent;
 }
 
-/* Mobile-only styles for the container */
 @media (max-width: 768px) {
   .main {
     padding-top: 0 !important;
   }
   .mobileContainer {
     max-width: 390px; /* Force the mobile design width */
-    min-height: 1636px;
+    min-height: 100vh;
+    min-height: 100dvh;
     background: #ffffff;
     overflow-x: hidden;
+    padding-bottom: calc(100px + var(--safe-bottom, 0px));
   }
 }
 

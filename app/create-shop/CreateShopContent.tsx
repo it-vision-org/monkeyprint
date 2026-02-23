@@ -516,18 +516,7 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
     const [categorySearch, setCategorySearch] = useState("");
     const [selectedTheme, setSelectedTheme] = useState<string>('theme-1');
 
-    // Prevent body scrolling on mobile - container handles scrolling internally
-    useEffect(() => {
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            const originalOverflow = document.body.style.overflow;
-            document.body.style.overflow = 'hidden';
 
-            return () => {
-                document.body.style.overflow = originalOverflow;
-            };
-        }
-    }, []);
 
     const toggleCategory = (category: string) => {
         setSelectedCategories(prev =>
