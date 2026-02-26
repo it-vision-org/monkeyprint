@@ -50,11 +50,12 @@
   background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%) !important;
 }
 
-/* CSS fallback fullscreen styles */
+/* CSS fallback fullscreen styles - used on iOS */
 .editor.fullscreen {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw;
+  width: 100%;
   height: 100vh;
   height: 100dvh;
   height: -webkit-fill-available;
@@ -62,8 +63,14 @@
   max-height: 100dvh;
   max-height: -webkit-fill-available;
   border-radius: 0;
-  z-index: 99999;
+  z-index: 2147483647;
   overflow: hidden;
+  /* Force hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Ensure interactions work */
+  pointer-events: auto;
+  touch-action: auto;
 }
 
 .editor.mobile.fullscreen {
@@ -79,6 +86,13 @@
   min-height: 100vh;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
+  z-index: 2147483647;
+  /* iOS Safari fixes */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  /* Ensure interactions work on mobile */
+  pointer-events: auto;
+  touch-action: auto;
 }
 
 /* Loading */
@@ -301,6 +315,21 @@
   box-shadow: 0 4px 16px rgba(20,184,166,0.4);
 }
 
+/* Delete button - red styling to indicate danger */
+.tool.delete,
+.tool[title="Delete"] {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.tool.delete:hover,
+.tool[title="Delete"]:hover {
+  background: #fef2f2;
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
 .editor.mobile .tool { width: 42px; height: 42px; }
 
 /* Canvas Area */
@@ -402,14 +431,13 @@
   margin-bottom: -2px;
 }
 
-/* Property Panel - Positioned to avoid sticky menu on desktop */
+/* Property Panel - Desktop uses absolute positioning relative to editor */
 .panel {
-  position: fixed;
-  top: 130px; 
+  position: absolute;
+  top: 70px; 
   right: 16px;
-  bottom: auto;
-  width: 300px;
-  max-height: calc(100vh - 160px);
+  width: 280px;
+  max-height: calc(100% - 100px);
   background: #ffffff;
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 16px;
@@ -417,8 +445,11 @@
   flex-direction: column;
   animation: slideIn 0.25s ease;
   box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-  z-index: 200;
+  z-index: 10000;
   overflow: hidden;
+  /* iOS hardware acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 @keyframes slideIn { 
@@ -436,6 +467,10 @@
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
   animation: slideUp 0.3s ease;
+  z-index: 10000;
+  /* iOS hardware acceleration */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 @keyframes slideUp { 
@@ -456,20 +491,33 @@
 .panelHeader h3 { margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; }
 
 .panelHeader button {
-  width: 32px; height: 32px;
+  width: 36px;
+  height: 36px;
   background: rgba(0,0,0,0.05);
   border: none;
   border-radius: 50%;
-  font-size: 22px;
+  font-size: 24px;
   color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  /* iOS fix: ensure touch target is big enough */
+  min-width: 36px;
+  min-height: 36px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .panelHeader button:hover { background: rgba(0,0,0,0.1); }
+
+/* iOS: ensure X button is tappable */
+@supports (-webkit-touch-callout: none) {
+  .panelHeader button {
+    z-index: 2147483647;
+    position: relative;
+  }
+}
 
 .panelBody {
   padding: 16px;
@@ -576,6 +624,7 @@
   border: 2px solid rgba(0,0,0,0.1);
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  z-index: 300;
   z-index: 300;
   animation: dropdownOpen 0.2s ease;
 }
@@ -748,43 +797,93 @@
   border-color: #14b8a6;
 }
 
-/* Color Button */
+/* New Color Picker Component - Clean & Simple */
+.colorPickerComponent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Color Grid - Simplified */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+/* Individual color swatch */
+.colorSwatch {
+  aspect-ratio: 1;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+  z-index: 2;
+  border-color: rgba(0,0,0,0.3);
+}
+
+.colorSwatch.active {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px #14b8a6, 0 4px 8px rgba(0,0,0,0.2);
+  transform: scale(1.1);
+}
+
+/* Current color preview */
+.colorPreview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.colorPreviewSwatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid rgba(0,0,0,0.15);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.colorPreviewValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  font-family: monospace;
+}
+
+/* Mobile adjustments */
+.editor.mobile .colorGrid {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.editor.mobile .colorSwatch {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 8px;
+}
+
+/* Color Button - Legacy styles, kept for any direct button usage */
 .colorBtn {
   width: 100%;
   height: 48px;
-  border: 3px solid rgba(0,0,0,0.1);
-  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.colorBtn:hover { transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
-/* Color Picker */
-.colorPickerWrap {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.colorPickerOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.73);
-}
-
-
-.colorPicker {
-  position: relative;
-  z-index: 1;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
+/* Note: Old modal-based color picker has been replaced with inline ColorPicker component */
 
 /* Save Button */
 .saveBtn {
@@ -881,6 +980,40 @@
   justify-content: center;
   z-index: 10000;
   padding: 20px;
+  /* iOS fixes */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* iOS Safari specific fixes for modals */
+@supports (-webkit-touch-callout: none) {
+  .modalOverlay {
+    /* Force hardware acceleration on iOS */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    /* Ensure it's above everything */
+    z-index: 2147483647;
+  }
+  
+  /* iOS panel fix - ensure it's above canvas */
+  .panel {
+    z-index: 2147483646 !important;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .editor.mobile .panel {
+    z-index: 2147483646 !important;
+  }
+
+  /* Font dropdown on iOS */
+  .fontDropdownMenu {
+    z-index: 2147483644 !important;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 .imageOptionsModal {

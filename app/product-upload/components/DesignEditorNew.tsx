@@ -1,10 +1,16 @@
 'use client';
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import * as fabric from 'fabric';
-// @ts-ignore - react-color types
-import { SketchPicker, ColorResult } from 'react-color';
 import styles from './DesignEditorNew.module.css';
+
+// Detect iOS device
+const isIOS = () => {
+    if (typeof navigator === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
 
 type Side = 'front' | 'back';
 type Tool = 'select' | 'text' | 'image' | 'draw';
@@ -27,7 +33,23 @@ type DesignEditorProps = {
 
 type HistoryState = string; // Serialized design for one side
 
-const PRESET_COLORS = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'];
+// Simplified color palette - essential colors only
+const COLOR_PALETTE = [
+    // Black, White, Grays
+    '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
+    // Reds & Pinks
+    '#FF0000', '#FF5252', '#FF8A80', '#E91E63', '#F48FB1', '#FFC0CB',
+    // Oranges & Yellows
+    '#FF5722', '#FF9800', '#FFC107', '#FFEB3B', '#FFF176',
+    // Greens
+    '#4CAF50', '#8BC34A', '#CDDC39', '#00E676', '#1DE9B6',
+    // Blues & Cyans
+    '#2196F3', '#03A9F4', '#00BCD4', '#3F51B5', '#0000FF', '#00FFFF',
+    // Purples
+    '#9C27B0', '#673AB7', '#E040FB', '#EA80FC',
+    // Browns
+    '#795548', '#8D6E63', '#A52A2A', '#D7CCC8',
+];
 const MOVE_STEP = 5;
 const MOVE_STEP_SHIFT = 20;
 const MAX_HISTORY = 50;
@@ -44,6 +66,42 @@ const getContrastColor = (hexColor: string): string => {
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
+
+// Color Picker Component - Simple inline palette (no custom colors)
+type ColorPickerProps = {
+    currentColor: string;
+    onColorChange: (color: string) => void;
+};
+
+const ColorPicker = memo(function ColorPicker({ currentColor, onColorChange }: ColorPickerProps) {
+    return (
+        <div className={styles.colorPickerComponent}>
+            {/* Color palette grid */}
+            <div className={styles.colorGrid}>
+                {COLOR_PALETTE.map((color) => (
+                    <button
+                        key={color}
+                        className={`${styles.colorSwatch} ${currentColor.toLowerCase() === color.toLowerCase() ? styles.active : ''}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => onColorChange(color)}
+                        title={color}
+                        type="button"
+                        aria-label={`Select color ${color}`}
+                    />
+                ))}
+            </div>
+
+            {/* Current color preview */}
+            <div className={styles.colorPreview}>
+                <div
+                    className={styles.colorPreviewSwatch}
+                    style={{ backgroundColor: currentColor }}
+                />
+                <span className={styles.colorPreviewValue}>{currentColor.toUpperCase()}</span>
+            </div>
+        </div>
+    );
+});
 
 const DesignEditor = memo(function DesignEditor({ productType, productColor, initialDesign, onDesignChange, printAreaFront, printAreaBack }: DesignEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -84,7 +142,6 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
     const [fontFamily, setFontFamily] = useState('Arial');
     const [fontSize, setFontSize] = useState(32);
     const [currentColor, setCurrentColor] = useState(() => getContrastColor(productColor));
-    const [showColorPicker, setShowColorPicker] = useState(false);
     const [isBold, setIsBold] = useState(false);
     const [isItalic, setIsItalic] = useState(false);
 
@@ -223,24 +280,14 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
         return () => clearTimeout(timer);
     }, [isFullscreen, calculateSize]);
 
-    // Lock body scroll when in CSS fullscreen mode
+    // Lock body scroll when in CSS fullscreen mode (desktop only - iOS handles this differently)
     useEffect(() => {
-        if (isFullscreen) {
+        if (isFullscreen && !isIOS()) {
+            // Desktop: prevent body scroll
             document.body.style.overflow = 'hidden';
-            document.body.style.touchAction = 'none';
-            // Prevent scroll on iOS Safari
-            document.documentElement.style.overflow = 'hidden';
-            document.documentElement.style.position = 'fixed';
-            document.documentElement.style.width = '100%';
-            document.documentElement.style.height = '100%';
         }
         return () => {
             document.body.style.overflow = '';
-            document.body.style.touchAction = '';
-            document.documentElement.style.overflow = '';
-            document.documentElement.style.position = '';
-            document.documentElement.style.width = '';
-            document.documentElement.style.height = '';
         };
     }, [isFullscreen]);
 
@@ -819,7 +866,6 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                         }
                         setShowPanel(false);
                         setFontDropdownOpen(false);
-                        setShowColorPicker(false);
                     }
                     break;
                 case ']':
@@ -1185,9 +1231,15 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
         saveCurrentDesign();
     };
 
-    // Native Fullscreen API implementation - keeps DOM elements in place so canvas refs work
+    // Fullscreen toggle - uses native API on desktop, CSS fullscreen on iOS
     const toggleFullscreen = useCallback(async () => {
         if (!containerRef.current) return;
+
+        // iOS doesn't support fullscreen API for non-video elements, use CSS fallback
+        if (isIOS()) {
+            setIsFullscreen(prev => !prev);
+            return;
+        }
 
         try {
             if (!isFullscreen) {
@@ -1312,7 +1364,7 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                             <button className={styles.tool} onClick={duplicateSelected} title="Duplicate (Ctrl+D)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>
                             </button>
-                            <button className={styles.tool} onClick={deleteSelected} title="Delete">
+                            <button className={`${styles.tool} ${styles.delete}`} onClick={deleteSelected} title="Delete">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
                             </button>
                         </div>
@@ -1337,7 +1389,13 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                 <div className={styles.panel}>
                     <div className={styles.panelHeader}>
                         <h3>{activeTool === 'draw' ? 'Draw Settings' : selected?.type === 'i-text' ? 'Text Properties' : 'Properties'}</h3>
-                        <button onClick={() => setShowPanel(false)}>×</button>
+                        <button onClick={() => {
+                            setShowPanel(false);
+                            // If in draw mode, also switch back to select tool to close the panel
+                            if (activeTool === 'draw') {
+                                setActiveTool('select');
+                            }
+                        }}>×</button>
                     </div>
                     <div className={styles.panelBody}>
                         {activeTool === 'draw' && (
@@ -1345,7 +1403,15 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                                 <label>Brush Size: {brushSize}px</label>
                                 <input type="range" min="2" max="50" value={brushSize} onChange={e => setBrushSize(+e.target.value)} />
                                 <label>Brush Color</label>
-                                <button className={styles.colorBtn} style={{ background: currentColor }} onClick={() => setShowColorPicker(!showColorPicker)} />
+                                <ColorPicker
+                                    currentColor={currentColor}
+                                    onColorChange={(color) => {
+                                        setCurrentColor(color);
+                                        if (mainCanvas.current?.freeDrawingBrush) {
+                                            mainCanvas.current.freeDrawingBrush.color = color;
+                                        }
+                                    }}
+                                />
                             </>
                         )}
 
@@ -1398,7 +1464,15 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                                 </div>
 
                                 <label>Text Color</label>
-                                <button className={styles.colorBtn} style={{ background: currentColor }} onClick={() => setShowColorPicker(!showColorPicker)} />
+                                <ColorPicker
+                                    currentColor={currentColor}
+                                    onColorChange={(color) => {
+                                        setCurrentColor(color);
+                                        if (selected?.type === 'i-text') {
+                                            updateTextProp('fill', color);
+                                        }
+                                    }}
+                                />
                             </>
                         )}
 
@@ -1754,213 +1828,396 @@ const DesignEditor = memo(function DesignEditor({ productType, productColor, ini
                 </div>
             )}
 
-            {showColorPicker && (
-                <div className={styles.colorPickerWrap}>
-                    <div className={styles.colorPickerOverlay} onClick={() => setShowColorPicker(false)} />
-                    <div className={styles.colorPicker}>
-                        <SketchPicker color={currentColor} onChange={(c: ColorResult) => { setCurrentColor(c.hex); if (selected?.type === 'i-text') updateTextProp('fill', c.hex); if (mainCanvas.current?.freeDrawingBrush) mainCanvas.current.freeDrawingBrush.color = c.hex; }} presetColors={PRESET_COLORS} />
-                    </div>
-                </div>
-            )}
-
             {/* Image Options Modal */}
+            {/* Image Options Modal - inline JSX, conditionally wrapped in Portal on mobile */}
             {showImageOptions && (
-                <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); } }}>
-                    <div
-                        className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
-                        onClick={(e) => e.stopPropagation()}
-                        onDragOver={!showAIPrompt && generatedImages.length === 0 ? handleDragOver : undefined}
-                        onDragLeave={!showAIPrompt && generatedImages.length === 0 ? handleDragLeave : undefined}
-                        onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
-                    >
-                        <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
+                <>
+                    {/* Mobile: render through Portal to escape stacking context issues */}
+                    {isMobile && typeof document !== 'undefined' && createPortal(
+                        <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); } }}>
+                            <div
+                                className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
+                                onClick={(e) => e.stopPropagation()}
+                                onDragOver={!showAIPrompt && generatedImages.length === 0 ? handleDragOver : undefined}
+                                onDragLeave={!showAIPrompt && generatedImages.length === 0 ? handleDragLeave : undefined}
+                                onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
+                            >
+                                <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
 
-                        {!showAIPrompt && generatedImages.length === 0 && (
-                            <>
-                                <h3 className={styles.modalTitle}>Add Image</h3>
-                                <div
-                                    className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ''}`}
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    {isDraggingOver ? (
-                                        <>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="64" height="64">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="17 8 12 3 7 8" />
-                                                <line x1="12" y1="3" x2="12" y2="15" />
-                                            </svg>
-                                            <p className={styles.dragDropText}>Drop your image here</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="48" height="48">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="17 8 12 3 7 8" />
-                                                <line x1="12" y1="3" x2="12" y2="15" />
-                                            </svg>
-                                            <p className={styles.dragDropText}>Drag and drop your image here</p>
-                                            <p className={styles.dragDropSubtext}>or click to browse</p>
-                                        </>
-                                    )}
-                                </div>
-                                <div className={styles.imageOptionsButtons}>
-                                    <button className={styles.imageOptionBtn} onClick={() => setShowAIPrompt(true)}>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                                            <path d="M2 17l10 5 10-5" />
-                                            <path d="M2 12l10 5 10-5" />
-                                        </svg>
-                                        <span>Generate with AI</span>
-                                    </button>
-                                </div>
-                            </>
-                        )}
-
-                        {showAIPrompt && generatedImages.length === 0 && (
-                            <>
-                                <h3 className={styles.modalTitle}>Generate with AI</h3>
-                                <div className={styles.aiPromptSection}>
-                                    <label className={styles.promptLabel}>Enter your prompt:</label>
-                                    <textarea
-                                        className={styles.promptInput}
-                                        value={aiPrompt}
-                                        onChange={(e) => setAiPrompt(e.target.value)}
-                                        placeholder="Describe the image you want to generate..."
-                                        rows={4}
-                                        disabled={isGeneratingAI}
-                                    />
-                                    <div className={styles.aiActions}>
-                                        <button
-                                            className={styles.generateBtn}
-                                            onClick={handleGenerateAI}
-                                            disabled={!aiPrompt.trim() || isGeneratingAI}
+                                {!showAIPrompt && generatedImages.length === 0 && (
+                                    <>
+                                        <h3 className={styles.modalTitle}>Add Image</h3>
+                                        <div
+                                            className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ''}`}
+                                            onClick={() => fileInputRef.current?.click()}
                                         >
-                                            {isGeneratingAI ? (
+                                            {isDraggingOver ? (
                                                 <>
-                                                    <span className={styles.miniSpinner}></span>
-                                                    Generating...
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="64" height="64">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                        <polyline points="17 8 12 3 7 8" />
+                                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                                    </svg>
+                                                    <p className={styles.dragDropText}>Drop your image here</p>
                                                 </>
                                             ) : (
-                                                'Generate'
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="48" height="48">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                        <polyline points="17 8 12 3 7 8" />
+                                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                                    </svg>
+                                                    <p className={styles.dragDropText}>Drag and drop your image here</p>
+                                                    <p className={styles.dragDropSubtext}>or click to browse</p>
+                                                </>
                                             )}
-                                        </button>
-                                        <button
-                                            className={styles.backBtn}
-                                            onClick={() => { setShowAIPrompt(false); setAiPrompt(''); }}
-                                            disabled={isGeneratingAI}
-                                        >
-                                            Back
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Show history if available when prompt is open */}
-                                {aiImageHistory.length > 0 && (
-                                    <>
-                                        <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '24px', marginBottom: '12px' }}>
-                                            Previous Generations
-                                        </h4>
-                                        <div className={styles.generatedImagesGrid}>
-                                            {aiImageHistory.map((img, index) => (
-                                                <button
-                                                    key={`history-${index}`}
-                                                    className={styles.generatedImageCard}
-                                                    onClick={() => selectGeneratedImage(img)}
-                                                >
-                                                    <img src={img} alt={`Previous ${index + 1}`} />
-                                                </button>
-                                            ))}
+                                        </div>
+                                        <div className={styles.imageOptionsButtons}>
+                                            <button className={styles.imageOptionBtn} onClick={() => setShowAIPrompt(true)}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                                    <path d="M2 17l10 5 10-5" />
+                                                    <path d="M2 12l10 5 10-5" />
+                                                </svg>
+                                                <span>Generate with AI</span>
+                                            </button>
                                         </div>
                                     </>
                                 )}
-                            </>
-                        )}
 
-                        {(generatedImages.length > 0 || aiImageHistory.length > 0) && (
-                            <>
-                                <h3 className={styles.modalTitle}>
-                                    {generatedImages.length > 0 ? 'New Generated Images' : 'Previous Generated Images'}
-                                </h3>
-
-                                {/* Show current batch if available */}
-                                {generatedImages.length > 0 && (
-                                    <div className={styles.generatedImagesGrid}>
-                                        {generatedImages.map((img, index) => (
-                                            <button
-                                                key={`new-${index}`}
-                                                className={styles.generatedImageCard}
-                                                onClick={() => selectGeneratedImage(img)}
-                                            >
-                                                <img src={img} alt={`Generated ${index + 1}`} />
-                                            </button>
-                                        ))}
-                                    </div>
+                                {showAIPrompt && generatedImages.length === 0 && (
+                                    <>
+                                        <h3 className={styles.modalTitle}>Generate with AI</h3>
+                                        <div className={styles.aiPromptSection}>
+                                            <label className={styles.promptLabel}>Enter your prompt:</label>
+                                            <textarea
+                                                className={styles.promptInput}
+                                                value={aiPrompt}
+                                                onChange={(e) => setAiPrompt(e.target.value)}
+                                                placeholder="Describe the image you want to generate..."
+                                                rows={4}
+                                                disabled={isGeneratingAI}
+                                            />
+                                            <div className={styles.aiActions}>
+                                                <button
+                                                    className={styles.generateBtn}
+                                                    onClick={handleGenerateAI}
+                                                    disabled={!aiPrompt.trim() || isGeneratingAI}
+                                                >
+                                                    {isGeneratingAI ? (
+                                                        <>
+                                                            <span className={styles.miniSpinner}></span>
+                                                            Generating...
+                                                        </>
+                                                    ) : (
+                                                        'Generate'
+                                                    )}
+                                                </button>
+                                                <button
+                                                    className={styles.backBtn}
+                                                    onClick={() => { setShowAIPrompt(false); setAiPrompt(''); }}
+                                                    disabled={isGeneratingAI}
+                                                >
+                                                    Back
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {aiImageHistory.length > 0 && (
+                                            <>
+                                                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '24px', marginBottom: '12px' }}>
+                                                    Previous Generations
+                                                </h4>
+                                                <div className={styles.generatedImagesGrid}>
+                                                    {aiImageHistory.map((img, index) => (
+                                                        <button
+                                                            key={`history-${index}`}
+                                                            className={styles.generatedImageCard}
+                                                            onClick={() => selectGeneratedImage(img)}
+                                                        >
+                                                            <img src={img} alt={`Previous ${index + 1}`} />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </>
                                 )}
 
-                                {/* Show history if there are previous images */}
-                                {aiImageHistory.length > 0 && (
+                                {(generatedImages.length > 0 || aiImageHistory.length > 0) && (
                                     <>
+                                        <h3 className={styles.modalTitle}>
+                                            {generatedImages.length > 0 ? 'New Generated Images' : 'Previous Generated Images'}
+                                        </h3>
                                         {generatedImages.length > 0 && (
-                                            <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '20px', marginBottom: '12px' }}>
-                                                Previous Generations
-                                            </h4>
-                                        )}
-                                        <div className={styles.generatedImagesGrid}>
-                                            {aiImageHistory
-                                                .filter(img => !generatedImages.includes(img)) // Don't show duplicates
-                                                .map((img, index) => (
+                                            <div className={styles.generatedImagesGrid}>
+                                                {generatedImages.map((img, index) => (
                                                     <button
-                                                        key={`history-${index}`}
+                                                        key={`new-${index}`}
                                                         className={styles.generatedImageCard}
                                                         onClick={() => selectGeneratedImage(img)}
                                                     >
-                                                        <img src={img} alt={`Previous ${index + 1}`} />
+                                                        <img src={img} alt={`Generated ${index + 1}`} />
                                                     </button>
                                                 ))}
+                                            </div>
+                                        )}
+                                        {aiImageHistory.length > 0 && (
+                                            <>
+                                                {generatedImages.length > 0 && (
+                                                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '20px', marginBottom: '12px' }}>
+                                                        Previous Generations
+                                                    </h4>
+                                                )}
+                                                <div className={styles.generatedImagesGrid}>
+                                                    {aiImageHistory
+                                                        .filter(img => !generatedImages.includes(img))
+                                                        .map((img, index) => (
+                                                            <button
+                                                                key={`history-${index}`}
+                                                                className={styles.generatedImageCard}
+                                                                onClick={() => selectGeneratedImage(img)}
+                                                            >
+                                                                <img src={img} alt={`Previous ${index + 1}`} />
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className={styles.regenerateSection}>
+                                            <button
+                                                className={styles.regenerateBtn}
+                                                onClick={() => {
+                                                    setGeneratedImages([]);
+                                                    setShowAIPrompt(true);
+                                                }}
+                                            >
+                                                Generate New Images
+                                            </button>
+                                            {aiImageHistory.length > 0 && (
+                                                <button
+                                                    className={styles.clearHistoryBtn}
+                                                    onClick={() => {
+                                                        if (confirm('Clear all generated image history?')) {
+                                                            setAiImageHistory([]);
+                                                            setGeneratedImages([]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        marginTop: '8px',
+                                                        padding: '8px 16px',
+                                                        background: 'rgba(239, 68, 68, 0.1)',
+                                                        color: '#dc2626',
+                                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                        borderRadius: '8px',
+                                                        fontSize: '12px',
+                                                        fontWeight: 600,
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                >
+                                                    Clear History
+                                                </button>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>,
+                        document.body
+                    )}
+                    {/* Desktop: render inline */}
+                    {!isMobile && (
+                        <div className={styles.modalOverlay} onClick={() => { if (!isGeneratingAI) { setShowImageOptions(false); setShowAIPrompt(false); } }}>
+                            <div
+                                className={`${styles.imageOptionsModal} ${isDraggingOver && !showAIPrompt && generatedImages.length === 0 ? styles.dragOver : ''}`}
+                                onClick={(e) => e.stopPropagation()}
+                                onDragOver={!showAIPrompt && generatedImages.length === 0 ? handleDragOver : undefined}
+                                onDragLeave={!showAIPrompt && generatedImages.length === 0 ? handleDragLeave : undefined}
+                                onDrop={!showAIPrompt && generatedImages.length === 0 ? handleDrop : undefined}
+                            >
+                                <button className={styles.modalClose} onClick={() => { setShowImageOptions(false); setShowAIPrompt(false); setIsDraggingOver(false); }} disabled={isGeneratingAI}>×</button>
+
+                                {!showAIPrompt && generatedImages.length === 0 && (
+                                    <>
+                                        <h3 className={styles.modalTitle}>Add Image</h3>
+                                        <div
+                                            className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ''}`}
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            {isDraggingOver ? (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="64" height="64">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                        <polyline points="17 8 12 3 7 8" />
+                                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                                    </svg>
+                                                    <p className={styles.dragDropText}>Drop your image here</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="48" height="48">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                        <polyline points="17 8 12 3 7 8" />
+                                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                                    </svg>
+                                                    <p className={styles.dragDropText}>Drag and drop your image here</p>
+                                                    <p className={styles.dragDropSubtext}>or click to browse</p>
+                                                </>
+                                            )}
+                                        </div>
+                                        <div className={styles.imageOptionsButtons}>
+                                            <button className={styles.imageOptionBtn} onClick={() => setShowAIPrompt(true)}>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                                    <path d="M2 17l10 5 10-5" />
+                                                    <path d="M2 12l10 5 10-5" />
+                                                </svg>
+                                                <span>Generate with AI</span>
+                                            </button>
                                         </div>
                                     </>
                                 )}
 
-                                <div className={styles.regenerateSection}>
-                                    <button
-                                        className={styles.regenerateBtn}
-                                        onClick={() => {
-                                            setGeneratedImages([]);
-                                            setShowAIPrompt(true);
-                                        }}
-                                    >
-                                        Generate New Images
-                                    </button>
-                                    {aiImageHistory.length > 0 && (
-                                        <button
-                                            className={styles.clearHistoryBtn}
-                                            onClick={() => {
-                                                if (confirm('Clear all generated image history?')) {
-                                                    setAiImageHistory([]);
+                                {showAIPrompt && generatedImages.length === 0 && (
+                                    <>
+                                        <h3 className={styles.modalTitle}>Generate with AI</h3>
+                                        <div className={styles.aiPromptSection}>
+                                            <label className={styles.promptLabel}>Enter your prompt:</label>
+                                            <textarea
+                                                className={styles.promptInput}
+                                                value={aiPrompt}
+                                                onChange={(e) => setAiPrompt(e.target.value)}
+                                                placeholder="Describe the image you want to generate..."
+                                                rows={4}
+                                                disabled={isGeneratingAI}
+                                            />
+                                            <div className={styles.aiActions}>
+                                                <button
+                                                    className={styles.generateBtn}
+                                                    onClick={handleGenerateAI}
+                                                    disabled={!aiPrompt.trim() || isGeneratingAI}
+                                                >
+                                                    {isGeneratingAI ? (
+                                                        <>
+                                                            <span className={styles.miniSpinner}></span>
+                                                            Generating...
+                                                        </>
+                                                    ) : (
+                                                        'Generate'
+                                                    )}
+                                                </button>
+                                                <button
+                                                    className={styles.backBtn}
+                                                    onClick={() => { setShowAIPrompt(false); setAiPrompt(''); }}
+                                                    disabled={isGeneratingAI}
+                                                >
+                                                    Back
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {aiImageHistory.length > 0 && (
+                                            <>
+                                                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '24px', marginBottom: '12px' }}>
+                                                    Previous Generations
+                                                </h4>
+                                                <div className={styles.generatedImagesGrid}>
+                                                    {aiImageHistory.map((img, index) => (
+                                                        <button
+                                                            key={`history-${index}`}
+                                                            className={styles.generatedImageCard}
+                                                            onClick={() => selectGeneratedImage(img)}
+                                                        >
+                                                            <img src={img} alt={`Previous ${index + 1}`} />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+
+                                {(generatedImages.length > 0 || aiImageHistory.length > 0) && (
+                                    <>
+                                        <h3 className={styles.modalTitle}>
+                                            {generatedImages.length > 0 ? 'New Generated Images' : 'Previous Generated Images'}
+                                        </h3>
+                                        {generatedImages.length > 0 && (
+                                            <div className={styles.generatedImagesGrid}>
+                                                {generatedImages.map((img, index) => (
+                                                    <button
+                                                        key={`new-${index}`}
+                                                        className={styles.generatedImageCard}
+                                                        onClick={() => selectGeneratedImage(img)}
+                                                    >
+                                                        <img src={img} alt={`Generated ${index + 1}`} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {aiImageHistory.length > 0 && (
+                                            <>
+                                                {generatedImages.length > 0 && (
+                                                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', marginTop: '20px', marginBottom: '12px' }}>
+                                                        Previous Generations
+                                                    </h4>
+                                                )}
+                                                <div className={styles.generatedImagesGrid}>
+                                                    {aiImageHistory
+                                                        .filter(img => !generatedImages.includes(img))
+                                                        .map((img, index) => (
+                                                            <button
+                                                                key={`history-${index}`}
+                                                                className={styles.generatedImageCard}
+                                                                onClick={() => selectGeneratedImage(img)}
+                                                            >
+                                                                <img src={img} alt={`Previous ${index + 1}`} />
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className={styles.regenerateSection}>
+                                            <button
+                                                className={styles.regenerateBtn}
+                                                onClick={() => {
                                                     setGeneratedImages([]);
-                                                }
-                                            }}
-                                            style={{
-                                                marginTop: '8px',
-                                                padding: '8px 16px',
-                                                background: 'rgba(239, 68, 68, 0.1)',
-                                                color: '#dc2626',
-                                                border: '1px solid rgba(239, 68, 68, 0.2)',
-                                                borderRadius: '8px',
-                                                fontSize: '12px',
-                                                fontWeight: 600,
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                            }}
-                                        >
-                                            Clear History
-                                        </button>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
+                                                    setShowAIPrompt(true);
+                                                }}
+                                            >
+                                                Generate New Images
+                                            </button>
+                                            {aiImageHistory.length > 0 && (
+                                                <button
+                                                    className={styles.clearHistoryBtn}
+                                                    onClick={() => {
+                                                        if (confirm('Clear all generated image history?')) {
+                                                            setAiImageHistory([]);
+                                                            setGeneratedImages([]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        marginTop: '8px',
+                                                        padding: '8px 16px',
+                                                        background: 'rgba(239, 68, 68, 0.1)',
+                                                        color: '#dc2626',
+                                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                        borderRadius: '8px',
+                                                        fontSize: '12px',
+                                                        fontWeight: 600,
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                >
+                                                    Clear History
+                                                </button>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
