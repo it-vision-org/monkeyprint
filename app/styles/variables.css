@@ -5,7 +5,6 @@
   --header-height-mobile: 56px;
   --header-height-desktop: 90px;
   --safe-bottom: env(safe-area-inset-bottom);
-  --viewport-height: 100vh;
   --viewport-height: 100dvh;
   
   

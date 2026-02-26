@@ -58,8 +58,8 @@
   top: 0;
   bottom: 0;
   width: 100vw;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   background: linear-gradient(180deg, #226894 0%, #01ab7b 100%);
   border: none;
   filter: drop-shadow(0px 32px 40px -12px rgba(0, 0, 0, 0.25));
@@ -482,8 +482,8 @@
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 300;
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: normal;
   color: #000000;
   outline: none;
   box-sizing: border-box;
@@ -513,7 +513,7 @@
   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 16px;
   color: #3f3f3f;
   cursor: pointer;
@@ -631,7 +631,7 @@
 .menuSlide {
   position: fixed;
   width: 279px;
-  height: 100vh;
+  height: 100dvh;
   left: -780px;
   top: 0px;
   background: linear-gradient(180deg, #1e66d1 0%, #c58fff 100%);
@@ -1108,19 +1108,19 @@
 
   .card2Required,
   .card3Required {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 17px;
   }
 
   .storeNameInput {
     min-height: 52px;
     height: 52px;
-    font-size: 14px;
+    font-size: 16px;
     padding: 0 20px;
   }
 
   .searchInput {
-    font-size: 12px;
+    font-size: 16px;
   }
 
   .uploadArea {
@@ -1154,7 +1154,7 @@
   }
 
   .uploadDescription {
-    font-size: 13px;
+    font-size: 16px;
     line-height: 16px;
   }
 
@@ -1166,19 +1166,19 @@
 
   .card2Required,
   .card3Required {
-    font-size: 13px;
+    font-size: 16px;
     line-height: 16px;
   }
 
   .storeNameInput {
     min-height: 48px;
     height: 48px;
-    font-size: 13px;
+    font-size: 16px;
     padding: 0 18px;
   }
 
   .searchInput {
-    font-size: 11px;
+    font-size: 16px;
     padding: 0 15px;
   }
 
@@ -1235,7 +1235,7 @@
 /* --- Styles moved from globals.css --- */
 
 .create-shop-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(
     180deg,
     #0a0a0a 0%,
@@ -1441,7 +1441,7 @@
 
 .cs-upload-copy p {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   color: rgba(13, 28, 35, 0.72);
   line-height: 1.4;
 }
@@ -1494,7 +1494,7 @@
 }
 
 .cs-card-heading span {
-  font-size: 13px;
+  font-size: 16px;
   color: rgba(13, 28, 35, 0.6);
   font-weight: 500;
 }
@@ -1510,7 +1510,7 @@
   padding: 16px 22px;
   border: 1px solid rgba(13, 28, 35, 0.12);
   background: #ffffff;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: #0d1c23;
 }
@@ -1551,7 +1551,7 @@
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 15px;
+  font-size: 16px;
   padding: 14px 0;
   color: #0d1c23;
 }

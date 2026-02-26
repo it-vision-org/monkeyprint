@@ -94,13 +94,15 @@ select {
     border-color var(--duration-fast) ease-out,
     box-shadow var(--duration-normal) var(--ease-out-expo),
     transform var(--duration-fast) var(--spring-responsive);
+  font-size: 16px; /* Prevent iOS zoom */
 }
 
 input:not([type="checkbox"]):not([type="radio"]):focus,
 textarea:focus,
 select:focus {
   outline: none;
-  transform: scale(1.005);
+  /* Reduced transform to prevent iOS jitter/zoom issues */
+  transform: none;
 }
 
 /* Checkbox and Radio tactile feedback */

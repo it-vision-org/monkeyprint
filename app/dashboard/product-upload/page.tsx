@@ -882,9 +882,8 @@ export default function ProductUploadPage() {
               gap: "32px",
               padding: "40px 20px",
               textAlign: "center",
-              background: "rgba(254, 242, 242, 0.1)",
+              background: "rgba(254, 242, 242, 0.95)",
               borderRadius: "32px",
-              backdropFilter: "blur(10px)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
             }}
           >
@@ -979,9 +978,8 @@ export default function ProductUploadPage() {
               gap: "32px",
               padding: "40px 20px",
               textAlign: "center",
-              background: "rgba(255, 255, 255, 0.1)",
+              background: "rgba(255, 255, 255, 0.95)",
               borderRadius: "32px",
-              backdropFilter: "blur(10px)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
             }}
           >
@@ -1212,7 +1210,6 @@ export default function ProductUploadPage() {
                           mask: productMaskImage
                             ? `url(${productMaskImage}) no-repeat center / contain`
                             : "none",
-                          filter: "blur(4px)",
                           zIndex: 0,
                         }}
                       />
