@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 // @ts-ignore - react-color types
 import { SketchPicker, ColorResult } from 'react-color';
@@ -45,7 +45,7 @@ const getContrastColor = (hexColor: string): string => {
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
 
-export default function DesignEditor({ productType, productColor, initialDesign, onDesignChange, printAreaFront, printAreaBack }: DesignEditorProps) {
+const DesignEditor = memo(function DesignEditor({ productType, productColor, initialDesign, onDesignChange, printAreaFront, printAreaBack }: DesignEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const previewRef = useRef<HTMLCanvasElement>(null);
@@ -152,13 +152,31 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         const mobile = window.innerWidth < 768;
         setIsMobile(mobile);
 
+        // Check if in native fullscreen mode
+        const isNativeFullscreen = !!(
+            document.fullscreenElement ||
+            (document as any).webkitFullscreenElement ||
+            (document as any).msFullscreenElement
+        );
+
         // Calculate available space for canvas
         if (mobile) {
             // Mobile: use a fixed aspect ratio based on width to prevent layout thrashing on scroll
             // because window.innerHeight changes constantly on mobile browsers when scrolling
-            const availableWidth = window.innerWidth - 40;
-            const w = Math.min(availableWidth, 380);
-            const h = w * 1.25; // Fixed aspect ratio 400:500
+            const availableWidth = isNativeFullscreen
+                ? window.innerWidth - 32  // More space in fullscreen
+                : window.innerWidth - 40;
+
+            // In fullscreen mode, use more of the available height
+            const headerHeight = isNativeFullscreen ? 56 : 120; // Smaller header in fullscreen
+            const toolbarHeight = isNativeFullscreen ? 56 : 70;
+            const availableHeight = window.innerHeight - headerHeight - toolbarHeight - 32;
+
+            const w = Math.min(availableWidth, isNativeFullscreen ? Math.min(520, availableWidth) : 380);
+            // Calculate height based on available space, but maintain reasonable aspect ratio
+            const h = isNativeFullscreen
+                ? Math.min(Math.max(w * 1.2, availableHeight * 0.85), availableHeight, window.innerHeight * 0.8)
+                : w * 1.25;
 
             setCanvasSize(prev => {
                 const newW = Math.floor(w);
@@ -167,11 +185,26 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 return { w: newW, h: newH };
             });
         } else {
-            // Desktop: standard size within constraints
-            setCanvasSize(prev => {
-                if (prev.w === 400 && prev.h === 500) return prev;
-                return { w: 400, h: 500 };
-            });
+            // Desktop: check if in fullscreen for larger canvas
+            if (isNativeFullscreen) {
+                // In fullscreen, calculate based on available space
+                const availableWidth = window.innerWidth - 200; // Account for toolbar
+                const availableHeight = window.innerHeight - 100; // Account for header
+                const w = Math.min(500, availableWidth);
+                const h = Math.min(600, availableHeight, w * 1.25);
+                setCanvasSize(prev => {
+                    const newW = Math.floor(w);
+                    const newH = Math.floor(h);
+                    if (prev.w === newW && prev.h === newH) return prev;
+                    return { w: newW, h: newH };
+                });
+            } else {
+                // Normal desktop size
+                setCanvasSize(prev => {
+                    if (prev.w === 400 && prev.h === 500) return prev;
+                    return { w: 400, h: 500 };
+                });
+            }
         }
     }, []);
 
@@ -179,7 +212,37 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         calculateSize();
         window.addEventListener('resize', calculateSize);
         return () => window.removeEventListener('resize', calculateSize);
-    }, [calculateSize, isFullscreen]);
+    }, [calculateSize]);
+
+    // Recalculate size when fullscreen state changes
+    useEffect(() => {
+        // Small delay to allow browser to complete fullscreen transition
+        const timer = setTimeout(() => {
+            calculateSize();
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [isFullscreen, calculateSize]);
+
+    // Lock body scroll when in CSS fullscreen mode
+    useEffect(() => {
+        if (isFullscreen) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+            // Prevent scroll on iOS Safari
+            document.documentElement.style.overflow = 'hidden';
+            document.documentElement.style.position = 'fixed';
+            document.documentElement.style.width = '100%';
+            document.documentElement.style.height = '100%';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.position = '';
+            document.documentElement.style.width = '';
+            document.documentElement.style.height = '';
+        };
+    }, [isFullscreen]);
 
     // Update background when color changes
     useEffect(() => {
@@ -338,7 +401,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             img.crossOrigin = 'anonymous';
             img.onload = () => res(img);
             img.onerror = () => {
-                console.warn('Failed to load product image:', src);
                 res(null);
             };
 
@@ -435,20 +497,16 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         });
     };
 
-    // History management
-    const pushToHistory = useCallback(() => {
+    // History management - accepts pre-serialized state to avoid redundant canvas serialization
+    const pushToHistory = useCallback((preSerializedState?: string) => {
         if (isUndoingRef.current || !mainCanvas.current || isInitializing.current) return;
 
         const side = currentSideRef.current;
-        const serialized = serialize(mainCanvas.current);
+        const serialized = preSerializedState || serialize(mainCanvas.current);
 
-        // Remove any redo states for this side
         historyRef.current[side] = historyRef.current[side].slice(0, historyIndexRef.current[side] + 1);
-
-        // Add new state
         historyRef.current[side].push(serialized);
 
-        // Limit history size
         if (historyRef.current[side].length > MAX_HISTORY) {
             historyRef.current[side].shift();
         } else {
@@ -500,8 +558,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
         const designData = JSON.stringify(designsRef.current);
 
-        console.log('Force saving design:', designData.substring(0, 200));
-
         // Update parent state
         onDesignChange?.(designData);
 
@@ -521,20 +577,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
         saveTimeoutRef.current = setTimeout(() => {
             if (mainCanvas.current) {
-                designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
+                const serialized = serialize(mainCanvas.current);
+                designsRef.current[currentSideRef.current] = serialized;
                 const designData = JSON.stringify(designsRef.current);
 
-                console.log('Auto-saving design:', designData.substring(0, 200));
-
-                // Update parent state
                 onDesignChange?.(designData);
 
-                // Auto-save to sessionStorage
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem("designEditorData", designData);
                 }
 
-                pushToHistory();
+                pushToHistory(serialized);
             }
         }, 300);
     }, [onDesignChange, pushToHistory]);
@@ -757,13 +810,17 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                     }
                     break;
                 case 'Escape':
-                    if (mainCanvas.current) {
-                        mainCanvas.current.discardActiveObject();
-                        mainCanvas.current.renderAll();
+                    if (isFullscreen) {
+                        setIsFullscreen(false);
+                    } else {
+                        if (mainCanvas.current) {
+                            mainCanvas.current.discardActiveObject();
+                            mainCanvas.current.renderAll();
+                        }
+                        setShowPanel(false);
+                        setFontDropdownOpen(false);
+                        setShowColorPicker(false);
                     }
-                    setShowPanel(false);
-                    setFontDropdownOpen(false);
-                    setShowColorPicker(false);
                     break;
                 case ']':
                     if (e.ctrlKey || e.metaKey) {
@@ -783,7 +840,7 @@ export default function DesignEditor({ productType, productColor, initialDesign,
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [deleteSelected, duplicateSelected, copySelected, pasteClipboard, moveSelected, bringForward, sendBackward, undo, redo]);
+    }, [deleteSelected, duplicateSelected, copySelected, pasteClipboard, moveSelected, bringForward, sendBackward, undo, redo, isFullscreen]);
 
     // Init canvas
     useEffect(() => {
@@ -855,7 +912,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             // Save initial state to sessionStorage (even if empty)
             designsRef.current.front = serialize(canvas);
             const initialDesignData = JSON.stringify(designsRef.current);
-            console.log('Initial design state saved:', initialDesignData.substring(0, 200));
             if (typeof window !== 'undefined') {
                 sessionStorage.setItem("designEditorData", initialDesignData);
             }
@@ -879,8 +935,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                 // Force immediate save
                 designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
                 const designData = JSON.stringify(designsRef.current);
-
-                console.log('Unmounting, force saving design:', designData.substring(0, 200));
 
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem("designEditorData", designData);
@@ -942,8 +996,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         // Save current side before switching (immediate, no debounce)
         designsRef.current[currentSideRef.current] = serialize(mainCanvas.current);
         const designData = JSON.stringify(designsRef.current);
-
-        console.log('Switching side, saving design:', designData.substring(0, 200));
 
         // Auto-save to sessionStorage when switching sides
         if (typeof window !== 'undefined') {
@@ -1133,15 +1185,58 @@ export default function DesignEditor({ productType, productColor, initialDesign,
         saveCurrentDesign();
     };
 
-    const toggleFullscreen = () => {
+    // Native Fullscreen API implementation - keeps DOM elements in place so canvas refs work
+    const toggleFullscreen = useCallback(async () => {
         if (!containerRef.current) return;
-        if (!isFullscreen) {
-            containerRef.current.requestFullscreen?.();
-        } else {
-            document.exitFullscreen?.();
+
+        try {
+            if (!isFullscreen) {
+                // Enter fullscreen
+                if (containerRef.current.requestFullscreen) {
+                    await containerRef.current.requestFullscreen();
+                } else if ((containerRef.current as any).webkitRequestFullscreen) {
+                    await (containerRef.current as any).webkitRequestFullscreen();
+                } else if ((containerRef.current as any).msRequestFullscreen) {
+                    await (containerRef.current as any).msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if ((document as any).webkitExitFullscreen) {
+                    await (document as any).webkitExitFullscreen();
+                } else if ((document as any).msExitFullscreen) {
+                    await (document as any).msExitFullscreen();
+                }
+            }
+        } catch (error) {
+            console.error('Fullscreen error:', error);
+            // Fallback to CSS fullscreen if native API fails
+            setIsFullscreen(prev => !prev);
         }
-        setIsFullscreen(!isFullscreen);
-    };
+    }, [isFullscreen]);
+
+    // Listen for fullscreen change events (user presses ESC, etc.)
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const isCurrentlyFullscreen = !!(
+                document.fullscreenElement ||
+                (document as any).webkitFullscreenElement ||
+                (document as any).msFullscreenElement
+            );
+            setIsFullscreen(isCurrentlyFullscreen);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
 
     // Removed handleSave - auto-save is now handled automatically
 
@@ -1184,7 +1279,11 @@ export default function DesignEditor({ productType, productColor, initialDesign,
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 7v6h-6" /><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13" /></svg>
                     </button>
                     <button className={styles.fullscreenBtn} onClick={toggleFullscreen} title="Fullscreen">
-                        {isFullscreen ? '✕' : '⛶'}
+                        {isFullscreen ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" /></svg>
+                        ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+                        )}
                     </button>
                 </div>
             </div>
@@ -1867,4 +1966,6 @@ export default function DesignEditor({ productType, productColor, initialDesign,
             <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => handleFiles(e.target.files)} />
         </div>
     );
-}
+});
+
+export default DesignEditor;

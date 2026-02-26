@@ -19,12 +19,66 @@
   min-height: 400px; 
 }
 
+/* Native Fullscreen API styles */
+.editor:fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+  background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+.editor:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+  background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+.editor:-moz-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+.editor:-ms-fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+/* CSS fallback fullscreen styles */
 .editor.fullscreen {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  width: 100vw; height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  max-height: 100vh;
+  max-height: 100dvh;
+  max-height: -webkit-fill-available;
   border-radius: 0;
   z-index: 99999;
+  overflow: hidden;
+}
+
+.editor.mobile.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 /* Loading */
@@ -97,10 +151,44 @@
 
 .sideTab span { font-size: 16px; }
 
+/* Mobile: reduce tab size to fit better */
+.editor.mobile .sideTab {
+  padding: 8px 12px;
+  min-height: 38px;
+  font-size: 12px;
+}
+
+.editor.mobile .sideTab span {
+  font-size: 14px;
+}
+
+.editor.mobile .header {
+  padding: 8px;
+  gap: 6px;
+}
+
 .headerActions {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-shrink: 0;
+}
+
+/* Mobile: ensure header actions are always visible */
+.editor.mobile .headerActions {
+  gap: 4px;
+}
+
+.editor.mobile .fullscreenBtn,
+.editor.mobile .undoBtn {
+  width: 36px;
+  height: 36px;
+}
+
+.editor.mobile .fullscreenBtn svg,
+.editor.mobile .undoBtn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .undoBtn {
@@ -173,6 +261,8 @@
   padding: 8px 10px;
   gap: 8px;
   justify-content: center;
+  position: relative;
+  z-index: 20;
 }
 
 .toolGroup {
@@ -228,6 +318,8 @@
 .editor.mobile .canvasArea { 
   padding: 8px; 
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .canvasWrap {
@@ -724,6 +816,29 @@
   margin: 8px 10px;
   width: calc(100% - 20px);
   text-align: center;
+}
+
+/* Very small screens - ensure buttons stay visible */
+@media (max-width: 380px) {
+  .editor.mobile .sideTabs {
+    gap: 4px;
+  }
+  
+  .editor.mobile .sideTab {
+    padding: 6px 10px;
+    min-height: 34px;
+    font-size: 11px;
+  }
+  
+  .editor.mobile .headerActions {
+    gap: 3px;
+  }
+  
+  .editor.mobile .fullscreenBtn,
+  .editor.mobile .undoBtn {
+    width: 34px;
+    height: 34px;
+  }
 }
 
 /* Responsive */

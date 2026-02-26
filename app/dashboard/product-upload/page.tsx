@@ -27,14 +27,6 @@ type QualityOption = {
   price: number;
 };
 
-// These will be loaded from the API
-let PRODUCT_TYPES: ProductCard[] = [];
-let COLOR_SWATCHES: ColorSwatch[] = [];
-let QUALITY_OPTIONS: QualityOption[] = [];
-let DESIGN_FEE = 30;
-let PRODUCT_PRICES: Record<string, number> = {};
-let COLOR_FILTERS: Record<string, string> = {};
-
 // Get product name for display
 const getProductName = (
   productId: string,
@@ -613,7 +605,7 @@ export default function ProductUploadPage() {
     multiple: false,
   });
 
-  const handleGenerateAI = () => {
+  const handleGenerateAI = useCallback(() => {
     setIsLoadingAI(true);
     setShowAIPopup(true);
     setTimeout(() => {
@@ -625,14 +617,14 @@ export default function ProductUploadPage() {
       ]);
       setIsLoadingAI(false);
     }, 1800);
-  };
+  }, []);
 
-  const selectAIImage = (imageUrl: string) => {
+  const selectAIImage = useCallback((imageUrl: string) => {
     setUploadedDesign(imageUrl);
     sessionStorage.setItem("uploadedDesign", imageUrl);
     setShowAIPopup(false);
     setAiImages([]);
-  };
+  }, []);
 
   // Get available qualities for the selected product type
   const availableQualities = useMemo(() => {
@@ -714,34 +706,29 @@ export default function ProductUploadPage() {
   const basePrice = productPrices[selectedProduct] ?? 20;
   const totalPrice = basePrice + designFee + qualityPrice;
 
-  const toggleColor = (id: string) => {
+  const toggleColor = useCallback((id: string) => {
     setSelectedColors((prev) => {
       const exists = prev.includes(id);
       if (exists) {
-        // Don't allow removing the last color
         if (prev.length === 1) {
           return prev;
         }
-        // Remove the color - if it was the active one, switch to the first remaining color
         const filtered = prev.filter((color) => color !== id);
         if (activeColor === id && filtered.length > 0) {
-          // If we removed the active color, set the first remaining color as active
           setActiveColorState(filtered[0]);
         }
         return filtered;
       } else {
-        // Add the color at the end (so it appears on the side, not center)
         return [...prev, id];
       }
     });
-  };
+  }, [activeColor]);
 
-  const setActiveColor = (colorId: string) => {
-    // Only set active if the color is in the selected colors
+  const setActiveColor = useCallback((colorId: string) => {
     if (selectedColors.includes(colorId)) {
       setActiveColorState(colorId);
     }
-  };
+  }, [selectedColors]);
 
   // Get selected colors in order (active color first for centering, rest in original order)
   const orderedColors = useMemo(() => {
@@ -811,7 +798,11 @@ export default function ProductUploadPage() {
     [selectedProduct, productTypes],
   );
 
-  const handleNext = async () => {
+  const toggleMobilePrice = useCallback(() => {
+    setMobilePriceExpanded((prev) => !prev);
+  }, []);
+
+  const handleNext = useCallback(async () => {
     // Save uploaded design if exists
     if (uploadedDesign) {
       sessionStorage.setItem("uploadedDesign", uploadedDesign);
@@ -850,36 +841,34 @@ export default function ProductUploadPage() {
     const selectedTypeLabel = getProductName(selectedProduct, productTypes);
     sessionStorage.setItem("productTypeLabel", selectedTypeLabel);
 
-    // Force save design editor data before navigation
-    // Get the latest from sessionStorage first (in case auto-save already happened)
-    const latestDesignData = sessionStorage.getItem("designEditorData");
-
-    if (latestDesignData) {
-      console.log(
-        "Saving design data before navigation:",
-        latestDesignData.substring(0, 200),
+    // Ensure design editor data exists in sessionStorage before navigation
+    if (!sessionStorage.getItem("designEditorData")) {
+      sessionStorage.setItem(
+        "designEditorData",
+        JSON.stringify({ front: null, back: null }),
       );
-      sessionStorage.setItem("designEditorData", latestDesignData);
-    } else {
-      // If no design data exists, save empty structure to ensure consistency
-      const emptyDesign = JSON.stringify({ front: null, back: null });
-      console.log("No design data, saving empty structure");
-      sessionStorage.setItem("designEditorData", emptyDesign);
     }
 
-    // Verify it was saved
-    const verify = sessionStorage.getItem("designEditorData");
-    console.log("Verified saved design data:", verify?.substring(0, 200));
-
-    // Navigate immediately - sessionStorage is synchronous
     router.push("/dashboard/product-upload/details");
-  };
+  }, [
+    uploadedDesign,
+    selectedProduct,
+    productTypes,
+    productTypesFull,
+    colorSwatches,
+    activeColor,
+    basePrice,
+    designFee,
+    qualityPrice,
+    availableQualities,
+    selectedQuality,
+    totalPrice,
+    router,
+  ]);
 
-  const handleDesignChange = (designData: string) => {
-    // DO NOT update state here to avoid massive lag/re-rendering of the entire page
-    // setDesignEditorData(designData);
-    // Auto-save is now handled in the DesignEditor component which saves to sessionStorage directly
-  };
+  const handleDesignChange = useCallback((_designData: string) => {
+    // No-op: auto-save is handled in the DesignEditor component which saves to sessionStorage directly
+  }, []);
 
   // Removed handleDesignSave - auto-save is now automatic in DesignEditor
 
@@ -977,7 +966,7 @@ export default function ProductUploadPage() {
     }
 
     loadProductData();
-  }, [editProductId, router, activeColor]);
+  }, [editProductId, router]);
 
   // (MobilePriceBar and DesktopPriceWidget are top-level memo'd components - see above the default export)
 
@@ -1244,7 +1233,7 @@ export default function ProductUploadPage() {
         qualityLabel={selectedQualityLabel}
         productName={selectedProductName}
         expanded={mobilePriceExpanded}
-        onToggle={() => setMobilePriceExpanded((prev) => !prev)}
+        onToggle={toggleMobilePrice}
       />
 
       {/* Desktop floating price widget */}
