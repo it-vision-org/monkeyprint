@@ -3,10 +3,237 @@
   max-width: 390px;
 }
 
-@media (min-width: 769px) {
-  .loginFormContainer {
-    max-width: 600px;
+/* Spin animation for loading state */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
+/* ===== LOGIN BUTTON - MODERN OVERHAUL ===== */
+.loginButton {
+  position: relative;
+  width: 100%;
+  min-height: 56px;
+  padding: 16px 32px;
+  margin-top: 24px;
+  background: linear-gradient(135deg, #41eb5c 0%, #2dbb45 50%, #1e9e34 100%);
+  color: #ffffff;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px rgba(65, 235, 92, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
 
+/* Shine effect overlay */
+.loginButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+/* Hover states */
+.loginButton:hover {
+  background: linear-gradient(135deg, #4fff6b 0%, #35d04a 50%, #2dbb45 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px rgba(65, 235, 92, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.loginButton:hover::before {
+  left: 100%;
+}
+
+/* Active/Pressed state */
+.loginButton:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 
+    0 2px 12px rgba(65, 235, 92, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus state for accessibility */
+.loginButton:focus-visible {
+  outline: 3px solid rgba(65, 235, 92, 0.5);
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.loginButton:disabled {
+  background: linear-gradient(135deg, #666666 0%, #444444 100%);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading state */
+.loginButtonLoading {
+  composes: loginButton;
+  background: linear-gradient(135deg, #2dbb45 0%, #1e9e34 100%);
+  cursor: wait;
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+  .loginFormContainer {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .loginButton {
+    min-height: 52px;
+    padding: 14px 24px;
+    font-size: 15px;
+    border-radius: 14px;
+    margin-top: 20px;
+  }
+
+  /* Ensure button is easily tappable */
+  .loginButton:active {
+    transform: translateY(2px) scale(0.97);
+  }
+}
+
+@media (max-width: 480px) {
+  .loginButton {
+    min-height: 50px;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (max-width: 360px) {
+  .loginButton {
+    min-height: 48px;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+}
+
+/* ===== DESKTOP ENHANCEMENTS ===== */
+@media (min-width: 769px) {
+  .loginFormContainer {
+    max-width: 480px;
+  }
+
+  .loginButton {
+    min-height: 60px;
+    padding: 18px 40px;
+    font-size: 17px;
+    border-radius: 18px;
+    margin-top: 32px;
+    box-shadow: 
+      0 6px 24px rgba(65, 235, 92, 0.35),
+      0 3px 10px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .loginButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 12px 40px rgba(65, 235, 92, 0.45),
+      0 6px 16px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+@media (min-width: 1200px) {
+  .loginFormContainer {
+    max-width: 520px;
+  }
+
+  .loginButton {
+    min-height: 64px;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* ===== DARK MODE OPTIMIZATIONS ===== */
+/* The button already has great contrast on dark backgrounds */
+/* These are additional enhancements for specific scenarios */
+
+@media (prefers-contrast: high) {
+  .loginButton {
+    border: 2px solid #ffffff;
+    box-shadow: 
+      0 4px 20px rgba(65, 235, 92, 0.5),
+      0 0 0 2px rgba(65, 235, 92, 0.3);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .loginButton,
+  .loginButton::before {
+    transition: none;
+  }
+  
+  .loginButton:hover {
+    transform: none;
+  }
+}
+
+/* ===== ALTERNATIVE BUTTON STYLES (if needed) ===== */
+.loginButtonOutline {
+  composes: loginButton;
+  background: transparent;
+  border: 2px solid #41eb5c;
+  color: #41eb5c;
+  box-shadow: 0 4px 20px rgba(65, 235, 92, 0.15);
+}
+
+.loginButtonOutline:hover {
+  background: rgba(65, 235, 92, 0.1);
+  color: #4fff6b;
+  border-color: #4fff6b;
+}
+
+.loginButtonWhite {
+  composes: loginButton;
+  background: #ffffff;
+  color: #146b2b;
+  box-shadow: 
+    0 4px 20px rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loginButtonWhite:hover {
+  background: #f0f0f0;
+  color: #0d521f;
+  box-shadow: 
+    0 8px 30px rgba(255, 255, 255, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../create-shop/createShop.module.css';
 import loginStyles from './login.module.css';
-import { MainHeader, LoadingButton, LoadingLink } from '@/components';
+import { MainHeader, LoadingLink } from '@/components';
 
 import { Suspense } from 'react';
 
@@ -113,16 +113,43 @@ function LoginContent() {
                                 {error && <p style={{ color: '#ff4444', marginTop: '16px', fontSize: '14px' }}>{error}</p>}
                             </div>
 
-                            <LoadingButton
-                                className={`${styles.step1Button}`}
+                            <button
+                                className={loginStyles.loginButton}
                                 type="submit"
-                                isLoading={isLoading}
-                                style={{ marginTop: '24px', width: '100%' }}
-                                variant="success"
-                                size="lg"
+                                disabled={isLoading}
                             >
-                                SE CONNECTER
-                            </LoadingButton>
+                                {isLoading ? (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            style={{
+                                                animation: 'spin 1s linear infinite'
+                                            }}
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="rgba(255,255,255,0.3)"
+                                                strokeWidth="3"
+                                                fill="none"
+                                            />
+                                            <path
+                                                d="M12 2a10 10 0 0 1 10 10"
+                                                stroke="#ffffff"
+                                                strokeWidth="3"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        Connexion...
+                                    </span>
+                                ) : (
+                                    'SE CONNECTER'
+                                )}
+                            </button>
                         </form>
 
                         <div style={{ marginTop: '24px', textAlign: 'center' }}>
