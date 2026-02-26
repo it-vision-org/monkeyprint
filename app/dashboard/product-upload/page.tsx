@@ -62,11 +62,19 @@ type MobilePriceBarProps = {
 };
 
 const MobilePriceBar = memo(function MobilePriceBar({
-  totalPrice, basePrice, designFee, qualityPrice, qualityLabel, productName,
-  expanded, onToggle,
+  totalPrice,
+  basePrice,
+  designFee,
+  qualityPrice,
+  qualityLabel,
+  productName,
+  expanded,
+  onToggle,
 }: MobilePriceBarProps) {
   return (
-    <div className={`${styles.puCartContainer} ${styles.puCartContainerMobile}`}>
+    <div
+      className={`${styles.puCartContainer} ${styles.puCartContainerMobile}`}
+    >
       <button
         className={styles.puCartBar}
         type="button"
@@ -74,27 +82,61 @@ const MobilePriceBar = memo(function MobilePriceBar({
         onClick={onToggle}
       >
         <div className={styles.puCartContent}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
           </svg>
         </div>
         <div className={styles.puCartTotal}>
           <span className={styles.puCartPrice}>{totalPrice}DT</span>
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className={expanded ? styles.expanded : ""}>
-            <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="16"
+            height="10"
+            viewBox="0 0 16 10"
+            fill="none"
+            className={expanded ? styles.expanded : ""}
+          >
+            <path
+              d="M1 1L8 8L15 1"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
       </button>
       {expanded && (
-        <div className={`${styles.puCartDetails} ${styles.puCartDetailsMobile}`}>
+        <div
+          className={`${styles.puCartDetails} ${styles.puCartDetailsMobile}`}
+        >
           <div className={styles.puCartDetailsHeader}>
             <h3 className={styles.puCartDetailsTitle}>Détails du prix</h3>
           </div>
           <div className={styles.puCartItems}>
             <div className={styles.puCartItem}>
               <div className={styles.puCartItemInfo}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                  <path d="M3 6h18" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
                 <span>Articles ({productName})</span>
               </div>
@@ -102,9 +144,19 @@ const MobilePriceBar = memo(function MobilePriceBar({
             </div>
             <div className={styles.puCartItem}>
               <div className={styles.puCartItemInfo}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
                 </svg>
                 <span>Design</span>
               </div>
@@ -112,8 +164,19 @@ const MobilePriceBar = memo(function MobilePriceBar({
             </div>
             <div className={styles.puCartItem}>
               <div className={styles.puCartItemInfo}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
                 </svg>
                 <span>Quality ({qualityLabel})</span>
               </div>
@@ -144,12 +207,25 @@ type DesktopPriceWidgetProps = {
 };
 
 const DesktopPriceWidget = memo(function DesktopPriceWidget({
-  totalPrice, basePrice, designFee, qualityPrice, qualityLabel, productName,
-  expanded, locked, onExpand, onLock,
+  totalPrice,
+  basePrice,
+  designFee,
+  qualityPrice,
+  qualityLabel,
+  productName,
+  expanded,
+  locked,
+  onExpand,
+  onLock,
 }: DesktopPriceWidgetProps) {
   const handleToggle = useCallback(() => {
-    if (locked) { onLock(false); onExpand(false); }
-    else { onLock(true); onExpand(true); }
+    if (locked) {
+      onLock(false);
+      onExpand(false);
+    } else {
+      onLock(true);
+      onExpand(true);
+    }
   }, [locked, onLock, onExpand]);
 
   const handleMouseEnter = useCallback(() => {
@@ -173,7 +249,16 @@ const DesktopPriceWidget = memo(function DesktopPriceWidget({
         aria-label="Voir le récapitulatif des prix"
       >
         <div className={styles.puPriceWidgetTriggerIcon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
           </svg>
         </div>
@@ -183,7 +268,16 @@ const DesktopPriceWidget = memo(function DesktopPriceWidget({
       <div className={styles.puPriceWidgetPanel}>
         <div className={styles.puPriceWidgetHeader}>
           <div className={styles.puPriceWidgetHeaderIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
             </svg>
           </div>
@@ -194,36 +288,78 @@ const DesktopPriceWidget = memo(function DesktopPriceWidget({
             <div className={styles.puPriceWidgetItem}>
               <div className={styles.puPriceWidgetItemInfo}>
                 <div className={styles.puPriceWidgetItemIcon}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
                   </svg>
                 </div>
-                <span className={styles.puPriceWidgetItemLabel}>Articles ({productName})</span>
+                <span className={styles.puPriceWidgetItemLabel}>
+                  Articles ({productName})
+                </span>
               </div>
-              <span className={styles.puPriceWidgetItemPrice}>{basePrice}DT</span>
+              <span className={styles.puPriceWidgetItemPrice}>
+                {basePrice}DT
+              </span>
             </div>
             <div className={styles.puPriceWidgetItem}>
               <div className={styles.puPriceWidgetItemInfo}>
                 <div className={styles.puPriceWidgetItemIcon}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
                   </svg>
                 </div>
                 <span className={styles.puPriceWidgetItemLabel}>Design</span>
               </div>
-              <span className={styles.puPriceWidgetItemPrice}>{designFee}DT</span>
+              <span className={styles.puPriceWidgetItemPrice}>
+                {designFee}DT
+              </span>
             </div>
             <div className={styles.puPriceWidgetItem}>
               <div className={styles.puPriceWidgetItemInfo}>
                 <div className={styles.puPriceWidgetItemIcon}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
                   </svg>
                 </div>
-                <span className={styles.puPriceWidgetItemLabel}>Quality ({qualityLabel})</span>
+                <span className={styles.puPriceWidgetItemLabel}>
+                  Quality ({qualityLabel})
+                </span>
               </div>
-              <span className={styles.puPriceWidgetItemPrice}>{qualityPrice}DT</span>
+              <span className={styles.puPriceWidgetItemPrice}>
+                {qualityPrice}DT
+              </span>
             </div>
           </div>
           <div className={styles.puPriceWidgetTotal}>
@@ -235,7 +371,6 @@ const DesktopPriceWidget = memo(function DesktopPriceWidget({
     </div>
   );
 });
-
 
 export default function ProductUploadPage() {
   const router = useRouter();
@@ -664,7 +799,9 @@ export default function ProductUploadPage() {
 
   // Memoize quality label
   const selectedQualityLabel = useMemo(
-    () => availableQualities.find((o: QualityOption) => o.id === selectedQuality)?.label || "Cotton",
+    () =>
+      availableQualities.find((o: QualityOption) => o.id === selectedQuality)
+        ?.label || "Cotton",
     [availableQualities, selectedQuality],
   );
 
@@ -703,7 +840,9 @@ export default function ProductUploadPage() {
     sessionStorage.setItem("productBasePrice", basePrice.toString());
     sessionStorage.setItem("productDesignFee", designFee.toString());
     sessionStorage.setItem("productQualityPrice", qualityPrice.toString());
-    const qualityLabel = availableQualities.find((o: QualityOption) => o.id === selectedQuality)?.label || "Cotton";
+    const qualityLabel =
+      availableQualities.find((o: QualityOption) => o.id === selectedQuality)
+        ?.label || "Cotton";
     sessionStorage.setItem("productQualityLabel", qualityLabel);
     sessionStorage.setItem("productTotalPrice", totalPrice.toString());
 
@@ -780,9 +919,9 @@ export default function ProductUploadPage() {
               const designData =
                 typeof parsed === "object" && parsed !== null
                   ? JSON.stringify({
-                    front: parsed.front || null,
-                    back: parsed.back || null,
-                  })
+                      front: parsed.front || null,
+                      back: parsed.back || null,
+                    })
                   : JSON.stringify({ front: null, back: null });
               setDesignEditorData(designData);
               sessionStorage.setItem("designEditorData", designData);
@@ -1123,7 +1262,7 @@ export default function ProductUploadPage() {
       />
 
       <main
-        className={`${styles.puMobileMain} dashboard-pu-mobile-main`}
+        className={`${styles.puMobileMain} ${styles.puMainDesktop} dashboard-pu-mobile-main`}
         style={{ paddingBottom: mobilePriceExpanded ? "260px" : "120px" }}
       >
         <div className={styles.puMobileFlow}>
@@ -1137,7 +1276,9 @@ export default function ProductUploadPage() {
           </div>
 
           <section className={styles.puCard}>
-            <h2 className={styles.puCardTitle}>Choisissez le type de produit</h2>
+            <h2 className={styles.puCardTitle}>
+              Choisissez le type de produit
+            </h2>
             <div className={styles.puProductGrid}>
               {productTypes.map((product) => (
                 <button
@@ -1147,7 +1288,9 @@ export default function ProductUploadPage() {
                   onClick={() => setSelectedProduct(product.id)}
                 >
                   {product.badge && (
-                    <span className={styles.puProductBadge}>{product.badge}</span>
+                    <span className={styles.puProductBadge}>
+                      {product.badge}
+                    </span>
                   )}
                   <div className={styles.puProductImage}>
                     <Image
@@ -1265,8 +1408,12 @@ export default function ProductUploadPage() {
                       className={`${styles.puColorDot} ${isSelected ? styles.active : ""} ${isActive && isSelected ? styles.selected : ""}`}
                       style={{
                         background: swatch.hex,
-                        border: isLight ? "2px solid rgba(0, 0, 0, 0.15)" : "none",
-                        boxShadow: isLight ? "0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)" : "none",
+                        border: isLight
+                          ? "2px solid rgba(0, 0, 0, 0.15)"
+                          : "none",
+                        boxShadow: isLight
+                          ? "0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)"
+                          : "none",
                       }}
                       onClick={() => toggleColor(swatch.id)}
                       title={swatch.label}
@@ -1303,12 +1450,17 @@ export default function ProductUploadPage() {
           </section>
 
           <section className={styles.puCard}>
-            <div className={styles.puCardHeader} style={{ padding: '20px 18px 0' }}>
+            <div
+              className={styles.puCardHeader}
+              style={{ padding: "20px 18px 0" }}
+            >
               <h3 className={styles.puCardSubtitle}>Modifiez votre design</h3>
-              <span className={styles.puPriceTag}>À partir de {designFee} DT</span>
+              <span className={styles.puPriceTag}>
+                À partir de {designFee} DT
+              </span>
             </div>
 
-            <div style={{ height: "600px", minHeight: "500px" }}>
+            <div className={styles.puDesignEditorContainer}>
               <DesignEditor
                 productType={selectedProduct}
                 productColor={activeColorHex}
@@ -1335,8 +1487,12 @@ export default function ProductUploadPage() {
                       className={`${styles.puMiniDot} ${isActive ? styles.active : ""}`}
                       style={{
                         background: swatch?.hex,
-                        border: isLight ? "2px solid rgba(0, 0, 0, 0.15)" : "none",
-                        boxShadow: isLight ? "0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)" : "none",
+                        border: isLight
+                          ? "2px solid rgba(0, 0, 0, 0.15)"
+                          : "none",
+                        boxShadow: isLight
+                          ? "0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 8px rgba(0, 0, 0, 0.1)"
+                          : "none",
                       }}
                       onClick={() => setActiveColor(colorId)}
                       title={swatch?.label}
@@ -1348,7 +1504,9 @@ export default function ProductUploadPage() {
           </section>
 
           <section className={styles.puCard} style={{ gap: "14px" }}>
-            <h3 className={styles.puCardSubtitle}>Select quality of the product</h3>
+            <h3 className={styles.puCardSubtitle}>
+              Select quality of the product
+            </h3>
             <div className={styles.puQualityRow}>
               {availableQualities.map((option: QualityOption) => (
                 <button
@@ -1386,7 +1544,11 @@ export default function ProductUploadPage() {
             </div>
           </section>
 
-          <button className={styles.puNextCta} type="button" onClick={handleNext}>
+          <button
+            className={styles.puNextCta}
+            type="button"
+            onClick={handleNext}
+          >
             {editProductId ? "SUIVANT (MODIFIER)" : "SUIVANT"}
           </button>
         </div>

@@ -1,8 +1,6 @@
 /* Dashboard and Admin Styles Module */
 
-.dashboard-page {
-  /* No explicit background here, handled by page components or base */
-}
+/* Dashboard page wrapper - styles handled by child components */
 
 .dash-header {
   position: fixed;
@@ -44,9 +42,7 @@
   color: #1f2937;
 }
 
-.dash-logo {
-  /* Placeholder */
-}
+/* dash-logo styles are applied via inline styles in component */
 
 .dash-nav {
   display: flex;
@@ -95,7 +91,9 @@
   top: calc(100% + 12px);
   left: 0;
   background: #ffffff;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.05);
+  box-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   padding: 8px;
   min-width: 180px;
@@ -105,8 +103,14 @@
 }
 
 @keyframes dropdownFade {
-  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .dash-nav-dropdown-item {
@@ -132,9 +136,15 @@
   border-radius: 50%;
 }
 
-.dash-submenu-dot.orange { background: #f97316; }
-.dash-submenu-dot.green { background: #10b981; }
-.dash-submenu-dot.red { background: #ef4444; }
+.dash-submenu-dot.orange {
+  background: #f97316;
+}
+.dash-submenu-dot.green {
+  background: #10b981;
+}
+.dash-submenu-dot.red {
+  background: #ef4444;
+}
 
 .dash-nav-caret {
   font-size: 10px;
@@ -160,9 +170,7 @@
   gap: 12px;
 }
 
-.dash-visit-btn {
-  /* Inherits from LoadingButton/ui-system */
-}
+/* dash-visit-btn styles inherited from LoadingButton/ui-system component */
 
 @media (max-width: 1024px) {
   .dash-nav {
@@ -255,8 +263,24 @@
   min-height: 100dvh;
   padding-top: 56px; /* Height of fixed header */
   background: #f1f5f9;
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 24px 24px;
+  /* Use CSS containment for better scroll performance */
+  contain: layout;
+}
+
+/* Subtle dot pattern - desktop only, simpler for performance */
+@media (min-width: 769px) {
+  .dash-main {
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 24px 24px;
+    /* Fix background to prevent repaints during scroll */
+    background-attachment: fixed;
+  }
+
+  /* Remove dot pattern for product upload page - it has its own gradient */
+  :global(.dash-main):has(.productUploadPage) {
+    background-image: none !important;
+    background-attachment: scroll !important;
+  }
 }
 
 .dash-content {
@@ -369,8 +393,6 @@
     cursor: pointer;
   }
 
-
-
   .dash-mobile-store-name {
     font-size: 16px;
     font-weight: 600;
@@ -379,8 +401,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-
 
   .dash-main {
     padding-top: var(--header-height-mobile, 56px);
