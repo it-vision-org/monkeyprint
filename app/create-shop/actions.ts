@@ -1,10 +1,9 @@
 'use server';
 
-import { auth, signIn } from '@/auth';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { uploadImageToR2 } from '@/lib/storage';
 import bcrypt from 'bcryptjs';
-import { AuthError } from 'next-auth';
 import { redirect } from 'next/navigation';
 
 export async function registerUser(formData: FormData) {
@@ -13,6 +12,17 @@ export async function registerUser(formData: FormData) {
 
     if (!email || !password) {
         return { error: 'Missing fields' };
+    }
+
+    // Validate password length (minimum 6 characters)
+    if (password.length < 6) {
+        return { error: 'Le mot de passe doit contenir au moins 6 caractères' };
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return { error: 'Veuillez entrer une adresse e-mail valide' };
     }
 
     try {
@@ -29,36 +39,9 @@ export async function registerUser(formData: FormData) {
             },
         });
 
-        // Attempt to sign in - signIn may throw NEXT_REDIRECT in server actions
-        // We need to handle this properly
-        try {
-            const result = await signIn('credentials', { 
-                email, 
-                password, 
-                redirect: false 
-            });
-            // If signIn returns without throwing, it was successful
-            return { success: true };
-        } catch (e: any) {
-            // Check if it's a Next.js redirect (which indicates success in Next.js 15)
-            if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.message?.includes('NEXT_REDIRECT')) {
-                // This is normal - sign in was successful, redirect was triggered
-                return { success: true };
-            }
-            // Check for auth errors
-            if (e instanceof AuthError) {
-                console.error('Auth error:', e);
-                return { error: 'Failed to auto-login' };
-            }
-            // For other errors, log and return error
-            console.error('Unexpected sign-in error:', e);
-            return { error: 'Failed to sign in after registration' };
-        }
+        // Return success - client will handle sign-in
+        return { success: true, email, password };
     } catch (error: any) {
-        // Let Next.js redirects pass through
-        if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-            throw error;
-        }
         console.error('Registration error:', error);
         return { error: 'Registration failed' };
     }

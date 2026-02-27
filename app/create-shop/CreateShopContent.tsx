@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import styles from './createShop.module.css';
 import { StepDots, MainHeader, LoadingButton, type MenuItem } from '@/components';
@@ -134,12 +134,13 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
         setIsLoading(true);
         setError('');
 
+        let isRedirect = false;
+
         try {
             const result = await onCreateShop();
             // Check if createStore returned an error
             if (result && result.error) {
                 setError(result.error);
-                setIsLoading(false);
                 return;
             }
         } catch (storeError: any) {
@@ -147,11 +148,16 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
             if (storeError?.digest?.startsWith('NEXT_REDIRECT') ||
                 storeError?.message?.includes('NEXT_REDIRECT')) {
                 // This is expected - redirect is happening
+                isRedirect = true;
                 return;
             }
             console.error('Store creation error:', storeError);
             setError(storeError?.message || 'Failed to create store');
-            setIsLoading(false);
+        } finally {
+            // Only reset loading if not redirecting
+            if (!isRedirect) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -214,30 +220,74 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
 const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, password, setPassword, onCreateShop }: any) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
+    const validateForm = () => {
+        let isValid = true;
+        setEmailError('');
+        setPasswordError('');
+
+        if (!email.trim()) {
+            setEmailError('L\'adresse e-mail est requise');
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setEmailError('Veuillez entrer une adresse e-mail valide');
+            isValid = false;
+        }
+
+        if (!password) {
+            setPasswordError('Le mot de passe est requis');
+            isValid = false;
+        } else if (password.length < 6) {
+            setPasswordError('Le mot de passe doit contenir au moins 6 caractères');
+            isValid = false;
+        }
+
+        return isValid;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
         setError('');
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsLoading(true);
 
         const formData = new FormData();
         formData.append('email', email);
         formData.append('password', password);
 
+        let isRedirect = false;
+
         try {
             const result = await registerUser(formData);
             if (result && result.error) {
                 setError(result.error);
-                setIsLoading(false);
                 return; // Stop execution if there's an error
             }
-            // Registration successful, now create the store
+
+            // Registration successful, now sign in
+            const signInResult = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (signInResult?.error) {
+                setError('Compte créé mais la connexion automatique a échoué. Veuillez vous connecter manuellement.');
+                return;
+            }
+
+            // Sign in successful, now create the store
             try {
                 const storeResult = await onCreateShop();
                 // Check if createStore returned an error
                 if (storeResult && storeResult.error) {
                     setError(storeResult.error);
-                    setIsLoading(false);
                     return;
                 }
             } catch (storeError: any) {
@@ -246,22 +296,20 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                 if (storeError?.digest?.startsWith('NEXT_REDIRECT') ||
                     storeError?.message?.includes('NEXT_REDIRECT')) {
                     // This is expected - redirect is happening
+                    isRedirect = true;
                     return;
                 }
                 console.error('Store creation error:', storeError);
                 setError(storeError?.message || 'Failed to create store');
-                setIsLoading(false);
             }
         } catch (e: any) {
-            // Check if it's a redirect error (which is actually success)
-            if (e?.digest?.startsWith('NEXT_REDIRECT') ||
-                e?.message?.includes('NEXT_REDIRECT')) {
-                // This is expected - redirect is happening, registration was successful
-                return;
-            }
             console.error('Registration error:', e);
             setError('Something went wrong');
-            setIsLoading(false);
+        } finally {
+            // Only reset loading if not redirecting
+            if (!isRedirect) {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -300,11 +348,14 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={styles['cs-pill-input']}
-                        required
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (emailError) setEmailError('');
+                        }}
+                        className={`${styles['cs-pill-input']} ${emailError ? styles.inputError : ''}`}
                         autoComplete="email"
                     />
+                    {emailError && <p className={styles.fieldError}>{emailError}</p>}
 
                     <div className={styles['cs-card-heading']} style={{ marginTop: '8px' }}>
                         <h3>Créer un mot de passe</h3>
@@ -313,12 +364,17 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     <input
                         type="password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className={styles['cs-pill-input']}
-                        required
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (passwordError) setPasswordError('');
+                        }}
+                        className={`${styles['cs-pill-input']} ${passwordError ? styles.inputError : ''}`}
                         autoComplete="new-password"
                     />
-                    {error && <p style={{ color: 'red', marginTop: 10 }}>{error}</p>}
+                    {passwordError && <p className={styles.fieldError}>{passwordError}</p>}
+                    <p className={styles.passwordHint}>Le mot de passe doit contenir au moins 6 caractères</p>
+
+                    {error && <div className={styles.formError}><p>{error}</p></div>}
                 </div>
 
                 <div className={styles['cs-divider-standalone']}>Ou</div>
@@ -356,7 +412,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
 };
 
 // Step 1: Store Details (First Step)
-const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategories, categorySearch, setCategorySearch, toggleCategory, handleAddCategory, setStep, logo, setLogo, logoFile, setLogoFile }: any) => {
+const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategories, categorySearch, setCategorySearch, toggleCategory, handleAddCategory, setStep, logo, setLogo, logoFile, setLogoFile, shopNameError, setShopNameError }: any) => {
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
@@ -371,6 +427,22 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
     }, [setLogo, setLogoFile]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.svg'] } });
+
+    const handleNext = () => {
+        if (!shopName.trim()) {
+            setShopNameError('Le nom de la boutique est requis');
+            return;
+        }
+        setShopNameError('');
+        setStep(2);
+    };
+
+    const handleShopNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setShopName(e.target.value);
+        if (shopNameError && e.target.value.trim()) {
+            setShopNameError('');
+        }
+    };
 
     return (
         <div className={styles.step3Container}>
@@ -426,16 +498,16 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                 <input
                     type="text"
                     value={shopName}
-                    onChange={(e) => setShopName(e.target.value)}
-                    className={styles.storeNameInput}
+                    onChange={handleShopNameChange}
+                    className={`${styles.storeNameInput} ${shopNameError ? styles.inputError : ''}`}
                     placeholder=""
                 />
+                {shopNameError && <p className={styles.fieldError}>{shopNameError}</p>}
             </div>
 
             {/* Card 3: Store Category */}
             <div className={styles.card3}>
                 <h3 className={styles.card3Title}>Catégorie de magasin</h3>
-                <p className={styles.card3Required}>Doit être rempli*</p>
 
                 <div className={styles.searchContainer}>
                     <div className={styles.searchPill}>
@@ -456,8 +528,25 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                                     handleAddCategory();
                                 }
                             }}
+                            onBlur={() => {
+                                // Optional: add category on blur if there's text
+                                if (categorySearch.trim()) {
+                                    handleAddCategory();
+                                }
+                            }}
                             className={styles.searchInput}
                         />
+                        <button
+                            type="button"
+                            onClick={handleAddCategory}
+                            className={styles.addCategoryBtn}
+                            disabled={!categorySearch.trim()}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -478,7 +567,7 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
             <div className={styles.buttonGroup}>
                 <LoadingButton
                     className={`${styles['cs-primary-btn']} ${styles.step3Button}`}
-                    onClick={() => setStep(2)}
+                    onClick={handleNext}
                     type="button"
                 >
                     SUIVANT
@@ -515,6 +604,7 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [categorySearch, setCategorySearch] = useState("");
     const [selectedTheme, setSelectedTheme] = useState<string>('theme-1');
+    const [shopNameError, setShopNameError] = useState("");
 
 
 
@@ -589,6 +679,8 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
                         setLogo={setLogo}
                         logoFile={logoFile}
                         setLogoFile={setLogoFile}
+                        shopNameError={shopNameError}
+                        setShopNameError={setShopNameError}
                     />
                 )}
                 {step === 2 && (
