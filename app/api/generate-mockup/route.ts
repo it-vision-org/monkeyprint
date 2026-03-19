@@ -1,5 +1,5 @@
+import { getR2Url, uploadImageToR2 } from "@/lib/storage";
 import { NextRequest, NextResponse } from "next/server";
-import { uploadImageToR2, getR2Url } from "@/lib/storage";
 
 const KIE_AI_API_KEY = process.env.KIE_AI_API_KEY;
 if (!KIE_AI_API_KEY) {
@@ -95,13 +95,18 @@ async function uploadDesignToR2(base64: string): Promise<string> {
   const key = await uploadImageToR2(base64, "temp-mockups");
   const url = await getR2Url(key);
   if (!url || url === key) {
-    throw new Error("R2 public domain not configured — cannot serve design URL to kie.ai");
+    throw new Error(
+      "R2 public domain not configured — cannot serve design URL to kie.ai",
+    );
   }
   return url;
 }
 
 // ─── Submit one nano-banana-2 task ───────────────────────────────
-async function submitTask(prompt: string, designUrl: string): Promise<string | null> {
+async function submitTask(
+  prompt: string,
+  designUrl: string,
+): Promise<string | null> {
   try {
     const body = {
       model: "nano-banana-2",
@@ -138,7 +143,10 @@ async function submitTask(prompt: string, designUrl: string): Promise<string | n
 }
 
 // ─── Poll task until done ─────────────────────────────────────────
-async function pollTask(taskId: string, maxWaitMs = 120_000): Promise<string[]> {
+async function pollTask(
+  taskId: string,
+  maxWaitMs = 120_000,
+): Promise<string[]> {
   const deadline = Date.now() + maxWaitMs;
   while (Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 3000));
@@ -156,7 +164,9 @@ async function pollTask(taskId: string, maxWaitMs = 120_000): Promise<string[]> 
         return Array.isArray(result.resultUrls) ? result.resultUrls : [];
       }
       if (record.state === "fail") {
-        console.error(`Task ${taskId} failed: ${record.failCode} — ${record.failMsg}`);
+        console.error(
+          `Task ${taskId} failed: ${record.failCode} — ${record.failMsg}`,
+        );
         return [];
       }
     } catch (e) {
@@ -174,20 +184,35 @@ export async function POST(request: NextRequest) {
     const { designImageBase64, gender, customPrompt } = body;
 
     if (!designImageBase64) {
-      return NextResponse.json({ error: "Design image is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Design image is required" },
+        { status: 400 },
+      );
     }
     if (!gender) {
-      return NextResponse.json({ error: "Audience option is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Audience option is required" },
+        { status: 400 },
+      );
     }
     if (gender === "custom") {
       if (!customPrompt?.trim()) {
-        return NextResponse.json({ error: "Custom prompt is required" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Custom prompt is required" },
+          { status: 400 },
+        );
       }
       if (customPrompt.length > 200) {
-        return NextResponse.json({ error: "Custom prompt must be 200 characters or less" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Custom prompt must be 200 characters or less" },
+          { status: 400 },
+        );
       }
     } else if (!SCENES[gender]) {
-      return NextResponse.json({ error: "Invalid audience option" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid audience option" },
+        { status: 400 },
+      );
     }
 
     // ── Upload design to R2 for public URL ──────────────────────
@@ -200,7 +225,10 @@ export async function POST(request: NextRequest) {
       console.log("Design uploaded to R2:", designUrl);
     } catch (uploadErr: any) {
       // R2 not available — fall back to text-only (no image_input)
-      console.warn("R2 upload failed, falling back to text-only:", uploadErr.message);
+      console.warn(
+        "R2 upload failed, falling back to text-only:",
+        uploadErr.message,
+      );
       designUrl = "";
     }
 
@@ -213,12 +241,7 @@ export async function POST(request: NextRequest) {
 
     // ── Submit 4 tasks in parallel ───────────────────────────────
     const taskIds = await Promise.all(
-      Array.from({ length: 4 }, () =>
-        submitTask(
-          prompt,
-          designUrl || "https://static.aiquickdraw.com/tools/example/1772164675129_TZfXY2Sn.png",
-        ),
-      ),
+      Array.from({ length: 4 }, () => submitTask(prompt, designUrl)),
     );
     console.log(`Tasks submitted: ${taskIds.filter(Boolean).length}/4`);
 
