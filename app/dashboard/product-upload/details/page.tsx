@@ -1041,6 +1041,14 @@ export default function ProductDetailsPage() {
     setGeneratedMockups([]);
   };
 
+  const handleChooseDifferentMockupScene = useCallback(() => {
+    setMockupModalOpen(false);
+    setMockupLoading(false);
+    setGeneratedMockups([]);
+    setMockupError(null);
+    setGenderSelectionModalOpen(true);
+  }, []);
+
   const handleSelectMockup = (url: string) => {
     setSelectedMockup(url);
     sessionStorage.setItem("uploadedDesign", url);
@@ -1216,7 +1224,7 @@ export default function ProductDetailsPage() {
         onMouseLeave={handleDesktopMouseLeave}
       />
       <main
-        className={`${styles.puMobileMain} ${mobilePriceExpanded ? styles.pdMainExpanded : ""} ${styles.pdDetailsMain}`}
+        className={`${styles.puMobileMain} ${mobilePriceExpanded ? styles.pdMainExpanded : ""}`}
       >
         <div className={styles.puMobileFlow}>
           <button
@@ -2170,7 +2178,13 @@ export default function ProductDetailsPage() {
           onClick={() => !mockupLoading && closeMockupModal()}
         >
           <div
-            className={styles.puPopup}
+            className={`${styles.puPopup} ${
+              !mockupLoading &&
+              !mockupError &&
+              generatedMockups.length > 0
+                ? styles.puPopupMockupWide
+                : ""
+            }`}
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -2178,77 +2192,138 @@ export default function ProductDetailsPage() {
               type="button"
               onClick={closeMockupModal}
               disabled={mockupLoading}
+              aria-label="Fermer"
             >
               ×
             </button>
-            <h2 className={styles.puPopupTitle}>
-              {mockupLoading
-                ? "Création de la maquette"
-                : mockupError
-                  ? "Oups !"
-                  : "Valider la maquette"}
-            </h2>
 
             {mockupLoading ? (
-              <div className={styles.puMockupLoadingPanel}>
-                <div className={styles.puMockupOrb}>✦</div>
-                <p className={styles.puMockupLoadingTitle}>{mockupStatus}</p>
-                <div className={styles.puMockupProgressWrap}>
-                  <div className={styles.puProgressContainer}>
-                    <div
-                      className={styles.puProgressBar}
-                      style={{ width: `${mockupProgress}%` }}
-                    />
-                  </div>
-                  <div className={styles.puMockupProgressMeta}>
-                    <span className={styles.puMockupProgressLabel}>
-                      Environ 30–60 secondes
-                    </span>
-                    <span className={styles.puMockupProgressPct}>
-                      {Math.round(mockupProgress)}%
-                    </span>
+              <>
+                <h2 className={styles.puPopupTitle}>Création de la maquette</h2>
+                <div className={styles.puMockupLoadingPanel}>
+                  <div className={styles.puMockupOrb}>✦</div>
+                  <p className={styles.puMockupLoadingTitle}>{mockupStatus}</p>
+                  <div className={styles.puMockupProgressWrap}>
+                    <div className={styles.puProgressContainer}>
+                      <div
+                        className={styles.puProgressBar}
+                        style={{ width: `${mockupProgress}%` }}
+                      />
+                    </div>
+                    <div className={styles.puMockupProgressMeta}>
+                      <span className={styles.puMockupProgressLabel}>
+                        Environ 30–60 secondes
+                      </span>
+                      <span className={styles.puMockupProgressPct}>
+                        {Math.round(mockupProgress)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
             ) : mockupError ? (
-              <div className={styles.puErrorContainer}>
-                <div className={styles.puErrorIcon}>!</div>
-                <div className={styles.puErrorTitle}>
-                  Échec de la génération
-                </div>
-                <div className={styles.puErrorText}>{mockupError}</div>
-                <button
-                  type="button"
-                  className={styles.puRetryBtn}
-                  onClick={handleGenerateMockup}
-                >
-                  Réessayer la génération
-                </button>
-              </div>
-            ) : generatedMockups.length > 0 ? (
-              <div
-                className={`${styles.puAiGrid} ${generatedMockups.length === 1 ? styles.puAiGridSingle : ""}`}
-              >
-                {generatedMockups.map((url, index) => (
+              <>
+                <h2 className={styles.puPopupTitle}>Oups !</h2>
+                <div className={styles.puErrorContainer}>
+                  <div className={styles.puErrorIcon}>!</div>
+                  <div className={styles.puErrorTitle}>
+                    Échec de la génération
+                  </div>
+                  <div className={styles.puErrorText}>{mockupError}</div>
                   <button
-                    key={index}
                     type="button"
-                    className={styles.puAiImageCard}
-                    onClick={() => handleSelectMockup(url)}
+                    className={styles.puRetryBtn}
+                    onClick={handleGenerateMockup}
                   >
-                    <Image
-                      src={url}
-                      alt={`Maquette ${index + 1}`}
-                      width={200}
-                      height={200}
-                      style={{ objectFit: "cover" }}
-                    />
+                    Réessayer la génération
                   </button>
-                ))}
+                </div>
+              </>
+            ) : generatedMockups.length > 1 ? (
+              <>
+                <h2 className={styles.puPopupTitle}>Choisissez une maquette</h2>
+                <div className={styles.puAiGrid}>
+                  {generatedMockups.map((url, index) => (
+                    <button
+                      key={url}
+                      type="button"
+                      className={styles.puAiImageCard}
+                      onClick={() => handleSelectMockup(url)}
+                    >
+                      <Image
+                        src={url}
+                        alt={`Maquette ${index + 1}`}
+                        width={200}
+                        height={200}
+                        style={{ objectFit: "cover" }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : generatedMockups.length === 1 ? (
+              <div className={styles.puMockupConfirmWrap}>
+                <div className={styles.puMockupConfirmHeader}>
+                  <span className={styles.puMockupConfirmBadge}>
+                    Maquette générée
+                  </span>
+                  <h2 className={styles.puMockupConfirmTitle}>
+                    Voici votre aperçu porté
+                  </h2>
+                  <p className={styles.puMockupConfirmLead}>
+                    Validez pour l&apos;afficher comme image principale du
+                    produit, ou choisissez un autre type de scène.
+                  </p>
+                </div>
+                <div className={styles.puMockupPreviewShell}>
+                  <div className={styles.puMockupPreviewInner}>
+                    <Image
+                      src={generatedMockups[0]}
+                      alt="Aperçu maquette produit"
+                      fill
+                      className={styles.puMockupPreviewImage}
+                      sizes="(max-width: 640px) calc(100vw - 48px), 560px"
+                      priority
+                    />
+                  </div>
+                </div>
+                <p className={styles.puMockupConfirmHint}>
+                  Cette image remplacera l&apos;aperçu actuel sur votre fiche
+                  produit et en boutique.
+                </p>
+                <div className={styles.puMockupConfirmActions}>
+                  <button
+                    type="button"
+                    className={styles.puMockupConfirmPrimary}
+                    onClick={() => handleSelectMockup(generatedMockups[0])}
+                  >
+                    Utiliser cette maquette
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.puMockupConfirmSecondary}
+                    onClick={closeMockupModal}
+                  >
+                    Fermer
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.puMockupConfirmLink}
+                    onClick={handleChooseDifferentMockupScene}
+                  >
+                    Changer le type de scène
+                  </button>
+                </div>
               </div>
             ) : (
-              <div style={{ textAlign: "center", padding: "40px" }}>
-                <p style={{ color: "#666" }}>Aucune maquette générée</p>
+              <div style={{ textAlign: "center", padding: "40px 16px" }}>
+                <h2 className={styles.puPopupTitle} style={{ marginBottom: 12 }}>
+                  Aucune image
+                </h2>
+                <p style={{ color: "#666", margin: 0, fontSize: 15 }}>
+                  Aucune maquette générée. Réessayez depuis l&apos;étape
+                  précédente.
+                </p>
               </div>
             )}
           </div>

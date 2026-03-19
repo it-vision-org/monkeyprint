@@ -73,10 +73,6 @@
     margin-bottom: 0;
   }
 
-  /* Orange bar is already in flow above main – only need a small gap to "Créez" text */
-  .puMobileMain {
-    padding-top: 12px !important;
-  }
 }
 
 :global(.dashboard-page):has(.productUploadPage) {
@@ -499,11 +495,30 @@
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 4;
   border: none;
   background: transparent;
   font-size: 32px;
+  line-height: 1;
   color: #999999;
   cursor: pointer;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.puPopupClose:hover:not(:disabled) {
+  color: #0d1c23;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.puPopupClose:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .puPopupTitle {
@@ -717,6 +732,240 @@
   }
 }
 
+/* ── Mockup result: single-image confirmation (mobile + desktop) ── */
+.puPopupMockupWide {
+  max-width: min(100%, calc(100vw - 32px));
+  width: min(560px, 100%);
+  max-height: min(92dvh, 880px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px 18px 26px;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 600px) {
+  .puPopupMockupWide {
+    max-width: 640px;
+    padding: 28px 32px 34px;
+  }
+}
+
+.puMockupConfirmWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  padding-top: 36px;
+}
+
+.puMockupConfirmHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.puMockupConfirmBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #047857;
+  background: linear-gradient(
+    135deg,
+    rgba(65, 235, 92, 0.18) 0%,
+    rgba(16, 185, 129, 0.12) 100%
+  );
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+.puMockupConfirmTitle {
+  margin: 0;
+  font-size: clamp(1.35rem, 4.2vw, 1.65rem);
+  font-weight: 800;
+  color: #0d1c23;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  max-width: 20ch;
+}
+
+.puMockupConfirmLead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  max-width: 36em;
+}
+
+.puMockupPreviewShell {
+  position: relative;
+  border-radius: 22px;
+  padding: 2px;
+  background: linear-gradient(
+    125deg,
+    rgba(65, 235, 92, 0.45) 0%,
+    rgba(14, 165, 233, 0.25) 45%,
+    rgba(65, 235, 92, 0.2) 100%
+  );
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 16px 48px -12px rgba(15, 23, 42, 0.22);
+}
+
+.puMockupPreviewInner {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 100%,
+    #1e293b 0%,
+    #0f172a 55%,
+    #020617 100%
+  );
+  aspect-ratio: 3 / 2;
+  width: 100%;
+  max-height: min(46dvh, 340px);
+  min-height: 180px;
+}
+
+@media (min-width: 600px) {
+  .puMockupPreviewInner {
+    max-height: min(50dvh, 420px);
+    min-height: 220px;
+  }
+}
+
+.puMockupPreviewImage {
+  object-fit: contain;
+}
+
+.puMockupConfirmHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.puMockupConfirmActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+@media (min-width: 520px) {
+  .puMockupConfirmActions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .puMockupConfirmPrimary {
+    flex: 1 1 220px;
+    max-width: 320px;
+  }
+
+  .puMockupConfirmSecondary {
+    flex: 0 1 auto;
+    min-width: 140px;
+  }
+
+  .puMockupConfirmLink {
+    flex: 1 0 100%;
+    order: 3;
+  }
+}
+
+.puMockupConfirmPrimary {
+  appearance: none;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 22px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #052e16;
+  background: linear-gradient(145deg, #5ef078 0%, #41eb5c 40%, #22c55e 100%);
+  cursor: pointer;
+  box-shadow:
+    0 4px 14px rgba(65, 235, 92, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.puMockupConfirmPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 28px rgba(65, 235, 92, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.puMockupConfirmPrimary:active {
+  transform: translateY(0);
+}
+
+.puMockupConfirmPrimary:focus-visible {
+  outline: 3px solid rgba(34, 197, 94, 0.55);
+  outline-offset: 3px;
+}
+
+.puMockupConfirmSecondary {
+  appearance: none;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.puMockupConfirmSecondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.puMockupConfirmSecondary:focus-visible {
+  outline: 3px solid rgba(100, 116, 139, 0.35);
+  outline-offset: 2px;
+}
+
+.puMockupConfirmLink {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0369a1;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-align: center;
+}
+
+.puMockupConfirmLink:hover {
+  color: #0c4a6e;
+}
+
+.puMockupConfirmLink:focus-visible {
+  outline: 2px solid #0369a1;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 /* Wizard steps — shared by design + details pages */
 .puSteps {
   display: flex;
@@ -778,19 +1027,6 @@
   background: rgba(255, 255, 255, 0.2);
   margin-bottom: 14px;
   flex-shrink: 0;
-}
-
-/* Details page: less gap below dashboard header (desktop / tablet) */
-@media (min-width: 769px) {
-  .pdDetailsMain.puMobileMain {
-    padding-top: 20px !important;
-  }
-}
-
-@media (min-width: 900px) {
-  .pdDetailsMain.puMobileMain {
-    padding-top: 16px !important;
-  }
 }
 
 .pdBackToEditor {
@@ -1627,6 +1863,26 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+  }
+}
+
+/*
+ * Dashboard product upload: same top offset below the layout header on
+ * /dashboard/product-upload and /details (replaces legacy calc(56px+48px)).
+ */
+:global(.dash-main):has(.productUploadPage) .puMobileMain {
+  padding-top: 12px !important;
+}
+
+@media (min-width: 769px) {
+  :global(.dash-main):has(.productUploadPage) .puMobileMain {
+    padding-top: 20px !important;
+  }
+}
+
+@media (min-width: 900px) {
+  :global(.dash-main):has(.productUploadPage) .puMobileMain {
+    padding-top: 24px !important;
   }
 }
 
