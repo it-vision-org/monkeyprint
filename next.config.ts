@@ -3,6 +3,16 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  serverExternalPackages: ['@imgly/background-removal'],
+  webpack: (config) => {
+    // Required for @imgly/background-removal ONNX/WASM support
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'sharp$': false,
+      'onnxruntime-node$': false,
+    };
+    return config;
+  },
   images: {
     remotePatterns: [
       {

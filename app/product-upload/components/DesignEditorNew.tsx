@@ -1977,357 +1977,214 @@ const DesignEditor = memo(function DesignEditor({
                       width: "100%",
                     }}
                   >
-                    {!showTechniqueSelector ? (
-                      <button
-                        className={`${styles.removeBgBtn} ${isRemovingBg ? styles.loading : ""}`}
-                        onClick={() => {
-                          if (isRemovingBg) return;
-                          setShowTechniqueSelector(true);
-                        }}
-                        disabled={isRemovingBg}
-                      >
-                        {isRemovingBg ? (
-                          <>
-                            <span className={styles.miniSpinner}></span>
-                            Removing...
-                          </>
-                        ) : (
-                          <>✨ Remove Background</>
-                        )}
-                      </button>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#64748b",
-                            fontWeight: 600,
-                            marginBottom: "4px",
-                          }}
-                        >
-                          Choose removal technique:
-                        </div>
-                        <button
-                          className={styles.techniqueBtn}
-                          style={{
-                            background:
-                              bgRemovalTechnique === "conservative"
-                                ? "linear-gradient(135deg, #10b981, #059669)"
-                                : "rgba(0,0,0,0.05)",
-                            color:
-                              bgRemovalTechnique === "conservative"
-                                ? "white"
-                                : "#475569",
-                            border: `2px solid ${bgRemovalTechnique === "conservative" ? "#10b981" : "rgba(0,0,0,0.08)"}`,
-                          }}
-                          onClick={() => setBgRemovalTechnique("conservative")}
-                        >
-                          🛡️ Conservative (Preserves more)
-                        </button>
-                        <button
-                          className={styles.techniqueBtn}
-                          style={{
-                            background:
-                              bgRemovalTechnique === "moderate"
-                                ? "linear-gradient(135deg, #6366f1, #4f46e5)"
-                                : "rgba(0,0,0,0.05)",
-                            color:
-                              bgRemovalTechnique === "moderate"
-                                ? "white"
-                                : "#475569",
-                            border: `2px solid ${bgRemovalTechnique === "moderate" ? "#6366f1" : "rgba(0,0,0,0.08)"}`,
-                          }}
-                          onClick={() => setBgRemovalTechnique("moderate")}
-                        >
-                          ⚖️ Moderate (Balanced)
-                        </button>
-                        <button
-                          className={styles.techniqueBtn}
-                          style={{
-                            background:
-                              bgRemovalTechnique === "aggressive"
-                                ? "linear-gradient(135deg, #ef4444, #dc2626)"
-                                : "rgba(0,0,0,0.05)",
-                            color:
-                              bgRemovalTechnique === "aggressive"
-                                ? "white"
-                                : "#475569",
-                            border: `2px solid ${bgRemovalTechnique === "aggressive" ? "#ef4444" : "rgba(0,0,0,0.08)"}`,
-                          }}
-                          onClick={() => setBgRemovalTechnique("aggressive")}
-                        >
-                          🔥 Aggressive (Removes more)
-                        </button>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            marginTop: "4px",
-                          }}
-                        >
-                          <button
-                            className={styles.techniqueBtn}
-                            style={{
-                              flex: 1,
-                              background:
-                                "linear-gradient(135deg, #6366f1, #4f46e5)",
-                              color: "white",
-                              border: "none",
-                            }}
-                            onClick={async () => {
-                              if (
-                                isRemovingBg ||
-                                !selected ||
-                                !mainCanvas.current
-                              )
-                                return;
+                    <button
+                      className={`${styles.removeBgBtn} ${isRemovingBg ? styles.loading : ""}`}
+                      onClick={async () => {
+                        if (
+                          isRemovingBg ||
+                          !selected ||
+                          !mainCanvas.current
+                        )
+                          return;
 
-                              // Check if selected object is an image
-                              if (!(selected instanceof fabric.FabricImage)) {
-                                alert(
-                                  "Please select an image to remove background",
-                                );
-                                return;
+                        if (!(selected instanceof fabric.FabricImage)) {
+                          alert(
+                            "Please select an image to remove background",
+                          );
+                          return;
+                        }
+
+                        setIsRemovingBg(true);
+
+                        try {
+                          const img = selected as fabric.FabricImage;
+                          const imgElement =
+                            img.getElement() as HTMLImageElement;
+
+                          let imageSrc = imgElement.src;
+                          let imageDataUrl: string;
+
+                          if (imageSrc.startsWith("data:")) {
+                            imageDataUrl = imageSrc;
+                          } else if (imageSrc.startsWith("blob:")) {
+                            const response = await fetch(imageSrc);
+                            const blob = await response.blob();
+                            imageDataUrl = await new Promise(
+                              (resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () =>
+                                  resolve(reader.result as string);
+                                reader.onerror = reject;
+                                reader.readAsDataURL(blob);
+                              },
+                            );
+                          } else {
+                            const response = await fetch(imageSrc);
+                            const blob = await response.blob();
+                            imageDataUrl = await new Promise(
+                              (resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () =>
+                                  resolve(reader.result as string);
+                                reader.onerror = reject;
+                                reader.readAsDataURL(blob);
+                              },
+                            );
+                          }
+
+                          if (
+                            !imageDataUrl ||
+                            !imageDataUrl.startsWith("data:")
+                          ) {
+                            const tempCanvas =
+                              document.createElement("canvas");
+                            const naturalWidth =
+                              imgElement.naturalWidth || img.width || 800;
+                            const naturalHeight =
+                              imgElement.naturalHeight ||
+                              img.height ||
+                              800;
+
+                            tempCanvas.width = naturalWidth;
+                            tempCanvas.height = naturalHeight;
+                            const tempCtx = tempCanvas.getContext("2d");
+
+                            if (!tempCtx) {
+                              throw new Error(
+                                "Could not get canvas context",
+                              );
+                            }
+
+                            await new Promise((resolve) => {
+                              if (imgElement.complete) {
+                                resolve(null);
+                              } else {
+                                imgElement.onload = () => resolve(null);
+                                imgElement.onerror = () => resolve(null);
                               }
+                            });
 
-                              setIsRemovingBg(true);
-                              setShowTechniqueSelector(false);
+                            tempCtx.drawImage(
+                              imgElement,
+                              0,
+                              0,
+                              naturalWidth,
+                              naturalHeight,
+                            );
 
-                              try {
-                                // Get the image's data URL
-                                const img = selected as fabric.FabricImage;
-                                const imgElement =
-                                  img.getElement() as HTMLImageElement;
+                            imageDataUrl =
+                              tempCanvas.toDataURL("image/png");
+                          }
 
-                                // Get the original image source URL
-                                let imageSrc = imgElement.src;
+                          const currentId =
+                            (img as any).id || Math.random().toString();
+                          if (!originalImages[currentId]) {
+                            setOriginalImages((prev) => ({
+                              ...prev,
+                              [currentId]: imageDataUrl,
+                            }));
+                          }
 
-                                // If it's a blob URL, we need to convert it to data URL
-                                let imageDataUrl: string;
+                          const response = await fetch(
+                            "/api/remove-background",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                imageDataUrl,
+                              }),
+                            },
+                          );
 
-                                if (imageSrc.startsWith("data:")) {
-                                  // Already a data URL
-                                  imageDataUrl = imageSrc;
-                                } else if (imageSrc.startsWith("blob:")) {
-                                  // Convert blob URL to data URL
-                                  const response = await fetch(imageSrc);
-                                  const blob = await response.blob();
-                                  imageDataUrl = await new Promise(
-                                    (resolve, reject) => {
-                                      const reader = new FileReader();
-                                      reader.onloadend = () =>
-                                        resolve(reader.result as string);
-                                      reader.onerror = reject;
-                                      reader.readAsDataURL(blob);
-                                    },
-                                  );
-                                } else {
-                                  // For other URLs, fetch and convert
-                                  const response = await fetch(imageSrc);
-                                  const blob = await response.blob();
-                                  imageDataUrl = await new Promise(
-                                    (resolve, reject) => {
-                                      const reader = new FileReader();
-                                      reader.onloadend = () =>
-                                        resolve(reader.result as string);
-                                      reader.onerror = reject;
-                                      reader.readAsDataURL(blob);
-                                    },
-                                  );
-                                }
+                          if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(
+                              error.error ||
+                                "Failed to remove background",
+                            );
+                          }
 
-                                // If we still don't have a data URL, create one from the image element
-                                if (
-                                  !imageDataUrl ||
-                                  !imageDataUrl.startsWith("data:")
-                                ) {
-                                  const tempCanvas =
-                                    document.createElement("canvas");
-                                  const naturalWidth =
-                                    imgElement.naturalWidth || img.width || 800;
-                                  const naturalHeight =
-                                    imgElement.naturalHeight ||
-                                    img.height ||
-                                    800;
+                          const data = await response.json();
 
-                                  tempCanvas.width = naturalWidth;
-                                  tempCanvas.height = naturalHeight;
-                                  const tempCtx = tempCanvas.getContext("2d");
+                          if (!data.success || !data.imageDataUrl) {
+                            throw new Error(
+                              "Invalid response from server",
+                            );
+                          }
 
-                                  if (!tempCtx) {
-                                    throw new Error(
-                                      "Could not get canvas context",
-                                    );
-                                  }
+                          const processedDataUrl = data.imageDataUrl;
 
-                                  // Wait for image to load if needed
-                                  await new Promise((resolve) => {
-                                    if (imgElement.complete) {
-                                      resolve(null);
-                                    } else {
-                                      imgElement.onload = () => resolve(null);
-                                      imgElement.onerror = () => resolve(null);
-                                    }
-                                  });
+                          fabric.FabricImage.fromURL(processedDataUrl)
+                            .then((newImg: fabric.FabricImage) => {
+                              if (!mainCanvas.current) return;
 
-                                  // Draw the image to the canvas at full resolution
-                                  tempCtx.drawImage(
-                                    imgElement,
-                                    0,
-                                    0,
-                                    naturalWidth,
-                                    naturalHeight,
-                                  );
+                              newImg.set({
+                                left: img.left,
+                                top: img.top,
+                                scaleX: img.scaleX,
+                                scaleY: img.scaleY,
+                                angle: img.angle,
+                                originX: img.originX,
+                                originY: img.originY,
+                                opacity: img.opacity,
+                                clipPath: img.clipPath,
+                              });
 
-                                  // Get the data URL
-                                  imageDataUrl =
-                                    tempCanvas.toDataURL("image/png");
-                                }
+                              mainCanvas.current.remove(img);
+                              mainCanvas.current.add(newImg);
+                              mainCanvas.current.setActiveObject(newImg);
+                              mainCanvas.current.renderAll();
 
-                                // Store the original image before processing (for undo)
-                                const currentId =
-                                  (img as any).id || Math.random().toString();
-                                if (!originalImages[currentId]) {
-                                  setOriginalImages((prev) => ({
-                                    ...prev,
-                                    [currentId]: imageDataUrl,
-                                  }));
-                                }
-
-                                // Call the API to remove background with selected technique
-                                const response = await fetch(
-                                  "/api/remove-background",
-                                  {
-                                    method: "POST",
-                                    headers: {
-                                      "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                      imageDataUrl,
-                                      technique: bgRemovalTechnique,
-                                    }),
-                                  },
-                                );
-
-                                if (!response.ok) {
-                                  const error = await response.json();
-                                  throw new Error(
-                                    error.error ||
-                                      "Failed to remove background",
-                                  );
-                                }
-
-                                const data = await response.json();
-
-                                if (!data.success || !data.imageDataUrl) {
-                                  throw new Error(
-                                    "Invalid response from server",
-                                  );
-                                }
-
-                                // Replace the image with the processed version
-                                const processedDataUrl = data.imageDataUrl;
-
-                                // Create new image from processed data URL
-                                fabric.FabricImage.fromURL(processedDataUrl)
-                                  .then((newImg: fabric.FabricImage) => {
-                                    if (!mainCanvas.current) return;
-
-                                    // Preserve the position, scale, and other properties
-                                    newImg.set({
-                                      left: img.left,
-                                      top: img.top,
-                                      scaleX: img.scaleX,
-                                      scaleY: img.scaleY,
-                                      angle: img.angle,
-                                      originX: img.originX,
-                                      originY: img.originY,
-                                      opacity: img.opacity,
-                                      clipPath: img.clipPath,
-                                    });
-
-                                    // Remove old image and add new one
-                                    mainCanvas.current.remove(img);
-                                    mainCanvas.current.add(newImg);
-                                    mainCanvas.current.setActiveObject(newImg);
-                                    mainCanvas.current.renderAll();
-
-                                    // Mark as processed and preserve original image reference
-                                    const id = (newImg as any).id || currentId;
-                                    (newImg as any).id = id;
-                                    setHasRemovedBg((prev) => ({
-                                      ...prev,
-                                      [id]: true,
-                                    }));
-                                    // Keep the original image stored (don't overwrite if it exists)
-                                    if (!originalImages[id]) {
-                                      setOriginalImages((prev) => ({
-                                        ...prev,
-                                        [id]: imageDataUrl,
-                                      }));
-                                    }
-                                    setSelected(newImg);
-
-                                    saveCurrentDesign();
-                                    setIsRemovingBg(false);
-                                  })
-                                  .catch((err) => {
-                                    console.error(
-                                      "Error loading processed image:",
-                                      err,
-                                    );
-                                    alert("Failed to load processed image");
-                                    setIsRemovingBg(false);
-                                  });
-                              } catch (error: any) {
-                                console.error(
-                                  "Error removing background:",
-                                  error,
-                                );
-                                alert(
-                                  error.message ||
-                                    "Failed to remove background. Please try again.",
-                                );
-                                setIsRemovingBg(false);
+                              const id = (newImg as any).id || currentId;
+                              (newImg as any).id = id;
+                              setHasRemovedBg((prev) => ({
+                                ...prev,
+                                [id]: true,
+                              }));
+                              if (!originalImages[id]) {
+                                setOriginalImages((prev) => ({
+                                  ...prev,
+                                  [id]: imageDataUrl,
+                                }));
                               }
-                            }}
-                            disabled={isRemovingBg}
-                          >
-                            {isRemovingBg ? (
-                              <>
-                                <span className={styles.miniSpinner}></span>
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                ✨ Apply{" "}
-                                {bgRemovalTechnique.charAt(0).toUpperCase() +
-                                  bgRemovalTechnique.slice(1)}
-                              </>
-                            )}
-                          </button>
-                          <button
-                            className={styles.techniqueBtn}
-                            style={{
-                              flex: 1,
-                              background: "rgba(0,0,0,0.05)",
-                              color: "#475569",
-                              border: "1px solid rgba(0,0,0,0.08)",
-                            }}
-                            onClick={() => setShowTechniqueSelector(false)}
-                            disabled={isRemovingBg}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                              setSelected(newImg);
+
+                              saveCurrentDesign();
+                              setIsRemovingBg(false);
+                            })
+                            .catch((err) => {
+                              console.error(
+                                "Error loading processed image:",
+                                err,
+                              );
+                              alert("Failed to load processed image");
+                              setIsRemovingBg(false);
+                            });
+                        } catch (error: any) {
+                          console.error(
+                            "Error removing background:",
+                            error,
+                          );
+                          alert(
+                            error.message ||
+                              "Failed to remove background. Please try again.",
+                          );
+                          setIsRemovingBg(false);
+                        }
+                      }}
+                      disabled={isRemovingBg}
+                    >
+                      {isRemovingBg ? (
+                        <>
+                          <span className={styles.miniSpinner}></span>
+                          Removing...
+                        </>
+                      ) : (
+                        <>✨ Remove Background</>
+                      )}
+                    </button>
                   </div>
                 )}
 
