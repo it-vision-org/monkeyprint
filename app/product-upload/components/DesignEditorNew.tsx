@@ -1434,9 +1434,24 @@ const DesignEditor = memo(function DesignEditor({
   };
 
   const selectGeneratedImage = (imageUrl: string) => {
-    // Convert data URL to blob/file and add to canvas
-    fetch(imageUrl)
-      .then((res) => res.blob())
+    // Remote CDN URLs (e.g. Kie.ai) are not fetchable from the browser without CORS.
+    // Same pattern as loadProductImages: pull cross-origin http(s) through our proxy.
+    let fetchUrl = imageUrl;
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+      try {
+        if (new URL(imageUrl).origin !== window.location.origin) {
+          fetchUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+        }
+      } catch {
+        /* invalid URL — try as-is */
+      }
+    }
+
+    fetch(fetchUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.blob();
+      })
       .then((blob) => {
         const file = new File([blob], "ai-generated.png", {
           type: "image/png",

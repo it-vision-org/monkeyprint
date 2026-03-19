@@ -6,6 +6,7 @@ import { useDropzone } from "react-dropzone";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../../styles/product-upload.module.css";
 import DesignEditor from "../../product-upload/components/DesignEditorNew";
+import ProductUploadSteps from "../../product-upload/components/ProductUploadSteps";
 import { getProductForEdit } from "../../product-upload/actions";
 
 type ProductCard = {
@@ -1578,88 +1579,7 @@ export default function ProductUploadPage() {
             </div>
           </section>
 
-          {/* Step indicator */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              padding: "0 0 4px",
-            }}
-          >
-            {[
-              { step: 1, label: "Design" },
-              { step: 2, label: "Détails" },
-              { step: 3, label: "Publier" },
-            ].map(({ step, label }, index) => (
-              <div
-                key={step}
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background:
-                        step === 1 ? "#41eb5c" : "rgba(255,255,255,0.2)",
-                      color: step === 1 ? "#000" : "rgba(255,255,255,0.5)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {step === 1 ? (
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    ) : (
-                      step
-                    )}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: step === 1 ? "#41eb5c" : "rgba(255,255,255,0.4)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {label}
-                  </span>
-                </div>
-                {index < 2 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "1px",
-                      background: "rgba(255,255,255,0.2)",
-                      marginBottom: "14px",
-                    }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <ProductUploadSteps currentStep={1} />
 
           {/* Validation error */}
           {nextValidationError && (

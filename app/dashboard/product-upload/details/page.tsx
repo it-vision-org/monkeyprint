@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 // Note: Using document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../../styles/product-upload.module.css";
 // ProductUploadHeader removed - using dashboard layout instead
 import { combineDesigns } from "@/lib/utils/designRenderer";
 import { useAlert } from "@/components/providers/AlertContext";
+import ProductUploadSteps from "../../../product-upload/components/ProductUploadSteps";
 
 type GenderOption = {
   id: string;
@@ -275,7 +276,7 @@ export default function ProductDetailsPage() {
     else if (mockupProgress < 35) setMockupStatus("Préparation de la scène…");
     else if (mockupProgress < 55) setMockupStatus("Génération IA en cours…");
     else if (mockupProgress < 75) setMockupStatus("Presque prêt…");
-    else setMockupStatus("Finalisation des maquettes…");
+    else setMockupStatus("Finalisation de la maquette…");
   }, [mockupProgress]);
   const [pricingSettings, setPricingSettings] = useState<any>(null);
 
@@ -292,6 +293,7 @@ export default function ProductDetailsPage() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [productTypeLabel, setProductTypeLabel] = useState("T-Shirt");
   const [isEditingProduct, setIsEditingProduct] = useState(false);
+  const mockupUploadInputRef = useRef<HTMLInputElement>(null);
 
   // Load design data and product data on mount
   useEffect(() => {
@@ -1045,6 +1047,36 @@ export default function ProductDetailsPage() {
     closeMockupModal();
   };
 
+  const handleMockupFileSelected = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showAlert(
+        "Veuillez choisir un fichier image (PNG, JPG, WebP…).",
+        "warning",
+      );
+      return;
+    }
+    const maxMb = 12;
+    if (file.size > maxMb * 1024 * 1024) {
+      showAlert(`Image trop volumineuse (maximum ${maxMb} Mo).`, "warning");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setSelectedMockup(dataUrl);
+      sessionStorage.setItem("uploadedDesign", dataUrl);
+    };
+    reader.onerror = () => {
+      showAlert("Impossible de lire ce fichier.", "error");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -1184,27 +1216,13 @@ export default function ProductDetailsPage() {
         onMouseLeave={handleDesktopMouseLeave}
       />
       <main
-        className={`${styles.puMobileMain} ${mobilePriceExpanded ? styles.pdMainExpanded : ""}`}
+        className={`${styles.puMobileMain} ${mobilePriceExpanded ? styles.pdMainExpanded : ""} ${styles.pdDetailsMain}`}
       >
         <div className={styles.puMobileFlow}>
           <button
+            type="button"
+            className={styles.pdBackToEditor}
             onClick={handleBack}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "transparent",
-              border: "none",
-              color: "#fff",
-              fontSize: "15px",
-              fontWeight: 600,
-              cursor: "pointer",
-              marginBottom: "6px",
-              padding: "8px 0",
-              transition: "opacity 0.2s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             <svg
               width="20"
@@ -1219,7 +1237,7 @@ export default function ProductDetailsPage() {
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Retour à l'édition
+            Retour à l&apos;édition
           </button>
           <div className={styles.pdIntro}>
             <p className={styles.pdIntroTitle}>
@@ -1486,14 +1504,30 @@ export default function ProductDetailsPage() {
               </div>
             )}
 
+            <input
+              ref={mockupUploadInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className={styles.pdHiddenFileInput}
+              aria-label="Téléverser une image de maquette"
+              onChange={handleMockupFileSelected}
+            />
             <div className={styles.pdActionRow}>
               <button
                 type="button"
                 className={styles.pdActionPrimary}
                 onClick={openGenderSelectionModal}
-                style={{ flex: "1", minWidth: "200px" }}
+                style={{ flex: "1", minWidth: "160px" }}
               >
                 GÉNÉRER UNE MAQUETTE
+              </button>
+              <button
+                type="button"
+                className={styles.pdActionSecondary}
+                onClick={() => mockupUploadInputRef.current?.click()}
+                style={{ flex: "1", minWidth: "160px" }}
+              >
+                TÉLÉVERSER UNE MAQUETTE
               </button>
               <button
                 type="button"
@@ -1751,6 +1785,8 @@ export default function ProductDetailsPage() {
             </div>
           </section>
 
+          <ProductUploadSteps currentStep={2} />
+
           <button
             className={styles.pdSubmit}
             type="button"
@@ -1823,8 +1859,7 @@ export default function ProductDetailsPage() {
                   lineHeight: "1.5",
                 }}
               >
-                Choisissez le type de modèle pour générer votre maquette
-                personnalisée
+                Choisissez le type de scène — une seule image sera générée.
               </p>
             </div>
 
@@ -2148,10 +2183,10 @@ export default function ProductDetailsPage() {
             </button>
             <h2 className={styles.puPopupTitle}>
               {mockupLoading
-                ? "Création des maquettes"
+                ? "Création de la maquette"
                 : mockupError
                   ? "Oups !"
-                  : "Choisissez une maquette"}
+                  : "Valider la maquette"}
             </h2>
 
             {mockupLoading ? (
@@ -2191,7 +2226,9 @@ export default function ProductDetailsPage() {
                 </button>
               </div>
             ) : generatedMockups.length > 0 ? (
-              <div className={styles.puAiGrid}>
+              <div
+                className={`${styles.puAiGrid} ${generatedMockups.length === 1 ? styles.puAiGridSingle : ""}`}
+              >
                 {generatedMockups.map((url, index) => (
                   <button
                     key={index}

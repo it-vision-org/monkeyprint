@@ -239,18 +239,12 @@ export async function POST(request: NextRequest) {
         : buildMockupPrompt(SCENES[gender]);
     console.log("Prompt:", prompt);
 
-    // ── Submit 4 tasks in parallel ───────────────────────────────
-    const taskIds = await Promise.all(
-      Array.from({ length: 4 }, () => submitTask(prompt, designUrl)),
-    );
-    console.log(`Tasks submitted: ${taskIds.filter(Boolean).length}/4`);
+    // ── Submit a single task ─────────────────────────────────────
+    const taskId = await submitTask(prompt, designUrl);
+    console.log(`Task submitted: ${taskId ? "ok" : "failed"}`);
 
-    // ── Poll all tasks concurrently ──────────────────────────────
-    const urlArrays = await Promise.all(
-      taskIds.map((id) => (id ? pollTask(id) : Promise.resolve([]))),
-    );
-
-    let images = urlArrays.flatMap((urls) => urls.slice(0, 1));
+    const urls = taskId ? await pollTask(taskId) : [];
+    const images = urls.slice(0, 1);
     console.log(`Mockups collected: ${images.length}`);
 
     if (images.length === 0) {
@@ -260,11 +254,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    while (images.length < 4) {
-      images.push(images[images.length - 1]);
-    }
-
-    return NextResponse.json({ success: true, images: images.slice(0, 4) });
+    return NextResponse.json({ success: true, images });
   } catch (error: any) {
     console.error("Mockup generation error:", error);
     return NextResponse.json(
