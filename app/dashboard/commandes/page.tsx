@@ -243,7 +243,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                                                 <div className={styles.commandeValue}>{order.customer.name || '-'}</div>
                                             </div>
                                             <div className={styles.commandeRow}>
-                                                <div className={styles.commandeLabel}>Adress</div>
+                                                <div className={styles.commandeLabel}>Adresse</div>
                                                 <div className={styles.commandeValue}>{order.customer.address || '-'}</div>
                                             </div>
                                             <div className={styles.commandeRow}>

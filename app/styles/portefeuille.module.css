@@ -248,7 +248,7 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  marginBottom: 8px;
+  margin-bottom: 8px;
   color: #374151;
 }
 
@@ -290,7 +290,7 @@
   background: transparent;
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  fontSize: 14px;
+  font-size: 14px;
   color: #6b7280;
   cursor: pointer;
 }
@@ -324,7 +324,7 @@
   color: #374151;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  fontSize: 16px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   display: inline-block;
@@ -391,7 +391,7 @@
 .withdrawalId {
   font-size: 12px;
   color: #9ca3af;
-  marginTop: 12px;
+  margin-top: 12px;
 }
 
 .backLink {
@@ -400,8 +400,8 @@
   gap: 8px;
   color: #2563eb;
   text-decoration: none;
-  fontSize: 14px;
-  marginBottom: 24px;
+  font-size: 14px;
+  margin-bottom: 24px;
 }
 
 .emptyState {
@@ -415,7 +415,7 @@
 .emptyStateText {
   font-size: 18px;
   color: #6b7280;
-  marginBottom: 24px;
+  margin-bottom: 24px;
 }
 
 .primaryButton {

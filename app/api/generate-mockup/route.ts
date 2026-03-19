@@ -1,278 +1,249 @@
 import { NextRequest, NextResponse } from "next/server";
+import { uploadImageToR2, getR2Url } from "@/lib/storage";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-if (!GEMINI_API_KEY) {
-  throw new Error("GEMINI_API_KEY environment variable is not set");
+const KIE_AI_API_KEY = process.env.KIE_AI_API_KEY;
+if (!KIE_AI_API_KEY) {
+  throw new Error("KIE_AI_API_KEY environment variable is not set");
 }
-// Primary model: gemini-3-pro-image-preview
-const GEMINI_API_URL_PRIMARY =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent";
-// Fallback model: gemini-3.1-flash-image-preview
-const GEMINI_API_URL_FALLBACK =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent";
 
-const GENDER_PROMPTS: Record<string, string> = {
-  homme: "a professional male model wearing",
-  femme: "a professional female model wearing",
-  enfant: "a child model wearing",
-  groupe: "a diverse group of people wearing",
-  famille: "a happy family (parents and children) wearing",
-  couple: "a couple wearing matching",
-  unisexe: "a unisex model wearing",
-  sport: "athletes or sports team members wearing",
-  corporate: "professional business people wearing",
+const KIE_API_BASE = "https://api.kie.ai";
+
+// ─── Scene descriptors per audience ──────────────────────────────
+const SCENES: Record<string, string> = {
+  homme:
+    "a confident stylish man in his late 20s, " +
+    "wearing the t-shirt, casual urban outfit, " +
+    "standing in a bright modern city street, golden hour natural light",
+
+  femme:
+    "a stylish woman in her late 20s, " +
+    "wearing the t-shirt, relaxed chic outfit, " +
+    "standing in a bright airy space, soft diffused natural light",
+
+  enfant:
+    "a happy energetic child aged 8–10, " +
+    "wearing the t-shirt, playful pose, " +
+    "colorful park background, bright cheerful daylight",
+
+  famille:
+    "a happy modern family of four — parents and two children, " +
+    "all wearing matching t-shirts, " +
+    "outdoors in a sunny park, warm golden light, candid joyful moment",
+
+  sport:
+    "a fit athletic person in their 20s, " +
+    "wearing the t-shirt, dynamic action pose, " +
+    "gym or outdoor track background, dramatic sports photography lighting",
+
+  corporate:
+    "a professional confident person in their 30s, " +
+    "wearing the t-shirt over smart-casual trousers, " +
+    "clean modern office or co-working space background, polished studio light",
+
+  unisexe:
+    "a trendy gender-neutral person in their 20s, " +
+    "wearing the t-shirt, minimalist style, " +
+    "clean white studio background, editorial fashion lighting",
+
+  couple:
+    "a couple in their late 20s, both wearing matching t-shirts, " +
+    "arms around each other, candid natural pose, " +
+    "warm lifestyle setting, golden hour light",
 };
 
+// ─── Build the mockup prompt ──────────────────────────────────────
+// nano-banana-2 receives BOTH the prompt AND the design as image_input.
+// The prompt instructs it to render the design onto the shirt.
+function buildMockupPrompt(scene: string): string {
+  return (
+    // Scene
+    `Fashion lifestyle photo: ${scene}. ` +
+    // Design placement — key instruction
+    `The t-shirt has the provided reference graphic printed in full color ` +
+    `centered on the chest — reproduce the exact design, colors, and details ` +
+    `from the reference image faithfully on the fabric. ` +
+    // Photography quality
+    `Camera: Canon EOS R5, 85mm f/1.8 lens, shallow depth of field. ` +
+    `Lighting: professional softbox studio light or soft natural window light. ` +
+    `Style: high-end fashion e-commerce photography, sharp fabric detail, ` +
+    `true-to-life garment texture, realistic fabric drape. ` +
+    // Background
+    `Background: clean, minimal, slightly blurred. ` +
+    // Output
+    `Full-body or three-quarter crop. Photorealistic. Commercial quality. ` +
+    `16:9 or 3:2 landscape format.`
+  );
+}
+
+function buildCustomPrompt(custom: string): string {
+  const sanitized = custom
+    .trim()
+    .slice(0, 200)
+    .replace(/[<>{}[\]\\]/g, "")
+    .replace(/\s+/g, " ");
+  return (
+    `Fashion lifestyle photo: ${sanitized}. ` +
+    `The t-shirt has the provided reference graphic printed in full color ` +
+    `centered on the chest — reproduce the exact design from the reference image faithfully. ` +
+    `High quality product photography, professional lighting, realistic fabric texture. ` +
+    `Commercial fashion photography quality.`
+  );
+}
+
+// ─── Upload design base64 to R2, return public URL ───────────────
+async function uploadDesignToR2(base64: string): Promise<string> {
+  const key = await uploadImageToR2(base64, "temp-mockups");
+  const url = await getR2Url(key);
+  if (!url || url === key) {
+    throw new Error("R2 public domain not configured — cannot serve design URL to kie.ai");
+  }
+  return url;
+}
+
+// ─── Submit one nano-banana-2 task ───────────────────────────────
+async function submitTask(prompt: string, designUrl: string): Promise<string | null> {
+  try {
+    const body = {
+      model: "nano-banana-2",
+      input: {
+        prompt,
+        image_input: [designUrl],
+        aspect_ratio: "3:2",
+        output_format: "jpg",
+        resolution: "1K",
+        google_search: false,
+      },
+    };
+
+    const res = await fetch(`${KIE_API_BASE}/api/v1/jobs/createTask`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${KIE_AI_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      console.error(`Task submit failed (${res.status}): ${await res.text()}`);
+      return null;
+    }
+
+    const data = await res.json();
+    return data.data?.taskId ?? null;
+  } catch (e) {
+    console.error("Submit error:", e);
+    return null;
+  }
+}
+
+// ─── Poll task until done ─────────────────────────────────────────
+async function pollTask(taskId: string, maxWaitMs = 120_000): Promise<string[]> {
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 3000));
+    try {
+      const res = await fetch(
+        `${KIE_API_BASE}/api/v1/jobs/recordInfo?taskId=${taskId}`,
+        { headers: { Authorization: `Bearer ${KIE_AI_API_KEY}` } },
+      );
+      if (!res.ok) continue;
+      const data = await res.json();
+      const record = data.data;
+      if (!record) continue;
+      if (record.state === "success") {
+        const result = JSON.parse(record.resultJson || "{}");
+        return Array.isArray(result.resultUrls) ? result.resultUrls : [];
+      }
+      if (record.state === "fail") {
+        console.error(`Task ${taskId} failed: ${record.failCode} — ${record.failMsg}`);
+        return [];
+      }
+    } catch (e) {
+      console.error(`Poll error ${taskId}:`, e);
+    }
+  }
+  console.error(`Task ${taskId} timed out`);
+  return [];
+}
+
+// ─── Route handler ────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { designImageBase64, gender, customPrompt } = body;
 
     if (!designImageBase64) {
-      return NextResponse.json(
-        { error: "Design image is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Design image is required" }, { status: 400 });
     }
-
     if (!gender) {
-      return NextResponse.json(
-        { error: "Gender option is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Audience option is required" }, { status: 400 });
     }
-
-    // Validate custom prompt if custom option is selected
     if (gender === "custom") {
-      if (!customPrompt || customPrompt.trim().length === 0) {
-        return NextResponse.json(
-          { error: "Custom prompt is required when selecting custom option" },
-          { status: 400 },
-        );
+      if (!customPrompt?.trim()) {
+        return NextResponse.json({ error: "Custom prompt is required" }, { status: 400 });
       }
       if (customPrompt.length > 200) {
-        return NextResponse.json(
-          { error: "Custom prompt must be 200 characters or less" },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: "Custom prompt must be 200 characters or less" }, { status: 400 });
       }
-    } else if (!GENDER_PROMPTS[gender]) {
-      return NextResponse.json(
-        { error: "Valid gender option is required" },
-        { status: 400 },
-      );
+    } else if (!SCENES[gender]) {
+      return NextResponse.json({ error: "Invalid audience option" }, { status: 400 });
     }
 
-    // Clean base64 string - remove data URL prefix if present
-    const base64Data = designImageBase64.includes(",")
-      ? designImageBase64.split(",")[1]
-      : designImageBase64;
+    // ── Upload design to R2 for public URL ──────────────────────
+    console.log("\n=== Mockup Generation (nano-banana-2) ===");
+    console.log("Audience:", gender);
 
-    // Sanitize custom prompt to prevent injection
-    const sanitizePrompt = (input: string): string => {
-      // Remove potentially dangerous characters and limit length
-      return input
-        .trim()
-        .slice(0, 200) // Already validated, but extra safety
-        .replace(/[<>{}[\]\\]/g, "") // Remove brackets and backslashes
-        .replace(/\n/g, " ") // Replace newlines with spaces
-        .replace(/\s+/g, " ") // Collapse multiple spaces
-        .trim();
-    };
-
-    // Build prompt for image editing
-    let prompt: string;
-
-    if (gender === "custom" && customPrompt) {
-      // Sanitize the custom prompt before using it
-      const sanitizedPrompt = sanitizePrompt(customPrompt);
-      prompt = `The user has asked for a custom design. Their request is: ${sanitizedPrompt}. The t-shirt should have the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
-    } else {
-      // Use predefined prompt
-      prompt = `${GENDER_PROMPTS[gender]} a t-shirt with the custom design shown on both front and back. High quality product photography, professional lighting, clean background, realistic fabric texture, detailed mockup. The design should be clearly visible and well-integrated into the garment. Generate a unique variation with different pose, angle, and setting. Use everything in the images. DO NOT REMOVE ANYTHING FROM THEM EVEN IF IT SEEMS LIKE A FAULT`;
+    let designUrl: string;
+    try {
+      designUrl = await uploadDesignToR2(designImageBase64);
+      console.log("Design uploaded to R2:", designUrl);
+    } catch (uploadErr: any) {
+      // R2 not available — fall back to text-only (no image_input)
+      console.warn("R2 upload failed, falling back to text-only:", uploadErr.message);
+      designUrl = "";
     }
 
-    console.log("\n=== Starting Mockup Generation ===");
-    console.log("Gender:", gender);
+    // ── Build prompt ────────────────────────────────────────────
+    const prompt =
+      gender === "custom"
+        ? buildCustomPrompt(customPrompt)
+        : buildMockupPrompt(SCENES[gender]);
     console.log("Prompt:", prompt);
-    console.log("Base64 data length:", base64Data.length);
-    console.log("Base64 preview:", base64Data.substring(0, 50) + "...");
 
-    // Use Gemini API for image editing (text-and-image-to-image)
-    // Format: contents with parts array containing text and inline_data
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt,
-            },
-            {
-              inline_data: {
-                mime_type: "image/png",
-                data: base64Data,
-              },
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-    };
-
-    console.log("Request body structure:", {
-      hasContents: !!requestBody.contents,
-      contentsLength: requestBody.contents.length,
-      firstContentParts: requestBody.contents[0]?.parts?.length,
-      partsTypes: requestBody.contents[0]?.parts?.map((p: any) =>
-        Object.keys(p),
+    // ── Submit 4 tasks in parallel ───────────────────────────────
+    const taskIds = await Promise.all(
+      Array.from({ length: 4 }, () =>
+        submitTask(
+          prompt,
+          designUrl || "https://static.aiquickdraw.com/tools/example/1772164675129_TZfXY2Sn.png",
+        ),
       ),
-    });
+    );
+    console.log(`Tasks submitted: ${taskIds.filter(Boolean).length}/4`);
 
-    // Helper function to generate a single image with retry and fallback
-    const generateSingleImage = async (
-      imageIndex: number,
-      attempt: number = 1,
-      useFallback: boolean = false,
-    ): Promise<string | null> => {
-      const apiUrl = useFallback
-        ? GEMINI_API_URL_FALLBACK
-        : GEMINI_API_URL_PRIMARY;
-      const modelName = useFallback
-        ? "gemini-3.1-flash-image-preview"
-        : "gemini-3.1-flash-image-preview";
-
-      try {
-        console.log(
-          `\n=== API Call ${imageIndex + 1} (Attempt ${attempt}, Model: ${modelName}) ===`,
-        );
-
-        const response = await fetch(`${apiUrl}?key=${GEMINI_API_KEY}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        console.log("Status:", response.status, response.statusText);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("API Error Response:", errorText);
-          throw new Error(
-            `Gemini API error (${response.status}): ${errorText}`,
-          );
-        }
-
-        const data = await response.json();
-        console.log("Response received, parsing...");
-
-        // Extract image from response
-        if (data.candidates && data.candidates.length > 0) {
-          const candidate = data.candidates[0];
-
-          if (
-            candidate.content &&
-            candidate.content.parts &&
-            candidate.content.parts.length > 0
-          ) {
-            const parts = candidate.content.parts;
-
-            // Look for inlineData (camelCase) or inline_data (snake_case) with image
-            const imagePart = parts.find(
-              (part: any) => part.inlineData || part.inline_data,
-            );
-            if (imagePart) {
-              const inlineData = imagePart.inlineData || imagePart.inline_data;
-              if (inlineData && inlineData.data) {
-                const mimeType =
-                  inlineData.mimeType || inlineData.mime_type || "image/jpeg";
-                console.log(
-                  `✓ Found image in part! MIME type: ${mimeType}, Data length: ${inlineData.data?.length}`,
-                );
-                return `data:${mimeType};base64,${inlineData.data}`;
-              }
-            }
-
-            // Check for finishReason issues
-            if (candidate.finishReason === "MAX_TOKENS") {
-              console.log("⚠ MAX_TOKENS reached - response truncated");
-            }
-          }
-        }
-
-        throw new Error("No image found in Gemini response");
-      } catch (error) {
-        console.error(
-          `Error generating image ${imageIndex + 1} (attempt ${attempt}):`,
-          error,
-        );
-
-        // Retry logic: up to 3 attempts
-        if (attempt < 3) {
-          // If first attempt failed and we haven't tried fallback, try fallback on next attempt
-          if (attempt === 1 && !useFallback) {
-            console.log(
-              `Retrying image ${imageIndex + 1} with fallback model (gemini-3.1-flash-image-preview)...`,
-            );
-            return generateSingleImage(imageIndex, attempt + 1, true);
-          } else {
-            // Retry with same model
-            console.log(
-              `Retrying image ${imageIndex + 1} (attempt ${attempt + 1})...`,
-            );
-            return generateSingleImage(imageIndex, attempt + 1, useFallback);
-          }
-        } else {
-          // All retries failed
-          console.error(
-            `Failed to generate image ${imageIndex + 1} after ${attempt} attempts`,
-          );
-          return null;
-        }
-      }
-    };
-
-    // Generate 4 images in parallel, but handle failures gracefully
-    const imagePromises = Array.from({ length: 4 }, (_, i) =>
-      generateSingleImage(i, 1, false),
+    // ── Poll all tasks concurrently ──────────────────────────────
+    const urlArrays = await Promise.all(
+      taskIds.map((id) => (id ? pollTask(id) : Promise.resolve([]))),
     );
 
-    // Wait for all images (some may be null if they failed)
-    const results = await Promise.all(imagePromises);
+    let images = urlArrays.flatMap((urls) => urls.slice(0, 1));
+    console.log(`Mockups collected: ${images.length}`);
 
-    // Filter out null values (failed generations)
-    let imageUrls = results.filter(
-      (url): url is string => url !== null && typeof url === "string",
-    );
-
-    console.log(`\n=== Generation Summary ===`);
-    console.log(`Successfully generated: ${imageUrls.length} out of 4 images`);
-
-    if (imageUrls.length === 0) {
+    if (images.length === 0) {
       return NextResponse.json(
-        { error: "No images were generated successfully after all retries" },
+        { error: "No mockups were generated. Please try again." },
         { status: 500 },
       );
     }
 
-    // If we have fewer than 4 images, duplicate the last one to fill up to 4
-    // But only if we have at least 1 successful image
-    while (imageUrls.length < 4 && imageUrls.length > 0) {
-      imageUrls.push(imageUrls[imageUrls.length - 1]);
+    while (images.length < 4) {
+      images.push(images[images.length - 1]);
     }
 
-    return NextResponse.json({
-      success: true,
-      images: imageUrls.slice(0, 4), // Ensure exactly 4 images
-    });
+    return NextResponse.json({ success: true, images: images.slice(0, 4) });
   } catch (error: any) {
-    console.error("Error generating mockups:", error);
+    console.error("Mockup generation error:", error);
     return NextResponse.json(
       { error: "Internal server error", details: error.message },
       { status: 500 },

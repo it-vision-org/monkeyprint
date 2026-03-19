@@ -161,9 +161,9 @@
   background: white;
   border-radius: 24px;
   padding: 32px;
-  maxWidth: 500px;
+  max-width: 500px;
   width: 100%;
-  maxHeight: 90vh;
+  max-height: 90vh;
   overflow: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: modalAppear 0.3s ease-out;

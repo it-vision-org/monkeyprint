@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kie.ai)",
+      "WebFetch(domain:docs.kie.ai)",
+      "Bash(node -e \":*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -E \"\\\\.\\(tsx?|json|js\\)$|^d\")"
+    ]
+  }
+}

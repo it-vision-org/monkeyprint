@@ -385,10 +385,10 @@ export default function ProductUploadPage() {
   const [activeColor, setActiveColorState] = useState<string>("");
   const [selectedQuality, setSelectedQuality] = useState<string>("");
   const [uploadedDesign, setUploadedDesign] = useState<string | null>(null);
-  const [showAIPopup, setShowAIPopup] = useState(false);
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const [aiImages, setAiImages] = useState<string[]>([]);
   const [designEditorData, setDesignEditorData] = useState<string | null>(null);
+  const [nextValidationError, setNextValidationError] = useState<string | null>(
+    null,
+  );
   const [mobilePriceExpanded, setMobilePriceExpanded] = useState(false);
   const [desktopPriceExpanded, setDesktopPriceExpanded] = useState(false);
   const [desktopPriceLocked, setDesktopPriceLocked] = useState(false);
@@ -605,27 +605,6 @@ export default function ProductUploadPage() {
     multiple: false,
   });
 
-  const handleGenerateAI = useCallback(() => {
-    setIsLoadingAI(true);
-    setShowAIPopup(true);
-    setTimeout(() => {
-      setAiImages([
-        "https://picsum.photos/seed/ai1/400/400",
-        "https://picsum.photos/seed/ai2/400/400",
-        "https://picsum.photos/seed/ai3/400/400",
-        "https://picsum.photos/seed/ai4/400/400",
-      ]);
-      setIsLoadingAI(false);
-    }, 1800);
-  }, []);
-
-  const selectAIImage = useCallback((imageUrl: string) => {
-    setUploadedDesign(imageUrl);
-    sessionStorage.setItem("uploadedDesign", imageUrl);
-    setShowAIPopup(false);
-    setAiImages([]);
-  }, []);
-
   // Get available qualities for the selected product type
   const availableQualities = useMemo(() => {
     if (!selectedProduct || !productTypesFull.length) return [];
@@ -706,29 +685,35 @@ export default function ProductUploadPage() {
   const basePrice = productPrices[selectedProduct] ?? 20;
   const totalPrice = basePrice + designFee + qualityPrice;
 
-  const toggleColor = useCallback((id: string) => {
-    setSelectedColors((prev) => {
-      const exists = prev.includes(id);
-      if (exists) {
-        if (prev.length === 1) {
-          return prev;
+  const toggleColor = useCallback(
+    (id: string) => {
+      setSelectedColors((prev) => {
+        const exists = prev.includes(id);
+        if (exists) {
+          if (prev.length === 1) {
+            return prev;
+          }
+          const filtered = prev.filter((color) => color !== id);
+          if (activeColor === id && filtered.length > 0) {
+            setActiveColorState(filtered[0]);
+          }
+          return filtered;
+        } else {
+          return [...prev, id];
         }
-        const filtered = prev.filter((color) => color !== id);
-        if (activeColor === id && filtered.length > 0) {
-          setActiveColorState(filtered[0]);
-        }
-        return filtered;
-      } else {
-        return [...prev, id];
-      }
-    });
-  }, [activeColor]);
+      });
+    },
+    [activeColor],
+  );
 
-  const setActiveColor = useCallback((colorId: string) => {
-    if (selectedColors.includes(colorId)) {
-      setActiveColorState(colorId);
-    }
-  }, [selectedColors]);
+  const setActiveColor = useCallback(
+    (colorId: string) => {
+      if (selectedColors.includes(colorId)) {
+        setActiveColorState(colorId);
+      }
+    },
+    [selectedColors],
+  );
 
   // Get selected colors in order (active color first for centering, rest in original order)
   const orderedColors = useMemo(() => {
@@ -798,11 +783,43 @@ export default function ProductUploadPage() {
     [selectedProduct, productTypes],
   );
 
+  // Clear validation error when user makes a selection
+  useEffect(() => {
+    if (nextValidationError) {
+      setNextValidationError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct, selectedColors, selectedQuality, uploadedDesign]);
+
   const toggleMobilePrice = useCallback(() => {
     setMobilePriceExpanded((prev) => !prev);
   }, []);
 
   const handleNext = useCallback(async () => {
+    // Validate required fields
+    if (!selectedProduct) {
+      setNextValidationError("Veuillez sélectionner un type de produit.");
+      return;
+    }
+    if (selectedColors.length === 0) {
+      setNextValidationError("Veuillez sélectionner au moins une couleur.");
+      return;
+    }
+    if (!selectedQuality) {
+      setNextValidationError("Veuillez sélectionner une qualité.");
+      return;
+    }
+    // Check if there's a design (either uploaded or in the design editor)
+    const hasEditorDesign =
+      !!sessionStorage.getItem("designEditorData") &&
+      sessionStorage.getItem("designEditorData") !==
+        JSON.stringify({ front: null, back: null });
+    if (!uploadedDesign && !hasEditorDesign) {
+      setNextValidationError("Veuillez ajouter un design avant de continuer.");
+      return;
+    }
+    setNextValidationError(null);
+
     // Save uploaded design if exists
     if (uploadedDesign) {
       sessionStorage.setItem("uploadedDesign", uploadedDesign);
@@ -1262,6 +1279,16 @@ export default function ProductUploadPage() {
                 : "Créez votre propre produit"}
             </p>
             <span className={styles.puIntroLine} />
+            <p
+              style={{
+                color: "rgba(255,255,255,0.55)",
+                fontSize: "13px",
+                margin: "6px 0 0",
+                fontWeight: 500,
+              }}
+            >
+              Étape 1 sur 3 — Configurez votre design
+            </p>
           </div>
 
           <section className={styles.puCard}>
@@ -1296,7 +1323,25 @@ export default function ProductUploadPage() {
           </section>
 
           <section className={styles.puCard}>
-            <h3 className={styles.puCardSubtitle}>Couleurs disponibles :</h3>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "10px",
+                flexWrap: "wrap",
+              }}
+            >
+              <h3 className={styles.puCardSubtitle}>Couleurs disponibles</h3>
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.45)",
+                  fontWeight: 500,
+                }}
+              >
+                Sélectionnez une ou plusieurs couleurs
+              </span>
+            </div>
             <div className={styles.puColorWrapper}>
               <div className={styles.puColorHero}>
                 {orderedColors.map((swatch, index) => {
@@ -1494,7 +1539,7 @@ export default function ProductUploadPage() {
 
           <section className={styles.puCard} style={{ gap: "14px" }}>
             <h3 className={styles.puCardSubtitle}>
-              Select quality of the product
+              Choisissez la qualité du produit
             </h3>
             <div className={styles.puQualityRow}>
               {availableQualities.map((option: QualityOption) => (
@@ -1523,73 +1568,145 @@ export default function ProductUploadPage() {
                 <span>{designFee}DT</span>
               </div>
               <div className={styles.puSummaryRow}>
-                <span>Quality</span>
+                <span>Qualité</span>
                 <span>{qualityPrice}DT</span>
               </div>
               <div className={styles.puSummaryTotal}>
-                <span>Article Prix Base</span>
+                <span>Prix total de base</span>
                 <span>{totalPrice}DT</span>
               </div>
             </div>
           </section>
+
+          {/* Step indicator */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              padding: "0 0 4px",
+            }}
+          >
+            {[
+              { step: 1, label: "Design" },
+              { step: 2, label: "Détails" },
+              { step: 3, label: "Publier" },
+            ].map(({ step, label }, index) => (
+              <div
+                key={step}
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background:
+                        step === 1 ? "#41eb5c" : "rgba(255,255,255,0.2)",
+                      color: step === 1 ? "#000" : "rgba(255,255,255,0.5)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {step === 1 ? (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      step
+                    )}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: step === 1 ? "#41eb5c" : "rgba(255,255,255,0.4)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {index < 2 && (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "1px",
+                      background: "rgba(255,255,255,0.2)",
+                      marginBottom: "14px",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Validation error */}
+          {nextValidationError && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "12px 16px",
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "1px solid rgba(239, 68, 68, 0.4)",
+                borderRadius: "10px",
+                color: "#fca5a5",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ flexShrink: 0 }}
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {nextValidationError}
+            </div>
+          )}
 
           <button
             className={styles.puNextCta}
             type="button"
             onClick={handleNext}
           >
-            {editProductId ? "SUIVANT (MODIFIER)" : "SUIVANT"}
+            {editProductId ? "SUIVANT (MODIFIER)" : "SUIVANT →"}
           </button>
         </div>
       </main>
 
-      {showAIPopup && (
-        <div
-          className={styles.puPopupOverlay}
-          onClick={() => !isLoadingAI && setShowAIPopup(false)}
-        >
-          <div
-            className={styles.puPopup}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              className={styles.puPopupClose}
-              type="button"
-              onClick={() => setShowAIPopup(false)}
-              disabled={isLoadingAI}
-            >
-              ×
-            </button>
-            <h2 className={styles.puPopupTitle}>
-              Choisissez votre design généré par IA
-            </h2>
-            {isLoadingAI ? (
-              <div className={styles.puLoading}>
-                <div className={styles.puSpinner} />
-                <p>Génération en cours...</p>
-              </div>
-            ) : (
-              <div className={styles.puAiGrid}>
-                {aiImages.map((img, index) => (
-                  <button
-                    key={img}
-                    type="button"
-                    className={styles.puAiImageCard}
-                    onClick={() => selectAIImage(img)}
-                  >
-                    <Image
-                      src={img}
-                      alt={`Design ${index + 1}`}
-                      width={200}
-                      height={200}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
+
   );
 }

@@ -233,6 +233,8 @@ const DesignEditor = memo(function DesignEditor({
   const [showAIPrompt, setShowAIPrompt] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiProgress, setAiProgress] = useState(0);
+  const aiProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]); // Current batch of generated images
   const [aiImageHistory, setAiImageHistory] = useState<string[]>([]); // History of all generated images
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -1359,6 +1361,32 @@ const DesignEditor = memo(function DesignEditor({
     handleFiles(e.dataTransfer.files);
   };
 
+  // Fake progress bar animation while waiting for AI
+  useEffect(() => {
+    if (isGeneratingAI) {
+      setAiProgress(5);
+      let elapsed = 0;
+      aiProgressIntervalRef.current = setInterval(() => {
+        elapsed += 1;
+        // Exponential ease: fast start, slows down, caps at 85%
+        const p = Math.min(Math.round(5 + 80 * (1 - Math.exp(-elapsed * 0.045))), 85);
+        setAiProgress(p);
+      }, 1000);
+    } else {
+      if (aiProgressIntervalRef.current) {
+        clearInterval(aiProgressIntervalRef.current);
+        aiProgressIntervalRef.current = null;
+      }
+      setAiProgress(0);
+    }
+    return () => {
+      if (aiProgressIntervalRef.current) {
+        clearInterval(aiProgressIntervalRef.current);
+        aiProgressIntervalRef.current = null;
+      }
+    };
+  }, [isGeneratingAI]);
+
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
       alert("Please enter a prompt");
@@ -1376,11 +1404,12 @@ const DesignEditor = memo(function DesignEditor({
         body: JSON.stringify({ prompt: aiPrompt }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to generate images");
+        throw new Error(data.error || data.details || "Failed to generate images");
       }
 
-      const data = await response.json();
       if (data.images && data.images.length > 0) {
         setGeneratedImages(data.images);
         // Add new images to history (avoid duplicates)
@@ -1396,9 +1425,9 @@ const DesignEditor = memo(function DesignEditor({
       } else {
         throw new Error("No images generated");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating AI images:", error);
-      alert("Failed to generate images. Please try again.");
+      alert(error?.message || "Failed to generate images. Please try again.");
     } finally {
       setIsGeneratingAI(false);
     }
@@ -2515,128 +2544,129 @@ const DesignEditor = memo(function DesignEditor({
                   {showAIPrompt && generatedImages.length === 0 && (
                     <>
                       <h3 className={styles.modalTitle}>Generate with AI</h3>
-                      <div className={styles.aiPromptSection}>
-                        <label className={styles.promptLabel}>
-                          Enter your prompt:
-                        </label>
-                        <textarea
-                          className={styles.promptInput}
-                          value={aiPrompt}
-                          onChange={(e) => setAiPrompt(e.target.value)}
-                          placeholder="Describe the image you want to generate..."
-                          rows={4}
-                          disabled={isGeneratingAI}
-                        />
-                        <div className={styles.aiActions}>
-                          <button
-                            className={styles.generateBtn}
-                            onClick={handleGenerateAI}
-                            disabled={!aiPrompt.trim() || isGeneratingAI}
-                          >
-                            {isGeneratingAI ? (
-                              <>
-                                <span className={styles.miniSpinner}></span>
-                                Generating...
-                              </>
-                            ) : (
-                              "Generate"
-                            )}
-                          </button>
-                          <button
-                            className={styles.backBtn}
-                            onClick={() => {
-                              setShowAIPrompt(false);
-                              setAiPrompt("");
-                            }}
-                            disabled={isGeneratingAI}
-                          >
-                            Back
-                          </button>
-                        </div>
-                      </div>
-                      {aiImageHistory.length > 0 && (
-                        <>
-                          <h4
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: 600,
-                              color: "#64748b",
-                              marginTop: "24px",
-                              marginBottom: "12px",
-                            }}
-                          >
-                            Previous Generations
-                          </h4>
-                          <div className={styles.generatedImagesGrid}>
-                            {aiImageHistory.map((img, index) => (
-                              <button
-                                key={`history-${index}`}
-                                className={styles.generatedImageCard}
-                                onClick={() => selectGeneratedImage(img)}
-                              >
-                                <img src={img} alt={`Previous ${index + 1}`} />
-                              </button>
-                            ))}
+
+                      {/* ── Loading panel ── */}
+                      {isGeneratingAI ? (
+                        <div className={styles.aiLoadingPanel}>
+                          <div className={styles.aiLoadingOrb}>✦</div>
+                          <p className={styles.aiLoadingTitle}>
+                            {aiProgress < 20
+                              ? "Initializing…"
+                              : aiProgress < 50
+                              ? "Generating designs…"
+                              : aiProgress < 75
+                              ? "Almost there…"
+                              : "Finalizing…"}
+                          </p>
+                          <div className={styles.aiProgressBar}>
+                            <div
+                              className={styles.aiProgressFill}
+                              style={{ width: `${aiProgress}%` }}
+                            />
                           </div>
-                        </>
+                          <div className={styles.aiProgressMeta}>
+                            <span className={styles.aiProgressLabel}>
+                              Usually 30–60 seconds
+                            </span>
+                            <span className={styles.aiProgressPercent}>
+                              {aiProgress}%
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── Prompt form ── */
+                        <div className={styles.aiPromptSection}>
+                          <label className={styles.promptLabel}>
+                            Describe your design:
+                          </label>
+                          <textarea
+                            className={styles.promptInput}
+                            value={aiPrompt}
+                            onChange={(e) => setAiPrompt(e.target.value)}
+                            placeholder="e.g. a roaring lion with flames, tattoo style…"
+                            rows={3}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                                handleGenerateAI();
+                              }
+                            }}
+                          />
+                          <span className={styles.promptHint}>
+                            Ctrl + Enter to generate
+                          </span>
+                          <div className={styles.aiActions}>
+                            <button
+                              className={styles.generateBtn}
+                              onClick={handleGenerateAI}
+                              disabled={!aiPrompt.trim()}
+                            >
+                              ✦ Generate 4 designs
+                            </button>
+                            <button
+                              className={styles.backBtn}
+                              onClick={() => {
+                                setShowAIPrompt(false);
+                                setAiPrompt("");
+                              }}
+                            >
+                              Back
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </>
                   )}
 
-                  {(generatedImages.length > 0 ||
-                    aiImageHistory.length > 0) && (
+                  {generatedImages.length > 0 && (
                     <>
                       <h3 className={styles.modalTitle}>
-                        {generatedImages.length > 0
-                          ? "New Generated Images"
-                          : "Previous Generated Images"}
+                        Pick a design
                       </h3>
-                      {generatedImages.length > 0 && (
-                        <div className={styles.generatedImagesGrid}>
-                          {generatedImages.map((img, index) => (
+                      <p className={styles.aiPickHint}>
+                        Tap any image to add it to your canvas
+                      </p>
+                      <div className={styles.generatedImagesGrid}>
+                        {generatedImages.map((img, index) => (
+                          <button
+                            key={`new-${index}`}
+                            className={styles.generatedImageCard}
+                            onClick={() => selectGeneratedImage(img)}
+                          >
+                            <img src={img} alt={`Design ${index + 1}`} />
+                            <div className={styles.generatedImageOverlay}>
+                              <span>✓ Use this</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      {aiImageHistory.filter((img) => !generatedImages.includes(img)).length > 0 && (
+                        <div className={styles.historySection}>
+                          <div className={styles.historyHeader}>
+                            <span className={styles.historyLabel}>Previous generations</span>
                             <button
-                              key={`new-${index}`}
-                              className={styles.generatedImageCard}
-                              onClick={() => selectGeneratedImage(img)}
+                              className={styles.clearHistoryInline}
+                              onClick={() => setAiImageHistory([])}
                             >
-                              <img src={img} alt={`Generated ${index + 1}`} />
+                              Clear
                             </button>
-                          ))}
-                        </div>
-                      )}
-                      {aiImageHistory.length > 0 && (
-                        <>
-                          {generatedImages.length > 0 && (
-                            <h4
-                              style={{
-                                fontSize: "14px",
-                                fontWeight: 600,
-                                color: "#64748b",
-                                marginTop: "20px",
-                                marginBottom: "12px",
-                              }}
-                            >
-                              Previous Generations
-                            </h4>
-                          )}
-                          <div className={styles.generatedImagesGrid}>
+                          </div>
+                          <div className={styles.historyStrip}>
                             {aiImageHistory
                               .filter((img) => !generatedImages.includes(img))
                               .map((img, index) => (
                                 <button
-                                  key={`history-${index}`}
-                                  className={styles.generatedImageCard}
+                                  key={`hist-${index}`}
+                                  className={styles.historyThumb}
                                   onClick={() => selectGeneratedImage(img)}
                                 >
-                                  <img
-                                    src={img}
-                                    alt={`Previous ${index + 1}`}
-                                  />
+                                  <img src={img} alt={`Previous ${index + 1}`} />
                                 </button>
                               ))}
                           </div>
-                        </>
+                        </div>
                       )}
+
                       <div className={styles.regenerateSection}>
                         <button
                           className={styles.regenerateBtn}
@@ -2645,35 +2675,8 @@ const DesignEditor = memo(function DesignEditor({
                             setShowAIPrompt(true);
                           }}
                         >
-                          Generate New Images
+                          ✦ Generate new designs
                         </button>
-                        {aiImageHistory.length > 0 && (
-                          <button
-                            className={styles.clearHistoryBtn}
-                            onClick={() => {
-                              if (
-                                confirm("Clear all generated image history?")
-                              ) {
-                                setAiImageHistory([]);
-                                setGeneratedImages([]);
-                              }
-                            }}
-                            style={{
-                              marginTop: "8px",
-                              padding: "8px 16px",
-                              background: "rgba(239, 68, 68, 0.1)",
-                              color: "#dc2626",
-                              border: "1px solid rgba(239, 68, 68, 0.2)",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                              transition: "all 0.2s",
-                            }}
-                          >
-                            Clear History
-                          </button>
-                        )}
                       </div>
                     </>
                   )}
@@ -2795,124 +2798,127 @@ const DesignEditor = memo(function DesignEditor({
                 {showAIPrompt && generatedImages.length === 0 && (
                   <>
                     <h3 className={styles.modalTitle}>Generate with AI</h3>
-                    <div className={styles.aiPromptSection}>
-                      <label className={styles.promptLabel}>
-                        Enter your prompt:
-                      </label>
-                      <textarea
-                        className={styles.promptInput}
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        placeholder="Describe the image you want to generate..."
-                        rows={4}
-                        disabled={isGeneratingAI}
-                      />
-                      <div className={styles.aiActions}>
-                        <button
-                          className={styles.generateBtn}
-                          onClick={handleGenerateAI}
-                          disabled={!aiPrompt.trim() || isGeneratingAI}
-                        >
-                          {isGeneratingAI ? (
-                            <>
-                              <span className={styles.miniSpinner}></span>
-                              Generating...
-                            </>
-                          ) : (
-                            "Generate"
-                          )}
-                        </button>
-                        <button
-                          className={styles.backBtn}
-                          onClick={() => {
-                            setShowAIPrompt(false);
-                            setAiPrompt("");
-                          }}
-                          disabled={isGeneratingAI}
-                        >
-                          Back
-                        </button>
-                      </div>
-                    </div>
-                    {aiImageHistory.length > 0 && (
-                      <>
-                        <h4
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            color: "#64748b",
-                            marginTop: "24px",
-                            marginBottom: "12px",
-                          }}
-                        >
-                          Previous Generations
-                        </h4>
-                        <div className={styles.generatedImagesGrid}>
-                          {aiImageHistory.map((img, index) => (
-                            <button
-                              key={`history-${index}`}
-                              className={styles.generatedImageCard}
-                              onClick={() => selectGeneratedImage(img)}
-                            >
-                              <img src={img} alt={`Previous ${index + 1}`} />
-                            </button>
-                          ))}
+
+                    {/* ── Loading panel ── */}
+                    {isGeneratingAI ? (
+                      <div className={styles.aiLoadingPanel}>
+                        <div className={styles.aiLoadingOrb}>✦</div>
+                        <p className={styles.aiLoadingTitle}>
+                          {aiProgress < 20
+                            ? "Initializing…"
+                            : aiProgress < 50
+                            ? "Generating designs…"
+                            : aiProgress < 75
+                            ? "Almost there…"
+                            : "Finalizing…"}
+                        </p>
+                        <div className={styles.aiProgressBar}>
+                          <div
+                            className={styles.aiProgressFill}
+                            style={{ width: `${aiProgress}%` }}
+                          />
                         </div>
-                      </>
+                        <div className={styles.aiProgressMeta}>
+                          <span className={styles.aiProgressLabel}>
+                            Usually 30–60 seconds
+                          </span>
+                          <span className={styles.aiProgressPercent}>
+                            {aiProgress}%
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      /* ── Prompt form ── */
+                      <div className={styles.aiPromptSection}>
+                        <label className={styles.promptLabel}>
+                          Describe your design:
+                        </label>
+                        <textarea
+                          className={styles.promptInput}
+                          value={aiPrompt}
+                          onChange={(e) => setAiPrompt(e.target.value)}
+                          placeholder="e.g. a roaring lion with flames, tattoo style…"
+                          rows={3}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                              handleGenerateAI();
+                            }
+                          }}
+                        />
+                        <span className={styles.promptHint}>
+                          Ctrl + Enter to generate
+                        </span>
+                        <div className={styles.aiActions}>
+                          <button
+                            className={styles.generateBtn}
+                            onClick={handleGenerateAI}
+                            disabled={!aiPrompt.trim()}
+                          >
+                            ✦ Generate 4 designs
+                          </button>
+                          <button
+                            className={styles.backBtn}
+                            onClick={() => {
+                              setShowAIPrompt(false);
+                              setAiPrompt("");
+                            }}
+                          >
+                            Back
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}
 
-                {(generatedImages.length > 0 || aiImageHistory.length > 0) && (
+                {generatedImages.length > 0 && (
                   <>
-                    <h3 className={styles.modalTitle}>
-                      {generatedImages.length > 0
-                        ? "New Generated Images"
-                        : "Previous Generated Images"}
-                    </h3>
-                    {generatedImages.length > 0 && (
-                      <div className={styles.generatedImagesGrid}>
-                        {generatedImages.map((img, index) => (
+                    <h3 className={styles.modalTitle}>Pick a design</h3>
+                    <p className={styles.aiPickHint}>
+                      Tap any image to add it to your canvas
+                    </p>
+                    <div className={styles.generatedImagesGrid}>
+                      {generatedImages.map((img, index) => (
+                        <button
+                          key={`new-${index}`}
+                          className={styles.generatedImageCard}
+                          onClick={() => selectGeneratedImage(img)}
+                        >
+                          <img src={img} alt={`Design ${index + 1}`} />
+                          <div className={styles.generatedImageOverlay}>
+                            <span>✓ Use this</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {aiImageHistory.filter((img) => !generatedImages.includes(img)).length > 0 && (
+                      <div className={styles.historySection}>
+                        <div className={styles.historyHeader}>
+                          <span className={styles.historyLabel}>Previous generations</span>
                           <button
-                            key={`new-${index}`}
-                            className={styles.generatedImageCard}
-                            onClick={() => selectGeneratedImage(img)}
+                            className={styles.clearHistoryInline}
+                            onClick={() => setAiImageHistory([])}
                           >
-                            <img src={img} alt={`Generated ${index + 1}`} />
+                            Clear
                           </button>
-                        ))}
-                      </div>
-                    )}
-                    {aiImageHistory.length > 0 && (
-                      <>
-                        {generatedImages.length > 0 && (
-                          <h4
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: 600,
-                              color: "#64748b",
-                              marginTop: "20px",
-                              marginBottom: "12px",
-                            }}
-                          >
-                            Previous Generations
-                          </h4>
-                        )}
-                        <div className={styles.generatedImagesGrid}>
+                        </div>
+                        <div className={styles.historyStrip}>
                           {aiImageHistory
                             .filter((img) => !generatedImages.includes(img))
                             .map((img, index) => (
                               <button
-                                key={`history-${index}`}
-                                className={styles.generatedImageCard}
+                                key={`hist-${index}`}
+                                className={styles.historyThumb}
                                 onClick={() => selectGeneratedImage(img)}
                               >
                                 <img src={img} alt={`Previous ${index + 1}`} />
                               </button>
                             ))}
                         </div>
-                      </>
+                      </div>
                     )}
+
                     <div className={styles.regenerateSection}>
                       <button
                         className={styles.regenerateBtn}
@@ -2921,33 +2927,8 @@ const DesignEditor = memo(function DesignEditor({
                           setShowAIPrompt(true);
                         }}
                       >
-                        Generate New Images
+                        ✦ Generate new designs
                       </button>
-                      {aiImageHistory.length > 0 && (
-                        <button
-                          className={styles.clearHistoryBtn}
-                          onClick={() => {
-                            if (confirm("Clear all generated image history?")) {
-                              setAiImageHistory([]);
-                              setGeneratedImages([]);
-                            }
-                          }}
-                          style={{
-                            marginTop: "8px",
-                            padding: "8px 16px",
-                            background: "rgba(239, 68, 68, 0.1)",
-                            color: "#dc2626",
-                            border: "1px solid rgba(239, 68, 68, 0.2)",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            transition: "all 0.2s",
-                          }}
-                        >
-                          Clear History
-                        </button>
-                      )}
                     </div>
                   </>
                 )}

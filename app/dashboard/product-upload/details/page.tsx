@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 // Note: Using document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
-import { useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../../styles/product-upload.module.css";
 // ProductUploadHeader removed - using dashboard layout instead
@@ -24,6 +24,204 @@ const GENDER_OPTIONS: GenderOption[] = [
 
 // MIN_PRICE will be loaded from API
 let MIN_PRICE = 55;
+
+// ─── Top-Level Sub-components ─────────────────────────────────────────────
+// IMPORTANT: These must be defined OUTSIDE ProductDetailsPage.
+// Defining components inside a parent component causes React to treat them as
+// new component types on every render, triggering unmount/remount cycles
+// which causes the sticky price bar and the "Retour à l'édition" button to jump.
+
+type MobilePriceBarDetailsProps = {
+  totalPrice: number;
+  basePrice: number;
+  designFee: number;
+  qualityPrice: number;
+  productTypeLabel: string;
+  selectedQualityLabel: string;
+  expanded: boolean;
+  onToggle: () => void;
+};
+
+const MobilePriceBarDetails = memo(function MobilePriceBarDetails({
+  totalPrice,
+  basePrice,
+  designFee,
+  qualityPrice,
+  productTypeLabel,
+  selectedQualityLabel,
+  expanded,
+  onToggle,
+}: MobilePriceBarDetailsProps) {
+  return (
+    <div className={`${styles.puCartContainer} ${styles.puCartContainerMobile}`}>
+      <button
+        className={styles.puCartBar}
+        type="button"
+        aria-expanded={expanded}
+        onClick={onToggle}
+      >
+        <div className={styles.puCartContent}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+          </svg>
+        </div>
+        <div className={styles.puCartTotal}>
+          <span className={styles.puCartPrice}>{totalPrice}DT</span>
+          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className={expanded ? styles.expanded : ""}>
+            <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </button>
+      {expanded && (
+        <div className={styles.puCartDetails}>
+          <div className={styles.puCartDetailsHeader}>
+            <h3 className={styles.puCartDetailsTitle}>Détails du prix</h3>
+          </div>
+          <div className={styles.puCartItems}>
+            <div className={styles.puCartItem}>
+              <div className={styles.puCartItemInfo}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                  <path d="M3 6h18" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+                <span>Articles ({productTypeLabel})</span>
+              </div>
+              <span className={styles.puCartItemPrice}>{basePrice}DT</span>
+            </div>
+            <div className={styles.puCartItem}>
+              <div className={styles.puCartItemInfo}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+                <span>Design</span>
+              </div>
+              <span className={styles.puCartItemPrice}>{designFee}DT</span>
+            </div>
+            <div className={styles.puCartItem}>
+              <div className={styles.puCartItemInfo}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+                <span className={styles.puPriceWidgetItemLabel}>Qualité ({selectedQualityLabel})</span>
+              </div>
+              <span className={styles.puCartItemPrice}>{qualityPrice}DT</span>
+            </div>
+          </div>
+          <div className={styles.puCartTotalLine}>
+            <span className={styles.puCartTotalLabel}>Total</span>
+            <span className={styles.puCartTotalPrice}>{totalPrice}DT</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+type DesktopPriceWidgetDetailsProps = {
+  totalPrice: number;
+  basePrice: number;
+  designFee: number;
+  qualityPrice: number;
+  productTypeLabel: string;
+  selectedQualityLabel: string;
+  expanded: boolean;
+  locked: boolean;
+  onToggle: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+};
+
+const DesktopPriceWidgetDetails = memo(function DesktopPriceWidgetDetails({
+  totalPrice,
+  basePrice,
+  designFee,
+  qualityPrice,
+  productTypeLabel,
+  selectedQualityLabel,
+  expanded,
+  locked,
+  onToggle,
+  onMouseEnter,
+  onMouseLeave,
+}: DesktopPriceWidgetDetailsProps) {
+  return (
+    <div
+      className={`${styles.puPriceWidgetDesktop} ${expanded ? styles.expanded : ""} ${locked ? styles.locked : ""}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <button className={styles.puPriceWidgetTrigger} type="button" onClick={onToggle} aria-label="Voir le récapitulatif des prix">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+        </svg>
+        <div className={styles.puPriceWidgetTriggerPrice}>{totalPrice}DT</div>
+      </button>
+
+      <div className={styles.puPriceWidgetPanel}>
+        <div className={styles.puPriceWidgetHeader}>
+          <div className={styles.puPriceWidgetHeaderIcon}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
+            </svg>
+          </div>
+          <div className={styles.puPriceWidgetHeaderTitle}>Récapitulatif</div>
+        </div>
+        <div className={styles.puPriceWidgetContent}>
+          <div className={styles.puPriceWidgetItems}>
+            <div className={styles.puPriceWidgetItem}>
+              <div className={styles.puPriceWidgetItemInfo}>
+                <div className={styles.puPriceWidgetItemIcon}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                  </svg>
+                </div>
+                <span className={styles.puPriceWidgetItemLabel}>Articles ({productTypeLabel})</span>
+              </div>
+              <span className={styles.puPriceWidgetItemPrice}>{basePrice}DT</span>
+            </div>
+            <div className={styles.puPriceWidgetItem}>
+              <div className={styles.puPriceWidgetItemInfo}>
+                <div className={styles.puPriceWidgetItemIcon}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                  </svg>
+                </div>
+                <span className={styles.puPriceWidgetItemLabel}>Design</span>
+              </div>
+              <span className={styles.puPriceWidgetItemPrice}>{designFee}DT</span>
+            </div>
+            <div className={styles.puPriceWidgetItem}>
+              <div className={styles.puPriceWidgetItemInfo}>
+                <div className={styles.puPriceWidgetItemIcon}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+                <span className={styles.puPriceWidgetItemLabel}>Qualité ({selectedQualityLabel})</span>
+              </div>
+              <span className={styles.puPriceWidgetItemPrice}>{qualityPrice}DT</span>
+            </div>
+          </div>
+          <div className={styles.puPriceWidgetTotal}>
+            <div className={styles.puPriceWidgetTotalLabel}>Total</div>
+            <div className={styles.puPriceWidgetTotalPrice}>{totalPrice}DT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 export default function ProductDetailsPage() {
   const router = useRouter();
@@ -56,33 +254,28 @@ export default function ProductDetailsPage() {
   const [isFirstProduct, setIsFirstProduct] = useState<boolean>(true);
   const [minPrice, setMinPrice] = useState<number>(55);
 
-  // Progress bar simulation logic
+  // Progress bar simulation — exponential ease, caps at 85%, resets on done
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (mockupLoading && mockupProgress < 90) {
-      interval = setInterval(() => {
-        setMockupProgress((prev) => {
-          if (prev < 40) return prev + 2; // Faster at start
-          if (prev < 70) return prev + 1; // Slower in middle
-          if (prev < 90) return prev + 0.5; // Very slow near end
-          return prev;
-        });
-      }, 800);
+    if (!mockupLoading) {
+      return;
     }
+    setMockupProgress(5);
+    let elapsed = 0;
+    const interval = setInterval(() => {
+      elapsed += 1;
+      const p = Math.min(Math.round(5 + 80 * (1 - Math.exp(-elapsed * 0.04))), 85);
+      setMockupProgress(p);
+    }, 1000);
     return () => clearInterval(interval);
-  }, [mockupLoading, mockupProgress]);
+  }, [mockupLoading]);
 
-  // Status message logic based on progress
+  // Status message based on progress
   useEffect(() => {
-    if (mockupProgress < 20)
-      setMockupStatus("Initialisation du moteur de rendu...");
-    else if (mockupProgress < 40)
-      setMockupStatus("Conversion de votre design...");
-    else if (mockupProgress < 60)
-      setMockupStatus("Application des textures et ombres...");
-    else if (mockupProgress < 85)
-      setMockupStatus("Génération des variantes IA...");
-    else setMockupStatus("Finalisation de vos maquettes...");
+    if (mockupProgress < 15) setMockupStatus("Initialisation…");
+    else if (mockupProgress < 35) setMockupStatus("Préparation de la scène…");
+    else if (mockupProgress < 55) setMockupStatus("Génération IA en cours…");
+    else if (mockupProgress < 75) setMockupStatus("Presque prêt…");
+    else setMockupStatus("Finalisation des maquettes…");
   }, [mockupProgress]);
   const [pricingSettings, setPricingSettings] = useState<any>(null);
 
@@ -106,13 +299,6 @@ export default function ProductDetailsPage() {
     const savedEditorData = sessionStorage.getItem("designEditorData");
     const editingProductId = sessionStorage.getItem("editingProductId");
     setIsEditingProduct(!!editingProductId);
-
-    console.log(
-      "Details page loading - savedEditorData:",
-      savedEditorData?.substring(0, 200),
-    );
-    console.log("Details page loading - savedDesign:", savedDesign);
-    console.log("Details page loading - editingProductId:", editingProductId);
 
     // Load pricing data from previous step
     const totalPriceStr = sessionStorage.getItem("productTotalPrice") || "20";
@@ -334,32 +520,13 @@ export default function ProductDetailsPage() {
       let designData: { front?: string | null; back?: string | null };
 
       if (!editorData || editorData.trim() === "") {
-        console.log("No editor data provided, using empty designs");
         designData = { front: null, back: null };
       } else {
-        console.log("Parsing design data:", editorData.substring(0, 300));
         designData = JSON.parse(editorData);
       }
-      console.log("Parsed design data structure:", {
-        hasFront: !!designData.front,
-        hasBack: !!designData.back,
-        frontType: typeof designData.front,
-        backType: typeof designData.back,
-        frontLength: designData.front?.length,
-        backLength: designData.back?.length,
-      });
 
       const frontDesign = designData.front || null;
       const backDesign = designData.back || null;
-
-      console.log(
-        "Front design:",
-        frontDesign ? `${frontDesign.substring(0, 100)}...` : "null",
-      );
-      console.log(
-        "Back design:",
-        backDesign ? `${backDesign.substring(0, 100)}...` : "null",
-      );
 
       // Always render both front and back, even when empty
       // Render front design (always)
@@ -368,16 +535,11 @@ export default function ProductDetailsPage() {
           frontDesign && frontDesign.trim() !== "" && frontDesign !== "null"
             ? frontDesign
             : emptyDesign;
-        console.log("Rendering front design...");
         const frontImg = await renderDesignToImage(
           frontDesignToRender,
           400,
           500,
           "front",
-        );
-        console.log(
-          "Front design rendered successfully, length:",
-          frontImg.length,
         );
         setFrontDesignImage(frontImg);
       } catch (error) {
@@ -390,16 +552,11 @@ export default function ProductDetailsPage() {
           backDesign && backDesign.trim() !== "" && backDesign !== "null"
             ? backDesign
             : emptyDesign;
-        console.log("Rendering back design...");
         const backImg = await renderDesignToImage(
           backDesignToRender,
           400,
           500,
           "back",
-        );
-        console.log(
-          "Back design rendered successfully, length:",
-          backImg.length,
         );
         setBackDesignImage(backImg);
       } catch (error) {
@@ -574,11 +731,6 @@ export default function ProductDetailsPage() {
               fabric.util
                 .enlivenObjects(objects)
                 .then(async (objs: any[]) => {
-                  console.log("Enlivened objects:", objs.length, "objects");
-                  console.log(
-                    "Object types:",
-                    objs.map((o) => o.type || o.constructor.name),
-                  );
                   // Wait for all images to be fully loaded
                   const imagePromises = objs
                     .filter(
@@ -840,13 +992,6 @@ export default function ProductDetailsPage() {
         throw new Error("Aucune image de design disponible");
       }
 
-      console.log("Combined image length:", combinedImage.length);
-      console.log("Combined image preview:", combinedImage.substring(0, 100));
-      console.log(
-        "Sending to API - using preview images:",
-        !!frontDesignImage && !!backDesignImage,
-      );
-
       // Call API to generate mockups
       const response = await fetch("/api/generate-mockup", {
         method: "POST",
@@ -872,13 +1017,7 @@ export default function ProductDetailsPage() {
 
       const data = await response.json();
 
-      console.log("API Response:", {
-        success: data.success,
-        imagesCount: data.images?.length,
-      });
-
       if (data.success && data.images && data.images.length > 0) {
-        console.log("Setting mockups:", data.images.length, "images");
         setMockupProgress(100);
         setTimeout(() => {
           setGeneratedMockups(data.images);
@@ -993,305 +1132,59 @@ export default function ProductDetailsPage() {
     }
   };
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     router.back();
-  };
+  }, [router]);
 
-  const displayTotalPrice = parseFloat(productPrice) || minPrice;
+  const handleMobilePriceToggle = useCallback(() => {
+    setMobilePriceExpanded((prev) => !prev);
+  }, []);
 
-  // Mobile sticky price bar
-  const MobilePriceBar = () => (
-    <div
-      className={`${styles.puCartContainer} ${styles.puCartContainerMobile}`}
-    >
-      <button
-        className={styles.puCartBar}
-        type="button"
-        aria-expanded={mobilePriceExpanded}
-        onClick={() => setMobilePriceExpanded((prev) => !prev)}
-      >
-        <div className={styles.puCartContent}>
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
-          </svg>
-        </div>
-        <div className={styles.puCartTotal}>
-          <span className={styles.puCartPrice}>{totalPrice}DT</span>
-          <svg
-            width="16"
-            height="10"
-            viewBox="0 0 16 10"
-            fill="none"
-            className={mobilePriceExpanded ? styles.expanded : ""}
-          >
-            <path
-              d="M1 1L8 8L15 1"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </button>
-      {mobilePriceExpanded && (
-        <div
-          className={`${styles.puCartDetails} ${styles.puCartDetailsMobile}`}
-        >
-          <div className={styles.puCartDetailsHeader}>
-            <h3 className={styles.puCartDetailsTitle}>Détails du prix</h3>
-          </div>
-          <div className={styles.puCartItems}>
-            <div className={styles.puCartItem}>
-              <div className={styles.puCartItemInfo}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                  <path d="M3 6h18" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-                <span>Articles ({productTypeLabel})</span>
-              </div>
-              <span className={styles.puCartItemPrice}>{basePrice}DT</span>
-            </div>
-            <div className={styles.puCartItem}>
-              <div className={styles.puCartItemInfo}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg>
-                <span>Design</span>
-              </div>
-              <span className={styles.puCartItemPrice}>{designFee}DT</span>
-            </div>
-            <div className={styles.puCartItem}>
-              <div className={styles.puCartItemInfo}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-                <span className={styles.puPriceWidgetItemLabel}>
-                  Quality ({selectedQualityLabel})
-                </span>
-              </div>
-              <span className={styles.puCartItemPrice}>{qualityPrice}DT</span>
-            </div>
-          </div>
-          <div className={styles.puCartTotalLine}>
-            <span className={styles.puCartTotalLabel}>Total</span>
-            <span className={styles.puCartTotalPrice}>{totalPrice}DT</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const handleDesktopPriceToggle = useCallback(() => {
+    if (desktopPriceLocked) {
+      setDesktopPriceLocked(false);
+      setDesktopPriceExpanded(false);
+    } else {
+      setDesktopPriceLocked(true);
+      setDesktopPriceExpanded(true);
+    }
+  }, [desktopPriceLocked]);
 
-  // Desktop floating price widget
-  const DesktopPriceWidget = () => {
-    const handleToggle = () => {
-      if (desktopPriceLocked) {
-        setDesktopPriceLocked(false);
-        setDesktopPriceExpanded(false);
-      } else {
-        setDesktopPriceLocked(true);
-        setDesktopPriceExpanded(true);
-      }
-    };
+  const handleDesktopMouseEnter = useCallback(() => {
+    if (!desktopPriceLocked) setDesktopPriceExpanded(true);
+  }, [desktopPriceLocked]);
 
-    const handleMouseEnter = () => {
-      if (!desktopPriceLocked) {
-        setDesktopPriceExpanded(true);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      if (!desktopPriceLocked) {
-        setDesktopPriceExpanded(false);
-      }
-    };
-
-    return (
-      <div
-        className={`${styles.puPriceWidgetDesktop} ${desktopPriceExpanded ? styles.expanded : ""} ${desktopPriceLocked ? styles.locked : ""}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <button
-          className={styles.puPriceWidgetTrigger}
-          type="button"
-          onClick={handleToggle}
-          aria-label="Voir le récapitulatif des prix"
-        >
-          <div className={styles.puPriceWidgetTriggerIcon}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
-            </svg>
-          </div>
-          <div className={styles.puPriceWidgetTriggerPrice}>{totalPrice}DT</div>
-        </button>
-
-        <div className={styles.puPriceWidgetPanel}>
-          <div className={styles.puPriceWidgetHeader}>
-            <div className={styles.puPriceWidgetHeaderIcon}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C15.895 17 15 17.895 15 19C15 20.105 15.895 21 17 21C18.105 21 19 20.105 19 19C19 17.895 18.105 17 17 17ZM9 19C9 20.105 8.105 21 7 21C5.895 21 5 20.105 5 19C5 17.895 5.895 17 7 17C8.105 17 9 17.895 9 19Z" />
-              </svg>
-            </div>
-            <div className={styles.puPriceWidgetHeaderTitle}>Récapitulatif</div>
-          </div>
-          <div className={styles.puPriceWidgetContent}>
-            <div className={styles.puPriceWidgetItems}>
-              <div className={styles.puPriceWidgetItem}>
-                <div className={styles.puPriceWidgetItemInfo}>
-                  <div className={styles.puPriceWidgetItemIcon}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                      <path d="M3 6h18" />
-                      <path d="M16 10a4 4 0 0 1-8 0" />
-                    </svg>
-                  </div>
-                  <span className={styles.puPriceWidgetItemLabel}>
-                    Articles ({productTypeLabel})
-                  </span>
-                </div>
-                <span className={styles.puPriceWidgetItemPrice}>
-                  {basePrice}DT
-                </span>
-              </div>
-              <div className={styles.puPriceWidgetItem}>
-                <div className={styles.puPriceWidgetItemInfo}>
-                  <div className={styles.puPriceWidgetItemIcon}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                      <line x1="12" y1="22.08" x2="12" y2="12" />
-                    </svg>
-                  </div>
-                  <span className={styles.puPriceWidgetItemLabel}>Design</span>
-                </div>
-                <span className={styles.puPriceWidgetItemPrice}>
-                  {designFee}DT
-                </span>
-              </div>
-              <div className={styles.puPriceWidgetItem}>
-                <div className={styles.puPriceWidgetItemInfo}>
-                  <div className={styles.puPriceWidgetItemIcon}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                      <path d="M2 17l10 5 10-5" />
-                      <path d="M2 12l10 5 10-5" />
-                    </svg>
-                  </div>
-                  <span className={styles.puPriceWidgetItemLabel}>
-                    Quality ({selectedQualityLabel})
-                  </span>
-                </div>
-                <span className={styles.puPriceWidgetItemPrice}>
-                  {qualityPrice}DT
-                </span>
-              </div>
-            </div>
-            <div className={styles.puPriceWidgetTotal}>
-              <div className={styles.puPriceWidgetTotalLabel}>Total</div>
-              <div className={styles.puPriceWidgetTotalPrice}>
-                {totalPrice}DT
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const handleDesktopMouseLeave = useCallback(() => {
+    if (!desktopPriceLocked) setDesktopPriceExpanded(false);
+  }, [desktopPriceLocked]);
 
   return (
     <div className={styles.productUploadPage}>
-      <MobilePriceBar />
-      <DesktopPriceWidget />
+      <MobilePriceBarDetails
+        totalPrice={totalPrice}
+        basePrice={basePrice}
+        designFee={designFee}
+        qualityPrice={qualityPrice}
+        productTypeLabel={productTypeLabel}
+        selectedQualityLabel={selectedQualityLabel}
+        expanded={mobilePriceExpanded}
+        onToggle={handleMobilePriceToggle}
+      />
+      <DesktopPriceWidgetDetails
+        totalPrice={totalPrice}
+        basePrice={basePrice}
+        designFee={designFee}
+        qualityPrice={qualityPrice}
+        productTypeLabel={productTypeLabel}
+        selectedQualityLabel={selectedQualityLabel}
+        expanded={desktopPriceExpanded}
+        locked={desktopPriceLocked}
+        onToggle={handleDesktopPriceToggle}
+        onMouseEnter={handleDesktopMouseEnter}
+        onMouseLeave={handleDesktopMouseLeave}
+      />
       <main
-        className={styles.puMobileMain}
-        style={{ paddingBottom: mobilePriceExpanded ? "260px" : "120px" }}
+        className={`${styles.puMobileMain} ${mobilePriceExpanded ? styles.pdMainExpanded : ""}`}
       >
         <div className={styles.puMobileFlow}>
           <button
@@ -2255,32 +2148,31 @@ export default function ProductDetailsPage() {
             </button>
             <h2 className={styles.puPopupTitle}>
               {mockupLoading
-                ? "Génération en cours"
+                ? "Création des maquettes"
                 : mockupError
                   ? "Oups !"
                   : "Choisissez une maquette"}
             </h2>
 
             {mockupLoading ? (
-              <div style={{ padding: "20px 0" }}>
-                <div className={styles.puProgressStep}>{mockupStatus}</div>
-                <div className={styles.puProgressContainer}>
-                  <div
-                    className={styles.puProgressBar}
-                    style={{ width: `${mockupProgress}%` }}
-                  />
-                </div>
-                <div className={styles.puProgressSubtext}>
-                  Cela prend environ 60 secondes. Ne fermez pas cette fenêtre.
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    marginTop: "32px",
-                  }}
-                >
-                  <div className={styles.puSpinner} />
+              <div className={styles.puMockupLoadingPanel}>
+                <div className={styles.puMockupOrb}>✦</div>
+                <p className={styles.puMockupLoadingTitle}>{mockupStatus}</p>
+                <div className={styles.puMockupProgressWrap}>
+                  <div className={styles.puProgressContainer}>
+                    <div
+                      className={styles.puProgressBar}
+                      style={{ width: `${mockupProgress}%` }}
+                    />
+                  </div>
+                  <div className={styles.puMockupProgressMeta}>
+                    <span className={styles.puMockupProgressLabel}>
+                      Environ 30–60 secondes
+                    </span>
+                    <span className={styles.puMockupProgressPct}>
+                      {Math.round(mockupProgress)}%
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : mockupError ? (

@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'pub-a54043a6fb8443aaa3cf47aa98675227.r2.dev',
       },
+      {
+        protocol: 'https',
+        hostname: '*.aiquickdraw.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.kie.ai',
+      },
     ],
   },
   outputFileTracingRoot: path.resolve(process.cwd()),
