@@ -27,7 +27,7 @@ export default function MobileBottomNav() {
         { label: 'Boutiques', href: '/stores', icon: Search },
         // Central specific action (optional)
         { label: 'Créer', href: '/create-shop', icon: PlusCircle, isPrimary: true },
-        { label: 'Panier', href: '/store/theme-1/cart', icon: ShoppingCart, count: cartCount },
+        { label: 'Panier', href: '/stores', icon: ShoppingCart, count: cartCount },
         { label: session ? 'Compte' : 'Connexion', href: session ? '/dashboard' : '/login', icon: User },
     ];
 

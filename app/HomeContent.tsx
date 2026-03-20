@@ -1,5 +1,3 @@
-'use client';
-
 import type { Session } from 'next-auth';
 import { LoadingLink, MainHeader, HomeHero, HowItWorks, StoresSection } from "@/components";
 import styles from "./home.module.css";

@@ -51,10 +51,12 @@ function MobileStoreInfo({ storeInfo }: { storeInfo: { name: string; logoUrl: st
 
 export default function DashboardLayout({
     children,
-    storeInfo: initialStoreInfo
+    storeInfo: initialStoreInfo,
+    commandesStats
 }: {
     children: ReactNode;
     storeInfo: { name: string; logoUrl: string | null } | null;
+    commandesStats: { nonConfirmed: number; confirmed: number; retours: number };
 }) {
     const router = useRouter();
     const pathname = usePathname() ?? "/dashboard";
@@ -66,6 +68,9 @@ export default function DashboardLayout({
     const [commandesOpen, setCommandesOpen] = useState(false);
     const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
     const storeInfo = initialStoreInfo;
+    const nonConfirmedCount = commandesStats?.nonConfirmed ?? 0;
+    const confirmedCount = commandesStats?.confirmed ?? 0;
+    const retoursCount = commandesStats?.retours ?? 0;
     const commandesDropdownRef = useRef<HTMLDivElement | null>(null);
     const navIndicatorRef = useRef<HTMLDivElement | null>(null);
     const navWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -210,6 +215,9 @@ export default function DashboardLayout({
                                     aria-expanded={commandesDropdownOpen}
                                 >
                                     COMMANDES
+                                    <span className={styles['dash-count-badge']} aria-label={`${nonConfirmedCount} commandes non confirmées`}>
+                                        {nonConfirmedCount}
+                                    </span>
                                     <span className={`${styles['dash-nav-caret']} ${commandesDropdownOpen ? styles.open : ""}`} aria-hidden="true">
                                         ▾
                                     </span>
@@ -224,6 +232,7 @@ export default function DashboardLayout({
                                         >
                                             <span className={`${styles['dash-submenu-dot']} ${styles.orange}`} aria-hidden="true"></span>
                                             Non confirmé
+                                            <span className={styles['dash-submenu-count']}>{nonConfirmedCount}</span>
                                         </LoadingLink>
                                         <LoadingLink
                                             href="/dashboard/commandes?status=confirme"
@@ -232,6 +241,7 @@ export default function DashboardLayout({
                                         >
                                             <span className={`${styles['dash-submenu-dot']} ${styles.green}`} aria-hidden="true"></span>
                                             Confirmé
+                                            <span className={styles['dash-submenu-count']}>{confirmedCount}</span>
                                         </LoadingLink>
                                         <LoadingLink
                                             href="/dashboard/commandes?status=retours"
@@ -240,6 +250,7 @@ export default function DashboardLayout({
                                         >
                                             <span className={`${styles['dash-submenu-dot']} ${styles.red}`} aria-hidden="true"></span>
                                             Retours
+                                            <span className={styles['dash-submenu-count']}>{retoursCount}</span>
                                         </LoadingLink>
                                     </div>
                                 )}
@@ -298,28 +309,31 @@ export default function DashboardLayout({
                 </div>
             </header>
 
-            {mobileMenuOpen && (
-                <>
-                    <div className={styles['dash-mobile-overlay']} onClick={() => setMobileMenuOpen(false)} />
-                    <div className={`${styles['dash-mobile-menu']} ${mobileMenuOpen ? styles.open : ""}`}>
-                        <div className={styles['dash-mobile-menu-header']}>
-                            <button
-                                className={styles['dash-visit-btn-mobile']}
-                                onClick={() => {
-                                    setMobileMenuOpen(false);
-                                    handleVisitStore();
-                                }}
-                            >
-                                VISITER LE MAGASIN
-                            </button>
-                            <button className={styles['dash-mobile-menu-close']} onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </button>
-                        </div>
+            <>
+                <div
+                    className={`${styles['dash-mobile-overlay']} ${mobileMenuOpen ? styles.open : ""}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    aria-hidden={!mobileMenuOpen}
+                />
+                <div className={`${styles['dash-mobile-menu']} ${mobileMenuOpen ? styles.open : ""}`}>
+                    <div className={styles['dash-mobile-menu-header']}>
+                        <button
+                            className={styles['dash-visit-btn-mobile']}
+                            onClick={() => {
+                                setMobileMenuOpen(false);
+                                handleVisitStore();
+                            }}
+                        >
+                            VISITER LE MAGASIN
+                        </button>
+                        <button className={styles['dash-mobile-menu-close']} onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
 
-                        <nav className={styles['dash-mobile-nav']}>
+                    <nav className={styles['dash-mobile-nav']}>
                             <LoadingLink href="/dashboard/apercu" className={`${styles['dash-mobile-nav-item']} ${pathname.startsWith("/dashboard/apercu") ? styles.active : ""}`}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -354,6 +368,7 @@ export default function DashboardLayout({
                                             <path d="M9 16H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                         </svg>
                                         Commandes
+                                        <span className={styles['dash-count-badge']}>{nonConfirmedCount}</span>
                                     </div>
                                     <svg
                                         width="20"
@@ -371,14 +386,17 @@ export default function DashboardLayout({
                                         <LoadingLink href="/dashboard/commandes?status=non-confirme" className={styles['dash-mobile-submenu-item']}>
                                             <span className={`${styles['dash-submenu-dot']} ${styles.orange}`}></span>
                                             Non confirmé
+                                            <span className={styles['dash-submenu-count']}>{nonConfirmedCount}</span>
                                         </LoadingLink>
                                         <LoadingLink href="/dashboard/commandes?status=confirme" className={styles['dash-mobile-submenu-item']}>
                                             <span className={`${styles['dash-submenu-dot']} ${styles.green}`}></span>
                                             Confirmé
+                                            <span className={styles['dash-submenu-count']}>{confirmedCount}</span>
                                         </LoadingLink>
                                         <LoadingLink href="/dashboard/commandes?status=retours" className={styles['dash-mobile-submenu-item']}>
                                             <span className={`${styles['dash-submenu-dot']} ${styles.red}`}></span>
                                             Retours
+                                            <span className={styles['dash-submenu-count']}>{retoursCount}</span>
                                         </LoadingLink>
                                     </div>
                                 )}
@@ -465,14 +483,14 @@ export default function DashboardLayout({
                                 </svg>
                                 Se déconnecter
                             </Link>
-                        </nav>
+                    </nav>
 
-                        <div className={styles['dash-mobile-logo']}>
-                            <Image src="/logo.png" alt="Monkey Print" width={180} height={60} style={{ objectFit: "contain" }} />
-                        </div>
+                    <div className={styles['dash-mobile-logo']}>
+                        <Image src="/logo.png" alt="Monkey Print" width={180} height={60} style={{ objectFit: "contain" }} />
                     </div>
-                </>
-            )}
+                </div>
+            </>
+            
 
             <main className={`${styles['dash-main']} dash-main`}>
                 <div className={`${styles['dash-content']} dash-content`}>{children}</div>

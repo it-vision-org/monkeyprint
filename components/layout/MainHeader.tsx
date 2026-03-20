@@ -66,7 +66,7 @@ export default function MainHeader({
   logoFilter,
   menuItems = defaultMenuItems,
   showCart = false,
-  cartHref = "/store/theme-1/cart",
+  cartHref = "/stores",
   cartCount = 0,
   className = "",
   mobileMenuProps = {},

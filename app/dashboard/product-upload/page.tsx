@@ -1625,8 +1625,6 @@ export default function ProductUploadPage() {
           </button>
         </div>
       </main>
-
     </div>
-
   );
 }

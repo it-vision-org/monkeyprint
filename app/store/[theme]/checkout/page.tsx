@@ -1,16 +1,7 @@
-'use client';
-
-import { CheckoutPage } from '@/components';
-import { useThemeFromRoute } from '@/hooks/useThemeFromRoute';
+import { redirect } from "next/navigation";
 
 export default function CheckoutPageRoute() {
-    const { baseRoute } = useThemeFromRoute();
-
-    if (!baseRoute) {
-        return <div>Theme not found</div>;
-    }
-
-    return <CheckoutPage baseRoute={baseRoute} />;
+    redirect("/stores");
 }
 
 

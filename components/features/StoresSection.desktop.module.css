@@ -156,6 +156,41 @@
   transform: scale(1.1);
 }
 
+.desktopStoreMeta {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(17, 24, 39, 0.78);
+  color: #ffffff;
+  backdrop-filter: blur(3px);
+}
+
+.desktopStoreName {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.desktopStoreStats {
+  margin: 4px 0 0;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  opacity: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .desktopStoreArrow {
   position: absolute;
   bottom: 24px;
