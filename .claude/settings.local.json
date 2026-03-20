@@ -11,7 +11,9 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/test-bg-removal)",
       "Bash(pip install:*)",
       "Bash(python scripts/remove_bg.py public/image-fake.jpg public/image-fake-test-result.png)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST -F \"file=@c:/Users/Dainor/Downloads/Mo/monkeyprint/public/image-fake.jpg\" http://localhost:8000/remove-bg)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST -F \"file=@c:/Users/Dainor/Downloads/Mo/monkeyprint/public/image-fake.jpg\" http://localhost:8000/remove-bg)",
+      "Bash(find c:UsersDainorDownloadsMomonkeyprintappshop -type d -name [storeSlug])",
+      "Bash(npx tsc:*)"
     ]
   }
 }
