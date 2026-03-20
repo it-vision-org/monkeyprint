@@ -59,9 +59,9 @@ type InternalProps = {
 
 /* ============================================================
    THEME 1 — "Canvas"
-   Hyper-minimal editorial magazine. Oversized typography is the
+   Swiss-design editorial magazine. Oversized typography is the
    hero. A scrolling ticker strip. Tall portrait category cards.
-   A numbered editorial product section.
+   A numbered editorial product section. Grid overlay. Reveal anims.
    ============================================================ */
 function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount }: InternalProps) {
     const router = useRouter();
@@ -81,7 +81,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
 
     return (
         <div className="theme-1-page">
-            {/* ─── Header: ultra-minimal ─── */}
+            {/* ─── Header: ultra-minimal with blur ─── */}
             <StoreHeader
                 cartCount={cartCount}
                 cartHref={`${baseRoute}/cart`}
@@ -93,7 +93,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                 cartStrokeColor={theme.cartStrokeColor}
             />
 
-            {/* ─── Hero: typographic full-viewport ─── */}
+            {/* ─── Hero: typographic full-viewport with grid overlay ─── */}
             <section className="theme-1-hero">
                 <div className="t1-hero-inner">
                     <div className="t1-hero-left">
@@ -126,14 +126,14 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </div>
             </section>
 
-            {/* ─── Ticker strip ─── */}
+            {/* ─── Ticker strip with fade edges ─── */}
             <div className="t1-ticker" aria-hidden="true">
                 <div className="t1-ticker-track">
                     {Array(8).fill('— NEW COLLECTION — FASHION — STYLE — DISCOVER ').join('')}
                 </div>
             </div>
 
-            {/* ─── Categories: tall portrait grid ─── */}
+            {/* ─── Categories: tall portrait grid with hover labels ─── */}
             {categories.length > 0 && (
                 <section className="t1-cats-section">
                     <div className="t1-cats-label">
@@ -164,7 +164,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </section>
             )}
 
-            {/* ─── Product sections: editorial numbered ─── */}
+            {/* ─── Product sections: editorial numbered with accent lines ─── */}
             {sections.map((section, si) => (
                 section.products && section.products.length > 0 && (
                     <section key={si} className="theme-1-section">
@@ -179,7 +179,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                                     className="theme-1-view-all"
                                     onClick={() => go(`${baseRoute}/all-products`)}
                                 >
-                                    All Products ↗
+                                    <span>All Products ↗</span>
                                 </button>
                             )}
                         </div>
@@ -202,9 +202,9 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
 
 /* ============================================================
    THEME 2 — "Forge"
-   Dark streetwear / drop culture. 50/50 split-screen hero with
-   image on the left and oversized bold text on the right.
-   Dense grid. Technical code-style section labels. Neon green.
+   Cyberpunk streetwear / drop culture. 50/50 split-screen hero.
+   Dense grid. Terminal code-style labels. Neon green. Glitch FX.
+   Scan lines. Animated grid BG. Corner bracket decorations.
    ============================================================ */
 function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount }: InternalProps) {
     const router = useRouter();
@@ -234,7 +234,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                 cartStrokeColor={theme.cartStrokeColor}
             />
 
-            {/* ─── Hero: 50/50 split ─── */}
+            {/* ─── Hero: 50/50 split with scan lines ─── */}
             <section className="theme-2-hero">
                 <div className="t2-hero-img-side">
                     {image ? (
@@ -262,7 +262,8 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                     <p className="t2-hero-sub">{heroContent.subtitle}</p>
                     <div className="t2-hero-actions">
                         <button className="t2-hero-cta-primary" onClick={() => go(`${baseRoute}/all-products`)}>
-                            SHOP NOW →
+                            <span>SHOP NOW</span>
+                            <span>→</span>
                         </button>
                     </div>
                     <div className="t2-hero-bottom-label">
@@ -272,7 +273,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </div>
             </section>
 
-            {/* ─── Categories: horizontal dark strip ─── */}
+            {/* ─── Categories: horizontal dark strip with neon borders ─── */}
             {categories.length > 0 && (
                 <div className="t2-cats-strip">
                     {categories.map((cat, i) => (
@@ -290,8 +291,10 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                             />
                             <div className="t2-cat-overlay" />
                             <div className="t2-cat-info">
-                                <span className="t2-cat-index">0{i + 1}</span>
-                                <span className="theme-2-category-label">{cat.label.toUpperCase()}</span>
+                                <div>
+                                    <span className="t2-cat-index">0{i + 1}</span>
+                                    <span className="theme-2-category-label">{cat.label.toUpperCase()}</span>
+                                </div>
                                 <span className="t2-cat-arrow">→</span>
                             </div>
                         </button>
@@ -299,7 +302,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </div>
             )}
 
-            {/* ─── Product sections: dense technical grid ─── */}
+            {/* ─── Product sections: terminal code-style headers ─── */}
             {sections.map((section, si) => (
                 section.products && section.products.length > 0 && (
                     <section key={si} className="theme-2-section">
@@ -310,7 +313,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                                     className="theme-2-view-all"
                                     onClick={() => go(`${baseRoute}/all-products`)}
                                 >
-                                    VIEW ALL →
+                                    <span>VIEW ALL →</span>
                                 </button>
                             )}
                         </div>
@@ -335,7 +338,8 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
    THEME 3 — "Amber"
    Warm luxury boutique. Full-height hero with the image as the
    background and a transparent header floating over it.
-   Large landscape category feature rows. Portrait product cards.
+   Golden shimmer. Warm glows. Premium card animations.
+   Serif elegance. Organic rounded shapes.
    ============================================================ */
 function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount }: InternalProps) {
     const router = useRouter();
@@ -353,7 +357,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
 
     return (
         <div className="theme-3-page">
-            {/* ─── Hero: full-height with overlaid header ─── */}
+            {/* ─── Hero: full-height with overlaid header + golden veil ─── */}
             <section className="theme-3-hero">
                 {bgImage && (
                     <div className="t3-hero-bg">
@@ -393,7 +397,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </div>
             </section>
 
-            {/* ─── Categories: large feature rows ─── */}
+            {/* ─── Categories: large feature rows with golden glow ─── */}
             {categories.length > 0 && (
                 <section className="t3-cats-section">
                     <div className="t3-cats-intro">
@@ -426,7 +430,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
                 </section>
             )}
 
-            {/* ─── Product sections: large portrait cards ─── */}
+            {/* ─── Product sections: large portrait cards with warm glow ─── */}
             {sections.map((section, si) => (
                 section.products && section.products.length > 0 && (
                     <section key={si} className="theme-3-section">

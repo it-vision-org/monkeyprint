@@ -13,7 +13,8 @@
       "Bash(python scripts/remove_bg.py public/image-fake.jpg public/image-fake-test-result.png)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST -F \"file=@c:/Users/Dainor/Downloads/Mo/monkeyprint/public/image-fake.jpg\" http://localhost:8000/remove-bg)",
       "Bash(find c:UsersDainorDownloadsMomonkeyprintappshop -type d -name [storeSlug])",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(find c:UsersDainorDownloadsMomonkeyprintcomponentsdashboard -type f -name *.tsx -o -name *.ts)"
     ]
   }
 }
