@@ -331,7 +331,12 @@ export async function POST(req: NextRequest) {
       .png()
       .toBuffer();
 
-    return new NextResponse(pngBuffer, {
+    // Copy into a plain ArrayBuffer so the body satisfies DOM BodyInit / BlobPart (Node Buffer uses ArrayBufferLike).
+    const ab = pngBuffer.buffer.slice(
+      pngBuffer.byteOffset,
+      pngBuffer.byteOffset + pngBuffer.byteLength
+    ) as ArrayBuffer;
+    return new NextResponse(new Blob([ab], { type: "image/png" }), {
       headers: {
         "Content-Type": "image/png",
         "Content-Disposition": 'inline; filename="removed-bg.png"',
