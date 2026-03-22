@@ -1,5 +1,9 @@
+// "native" = your machine (Windows/macOS/Linux dev). debian-openssl-3.0.x = Docker/runtime on
+// Debian Bookworm (node:20-bookworm-slim). Generate inside Docker can resolve "native" to a
+// different OpenSSL variant than the final container; listing both avoids Prisma engine mismatch.
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {

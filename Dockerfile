@@ -9,6 +9,7 @@ FROM node:20-bookworm-slim AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules /app/node_modules
 COPY . .
+# Must match final stage (bookworm + OpenSSL 3); schema.prisma lists debian-openssl-3.0.x for this.
 RUN npx prisma generate
 RUN npm run build
 
@@ -29,8 +30,9 @@ ENV PATH="/opt/rembg-venv/bin:$PATH"
 # Create non-root user inside container
 RUN useradd -m -u 10001 appuser
 
-# Copy build output
+# Copy build output (app runs as non-root; must own .next for image cache writes)
 COPY --from=build /app ./
+RUN chown -R appuser:appuser /app
 
 USER appuser
 EXPOSE 3000 8000
