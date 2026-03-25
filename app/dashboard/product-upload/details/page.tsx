@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 // Note: Using document.createElement('img') instead of new Image() to avoid conflict with Next.js Image
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,17 +9,18 @@ import { combineDesigns } from "@/lib/utils/designRenderer";
 import { useAlert } from "@/components/providers/AlertContext";
 import ProductUploadSteps from "../../../product-upload/components/ProductUploadSteps";
 
-type GenderOption = {
+type MockupCategory = {
   id: string;
   label: string;
+  emoji: string;
 };
 
-const GENDER_OPTIONS: GenderOption[] = [
-  { id: "homme", label: "Homme" },
-  { id: "femme", label: "Femme" },
-  { id: "enfant", label: "Enfant" },
-  { id: "famille", label: "Famille" },
-  { id: "custom", label: "Personnaliser ou autre" },
+const MOCKUP_CATEGORIES: MockupCategory[] = [
+  { id: "male", label: "Homme", emoji: "👨" },
+  { id: "female", label: "Femme", emoji: "👩" },
+  { id: "boy", label: "Garçon", emoji: "👦" },
+  { id: "girl", label: "Fille", emoji: "👧" },
+  { id: "upload", label: "Téléverser", emoji: "📤" },
 ];
 
 // MIN_PRICE will be loaded from API
@@ -238,20 +238,32 @@ export default function ProductDetailsPage() {
   const [description, setDescription] = useState<string>("");
   const [charCount, setCharCount] = useState<number>(0);
   const [mockupModalOpen, setMockupModalOpen] = useState(false);
-  const [genderSelectionModalOpen, setGenderSelectionModalOpen] =
-    useState(false);
-  const [selectedGenderForMockup, setSelectedGenderForMockup] =
-    useState<string>("homme");
+  const [mockupStep, setMockupStep] = useState<"category" | "template" | "loading" | "result" | "error">("category");
+  const [selectedCategory, setSelectedCategory] = useState<string>("male");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("male_1");
   const [mockupLoading, setMockupLoading] = useState(false);
   const [mockupProgress, setMockupProgress] = useState(0);
   const [mockupStatus, setMockupStatus] = useState("");
   const [mockupError, setMockupError] = useState<string | null>(null);
-  const [generatedMockups, setGeneratedMockups] = useState<string[]>([]);
+  const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
+  const [templateCatalog, setTemplateCatalog] = useState<Record<string, { id: string; index: number; name: string }[]>>({});
   const [isRenderingDesign, setIsRenderingDesign] = useState(true);
   const [combinedDesignImage, setCombinedDesignImage] = useState<string | null>(
     null,
   );
-  const [customPrompt, setCustomPrompt] = useState<string>("");
+  // Load template catalog on mount
+  useEffect(() => {
+    async function loadTemplates() {
+      try {
+        const res = await fetch("/api/generate-mockup");
+        const data = await res.json();
+        if (data.catalog) setTemplateCatalog(data.catalog);
+      } catch (e) {
+        console.error("Failed to load template catalog:", e);
+      }
+    }
+    loadTemplates();
+  }, []);
   const [isFirstProduct, setIsFirstProduct] = useState<boolean>(true);
   const [minPrice, setMinPrice] = useState<number>(55);
 
@@ -272,11 +284,10 @@ export default function ProductDetailsPage() {
 
   // Status message based on progress
   useEffect(() => {
-    if (mockupProgress < 15) setMockupStatus("Initialisation…");
-    else if (mockupProgress < 35) setMockupStatus("Préparation de la scène…");
-    else if (mockupProgress < 55) setMockupStatus("Génération IA en cours…");
-    else if (mockupProgress < 75) setMockupStatus("Presque prêt…");
-    else setMockupStatus("Finalisation de la maquette…");
+    if (mockupProgress < 20) setMockupStatus("Initialisation…");
+    else if (mockupProgress < 50) setMockupStatus("Application du design…");
+    else if (mockupProgress < 80) setMockupStatus("Rendu de la texture…");
+    else setMockupStatus("Finalisation…");
   }, [mockupProgress]);
   const [pricingSettings, setPricingSettings] = useState<any>(null);
 
@@ -912,12 +923,33 @@ export default function ProductDetailsPage() {
     setCharCount(value.length);
   };
 
-  const openGenderSelectionModal = () => {
-    setGenderSelectionModalOpen(true);
+  const openMockupModal = () => {
+    setMockupStep("category");
+    setMockupError(null);
+    setGeneratedMockup(null);
+    setMockupModalOpen(true);
   };
 
-  const closeGenderSelectionModal = () => {
-    setGenderSelectionModalOpen(false);
+  const closeMockupModal = () => {
+    setMockupModalOpen(false);
+    setMockupLoading(false);
+    setGeneratedMockup(null);
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    if (categoryId === "upload") {
+      // Close modal and trigger file upload
+      closeMockupModal();
+      mockupUploadInputRef.current?.click();
+      return;
+    }
+    setSelectedCategory(categoryId);
+    // Auto-select first template of category
+    const templates = templateCatalog[categoryId];
+    if (templates && templates.length > 0) {
+      setSelectedTemplateId(templates[0].id);
+    }
+    setMockupStep("template");
   };
 
   const handleGenerateMockup = async () => {
@@ -929,82 +961,30 @@ export default function ProductDetailsPage() {
       return;
     }
 
-    closeGenderSelectionModal();
-    setMockupModalOpen(true);
+    setMockupStep("loading");
     setMockupLoading(true);
     setMockupProgress(0);
     setMockupError(null);
-    setGeneratedMockups([]);
+    setGeneratedMockup(null);
 
     try {
-      // Use the same preview images that are correctly displayed
-      // This ensures we send exactly what the user sees to Gemini
-      if (!frontDesignImage && !backDesignImage) {
+      // Use the front design image (the main design to put on the shirt)
+      if (!frontDesignImage) {
         throw new Error(
-          "Les images de prévisualisation ne sont pas encore prêtes. Veuillez attendre un instant.",
+          "Aucune image de design recto disponible. Veuillez retourner à l'éditeur.",
         );
       }
 
-      let combinedImage: string;
+      // Get shirt color from sessionStorage
+      const shirtColor = sessionStorage.getItem("productColor") || "#FFFFFF";
 
-      if (frontDesignImage && backDesignImage) {
-        // Combine the preview images side by side (same as generateCombinedImage)
-        const canvas = document.createElement("canvas");
-        // Each preview is 400x500, so combined is 800x500
-        canvas.width = 800; // 400 * 2
-        canvas.height = 500;
-        const ctx = canvas.getContext("2d");
-
-        if (ctx) {
-          // Load and draw front image (left side)
-          const frontImageEl = document.createElement("img");
-          frontImageEl.crossOrigin = "anonymous";
-          frontImageEl.src = frontDesignImage;
-          await new Promise((resolve, reject) => {
-            frontImageEl.onload = () => {
-              ctx.drawImage(frontImageEl, 0, 0, 400, 500);
-              resolve(null);
-            };
-            frontImageEl.onerror = reject;
-          });
-
-          // Load and draw back image (right side)
-          const backImageEl = document.createElement("img");
-          backImageEl.crossOrigin = "anonymous";
-          backImageEl.src = backDesignImage;
-          await new Promise((resolve, reject) => {
-            backImageEl.onload = () => {
-              ctx.drawImage(backImageEl, 400, 0, 400, 500);
-              resolve(null);
-            };
-            backImageEl.onerror = reject;
-          });
-
-          combinedImage = canvas.toDataURL("image/png", 1.0);
-        } else {
-          throw new Error("Impossible de créer le contexte canvas");
-        }
-      } else if (frontDesignImage) {
-        // Only front design
-        combinedImage = frontDesignImage;
-      } else if (backDesignImage) {
-        // Only back design
-        combinedImage = backDesignImage;
-      } else {
-        throw new Error("Aucune image de design disponible");
-      }
-
-      // Call API to generate mockups
       const response = await fetch("/api/generate-mockup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          designImageBase64: combinedImage,
-          gender: selectedGenderForMockup,
-          customPrompt:
-            selectedGenderForMockup === "custom" ? customPrompt : undefined,
+          designImageBase64: frontDesignImage,
+          templateId: selectedTemplateId,
+          shirtColor,
         }),
       });
 
@@ -1013,45 +993,33 @@ export default function ProductDetailsPage() {
           .json()
           .catch(() => ({ error: "Unknown error" }));
         throw new Error(
-          error.error || `Failed to generate mockups: ${response.statusText}`,
+          error.error || `Échec de la génération: ${response.statusText}`,
         );
       }
 
       const data = await response.json();
 
-      if (data.success && data.images && data.images.length > 0) {
+      if (data.success && data.image) {
         setMockupProgress(100);
         setTimeout(() => {
-          setGeneratedMockups(data.images);
+          setGeneratedMockup(data.image);
           setMockupLoading(false);
-        }, 500);
+          setMockupStep("result");
+        }, 300);
       } else {
-        throw new Error("No images returned from API");
+        throw new Error("Aucune image retournée par le serveur");
       }
     } catch (error: any) {
-      console.error("Error generating mockups:", error);
+      console.error("Error generating mockup:", error);
       setMockupError(error.message || "Une erreur inconnue est survenue.");
       setMockupLoading(false);
+      setMockupStep("error");
     }
   };
 
-  const closeMockupModal = () => {
-    setMockupModalOpen(false);
-    setMockupLoading(false);
-    setGeneratedMockups([]);
-  };
-
-  const handleChooseDifferentMockupScene = useCallback(() => {
-    setMockupModalOpen(false);
-    setMockupLoading(false);
-    setGeneratedMockups([]);
-    setMockupError(null);
-    setGenderSelectionModalOpen(true);
-  }, []);
-
-  const handleSelectMockup = (url: string) => {
-    setSelectedMockup(url);
-    sessionStorage.setItem("uploadedDesign", url);
+  const handleSelectMockup = (dataUrl: string) => {
+    setSelectedMockup(dataUrl);
+    sessionStorage.setItem("uploadedDesign", dataUrl);
     closeMockupModal();
   };
 
@@ -1524,18 +1492,10 @@ export default function ProductDetailsPage() {
               <button
                 type="button"
                 className={styles.pdActionPrimary}
-                onClick={openGenderSelectionModal}
+                onClick={openMockupModal}
                 style={{ flex: "1", minWidth: "160px" }}
               >
                 GÉNÉRER UNE MAQUETTE
-              </button>
-              <button
-                type="button"
-                className={styles.pdActionSecondary}
-                onClick={() => mockupUploadInputRef.current?.click()}
-                style={{ flex: "1", minWidth: "160px" }}
-              >
-                TÉLÉVERSER UNE MAQUETTE
               </button>
               <button
                 type="button"
@@ -1692,7 +1652,7 @@ export default function ProductDetailsPage() {
               </div>
               <div className={styles.pdRequiredNote}>Doit être rempli*</div>
               <div className={styles.pdGenderRow}>
-                {GENDER_OPTIONS.slice(0, 3).map((option) => (
+                {MOCKUP_CATEGORIES.filter(c => c.id !== "upload").map((option) => (
                   <label
                     key={option.id}
                     className={`${styles.pdRadioOption} ${selectedGenders.includes(option.id) ? styles.active : ""}`}
@@ -1819,24 +1779,25 @@ export default function ProductDetailsPage() {
         </div>
       </main>
 
-      {/* Gender Selection Modal - Overhauled */}
-      {genderSelectionModalOpen && (
+      {/* Mockup Generation Modal — unified multi-step */}
+      {mockupModalOpen && (
         <div
           className={styles.puPopupOverlay}
-          onClick={closeGenderSelectionModal}
+          onClick={() => !mockupLoading && closeMockupModal()}
         >
           <div
             className={styles.puPopup}
             onClick={(event) => event.stopPropagation()}
             style={{
-              maxWidth: "600px",
+              maxWidth: mockupStep === "result" ? "700px" : "600px",
               padding: "32px",
             }}
           >
             <button
               className={styles.puPopupClose}
               type="button"
-              onClick={closeGenderSelectionModal}
+              onClick={closeMockupModal}
+              disabled={mockupLoading}
               style={{
                 top: "20px",
                 right: "20px",
@@ -1847,357 +1808,268 @@ export default function ProductDetailsPage() {
               ×
             </button>
 
-            <div style={{ textAlign: "center", marginBottom: "32px" }}>
-              <h2
-                className={styles.puPopupTitle}
-                style={{
-                  fontSize: "28px",
-                  fontWeight: 700,
-                  color: "#0d1c23",
-                  marginBottom: "12px",
-                }}
-              >
-                Sélectionnez le type de maquette
-              </h2>
-              <p
-                style={{
-                  fontSize: "15px",
-                  color: "#6b7280",
-                  margin: 0,
-                  lineHeight: "1.5",
-                }}
-              >
-                Choisissez le type de scène — une seule image sera générée.
-              </p>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: "16px",
-                marginBottom: "32px",
-              }}
-            >
-              {GENDER_OPTIONS.map((option) => {
-                const isSelected = selectedGenderForMockup === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setSelectedGenderForMockup(option.id)}
+            {/* Step 1: Category Selection */}
+            {mockupStep === "category" && (
+              <>
+                <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                  <h2
+                    className={styles.puPopupTitle}
                     style={{
-                      padding: "20px 16px",
-                      borderRadius: "16px",
-                      border: isSelected
-                        ? "2px solid #41eb5c"
-                        : "2px solid #e5e7eb",
-                      backgroundColor: isSelected ? "#f0fdf4" : "#ffffff",
-                      cursor: "pointer",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "8px",
-                      position: "relative",
-                      overflow: "hidden",
-                      boxShadow: isSelected
-                        ? "0 8px 24px rgba(65, 235, 92, 0.15)"
-                        : "0 2px 8px rgba(0, 0, 0, 0.05)",
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#0d1c23",
+                      marginBottom: "12px",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
+                  >
+                    Générer une maquette
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      color: "#6b7280",
+                      margin: 0,
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    Choisissez une catégorie pour votre maquette.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
+                    gap: "16px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  {MOCKUP_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => handleCategorySelect(cat.id)}
+                      style={{
+                        padding: "20px 12px",
+                        borderRadius: "16px",
+                        border: "2px solid #e5e7eb",
+                        backgroundColor: "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "8px",
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                      }}
+                      onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "#41eb5c";
-                        e.currentTarget.style.backgroundColor = "#f9fafb";
+                        e.currentTarget.style.backgroundColor = "#f0fdf4";
                         e.currentTarget.style.transform = "translateY(-2px)";
                         e.currentTarget.style.boxShadow =
                           "0 4px 12px rgba(0, 0, 0, 0.1)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
+                      }}
+                      onMouseLeave={(e) => {
                         e.currentTarget.style.borderColor = "#e5e7eb";
                         e.currentTarget.style.backgroundColor = "#ffffff";
                         e.currentTarget.style.transform = "translateY(0)";
                         e.currentTarget.style.boxShadow =
                           "0 2px 8px rgba(0, 0, 0, 0.05)";
-                      }
-                    }}
-                  >
-                    {isSelected && (
+                      }}
+                    >
                       <div
                         style={{
-                          position: "absolute",
-                          top: "8px",
-                          right: "8px",
-                          width: "24px",
-                          height: "24px",
-                          borderRadius: "50%",
-                          backgroundColor: "#41eb5c",
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "12px",
+                          backgroundColor: "#f3f4f6",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          boxShadow: "0 2px 8px rgba(65, 235, 92, 0.3)",
+                          marginBottom: "4px",
+                          transition: "all 0.3s",
                         }}
                       >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="white"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
+                        <span style={{ fontSize: "24px" }}>{cat.emoji}</span>
                       </div>
-                    )}
-                    <div
-                      style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "12px",
-                        backgroundColor: isSelected ? "#41eb5c" : "#f3f4f6",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: "4px",
-                        transition: "all 0.3s",
-                      }}
-                    >
                       <span
                         style={{
-                          fontSize: "24px",
-                          color: isSelected ? "#ffffff" : "#6b7280",
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          color: "#4b5563",
+                          textAlign: "center",
                         }}
                       >
-                        {option.id === "homme"
-                          ? "👨"
-                          : option.id === "femme"
-                            ? "👩"
-                            : option.id === "enfant"
-                              ? "👶"
-                              : option.id === "famille"
-                                ? "👨‍👩‍👧‍👦"
-                                : option.id === "custom"
-                                  ? "✏️"
-                                  : "👤"}
+                        {cat.label}
                       </span>
-                    </div>
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: isSelected ? 700 : 600,
-                        color: isSelected ? "#0d1c23" : "#4b5563",
-                        textAlign: "center",
-                      }}
-                    >
-                      {option.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
-            {/* Custom Prompt Input */}
-            {selectedGenderForMockup === "custom" && (
-              <div
-                style={{
-                  marginBottom: "24px",
-                  padding: "20px",
-                  background: "#f9fafb",
-                  borderRadius: "12px",
-                  border: "2px solid #e5e7eb",
-                }}
-              >
-                <label
+            {/* Step 2: Template Selection */}
+            {mockupStep === "template" && (
+              <>
+                <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                  <h2
+                    className={styles.puPopupTitle}
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 700,
+                      color: "#0d1c23",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Choisissez un modèle
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#6b7280",
+                      margin: 0,
+                    }}
+                  >
+                    {MOCKUP_CATEGORIES.find((c) => c.id === selectedCategory)
+                      ?.label || selectedCategory}{" "}
+                    — sélectionnez un modèle de maquette
+                  </p>
+                </div>
+
+                <div
                   style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#0d1c23",
-                    marginBottom: "8px",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: "16px",
+                    marginBottom: "24px",
                   }}
                 >
-                  Décrivez votre maquette personnalisée
-                </label>
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 200) {
-                      setCustomPrompt(e.target.value);
-                    }
-                  }}
-                  placeholder="Ex: Un groupe d'amis portant des t-shirts lors d'un événement sportif..."
-                  style={{
-                    width: "100%",
-                    minHeight: "100px",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    border: "2px solid #e5e7eb",
-                    fontSize: "14px",
-                    fontFamily: "inherit",
-                    resize: "vertical",
-                    outline: "none",
-                    transition: "border-color 0.2s",
-                    backgroundColor: "#ffffff",
-                    color: "#0d1c23",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#41eb5c";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }}
-                />
+                  {(
+                    templateCatalog[selectedCategory] || [
+                      { id: "male_1", index: 0, name: "Modèle 1" },
+                      { id: "male_1", index: 1, name: "Modèle 2" },
+                      { id: "male_1", index: 2, name: "Modèle 3" },
+                      { id: "male_1", index: 3, name: "Modèle 4" },
+                    ]
+                  ).map((tpl, idx) => {
+                    const isSelected =
+                      selectedTemplateId === tpl.id && idx === 0
+                        ? true
+                        : selectedTemplateId === `${tpl.id}_${idx}` ||
+                          (selectedTemplateId === tpl.id && idx === 0);
+                    return (
+                      <button
+                        key={`${tpl.id}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTemplateId(tpl.id);
+                        }}
+                        style={{
+                          padding: "0",
+                          borderRadius: "16px",
+                          border: isSelected
+                            ? "3px solid #41eb5c"
+                            : "2px solid #e5e7eb",
+                          backgroundColor: "#ffffff",
+                          cursor: "pointer",
+                          transition: "all 0.3s",
+                          overflow: "hidden",
+                          boxShadow: isSelected
+                            ? "0 8px 24px rgba(65, 235, 92, 0.15)"
+                            : "0 2px 8px rgba(0, 0, 0, 0.05)",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.borderColor = "#41eb5c";
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.borderColor = "#e5e7eb";
+                            e.currentTarget.style.transform = "translateY(0)";
+                          }
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "100%",
+                            aspectRatio: "2/3",
+                            background: "#f9fafb",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src={`/api/mockup-templates/${tpl.id}/preview`}
+                            alt={tpl.name}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </div>
+                        <div
+                          style={{
+                            padding: "10px",
+                            textAlign: "center",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: isSelected ? "#0d1c23" : "#6b7280",
+                          }}
+                        >
+                          Modèle {idx + 1}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: "8px",
+                    gap: "12px",
+                    justifyContent: "center",
                   }}
                 >
-                  <p
+                  <button
+                    type="button"
+                    onClick={() => setMockupStep("category")}
+                    className={styles.pdActionSecondary}
+                    style={{ minWidth: "120px" }}
+                  >
+                    Retour
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateMockup}
+                    className={styles.pdActionPrimary}
                     style={{
-                      margin: 0,
-                      fontSize: "12px",
-                      color: "#6b7280",
-                      fontStyle: "italic",
+                      padding: "14px 32px",
+                      borderRadius: "12px",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: "15px",
+                      fontWeight: 700,
+                      color: "#ffffff",
+                      background:
+                        "linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)",
+                      boxShadow: "0 4px 16px rgba(65, 235, 92, 0.3)",
+                      transition: "all 0.2s",
+                      minWidth: "140px",
                     }}
                   >
-                    Maximum 200 caractères
-                  </p>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: customPrompt.length >= 200 ? "#ef4444" : "#6b7280",
-                    }}
-                  >
-                    {customPrompt.length}/200
-                  </span>
+                    Générer la maquette
+                  </button>
                 </div>
-              </div>
+              </>
             )}
 
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                paddingTop: "8px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={closeGenderSelectionModal}
-                className={styles.pdActionSecondary}
-                style={{
-                  minWidth: "120px",
-                }}
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={handleGenerateMockup}
-                disabled={
-                  selectedGenderForMockup === "custom" &&
-                  (!customPrompt || customPrompt.trim().length === 0)
-                }
-                className={styles.pdActionPrimary}
-                style={{
-                  padding: "14px 32px",
-                  borderRadius: "12px",
-                  border: "none",
-                  cursor:
-                    selectedGenderForMockup === "custom" &&
-                    (!customPrompt || customPrompt.trim().length === 0)
-                      ? "not-allowed"
-                      : "pointer",
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  background:
-                    selectedGenderForMockup === "custom" &&
-                    (!customPrompt || customPrompt.trim().length === 0)
-                      ? "linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)"
-                      : "linear-gradient(135deg, #41eb5c 0%, #2dd44a 100%)",
-                  boxShadow:
-                    selectedGenderForMockup === "custom" &&
-                    (!customPrompt || customPrompt.trim().length === 0)
-                      ? "none"
-                      : "0 4px 16px rgba(65, 235, 92, 0.3)",
-                  transition: "all 0.2s",
-                  minWidth: "140px",
-                  opacity:
-                    selectedGenderForMockup === "custom" &&
-                    (!customPrompt || customPrompt.trim().length === 0)
-                      ? 0.6
-                      : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (
-                    !(
-                      selectedGenderForMockup === "custom" &&
-                      (!customPrompt || customPrompt.trim().length === 0)
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 6px 20px rgba(65, 235, 92, 0.4)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (
-                    !(
-                      selectedGenderForMockup === "custom" &&
-                      (!customPrompt || customPrompt.trim().length === 0)
-                    )
-                  ) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow =
-                      "0 4px 16px rgba(65, 235, 92, 0.3)";
-                  }
-                }}
-              >
-                Générer la maquette
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mockup Selection Modal */}
-      {mockupModalOpen && (
-        <div
-          className={styles.puPopupOverlay}
-          onClick={() => !mockupLoading && closeMockupModal()}
-        >
-          <div
-            className={`${styles.puPopup} ${
-              !mockupLoading &&
-              !mockupError &&
-              generatedMockups.length > 0
-                ? styles.puPopupMockupWide
-                : ""
-            }`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              className={styles.puPopupClose}
-              type="button"
-              onClick={closeMockupModal}
-              disabled={mockupLoading}
-              aria-label="Fermer"
-            >
-              ×
-            </button>
-
-            {mockupLoading ? (
+            {/* Step 3: Loading */}
+            {mockupStep === "loading" && (
               <>
                 <h2 className={styles.puPopupTitle}>Création de la maquette</h2>
                 <div className={styles.puMockupLoadingPanel}>
@@ -2212,7 +2084,7 @@ export default function ProductDetailsPage() {
                     </div>
                     <div className={styles.puMockupProgressMeta}>
                       <span className={styles.puMockupProgressLabel}>
-                        Environ 30–60 secondes
+                        Quelques secondes...
                       </span>
                       <span className={styles.puMockupProgressPct}>
                         {Math.round(mockupProgress)}%
@@ -2221,7 +2093,10 @@ export default function ProductDetailsPage() {
                   </div>
                 </div>
               </>
-            ) : mockupError ? (
+            )}
+
+            {/* Step 4: Error */}
+            {mockupStep === "error" && (
               <>
                 <h2 className={styles.puPopupTitle}>Oups !</h2>
                 <div className={styles.puErrorContainer}>
@@ -2230,60 +2105,51 @@ export default function ProductDetailsPage() {
                     Échec de la génération
                   </div>
                   <div className={styles.puErrorText}>{mockupError}</div>
-                  <button
-                    type="button"
-                    className={styles.puRetryBtn}
-                    onClick={handleGenerateMockup}
-                  >
-                    Réessayer la génération
-                  </button>
-                </div>
-              </>
-            ) : generatedMockups.length > 1 ? (
-              <>
-                <h2 className={styles.puPopupTitle}>Choisissez une maquette</h2>
-                <div className={styles.puAiGrid}>
-                  {generatedMockups.map((url, index) => (
+                  <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "16px" }}>
                     <button
-                      key={url}
                       type="button"
-                      className={styles.puAiImageCard}
-                      onClick={() => handleSelectMockup(url)}
+                      className={styles.pdActionSecondary}
+                      onClick={() => setMockupStep("template")}
                     >
-                      <Image
-                        src={url}
-                        alt={`Maquette ${index + 1}`}
-                        width={200}
-                        height={200}
-                        style={{ objectFit: "cover" }}
-                      />
+                      Retour
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      className={styles.puRetryBtn}
+                      onClick={handleGenerateMockup}
+                    >
+                      Réessayer
+                    </button>
+                  </div>
                 </div>
               </>
-            ) : generatedMockups.length === 1 ? (
+            )}
+
+            {/* Step 5: Result */}
+            {mockupStep === "result" && generatedMockup && (
               <div className={styles.puMockupConfirmWrap}>
                 <div className={styles.puMockupConfirmHeader}>
                   <span className={styles.puMockupConfirmBadge}>
                     Maquette générée
                   </span>
                   <h2 className={styles.puMockupConfirmTitle}>
-                    Voici votre aperçu porté
+                    Voici votre maquette
                   </h2>
                   <p className={styles.puMockupConfirmLead}>
-                    Validez pour l&apos;afficher comme image principale du
-                    produit, ou choisissez un autre type de scène.
+                    Validez pour l&apos;utiliser comme image principale du
+                    produit, ou choisissez un autre modèle.
                   </p>
                 </div>
                 <div className={styles.puMockupPreviewShell}>
                   <div className={styles.puMockupPreviewInner}>
-                    <Image
-                      src={generatedMockups[0]}
+                    <img
+                      src={generatedMockup}
                       alt="Aperçu maquette produit"
-                      fill
-                      className={styles.puMockupPreviewImage}
-                      sizes="(max-width: 640px) calc(100vw - 48px), 560px"
-                      priority
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
                     />
                   </div>
                 </div>
@@ -2295,7 +2161,7 @@ export default function ProductDetailsPage() {
                   <button
                     type="button"
                     className={styles.puMockupConfirmPrimary}
-                    onClick={() => handleSelectMockup(generatedMockups[0])}
+                    onClick={() => handleSelectMockup(generatedMockup)}
                   >
                     Utiliser cette maquette
                   </button>
@@ -2309,21 +2175,11 @@ export default function ProductDetailsPage() {
                   <button
                     type="button"
                     className={styles.puMockupConfirmLink}
-                    onClick={handleChooseDifferentMockupScene}
+                    onClick={() => setMockupStep("template")}
                   >
-                    Changer le type de scène
+                    Choisir un autre modèle
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div style={{ textAlign: "center", padding: "40px 16px" }}>
-                <h2 className={styles.puPopupTitle} style={{ marginBottom: 12 }}>
-                  Aucune image
-                </h2>
-                <p style={{ color: "#666", margin: 0, fontSize: 15 }}>
-                  Aucune maquette générée. Réessayez depuis l&apos;étape
-                  précédente.
-                </p>
               </div>
             )}
           </div>

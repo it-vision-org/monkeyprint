@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../create-shop/createShop.module.css';
@@ -25,6 +25,7 @@ function LoginContent() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,8 +43,12 @@ function LoginContent() {
                 setError('Email ou mot de passe incorrect');
                 setIsLoading(false);
             } else {
-                // Successful login - redirect to dashboard apercu
-                router.push('/dashboard/apercu');
+                const raw = searchParams.get('callbackUrl');
+                const safe =
+                    raw && raw.startsWith('/') && !raw.startsWith('//')
+                        ? raw
+                        : '/dashboard/apercu';
+                router.push(safe);
                 router.refresh();
             }
         } catch (e) {

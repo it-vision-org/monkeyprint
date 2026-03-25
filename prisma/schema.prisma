@@ -16,18 +16,36 @@ enum Role {
   ADMIN
 }
 
+enum AiTier {
+  FREE
+  PREMIUM
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   name      String?
   role      Role     @default(USER)
+  aiTier    AiTier   @default(FREE)
+  aiPremiumLimit Int? // Per-user override; if null, uses global setting
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
   store          Store? // One-to-one: Each user can have at most one store
   supportTickets SupportTicket[]
+  aiGenerationLogs AiGenerationLog[]
+}
+
+model AiGenerationLog {
+  id        String   @id @default(uuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model Store {

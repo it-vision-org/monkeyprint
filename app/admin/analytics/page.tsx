@@ -5,7 +5,7 @@ import styles from '@/app/styles/dashboard.module.css';
 export default function AdminAnalyticsPage() {
     return (
         <>
-            <h1 className={styles['dash-page-title']}>Analytiques</h1>
+            <h1 className="dash-page-title">Analytiques</h1>
 
             {/* Analytics Cards */}
             <div className={styles['admin-analytics-grid']}>

@@ -12,7 +12,7 @@ export default async function AdminProductConfigPage() {
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
     return (
-        <div style={{ padding: '24px' }}>
+        <div className="admin-product-config-page">
             <h1 className="dash-page-title" style={{ marginBottom: '32px' }}>
                 Configuration des Produits
             </h1>

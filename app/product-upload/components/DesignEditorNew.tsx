@@ -239,6 +239,15 @@ const DesignEditor = memo(function DesignEditor({
   const [aiImageHistory, setAiImageHistory] = useState<string[]>([]); // History of all generated images
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
+  // AI usage / tier state
+  const [aiUsage, setAiUsage] = useState<{
+    used: number;
+    limit: number;
+    tier: "FREE" | "PREMIUM";
+    contactPhone: string;
+    remaining: number;
+  } | null>(null);
+
   // Undo/Redo state for UI
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -277,6 +286,16 @@ const DesignEditor = memo(function DesignEditor({
         });
       })
       .catch(() => setFonts([{ name: "Arial", file: null, system: true }]));
+  }, []);
+
+  // Fetch AI usage on mount
+  useEffect(() => {
+    fetch("/api/ai-usage")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) setAiUsage(data);
+      })
+      .catch(() => {});
   }, []);
 
   // Detect mobile and calculate dynamic canvas size
@@ -1395,16 +1414,23 @@ const DesignEditor = memo(function DesignEditor({
 
     setIsGeneratingAI(true);
     try {
-      // Call API to generate images with AI
       const response = await fetch("/api/generate-ai-image", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: aiPrompt }),
       });
 
       const data = await response.json();
+
+      if (response.status === 429 && data.error === "LIMIT_REACHED") {
+        // Refresh usage state to show the wall
+        setAiUsage((prev) =>
+          prev
+            ? { ...prev, used: data.used ?? prev.used, remaining: 0 }
+            : prev,
+        );
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.error || data.details || "Failed to generate images");
@@ -1412,16 +1438,21 @@ const DesignEditor = memo(function DesignEditor({
 
       if (data.images && data.images.length > 0) {
         setGeneratedImages(data.images);
-        // Add new images to history (avoid duplicates)
         setAiImageHistory((prev) => {
           const newHistory = [...prev];
           data.images.forEach((img: string) => {
-            if (!newHistory.includes(img)) {
-              newHistory.push(img);
-            }
+            if (!newHistory.includes(img)) newHistory.push(img);
           });
           return newHistory;
         });
+        // Update usage counter
+        if (data.used != null && data.limit != null) {
+          setAiUsage((prev) =>
+            prev
+              ? { ...prev, used: data.used, limit: data.limit, remaining: Math.max(0, data.limit - data.used) }
+              : prev,
+          );
+        }
       } else {
         throw new Error("No images generated");
       }
@@ -2448,42 +2479,80 @@ const DesignEditor = memo(function DesignEditor({
                       ) : (
                         /* ── Prompt form ── */
                         <div className={styles.aiPromptSection}>
-                          <label className={styles.promptLabel}>
-                            Describe your design:
-                          </label>
-                          <textarea
-                            className={styles.promptInput}
-                            value={aiPrompt}
-                            onChange={(e) => setAiPrompt(e.target.value)}
-                            placeholder="e.g. a roaring lion with flames, tattoo style…"
-                            rows={3}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                                handleGenerateAI();
-                              }
-                            }}
-                          />
-                          <span className={styles.promptHint}>
-                            Ctrl + Enter to generate
-                          </span>
-                          <div className={styles.aiActions}>
-                            <button
-                              className={styles.generateBtn}
-                              onClick={handleGenerateAI}
-                              disabled={!aiPrompt.trim()}
-                            >
-                              ✦ Generate 4 designs
-                            </button>
-                            <button
-                              className={styles.backBtn}
-                              onClick={() => {
-                                setShowAIPrompt(false);
-                                setAiPrompt("");
-                              }}
-                            >
-                              Back
-                            </button>
-                          </div>
+                          {/* Usage pill */}
+                          {aiUsage && (
+                            <div className={styles.aiUsageRow}>
+                              <span className={aiUsage.remaining === 0 ? styles.aiUsagePillEmpty : styles.aiUsagePillOk}>
+                                ✦ {aiUsage.used}/{aiUsage.limit} générations aujourd&apos;hui
+                                {aiUsage.tier === "PREMIUM" && " · Premium"}
+                              </span>
+                            </div>
+                          )}
+
+                          {aiUsage && aiUsage.remaining === 0 ? (
+                            /* ── Limit reached wall ── */
+                            <div className={styles.aiLimitWall}>
+                              <div className={styles.aiLimitIcon}>⚡</div>
+                              <h4 className={styles.aiLimitTitle}>Limite journalière atteinte</h4>
+                              <p className={styles.aiLimitDesc}>
+                                Vous avez utilisé vos <strong>{aiUsage.limit}</strong> générations gratuites d&apos;aujourd&apos;hui.
+                                Passez au plan <strong>Premium</strong> pour plus de générations.
+                              </p>
+                              <a
+                                href={`tel:${aiUsage.contactPhone.replace(/\s/g, "")}`}
+                                className={styles.aiLimitContactBtn}
+                              >
+                                📞 {aiUsage.contactPhone}
+                              </a>
+                              <p className={styles.aiLimitHint}>Appelez-nous pour activer votre accès Premium</p>
+                              <button
+                                className={styles.backBtn}
+                                onClick={() => { setShowAIPrompt(false); setAiPrompt(""); }}
+                                style={{ alignSelf: "center" }}
+                              >
+                                Retour
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <label className={styles.promptLabel}>
+                                Describe your design:
+                              </label>
+                              <textarea
+                                className={styles.promptInput}
+                                value={aiPrompt}
+                                onChange={(e) => setAiPrompt(e.target.value)}
+                                placeholder="e.g. a roaring lion with flames, tattoo style…"
+                                rows={3}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                                    handleGenerateAI();
+                                  }
+                                }}
+                              />
+                              <span className={styles.promptHint}>
+                                Ctrl + Enter to generate
+                              </span>
+                              <div className={styles.aiActions}>
+                                <button
+                                  className={styles.generateBtn}
+                                  onClick={handleGenerateAI}
+                                  disabled={!aiPrompt.trim()}
+                                >
+                                  ✦ Generate 2 designs
+                                </button>
+                                <button
+                                  className={styles.backBtn}
+                                  onClick={() => {
+                                    setShowAIPrompt(false);
+                                    setAiPrompt("");
+                                  }}
+                                >
+                                  Back
+                                </button>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
                     </>
@@ -2702,42 +2771,80 @@ const DesignEditor = memo(function DesignEditor({
                     ) : (
                       /* ── Prompt form ── */
                       <div className={styles.aiPromptSection}>
-                        <label className={styles.promptLabel}>
-                          Describe your design:
-                        </label>
-                        <textarea
-                          className={styles.promptInput}
-                          value={aiPrompt}
-                          onChange={(e) => setAiPrompt(e.target.value)}
-                          placeholder="e.g. a roaring lion with flames, tattoo style…"
-                          rows={3}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                              handleGenerateAI();
-                            }
-                          }}
-                        />
-                        <span className={styles.promptHint}>
-                          Ctrl + Enter to generate
-                        </span>
-                        <div className={styles.aiActions}>
-                          <button
-                            className={styles.generateBtn}
-                            onClick={handleGenerateAI}
-                            disabled={!aiPrompt.trim()}
-                          >
-                            ✦ Generate 4 designs
-                          </button>
-                          <button
-                            className={styles.backBtn}
-                            onClick={() => {
-                              setShowAIPrompt(false);
-                              setAiPrompt("");
-                            }}
-                          >
-                            Back
-                          </button>
-                        </div>
+                        {/* Usage pill */}
+                        {aiUsage && (
+                          <div className={styles.aiUsageRow}>
+                            <span className={aiUsage.remaining === 0 ? styles.aiUsagePillEmpty : styles.aiUsagePillOk}>
+                              ✦ {aiUsage.used}/{aiUsage.limit} générations aujourd&apos;hui
+                              {aiUsage.tier === "PREMIUM" && " · Premium"}
+                            </span>
+                          </div>
+                        )}
+
+                        {aiUsage && aiUsage.remaining === 0 ? (
+                          /* ── Limit reached wall ── */
+                          <div className={styles.aiLimitWall}>
+                            <div className={styles.aiLimitIcon}>⚡</div>
+                            <h4 className={styles.aiLimitTitle}>Limite journalière atteinte</h4>
+                            <p className={styles.aiLimitDesc}>
+                              Vous avez utilisé vos <strong>{aiUsage.limit}</strong> générations gratuites d&apos;aujourd&apos;hui.
+                              Passez au plan <strong>Premium</strong> pour plus de générations.
+                            </p>
+                            <a
+                              href={`tel:${aiUsage.contactPhone.replace(/\s/g, "")}`}
+                              className={styles.aiLimitContactBtn}
+                            >
+                              📞 {aiUsage.contactPhone}
+                            </a>
+                            <p className={styles.aiLimitHint}>Appelez-nous pour activer votre accès Premium</p>
+                            <button
+                              className={styles.backBtn}
+                              onClick={() => { setShowAIPrompt(false); setAiPrompt(""); }}
+                              style={{ alignSelf: "center" }}
+                            >
+                              Retour
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <label className={styles.promptLabel}>
+                              Describe your design:
+                            </label>
+                            <textarea
+                              className={styles.promptInput}
+                              value={aiPrompt}
+                              onChange={(e) => setAiPrompt(e.target.value)}
+                              placeholder="e.g. a roaring lion with flames, tattoo style…"
+                              rows={3}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                                  handleGenerateAI();
+                                }
+                              }}
+                            />
+                            <span className={styles.promptHint}>
+                              Ctrl + Enter to generate
+                            </span>
+                            <div className={styles.aiActions}>
+                              <button
+                                className={styles.generateBtn}
+                                onClick={handleGenerateAI}
+                                disabled={!aiPrompt.trim()}
+                              >
+                                ✦ Generate 2 designs
+                              </button>
+                              <button
+                                className={styles.backBtn}
+                                onClick={() => {
+                                  setShowAIPrompt(false);
+                                  setAiPrompt("");
+                                }}
+                              >
+                                Back
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </>

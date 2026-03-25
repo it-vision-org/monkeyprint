@@ -1,0 +1,13 @@
+{
+  "name": "Male Model 1",
+  "category": "male",
+  "description": "Male model in white t-shirt",
+  "width": 1000,
+  "height": 1500,
+  "defaultDesign": {
+    "x": 370,
+    "y": 500,
+    "width": 260,
+    "height": 300
+  }
+}

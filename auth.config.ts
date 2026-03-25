@@ -10,8 +10,13 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-            const isOnCreateShop = nextUrl.pathname === '/create-shop';
+            const isOnAdmin = nextUrl.pathname.startsWith('/admin');
             const isOnLogin = nextUrl.pathname === '/login';
+
+            function safeInternalPath(path: string | null): string | null {
+                if (!path || !path.startsWith('/') || path.startsWith('//')) return null;
+                return path;
+            }
 
             // Protect dashboard routes - require authentication
             if (isOnDashboard) {
@@ -19,9 +24,23 @@ export const authConfig = {
                 return false; // Redirect unauthenticated users to login page
             }
 
-            // Redirect logged-in users away from login page only
-            // Allow logged-in users to access /create-shop (they may not have a store yet)
+            // Admin: send anonymous users to login with return URL
+            if (isOnAdmin) {
+                if (isLoggedIn) return true;
+                const login = new URL('/login', nextUrl);
+                login.searchParams.set(
+                    'callbackUrl',
+                    `${nextUrl.pathname}${nextUrl.search}`
+                );
+                return NextResponse.redirect(login);
+            }
+
+            // Logged-in users hitting /login → dashboard or safe callbackUrl
             if (isLoggedIn && isOnLogin) {
+                const callback = safeInternalPath(nextUrl.searchParams.get('callbackUrl'));
+                if (callback) {
+                    return NextResponse.redirect(new URL(callback, nextUrl));
+                }
                 return NextResponse.redirect(new URL('/dashboard/apercu', nextUrl));
             }
 

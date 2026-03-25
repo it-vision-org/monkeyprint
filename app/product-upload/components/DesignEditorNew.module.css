@@ -1168,6 +1168,98 @@
   gap: 16px;
 }
 
+/* AI Usage pill row */
+.aiUsageRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: -4px;
+}
+
+.aiUsagePillOk {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #065f46;
+  letter-spacing: 0.02em;
+}
+
+.aiUsagePillEmpty {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #991b1b;
+  letter-spacing: 0.02em;
+}
+
+/* Limit reached wall */
+.aiLimitWall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 16px 20px;
+  text-align: center;
+}
+
+.aiLimitIcon {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.5));
+  animation: aiLimitPulse 2s ease-in-out infinite;
+}
+
+@keyframes aiLimitPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.aiLimitTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.aiLimitDesc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 280px;
+}
+
+.aiLimitContactBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 18px rgba(20, 184, 166, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.aiLimitContactBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(20, 184, 166, 0.45);
+}
+
+.aiLimitHint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: -4px 0 4px;
+}
+
 .promptLabel {
   font-size: 14px;
   font-weight: 600;

@@ -44,9 +44,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 if (isActivePath(pathname, "/admin/users")) return 2;
                 if (isActivePath(pathname, "/admin/orders")) return 3;
                 if (isActivePath(pathname, "/admin/products")) return 4;
-                if (isActivePath(pathname, "/admin/support")) return 5;
-                if (isActivePath(pathname, "/admin/analytics")) return 6;
-                if (isActivePath(pathname, "/admin/settings")) return 7;
+                if (isActivePath(pathname, "/admin/product-config")) return 5;
+                if (isActivePath(pathname, "/admin/support")) return 6;
+                if (isActivePath(pathname, "/admin/analytics")) return 7;
+                if (isActivePath(pathname, "/admin/settings")) return 8;
                 return -1;
             })();
 
@@ -100,11 +101,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="admin-page">
             <header className="admin-header">
                 <div className="admin-container">
-                    <div className="admin-logo" title={sectionLabel}>
-                        <span className="admin-section" title={sectionLabel}>
-                            {sectionLabel}
+                    <Link href="/admin" className="admin-logo" title="Monkey Print — Administration">
+                        <span className="admin-logo-mark">
+                            <Image src="/logo.png" alt="" width={36} height={36} style={{ objectFit: "contain" }} />
                         </span>
-                    </div>
+                        <span className="admin-logo-text">
+                            <span className="admin-logo-title">Monkey Print</span>
+                            <span className="admin-section">{sectionLabel}</span>
+                        </span>
+                    </Link>
 
                     <nav className="admin-nav">
                         <div className="admin-nav-indicator-wrapper" ref={navWrapperRef}>
@@ -154,9 +159,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         </button>
                     </div>
 
-                    <button className="admin-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 12H21M3 6H21M3 18H21" stroke="#0d9488" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <button type="button" className="admin-mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                            <path d="M3 12H21M3 6H21M3 18H21" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
                 </div>
@@ -167,9 +172,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     <div className="admin-mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
                     <div className={`admin-mobile-menu ${mobileMenuOpen ? "open" : ""}`}>
                         <div className="admin-mobile-menu-header">
-                            <button className="admin-mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <button type="button" className="admin-mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
                         </div>

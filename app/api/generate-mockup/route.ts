@@ -1,187 +1,172 @@
-import { getR2Url, uploadImageToR2 } from "@/lib/storage";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 
-const KIE_AI_API_KEY = process.env.KIE_AI_API_KEY;
-if (!KIE_AI_API_KEY) {
-  throw new Error("KIE_AI_API_KEY environment variable is not set");
-}
+const TEMPLATES_DIR = path.join(process.cwd(), "mockupproject", "templates");
 
-const KIE_API_BASE = "https://api.kie.ai";
-
-// ─── Scene descriptors per audience ──────────────────────────────
-const SCENES: Record<string, string> = {
-  homme:
-    "a confident stylish man in his late 20s, " +
-    "wearing the t-shirt, casual urban outfit, " +
-    "standing in a bright modern city street, golden hour natural light",
-
-  femme:
-    "a stylish woman in her late 20s, " +
-    "wearing the t-shirt, relaxed chic outfit, " +
-    "standing in a bright airy space, soft diffused natural light",
-
-  enfant:
-    "a happy energetic child aged 8–10, " +
-    "wearing the t-shirt, playful pose, " +
-    "colorful park background, bright cheerful daylight",
-
-  famille:
-    "a happy modern family of four — parents and two children, " +
-    "all wearing matching t-shirts, " +
-    "outdoors in a sunny park, warm golden light, candid joyful moment",
-
-  sport:
-    "a fit athletic person in their 20s, " +
-    "wearing the t-shirt, dynamic action pose, " +
-    "gym or outdoor track background, dramatic sports photography lighting",
-
-  corporate:
-    "a professional confident person in their 30s, " +
-    "wearing the t-shirt over smart-casual trousers, " +
-    "clean modern office or co-working space background, polished studio light",
-
-  unisexe:
-    "a trendy gender-neutral person in their 20s, " +
-    "wearing the t-shirt, minimalist style, " +
-    "clean white studio background, editorial fashion lighting",
-
-  couple:
-    "a couple in their late 20s, both wearing matching t-shirts, " +
-    "arms around each other, candid natural pose, " +
-    "warm lifestyle setting, golden hour light",
+// ─── Template catalog ────────────────────────────────────────────
+// Maps category → array of template folder names.
+// For now every slot points to male_1 (the only template we have).
+// Add new folders under mockupproject/templates/ and update this map.
+const TEMPLATE_CATALOG: Record<string, string[]> = {
+  male: ["male_1", "male_1", "male_1", "male_1"],
+  female: ["male_1", "male_1", "male_1", "male_1"],
+  boy: ["male_1", "male_1", "male_1", "male_1"],
+  girl: ["male_1", "male_1", "male_1", "male_1"],
 };
 
-// ─── Build the mockup prompt ──────────────────────────────────────
-// nano-banana-2 receives BOTH the prompt AND the design as image_input.
-// The prompt instructs it to render the design onto the shirt.
-function buildMockupPrompt(scene: string): string {
-  return (
-    // Scene
-    `Fashion lifestyle photo: ${scene}. ` +
-    // Design placement — key instruction
-    `The t-shirt has the provided reference graphic printed in full color ` +
-    `centered on the chest — reproduce the exact design, colors, and details ` +
-    `from the reference image faithfully on the fabric. ` +
-    // Photography quality
-    `Camera: Canon EOS R5, 85mm f/1.8 lens, shallow depth of field. ` +
-    `Lighting: professional softbox studio light or soft natural window light. ` +
-    `Style: high-end fashion e-commerce photography, sharp fabric detail, ` +
-    `true-to-life garment texture, realistic fabric drape. ` +
-    // Background
-    `Background: clean, minimal, slightly blurred. ` +
-    // Output
-    `Full-body or three-quarter crop. Photorealistic. Commercial quality. ` +
-    `16:9 or 3:2 landscape format.`
-  );
-}
+// ─── Mask analysis ───────────────────────────────────────────────
+async function analyzeMask(maskPath: string) {
+  const { data, info } = await sharp(maskPath)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-function buildCustomPrompt(custom: string): string {
-  const sanitized = custom
-    .trim()
-    .slice(0, 200)
-    .replace(/[<>{}[\]\\]/g, "")
-    .replace(/\s+/g, " ");
-  return (
-    `Fashion lifestyle photo: ${sanitized}. ` +
-    `The t-shirt has the provided reference graphic printed in full color ` +
-    `centered on the chest — reproduce the exact design from the reference image faithfully. ` +
-    `High quality product photography, professional lighting, realistic fabric texture. ` +
-    `Commercial fashion photography quality.`
-  );
-}
+  const { width, height, channels } = info;
+  let minX = width,
+    maxX = 0,
+    minY = height,
+    maxY = 0;
 
-// ─── Upload design base64 to R2, return public URL ───────────────
-async function uploadDesignToR2(base64: string): Promise<string> {
-  const key = await uploadImageToR2(base64, "temp-mockups");
-  const url = await getR2Url(key);
-  if (!url || url === key) {
-    throw new Error(
-      "R2 public domain not configured — cannot serve design URL to kie.ai",
-    );
-  }
-  return url;
-}
-
-// ─── Submit one nano-banana-2 task ───────────────────────────────
-async function submitTask(
-  prompt: string,
-  designUrl: string,
-): Promise<string | null> {
-  try {
-    const body = {
-      model: "nano-banana-2",
-      input: {
-        prompt,
-        image_input: [designUrl],
-        aspect_ratio: "3:2",
-        output_format: "jpg",
-        resolution: "1K",
-        google_search: false,
-      },
-    };
-
-    const res = await fetch(`${KIE_API_BASE}/api/v1/jobs/createTask`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${KIE_AI_API_KEY}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      console.error(`Task submit failed (${res.status}): ${await res.text()}`);
-      return null;
-    }
-
-    const data = await res.json();
-    return data.data?.taskId ?? null;
-  } catch (e) {
-    console.error("Submit error:", e);
-    return null;
-  }
-}
-
-// ─── Poll task until done ─────────────────────────────────────────
-async function pollTask(
-  taskId: string,
-  maxWaitMs = 120_000,
-): Promise<string[]> {
-  const deadline = Date.now() + maxWaitMs;
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 3000));
-    try {
-      const res = await fetch(
-        `${KIE_API_BASE}/api/v1/jobs/recordInfo?taskId=${taskId}`,
-        { headers: { Authorization: `Bearer ${KIE_AI_API_KEY}` } },
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const record = data.data;
-      if (!record) continue;
-      if (record.state === "success") {
-        const result = JSON.parse(record.resultJson || "{}");
-        return Array.isArray(result.resultUrls) ? result.resultUrls : [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const alpha = data[(y * width + x) * channels + (channels - 1)];
+      if (alpha > 128) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
       }
-      if (record.state === "fail") {
-        console.error(
-          `Task ${taskId} failed: ${record.failCode} — ${record.failMsg}`,
-        );
-        return [];
-      }
-    } catch (e) {
-      console.error(`Poll error ${taskId}:`, e);
     }
   }
-  console.error(`Task ${taskId} timed out`);
-  return [];
+
+  const bboxWidth = maxX - minX;
+  const bboxHeight = maxY - minY;
+
+  return {
+    top: minY,
+    left: minX,
+    width: bboxWidth,
+    height: bboxHeight,
+    centerX: minX + Math.round(bboxWidth / 2),
+    centerY: minY + Math.round(bboxHeight / 2),
+  };
+}
+
+// ─── Core mockup compositing ────────────────────────────────────
+async function generateMockup({
+  templateId,
+  shirtColor,
+  designBuffer,
+}: {
+  templateId: string;
+  shirtColor: string;
+  designBuffer: Buffer;
+}): Promise<Buffer> {
+  const templateDir = path.join(TEMPLATES_DIR, templateId);
+  const basePath = path.join(templateDir, "base.png");
+  const maskPath = path.join(templateDir, "mask.png");
+
+  if (!fs.existsSync(basePath) || !fs.existsSync(maskPath)) {
+    throw new Error(`Template "${templateId}" not found`);
+  }
+
+  const baseMeta = await sharp(basePath).metadata();
+  const width = baseMeta.width!;
+  const height = baseMeta.height!;
+
+  // Parse hex color
+  const r = parseInt(shirtColor.slice(1, 3), 16);
+  const g = parseInt(shirtColor.slice(3, 5), 16);
+  const b = parseInt(shirtColor.slice(5, 7), 16);
+
+  // --- Step 1: Color the shirt ---
+  const colorLayer = await sharp({
+    create: { width, height, channels: 4, background: { r, g, b, alpha: 255 } },
+  })
+    .png()
+    .toBuffer();
+
+  const maskedColor = await sharp(colorLayer)
+    .composite([{ input: maskPath, blend: "dest-in" }])
+    .png()
+    .toBuffer();
+
+  let resultBuffer = await sharp(basePath)
+    .composite([{ input: maskedColor, blend: "multiply" }])
+    .png()
+    .toBuffer();
+
+  // --- Step 2: Overlay design ---
+  const shirtBounds = await analyzeMask(maskPath);
+
+  let designWidth = Math.round(shirtBounds.width * 0.5);
+  let designHeight = Math.round(shirtBounds.height * 0.45);
+  const designX = shirtBounds.centerX - Math.round(designWidth / 2);
+  const designY = shirtBounds.centerY - Math.round(designHeight / 2);
+
+  const resizedDesign = await sharp(designBuffer)
+    .resize(designWidth, designHeight, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+
+  // Place design on canvas, clip to shirt boundary
+  const designOnCanvas = await sharp({
+    create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  })
+    .composite([{ input: resizedDesign, top: designY, left: designX, blend: "over" }])
+    .png()
+    .toBuffer();
+
+  const clippedDesign = await sharp(designOnCanvas)
+    .composite([{ input: maskPath, blend: "dest-in" }])
+    .png()
+    .toBuffer();
+
+  resultBuffer = await sharp(resultBuffer)
+    .composite([{ input: clippedDesign, blend: "over" }])
+    .png()
+    .toBuffer();
+
+  // --- Step 3: Apply fabric wrinkle texture ---
+  const texturePath = path.join(templateDir, "texture.png");
+  let textureBuffer: Buffer;
+
+  if (fs.existsSync(texturePath)) {
+    textureBuffer = await sharp(texturePath).png().toBuffer();
+  } else {
+    textureBuffer = await sharp(basePath).grayscale().normalize().png().toBuffer();
+  }
+
+  // Mask texture to only where the design has pixels
+  const clippedDesignAlpha = await sharp(clippedDesign)
+    .ensureAlpha()
+    .extractChannel(3)
+    .toBuffer();
+
+  const maskedTexture = await sharp(textureBuffer)
+    .ensureAlpha()
+    .composite([{ input: clippedDesignAlpha, blend: "dest-in" }])
+    .png()
+    .toBuffer();
+
+  resultBuffer = await sharp(resultBuffer)
+    .composite([{ input: maskedTexture, blend: "soft-light" }])
+    .png()
+    .toBuffer();
+
+  return resultBuffer;
 }
 
 // ─── Route handler ────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { designImageBase64, gender, customPrompt } = body;
+    const { designImageBase64, templateId, shirtColor = "#FFFFFF" } = body;
 
     if (!designImageBase64) {
       return NextResponse.json(
@@ -189,72 +174,53 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    if (!gender) {
+    if (!templateId) {
       return NextResponse.json(
-        { error: "Audience option is required" },
-        { status: 400 },
-      );
-    }
-    if (gender === "custom") {
-      if (!customPrompt?.trim()) {
-        return NextResponse.json(
-          { error: "Custom prompt is required" },
-          { status: 400 },
-        );
-      }
-      if (customPrompt.length > 200) {
-        return NextResponse.json(
-          { error: "Custom prompt must be 200 characters or less" },
-          { status: 400 },
-        );
-      }
-    } else if (!SCENES[gender]) {
-      return NextResponse.json(
-        { error: "Invalid audience option" },
+        { error: "Template ID is required" },
         { status: 400 },
       );
     }
 
-    // ── Upload design to R2 for public URL ──────────────────────
-    console.log("\n=== Mockup Generation (nano-banana-2) ===");
-    console.log("Audience:", gender);
-
-    let designUrl: string;
-    try {
-      designUrl = await uploadDesignToR2(designImageBase64);
-      console.log("Design uploaded to R2:", designUrl);
-    } catch (uploadErr: any) {
-      // R2 not available — fall back to text-only (no image_input)
-      console.warn(
-        "R2 upload failed, falling back to text-only:",
-        uploadErr.message,
-      );
-      designUrl = "";
-    }
-
-    // ── Build prompt ────────────────────────────────────────────
-    const prompt =
-      gender === "custom"
-        ? buildCustomPrompt(customPrompt)
-        : buildMockupPrompt(SCENES[gender]);
-    console.log("Prompt:", prompt);
-
-    // ── Submit a single task ─────────────────────────────────────
-    const taskId = await submitTask(prompt, designUrl);
-    console.log(`Task submitted: ${taskId ? "ok" : "failed"}`);
-
-    const urls = taskId ? await pollTask(taskId) : [];
-    const images = urls.slice(0, 1);
-    console.log(`Mockups collected: ${images.length}`);
-
-    if (images.length === 0) {
+    // Validate template exists in catalog
+    const allTemplateIds = new Set(Object.values(TEMPLATE_CATALOG).flat());
+    if (!allTemplateIds.has(templateId)) {
       return NextResponse.json(
-        { error: "No mockups were generated. Please try again." },
-        { status: 500 },
+        { error: "Invalid template ID" },
+        { status: 400 },
       );
     }
 
-    return NextResponse.json({ success: true, images });
+    // Validate hex color
+    if (!/^#[0-9A-Fa-f]{6}$/.test(shirtColor)) {
+      return NextResponse.json(
+        { error: "Invalid shirt color (use #RRGGBB)" },
+        { status: 400 },
+      );
+    }
+
+    console.log("\n=== Mockup Generation (Sharp compositing) ===");
+    console.log("Template:", templateId, "| Color:", shirtColor);
+
+    // Strip data URL prefix if present
+    const base64Data = designImageBase64.replace(
+      /^data:image\/[a-zA-Z+]+;base64,/,
+      "",
+    );
+    const designBuffer = Buffer.from(base64Data, "base64");
+
+    const resultBuffer = await generateMockup({
+      templateId,
+      shirtColor,
+      designBuffer,
+    });
+
+    // Convert to base64 data URL
+    const resultBase64 = `data:image/png;base64,${resultBuffer.toString("base64")}`;
+
+    return NextResponse.json({
+      success: true,
+      image: resultBase64,
+    });
   } catch (error: any) {
     console.error("Mockup generation error:", error);
     return NextResponse.json(
@@ -262,4 +228,23 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+// ─── GET: list available templates per category ──────────────────
+export async function GET() {
+  const catalog: Record<string, { id: string; index: number; name: string }[]> = {};
+
+  for (const [category, templateIds] of Object.entries(TEMPLATE_CATALOG)) {
+    catalog[category] = templateIds.map((id, index) => {
+      const configPath = path.join(TEMPLATES_DIR, id, "config.json");
+      let name = id;
+      try {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+        name = config.name || id;
+      } catch {}
+      return { id, index, name: `${name} ${index + 1}` };
+    });
+  }
+
+  return NextResponse.json({ catalog });
 }

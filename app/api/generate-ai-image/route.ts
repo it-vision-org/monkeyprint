@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getActiveModel } from "@/lib/kie-ai-models";
+import { GoogleGenAI } from "@google/genai";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { uploadImageToR2, getR2Url } from "@/lib/storage";
 
-const KIE_AI_API_KEY = process.env.KIE_AI_API_KEY;
-if (!KIE_AI_API_KEY) {
-  throw new Error("KIE_AI_API_KEY environment variable is not set");
-}
+const GEMINI_MODEL = "gemini-3.1-flash-image-preview";
+const FREE_DAILY_LIMIT_DEFAULT = 3;
+const IMAGES_PER_GENERATION = 2;
 
-const KIE_API_BASE = "https://api.kie.ai";
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 // ─── Sanitize user prompt ─────────────────────────────────────────
 function sanitize(input: string): string {
@@ -20,169 +22,162 @@ function sanitize(input: string): string {
 }
 
 // ─── Build the final prompt ───────────────────────────────────────
-// Goal: isolated graphic artwork on a pure white background,
-// no t-shirt, ready to be placed on a garment in the editor.
 function buildDesignPrompt(userPrompt: string): string {
   return (
     `${userPrompt}. ` +
-    // Style
     `Art style: bold vector graphic illustration, strong clean black outlines, ` +
     `flat solid vibrant colors, no photorealism, no gradients on the subject. ` +
-    // Background — the single most critical instruction
     `BACKGROUND: pure solid white (#FFFFFF) only — completely empty, ` +
     `no texture, no noise, no pattern, no vignette, no scenery. ` +
-    // Isolation
     `Subject fully isolated like a sticker or die-cut decal. ` +
     `No drop shadows, no glow, no cast shadows, no reflections. ` +
-    // Composition
     `Centered single subject, tight crop with minimal white padding. ` +
-    // What NOT to include
     `No t-shirt, no clothing, no mannequin, no human body, no frame, no border. ` +
-    // Output quality
     `Print-ready PNG artwork, sharp crisp edges, 1000x1000px minimum quality. ` +
     `Professional graphic design for apparel screen printing.`
   );
 }
 
-// ─── Build model-specific input payload ──────────────────────────
-function buildInput(modelId: string, prompt: string): object {
-  if (modelId === "nano-banana-2") {
-    return {
-      prompt,
-      aspect_ratio: "1:1",
-      output_format: "png",
-      resolution: "1K",
-      google_search: false,
-    };
-  }
-  if (modelId === "z-image") {
-    return { prompt, aspect_ratio: "1:1" };
-  }
-  // grok-imagine/text-to-image (default)
-  return { prompt, aspect_ratio: "1:1" };
-}
-
-// ─── Submit one task ──────────────────────────────────────────────
-async function submitTask(prompt: string, modelId: string): Promise<string | null> {
+// ─── Generate a single image via Gemini ──────────────────────────
+async function generateOneImage(prompt: string): Promise<string | null> {
   try {
-    const res = await fetch(`${KIE_API_BASE}/api/v1/jobs/createTask`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${KIE_AI_API_KEY}`,
-      },
-      body: JSON.stringify({ model: modelId, input: buildInput(modelId, prompt) }),
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: { responseModalities: ["IMAGE", "TEXT"] },
     });
 
-    if (!res.ok) {
-      console.error(`Task submit failed (${res.status}): ${await res.text()}`);
-      return null;
-    }
+    const parts = response.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      if ((part as any).inlineData?.data) {
+        const inlineData = (part as any).inlineData;
+        const base64 = inlineData.data as string;
+        const mimeType: string = inlineData.mimeType || "image/png";
+        const ext = mimeType.includes("jpeg") || mimeType.includes("jpg") ? "jpg" : "png";
 
-    const data = await res.json();
-    const taskId = data.data?.taskId ?? null;
-    if (taskId) console.log(`Design task submitted: ${taskId}`);
-    return taskId;
-  } catch (e) {
-    console.error("Submit error:", e);
+        // Upload to R2 and return public URL
+        const key = await uploadImageToR2Base64(base64, ext);
+        return await getR2Url(key);
+      }
+    }
+    console.error("Gemini returned no image part");
+    return null;
+  } catch (e: any) {
+    console.error("Gemini generateContent error:", e?.message ?? e);
     return null;
   }
 }
 
-// ─── Poll until done, return image URLs ──────────────────────────
-async function pollTask(taskId: string, maxWaitMs = 120_000): Promise<string[]> {
-  const deadline = Date.now() + maxWaitMs;
-  while (Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 3000));
-    try {
-      const res = await fetch(
-        `${KIE_API_BASE}/api/v1/jobs/recordInfo?taskId=${taskId}`,
-        { headers: { Authorization: `Bearer ${KIE_AI_API_KEY}` } },
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const record = data.data;
-      if (!record) continue;
-      if (record.state === "success") {
-        const result = JSON.parse(record.resultJson || "{}");
-        return Array.isArray(result.resultUrls) ? result.resultUrls : [];
-      }
-      if (record.state === "fail") {
-        console.error(`Task ${taskId} failed: ${record.failCode} — ${record.failMsg}`);
-        return [];
-      }
-    } catch (e) {
-      console.error(`Poll error for ${taskId}:`, e);
-    }
-  }
-  console.error(`Task ${taskId} timed out`);
-  return [];
+// ─── Upload raw base64 (no header) to R2 ─────────────────────────
+async function uploadImageToR2Base64(base64: string, ext: string): Promise<string> {
+  const dataUrl = `data:image/${ext};base64,${base64}`;
+  return uploadImageToR2(dataUrl, "ai-designs");
+}
+
+// ─── Get today's generation count for a user ─────────────────────
+async function getTodayCount(userId: string): Promise<number> {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  return prisma.aiGenerationLog.count({
+    where: { userId, createdAt: { gte: startOfDay } },
+  });
+}
+
+// ─── Get daily limits from settings ──────────────────────────────
+async function getLimits(): Promise<{ free: number; premium: number }> {
+  const settings = await prisma.setting.findMany({
+    where: { key: { in: ["freeAiGenerationsPerDay", "premiumAiGenerationsPerDay"] } },
+  });
+  const map: Record<string, number> = {};
+  for (const s of settings) map[s.key] = parseFloat(s.value);
+  return {
+    free: map["freeAiGenerationsPerDay"] ?? FREE_DAILY_LIMIT_DEFAULT,
+    premium: map["premiumAiGenerationsPerDay"] ?? 50,
+  };
 }
 
 // ─── Route handler ────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { prompt } = body;
+  // Auth check
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
 
-    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-    }
-    if (prompt.length > 500) {
-      return NextResponse.json(
-        { error: "Prompt must be 500 characters or less" },
-        { status: 400 },
-      );
-    }
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, aiTier: true, aiPremiumLimit: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+  }
 
-    const model = getActiveModel();
-    const finalPrompt = buildDesignPrompt(sanitize(prompt));
+  // Check daily limit
+  const limits = await getLimits();
+  const dailyLimit =
+    user.aiTier === "PREMIUM"
+      ? (user.aiPremiumLimit ?? limits.premium)
+      : limits.free;
 
-    console.log(`\n=== Design Generation (${model.name}) ===`);
-    console.log("User prompt:", prompt.trim());
-
-    let images: string[];
-
-    if (model.imagesPerTask >= 4) {
-      // Grok: 1 task returns up to 6 images
-      const taskId = await submitTask(finalPrompt, model.id);
-      const urls = taskId ? await pollTask(taskId) : [];
-      images = urls.slice(0, 4);
-    } else {
-      // nano-banana-2 / z-image: 1 image per task, submit 4 in parallel
-      const taskIds = await Promise.all(
-        Array.from({ length: 4 }, () => submitTask(finalPrompt, model.id)),
-      );
-      console.log(`Tasks submitted: ${taskIds.filter(Boolean).length}/4`);
-      const urlArrays = await Promise.all(
-        taskIds.map((id) => (id ? pollTask(id) : Promise.resolve([]))),
-      );
-      images = urlArrays.flatMap((urls) => urls.slice(0, 1));
-    }
-    console.log(`Images collected: ${images.length}`);
-
-    if (images.length === 0) {
-      return NextResponse.json(
-        { error: `No images returned by model "${model.name}". Check server logs for task failure details.` },
-        { status: 500 },
-      );
-    }
-
-    // Fill to 4 if some tasks failed
-    while (images.length < 4) {
-      images.push(images[images.length - 1]);
-    }
-
-    return NextResponse.json({
-      success: true,
-      images: images.slice(0, 4),
-      model: model.name,
-    });
-  } catch (error: any) {
-    console.error("Design generation error:", error);
+  const todayCount = await getTodayCount(user.id);
+  if (todayCount >= dailyLimit) {
     return NextResponse.json(
-      { error: "Internal server error", details: error.message },
+      {
+        error: "LIMIT_REACHED",
+        used: todayCount,
+        limit: dailyLimit,
+        tier: user.aiTier,
+      },
+      { status: 429 },
+    );
+  }
+
+  // Validate prompt
+  const body = await request.json();
+  const { prompt } = body;
+  if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+    return NextResponse.json({ error: "Prompt requis" }, { status: 400 });
+  }
+  if (prompt.length > 500) {
+    return NextResponse.json(
+      { error: "Le prompt ne doit pas dépasser 500 caractères" },
+      { status: 400 },
+    );
+  }
+
+  const finalPrompt = buildDesignPrompt(sanitize(prompt));
+  console.log(`\n=== Design Generation (Gemini Flash) ===`);
+  console.log("User:", user.id, "| Tier:", user.aiTier, "| Today:", todayCount + 1, "/", dailyLimit);
+  console.log("Prompt:", prompt.trim());
+
+  // Generate IMAGES_PER_GENERATION images in parallel
+  const results = await Promise.all(
+    Array.from({ length: IMAGES_PER_GENERATION }, () => generateOneImage(finalPrompt)),
+  );
+
+  const images = results.filter((url): url is string => url !== null);
+  console.log(`Images generated: ${images.length}/${IMAGES_PER_GENERATION}`);
+
+  if (images.length === 0) {
+    return NextResponse.json(
+      { error: "Aucune image générée. Vérifiez les logs du serveur." },
       { status: 500 },
     );
   }
+
+  // Fill to 4 if some failed
+  while (images.length < IMAGES_PER_GENERATION) {
+    images.push(images[images.length - 1]);
+  }
+
+  // Log this generation (counts as 1 use)
+  await prisma.aiGenerationLog.create({ data: { userId: user.id } });
+
+  return NextResponse.json({
+    success: true,
+    images: images.slice(0, IMAGES_PER_GENERATION),
+    used: todayCount + 1,
+    limit: dailyLimit,
+    tier: user.aiTier,
+  });
 }

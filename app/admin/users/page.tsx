@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import AiTierControl from "./AiTierControl";
 
 export default async function AdminUsersPage({
     searchParams,
@@ -36,7 +37,7 @@ export default async function AdminUsersPage({
         prisma.user.findMany({
             where,
             include: {
-                store: true
+                store: true,
             },
             orderBy: { createdAt: 'desc' },
             skip: (page - 1) * pageSize,
@@ -137,6 +138,7 @@ export default async function AdminUsersPage({
                             <th>Utilisateur</th>
                             <th>Email</th>
                             <th>Rôle</th>
+                            <th>IA</th>
                             <th>Magasins</th>
                             <th>Date d'inscription</th>
                             <th>Statut</th>
@@ -146,7 +148,7 @@ export default async function AdminUsersPage({
                     <tbody>
                         {users.length === 0 ? (
                             <tr>
-                                <td colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>Aucun utilisateur trouvé</td>
+                                <td colSpan={8} style={{ textAlign: 'center', padding: '20px' }}>Aucun utilisateur trouvé</td>
                             </tr>
                         ) : (
                             users.map((user: any) => (
@@ -164,6 +166,13 @@ export default async function AdminUsersPage({
                                         <span className={`admin-role-badge ${user.role === 'ADMIN' ? 'owner' : 'customer'}`}>
                                             {user.role === 'ADMIN' ? 'Admin' : 'Vendeur'}
                                         </span>
+                                    </td>
+                                    <td>
+                                        <AiTierControl
+                                            userId={user.id}
+                                            initialTier={user.aiTier ?? "FREE"}
+                                            initialLimit={user.aiPremiumLimit ?? null}
+                                        />
                                     </td>
                                     <td>{user.store ? 1 : 0}</td>
                                     <td>{new Date(user.createdAt).toLocaleDateString()}</td>
