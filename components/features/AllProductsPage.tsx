@@ -156,8 +156,12 @@ export default function AllProductsPage({
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
                             <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <h3>No products found</h3>
-                        <p>Check back later for new products</p>
+                        <h3>Aucun produit disponible</h3>
+                        <p>Cette boutique est en cours de préparation.</p>
+                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
+                            <LoadingLink href={theme.baseRoute}>Retour à la boutique</LoadingLink>
+                            <LoadingLink href="/dashboard/product-upload">Ajouter un produit</LoadingLink>
+                        </div>
                     </div>
                 ) : (
                     <div className="all-products-grid-modern">

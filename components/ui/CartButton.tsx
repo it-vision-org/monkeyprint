@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 type CartButtonProps = {
     count: number;
@@ -18,12 +19,21 @@ export default function CartButton({
     strokeColor = '#1f2937'
 }: CartButtonProps) {
     const router = useRouter();
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    const handleCartClick = () => {
+        if (isNavigating) return;
+        setIsNavigating(true);
+        router.push(href);
+    };
 
     return (
         <button
             className={className}
-            onClick={() => router.push(href)}
+            onClick={handleCartClick}
             aria-label={`Cart with ${count} items`}
+            disabled={isNavigating}
+            style={{ opacity: isNavigating ? 0.8 : 1, cursor: isNavigating ? "not-allowed" : "pointer" }}
         >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path

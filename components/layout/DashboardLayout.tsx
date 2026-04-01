@@ -7,6 +7,7 @@ import LoadingButton from "../ui/LoadingButton";
 import LoadingLink from "../ui/LoadingLink";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { signOut } from "next-auth/react";
 import styles from "@/app/styles/dashboard.module.css";
 
 type CommandesStatus = "non-confirme" | "confirme" | "retours";
@@ -67,6 +68,8 @@ export default function DashboardLayout({
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [commandesOpen, setCommandesOpen] = useState(false);
     const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
+    const [isVisitingStore, setIsVisitingStore] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const storeInfo = initialStoreInfo;
     const nonConfirmedCount = commandesStats?.nonConfirmed ?? 0;
     const confirmedCount = commandesStats?.confirmed ?? 0;
@@ -79,6 +82,8 @@ export default function DashboardLayout({
     const commandesStatus = (searchParams.get("status") as CommandesStatus | null) ?? null;
 
     const handleVisitStore = async () => {
+        if (isVisitingStore) return;
+        setIsVisitingStore(true);
         try {
             const response = await fetch('/api/store-info');
             if (!response.ok) {
@@ -89,6 +94,21 @@ export default function DashboardLayout({
             router.push(`/shop/${data.slug}`);
         } catch (error) {
             console.error('Error fetching store info:', error);
+        } finally {
+            setIsVisitingStore(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+        try {
+            await signOut({ redirect: false });
+            router.replace("/");
+            router.refresh();
+        } catch (error) {
+            console.error("Logout failed:", error);
+            setIsLoggingOut(false);
         }
     };
 
@@ -296,6 +316,7 @@ export default function DashboardLayout({
                             title="VISITER LE MAGASIN"
                             variant="outline"
                             size="sm"
+                            isLoading={isVisitingStore}
                         >
                             VISITER LE MAGASIN
                         </LoadingButton>
@@ -323,8 +344,9 @@ export default function DashboardLayout({
                                 setMobileMenuOpen(false);
                                 handleVisitStore();
                             }}
+                            disabled={isVisitingStore}
                         >
-                            VISITER LE MAGASIN
+                            {isVisitingStore ? "Ouverture..." : "VISITER LE MAGASIN"}
                         </button>
                         <button className={styles['dash-mobile-menu-close']} onClick={() => setMobileMenuOpen(false)} aria-label="Fermer">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -469,7 +491,16 @@ export default function DashboardLayout({
                                 Paramètres
                             </Link>
 
-                            <Link href="/logout" className={`${styles['dash-mobile-nav-item']} ${styles.logout}`}>
+                            <button
+                                type="button"
+                                className={`${styles['dash-mobile-nav-item']} ${styles.logout}`}
+                                onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    handleLogout();
+                                }}
+                                disabled={isLoggingOut}
+                                style={{ width: "100%", border: "none", background: "transparent", textAlign: "left" }}
+                            >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
@@ -481,8 +512,8 @@ export default function DashboardLayout({
                                     <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                                Se déconnecter
-                            </Link>
+                                {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+                            </button>
                     </nav>
 
                     <div className={styles['dash-mobile-logo']}>

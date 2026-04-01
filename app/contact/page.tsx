@@ -25,16 +25,45 @@ export default function ContactPage() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
+
+    const validateForm = () => {
+        const nextErrors: Partial<Record<keyof typeof formData, string>> = {};
+        if (!formData.name.trim()) nextErrors.name = "Le nom est requis.";
+        if (!formData.email.trim()) {
+            nextErrors.email = "L'email est requis.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            nextErrors.email = "Veuillez entrer un email valide.";
+        }
+        if (!formData.subject) nextErrors.subject = "Veuillez sélectionner un sujet.";
+        if (!formData.message.trim()) {
+            nextErrors.message = "Le message est requis.";
+        } else if (formData.message.trim().length < 10) {
+            nextErrors.message = "Le message doit contenir au moins 10 caractères.";
+        }
+        setFieldErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData(prev => ({
             ...prev,
             [e.target.name]: e.target.value
         }));
+        if (fieldErrors[e.target.name as keyof typeof formData]) {
+            setFieldErrors(prev => ({ ...prev, [e.target.name]: undefined }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validateForm()) {
+            setSubmitMessage({
+                type: 'error',
+                text: 'Veuillez corriger les champs en erreur avant d\'envoyer.'
+            });
+            return;
+        }
         setIsSubmitting(true);
         setSubmitMessage(null);
 
@@ -110,10 +139,11 @@ export default function ContactPage() {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
+                                aria-invalid={!!fieldErrors.name}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
+                                    border: fieldErrors.name ? '1px solid #dc2626' : '1px solid #d1d5db',
                                     borderRadius: '8px',
                                     fontSize: '16px',
                                     outline: 'none',
@@ -122,6 +152,7 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
+                            {fieldErrors.name && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.name}</p>}
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
@@ -140,10 +171,11 @@ export default function ContactPage() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
+                                aria-invalid={!!fieldErrors.email}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
+                                    border: fieldErrors.email ? '1px solid #dc2626' : '1px solid #d1d5db',
                                     borderRadius: '8px',
                                     fontSize: '16px',
                                     outline: 'none',
@@ -152,6 +184,7 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
+                            {fieldErrors.email && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.email}</p>}
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
@@ -169,10 +202,11 @@ export default function ContactPage() {
                                 value={formData.subject}
                                 onChange={handleChange}
                                 required
+                                aria-invalid={!!fieldErrors.subject}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
+                                    border: fieldErrors.subject ? '1px solid #dc2626' : '1px solid #d1d5db',
                                     borderRadius: '8px',
                                     fontSize: '16px',
                                     outline: 'none',
@@ -189,6 +223,7 @@ export default function ContactPage() {
                                 <option value="feedback">Commentaires</option>
                                 <option value="other">Autre</option>
                             </select>
+                            {fieldErrors.subject && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.subject}</p>}
                         </div>
 
                         <div style={{ marginBottom: '32px' }}>
@@ -207,10 +242,11 @@ export default function ContactPage() {
                                 onChange={handleChange}
                                 required
                                 rows={6}
+                                aria-invalid={!!fieldErrors.message}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
+                                    border: fieldErrors.message ? '1px solid #dc2626' : '1px solid #d1d5db',
                                     borderRadius: '8px',
                                     fontSize: '16px',
                                     outline: 'none',
@@ -221,6 +257,7 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
+                            {fieldErrors.message && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.message}</p>}
                         </div>
 
                         <button

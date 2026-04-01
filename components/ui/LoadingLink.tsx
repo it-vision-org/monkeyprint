@@ -31,6 +31,26 @@ export default function LoadingLink({
     }, [pathname, searchParams]);
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        const isExternalHref =
+            href.startsWith("http://") ||
+            href.startsWith("https://") ||
+            href.startsWith("mailto:") ||
+            href.startsWith("tel:");
+
+        if (isExternalHref) {
+            return;
+        }
+
+        if (
+            e.metaKey ||
+            e.ctrlKey ||
+            e.shiftKey ||
+            e.altKey ||
+            e.button !== 0
+        ) {
+            return;
+        }
+
         if (isLoading) {
             e.preventDefault();
             return;
@@ -40,19 +60,15 @@ export default function LoadingLink({
             onClick(e);
         }
 
-        if (href === pathname) {
+        if (href === pathname || href.startsWith("#")) {
             setIsLoading(false);
             return;
         }
 
         if (!e.defaultPrevented) {
-            // Only start loading if we're actually navigating to a new route
-            // or if it's a different query param
-            if (href !== pathname && !href.startsWith('#')) {
-                setIsLoading(true);
-                // Use router.push for client-side navigation
-                router.push(href);
-            }
+            e.preventDefault();
+            setIsLoading(true);
+            router.push(href);
         }
     };
 

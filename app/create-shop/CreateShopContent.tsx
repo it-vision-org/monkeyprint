@@ -84,6 +84,9 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                                 type="button"
                                 className={`${styles['cs-theme-card']} ${styles[state]} ${selectedTheme === theme.id ? styles.selected : ""}`}
                                 onClick={() => setSelectedTheme(theme.id)}
+                                aria-label={`Choisir le thème ${theme.label}`}
+                                aria-pressed={selectedTheme === theme.id}
+                                title={`Prévisualiser ${theme.label}`}
                             >
                                 <Image src={theme.image} alt={theme.label} width={960} height={540} />
                             </button>
@@ -91,12 +94,24 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
                     })}
                 </div>
                 <div className={styles['cs-theme-controls']}>
-                    <button type="button" onClick={handlePrev} className={styles['cs-round-nav']}>
+                    <button
+                        type="button"
+                        onClick={handlePrev}
+                        className={styles['cs-round-nav']}
+                        aria-label="Thème précédent"
+                        title="Thème précédent"
+                    >
                         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                             <path d="M12.5 4.16669L7.5 10L12.5 15.8334" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" />
                         </svg>
                     </button>
-                    <button type="button" onClick={handleNext} className={styles['cs-round-nav']}>
+                    <button
+                        type="button"
+                        onClick={handleNext}
+                        className={styles['cs-round-nav']}
+                        aria-label="Thème suivant"
+                        title="Thème suivant"
+                    >
                         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                             <path d="M7.5 4.16669L12.5 10L7.5 15.8334" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" />
                         </svg>

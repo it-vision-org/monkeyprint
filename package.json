@@ -11,7 +11,7 @@
     "@aws-sdk/client-s3": "^3.958.0",
     "@google/genai": "^1.46.0",
     "@imgly/background-removal": "^1.7.0",
-    "@prisma/client": "^6.19.1",
+    "@prisma/client": "^6.19.3",
     "@types/fabric": "^5.3.10",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.1.0",
@@ -38,7 +38,7 @@
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
-    "prisma": "^6.19.1",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4.1.14",
     "typescript": "^5"
   }

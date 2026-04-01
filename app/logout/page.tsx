@@ -8,29 +8,39 @@ import styles from './logout.module.css';
 export default function LogoutPage() {
     const router = useRouter();
     const [isFadingOut, setIsFadingOut] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
-        // Small delay to show the animation
-        const timer = setTimeout(() => {
-            setIsFadingOut(true);
-            
-            // Sign out after fade-out animation starts
-            setTimeout(() => {
-                signOut({ redirect: false }).then(() => {
-                    router.push('/');
-                    router.refresh();
-                });
-            }, 300); // Wait for fade-out animation to complete
-        }, 1500); // Show loading animation for 1.5 seconds
+        let isMounted = true;
+        const runLogout = async () => {
+            try {
+                setIsFadingOut(true);
+                await signOut({ redirect: false });
+                if (!isMounted) return;
+                router.replace('/');
+                router.refresh();
+            } catch (error) {
+                console.error('Logout failed:', error);
+                if (isMounted) {
+                    setHasError(true);
+                    setIsFadingOut(false);
+                }
+            }
+        };
+        runLogout();
 
-        return () => clearTimeout(timer);
+        return () => {
+            isMounted = false;
+        };
     }, [router]);
 
     return (
         <div className={`${styles.logoutContainer} ${isFadingOut ? styles.fadeOut : styles.fadeIn}`}>
             <div className={styles.logoutContent}>
                 <div className={styles.logoutSpinner}></div>
-                <p className={styles.logoutText}>Déconnexion en cours...</p>
+                <p className={styles.logoutText}>
+                    {hasError ? 'Échec de la déconnexion. Réessayez.' : 'Déconnexion en cours...'}
+                </p>
             </div>
         </div>
     );

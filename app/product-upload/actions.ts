@@ -68,16 +68,24 @@ export async function createProduct(formData: FormData) {
         return { error: 'Store not found' };
     }
 
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
+    const name = (formData.get('name') as string)?.trim();
+    const description = (formData.get('description') as string)?.trim();
     const price = parseFloat(formData.get('price') as string);
     const type = formData.get('type') as string;
     const designData = formData.get('designData') as string;
     const mockupImageBase64 = formData.get('mockupImage') as string;
     const productId = formData.get('productId') as string | null; // For edit mode
 
+    if (!name) {
+        return { error: 'Le nom du produit est requis' };
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+        return { error: 'Le prix doit être supérieur à 0' };
+    }
+
     let previewFront = null;
     let previewBack = null;
+    let savedProductId: string | null = null;
 
     try {
         // Upload only the final mockup/combined image
@@ -99,23 +107,24 @@ export async function createProduct(formData: FormData) {
                 return { error: 'Product not found or unauthorized' };
             }
 
-            await prisma.product.update({
+            const updatedProduct = await prisma.product.update({
                 where: { id: productId },
                 data: {
                     name,
-                    description,
+                    description: description || null,
                     basePrice: price,
                     type: type || 'tshirt',
                     designData,
                     ...(previewFront && { previewFront }), // Only update if new image provided
                 }
             });
+            savedProductId = updatedProduct.id;
         } else {
             // Create new product
-            await prisma.product.create({
+            const createdProduct = await prisma.product.create({
                 data: {
                     name,
-                    description,
+                    description: description || null,
                     basePrice: price,
                     type: type || 'tshirt',
                     designData,
@@ -124,6 +133,7 @@ export async function createProduct(formData: FormData) {
                     storeId: store.id
                 }
             });
+            savedProductId = createdProduct.id;
         }
     } catch (e) {
         console.error('Product save failed:', e);
@@ -136,6 +146,7 @@ export async function createProduct(formData: FormData) {
         // but the client will handle cleanup on redirect
     }
 
-    // Redirect on success (redirect throws, so it won't return)
-    redirect('/dashboard/produits');
+    const mode = productId ? "updated" : "created";
+    const successPath = `/dashboard/produits?status=${mode}&productId=${savedProductId || ""}&storeSlug=${encodeURIComponent(store.slug)}`;
+    redirect(successPath);
 }

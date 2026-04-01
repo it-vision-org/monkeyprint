@@ -1770,10 +1770,10 @@ export default function ProductDetailsPage() {
                 : {}
             }
           >
-            {isEditingProduct
-              ? "ENREGISTRER LES MODIFICATIONS"
-              : isFirstProduct
-                ? "VOTRE SITE WEB EST PRÊT"
+            {isSubmitting
+              ? "PUBLICATION EN COURS..."
+              : isEditingProduct
+                ? "ENREGISTRER LES MODIFICATIONS"
                 : "PUBLIER LE PRODUIT"}
           </button>
         </div>

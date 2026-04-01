@@ -4,11 +4,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getR2Url } from "@/lib/storage";
 import AdminProductTableRow from "./AdminProductTableRow";
+import AdminStoreFilterSelect from "./AdminStoreFilterSelect";
+
+type AdminProductsSearchParams = { q?: string; store?: string; page?: string };
 
 export default async function AdminProductsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ q?: string; store?: string; page?: string }>;
+    searchParams?: Promise<AdminProductsSearchParams>;
 }) {
     const session = await auth();
     if (!session?.user?.email) redirect("/");
@@ -17,10 +20,10 @@ export default async function AdminProductsPage({
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (user?.role !== 'ADMIN') redirect("/dashboard");
 
-    const resolvedParams = await searchParams;
+    const resolvedParams = searchParams ? await searchParams : {};
     const query = resolvedParams.q || "";
     const storeFilter = resolvedParams.store || "all";
-    const page = parseInt(resolvedParams.page || "1");
+    const page = Math.max(1, parseInt(resolvedParams.page || "1", 10) || 1);
     const pageSize = 20;
 
     const where: any = {};
@@ -34,52 +37,73 @@ export default async function AdminProductsPage({
         ];
     }
 
-    const [products, totalCount, statsByProduct, stores] = await Promise.all([
-        prisma.product.findMany({
-            where,
-            select: {
-                id: true,
-                name: true,
-                description: true,
-                basePrice: true,
-                createdAt: true,
-                previewFront: true,
-                store: {
-                    select: {
-                        id: true,
-                        name: true,
-                        slug: true
+    let products: any[] = [];
+    let totalCount = 0;
+    let totalSold = 0;
+    let stores: Array<{ id: string; name: string }> = [];
+    let loadError = false;
+
+    try {
+        const [loadedProducts, loadedTotalCount, statsByProduct, loadedStores] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    basePrice: true,
+                    createdAt: true,
+                    previewFront: true,
+                    store: {
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true
+                        }
+                    },
+                    _count: {
+                        select: {
+                            orderItems: true
+                        }
                     }
                 },
-                _count: {
-                    select: {
-                        orderItems: true
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-        }),
-        prisma.product.count({ where }),
-        prisma.orderItem.aggregate({
-            _sum: { quantity: true },
-        }),
-        prisma.store.findMany({
-            select: {
-                id: true,
-                name: true,
-            },
-            orderBy: { name: 'asc' },
-        })
-    ]);
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            prisma.product.count({ where }),
+            prisma.orderItem.aggregate({
+                _sum: { quantity: true },
+            }),
+            prisma.store.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                },
+                orderBy: { name: 'asc' },
+            })
+        ]);
 
-    const totalSold = statsByProduct._sum.quantity || 0;
+        products = loadedProducts;
+        totalCount = loadedTotalCount;
+        totalSold = statsByProduct._sum.quantity || 0;
+        stores = loadedStores;
+    } catch (error) {
+        console.error("Admin products page failed to load:", error);
+        loadError = true;
+    }
 
     // Resolve image URLs for products
     const productsWithImages = await Promise.all(
         products.map(async (product: typeof products[number]) => {
-            const imageUrl = product.previewFront ? await getR2Url(product.previewFront) : null;
+            let imageUrl: string | null = null;
+            if (product.previewFront) {
+                try {
+                    imageUrl = await getR2Url(product.previewFront);
+                } catch (error) {
+                    console.warn(`Could not resolve preview image for product ${product.id}:`, error);
+                }
+            }
             return { ...product, imageUrl };
         })
     );
@@ -95,6 +119,19 @@ export default async function AdminProductsPage({
     );
 
     const allProductsCount = await prisma.product.count();
+
+    const firstFiveStoreIds = new Set(
+        productCountsByStore.slice(0, 5).map((s) => s.id),
+    );
+    const overflowSelectValue =
+        storeFilter !== "all" && !firstFiveStoreIds.has(storeFilter)
+            ? storeFilter
+            : "all";
+    const overflowStoreOptions = stores.slice(5).map((store) => ({
+        id: store.id,
+        name: store.name,
+        count: productCountsByStore.find((s) => s.id === store.id)?.count ?? 0,
+    }));
 
     return (
         <>
@@ -117,6 +154,21 @@ export default async function AdminProductsPage({
             </div>
 
             {/* Stats Cards */}
+            {loadError && (
+                <div
+                    style={{
+                        marginBottom: "14px",
+                        background: "#fef2f2",
+                        border: "1px solid #fecaca",
+                        color: "#991b1b",
+                        borderRadius: "12px",
+                        padding: "12px 14px",
+                        fontWeight: 500,
+                    }}
+                >
+                    Certaines données n&apos;ont pas pu être chargées. Vérifiez la connexion puis réessayez.
+                </div>
+            )}
             <div className="admin-products-stats">
                 <div className="admin-products-stat-card">
                     <div className="admin-products-stat-value">{totalCount}</div>
@@ -166,31 +218,11 @@ export default async function AdminProductsPage({
                         </Link>
                     ))}
                     {stores.length > 5 && (
-                        <form action="/admin/products" method="get" style={{ display: 'inline' }}>
-                            <input type="hidden" name="q" value={query} />
-                            <select
-                                name="store"
-                                onChange={(e) => e.target.form?.submit()}
-                                value={storeFilter !== 'all' && !productCountsByStore.slice(0, 5).some(s => s.id === storeFilter) ? storeFilter : 'all'}
-                                style={{
-                                    padding: '10px 16px',
-                                    borderRadius: '10px',
-                                    border: '1px solid #e5e7eb',
-                                    background: 'white',
-                                    fontSize: '14px',
-                                    fontWeight: 500,
-                                    color: '#6b7280',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <option value="all">Autres magasins...</option>
-                                {stores.slice(5).map((store: typeof stores[number]) => (
-                                    <option key={store.id} value={store.id}>
-                                        {store.name} ({productCountsByStore.find(s => s.id === store.id)?.count || 0})
-                                    </option>
-                                ))}
-                            </select>
-                        </form>
+                        <AdminStoreFilterSelect
+                            query={query}
+                            selectValue={overflowSelectValue}
+                            options={overflowStoreOptions}
+                        />
                     )}
                 </div>
             </div>
