@@ -24,7 +24,7 @@ const MOCKUP_CATEGORIES: MockupCategory[] = [
 ];
 
 // MIN_PRICE will be loaded from API
-let MIN_PRICE = 55;
+const MIN_PRICE = 55;
 
 // ─── Top-Level Sub-components ─────────────────────────────────────────────
 // IMPORTANT: These must be defined OUTSIDE ProductDetailsPage.

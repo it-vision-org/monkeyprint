@@ -789,7 +789,6 @@ export default function ProductUploadPage() {
     if (nextValidationError) {
       setNextValidationError(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProduct, selectedColors, selectedQuality, uploadedDesign]);
 
   const toggleMobilePrice = useCallback(() => {

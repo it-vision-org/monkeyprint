@@ -69,7 +69,7 @@ function detectCheckerboardColors(
 
   // K-means-ish: pick two representative colors
   // Start with the first pixel and the one most different from it
-  let c1 = allCornerPixels[0];
+  const c1 = allCornerPixels[0];
   let maxDist = 0;
   let c2 = allCornerPixels[0];
 

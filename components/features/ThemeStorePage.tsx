@@ -307,7 +307,10 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                 section.products && section.products.length > 0 && (
                     <section key={si} className="theme-2-section">
                         <div className="t2-section-header">
-                            <span className="t2-section-code">// {section.title.toUpperCase()}</span>
+                            <span className="t2-section-code">
+                                {'// '}
+                                {section.title.toUpperCase()}
+                            </span>
                             {section.showViewAll && (
                                 <button
                                     className="theme-2-view-all"

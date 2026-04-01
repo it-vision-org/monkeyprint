@@ -522,7 +522,6 @@ const DesignEditor = memo(function DesignEditor({
             evented: false,
             originX: "center",
             originY: "center",
-            // @ts-ignore
             isGuide: true,
           });
 
@@ -2032,7 +2031,7 @@ const DesignEditor = memo(function DesignEditor({
                           const imgElement =
                             img.getElement() as HTMLImageElement;
 
-                          let imageSrc = imgElement.src;
+                          const imageSrc = imgElement.src;
                           let imageDataUrl: string;
 
                           if (imageSrc.startsWith("data:")) {

@@ -34,7 +34,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
     }
 
     // Build search filter
-    let searchFilter: any = {};
+    const searchFilter: any = {};
     if (query) {
         searchFilter.OR = [
             { id: { contains: query, mode: 'insensitive' } },

@@ -4,8 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAlert } from '@/components';
 import Image from 'next/image';
 import * as fabric from 'fabric';
-// @ts-ignore - react-color types
-import { SketchPicker, ColorResult } from 'react-color';
+import { SketchPicker } from 'react-color';
 
 type ProductType = {
     id: string;

@@ -101,8 +101,8 @@ async function generateMockup({
   // --- Step 2: Overlay design ---
   const shirtBounds = await analyzeMask(maskPath);
 
-  let designWidth = Math.round(shirtBounds.width * 0.5);
-  let designHeight = Math.round(shirtBounds.height * 0.45);
+  const designWidth = Math.round(shirtBounds.width * 0.5);
+  const designHeight = Math.round(shirtBounds.height * 0.45);
   const designX = shirtBounds.centerX - Math.round(designWidth / 2);
   const designY = shirtBounds.centerY - Math.round(designHeight / 2);
 

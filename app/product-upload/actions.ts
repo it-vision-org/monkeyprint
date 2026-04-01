@@ -84,7 +84,7 @@ export async function createProduct(formData: FormData) {
     }
 
     let previewFront = null;
-    let previewBack = null;
+    const previewBack = null;
     let savedProductId: string | null = null;
 
     try {

@@ -322,15 +322,15 @@ export default function ProductUploadHeader({
               </>
             ) : (
               <>
-                <a href="/" className={styles["pu-desktop-nav-link"]}>
+                <Link href="/" className={styles["pu-desktop-nav-link"]}>
                   Accueil
-                </a>
-                <a href="/#stores" className={styles["pu-desktop-nav-link"]}>
+                </Link>
+                <Link href="/#stores" className={styles["pu-desktop-nav-link"]}>
                   Shop List
-                </a>
-                <a href="/contact" className={styles["pu-desktop-nav-link"]}>
+                </Link>
+                <Link href="/contact" className={styles["pu-desktop-nav-link"]}>
                   Contactez-nous
-                </a>
+                </Link>
               </>
             )}
           </nav>
@@ -403,9 +403,15 @@ export default function ProductUploadHeader({
                 </>
               ) : (
                 <>
-                  <a href="/">Accueil</a>
-                  <a href="/#stores">Shop List</a>
-                  <a href="/contact">Contactez-nous</a>
+                  <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                    Accueil
+                  </Link>
+                  <Link href="/#stores" onClick={() => setMobileMenuOpen(false)}>
+                    Shop List
+                  </Link>
+                  <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
+                    Contactez-nous
+                  </Link>
                 </>
               )}
             </nav>
