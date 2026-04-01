@@ -151,18 +151,24 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                                     <div className="cart-item-controls-modern">
                                         <div className="cart-item-quantity-modern">
                                             <button
+                                                type="button"
                                                 onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                                 className="cart-quantity-btn-modern"
                                                 disabled={item.quantity <= 1}
+                                                aria-label={`Decrease quantity for ${item.name}`}
+                                                title="Decrease quantity"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                 </svg>
                                             </button>
-                                            <span className="cart-quantity-value-modern">{item.quantity}</span>
+                                            <span className="cart-quantity-value-modern" aria-live="polite">{item.quantity}</span>
                                             <button
+                                                type="button"
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                 className="cart-quantity-btn-modern"
+                                                aria-label={`Increase quantity for ${item.name}`}
+                                                title="Increase quantity"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

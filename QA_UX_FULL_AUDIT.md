@@ -71,7 +71,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
 
 ## P0 (critical)
 
-1) `GET /admin/products` crashes with server-side exception
+1. `GET /admin/products` crashes with server-side exception
 
 - Route shows application error message and digest.
 - Impact: core admin function inaccessible; breaks operational workflows.
@@ -80,7 +80,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - add error boundary with actionable message,
   - add route-level smoke test in CI for all `/admin/*` pages.
 
-2) Seller product flow does not provide reliable post-create product discoverability
+2. Seller product flow does not provide reliable post-create product discoverability
 
 - New seller flow created store (`/shop/speed-flow-studio-910`) but resulted in empty product listing (`/all-products` with only filter/sort controls visible).
 - Impact: seller cannot confidently verify publication success; business funnel breaks.
@@ -91,7 +91,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
 
 ## P1 (high)
 
-1) Navigation often appears non-responsive immediately after click
+1. Navigation often appears non-responsive immediately after click
 
 - Multiple links/buttons showed active/focus state with no immediate route change, then route changed after delay.
 - Seen on public nav and store/product interactions.
@@ -101,7 +101,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - disable duplicate clicks during pending navigation,
   - reduce route transition latency and unnecessary re-renders.
 
-2) CTA semantic mismatch in seller dashboard
+2. CTA semantic mismatch in seller dashboard
 
 - In `/dashboard/product-upload`, clicking `VISITER LE MAGASIN` led to product-upload details route (`/dashboard/product-upload/details`) before eventually landing in store context later.
 - Impact: severe confusion; CTA violates user expectation.
@@ -109,7 +109,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - rename CTA if it is actually “continue product setup”,
   - or make it always open storefront URL directly and move workflow CTA to clearly named button.
 
-3) Onboarding/theme step has unnamed buttons
+3. Onboarding/theme step has unnamed buttons
 
 - Theme step includes multiple interactive buttons without accessible names/labels.
 - Impact: poor accessibility, hard-to-understand selection UX, testing automation fragility.
@@ -117,7 +117,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - assign explicit labels (theme name + preview),
   - add selected state visuals + ARIA labels.
 
-4) Logout path and dashboard “Se déconnecter” interaction inconsistency
+4. Logout path and dashboard “Se déconnecter” interaction inconsistency
 
 - Dashboard side “Se déconnecter” had pointer-events issue in one attempt.
 - ` /logout` route works but uses transient message and redirects later.
@@ -128,7 +128,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
 
 ## P2 (medium)
 
-1) Product/cart behavior ambiguity
+1. Product/cart behavior ambiguity
 
 - On product detail page, action states changed in non-obvious way (`Ajouter au panier`, then `Commander maintenant`, cart count jumped).
 - Impact: hard to predict cart state; increases checkout abandonment risk.
@@ -136,7 +136,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - unify add-to-cart and buy-now semantics with explicit confirmation toast/mini-cart updates,
   - avoid ambiguous “disabled + renamed” state without explanation.
 
-2) Public content quality and polish inconsistency
+2. Public content quality and polish inconsistency
 
 - Product names/prices and text in storefront can appear unpolished or malformed.
 - Impact: perceived quality and trust decline.
@@ -144,7 +144,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - stronger content validation rules for seller input,
   - typography/spacing normalization for product cards and price formatting.
 
-3) Header links appear to react slower than expected
+3. Header links appear to react slower than expected
 
 - Especially on mobile-sized viewport, taps required short wait before route finalization.
 - Impact: “dead tap” perception.
@@ -153,7 +153,7 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
   - ensure no overlay blocks pointer events,
   - add instant visual feedback.
 
-4) Contact form UX could be clearer
+4. Contact form UX could be clearer
 
 - Required fields correctly block submit, but inline error messaging relies mostly on native focus behavior.
 - Recommendation:
@@ -161,9 +161,9 @@ Overall status: **not yet production-ready for smooth UX**, but the foundation i
 
 ## P3 (polish)
 
-1) Duplicate/verbose sections on home and store pages reduce scannability.
-2) Motion feels inconsistent (some transitions delayed without intentional animation language).
-3) Visual hierarchy can be tightened (headline duplication, crowded cards, mixed spacing rhythm).
+1. Duplicate/verbose sections on home and store pages reduce scannability.
+2. Motion feels inconsistent (some transitions delayed without intentional animation language).
+3. Visual hierarchy can be tightened (headline duplication, crowded cards, mixed spacing rhythm).
 
 ---
 
@@ -204,10 +204,10 @@ Observed behavior indicates **perceived slowness/jank risk** in route transition
 
 Recommendations:
 
-1) Add explicit pending UI for route transitions (skeleton/spinner + disabled re-click).
-2) Reduce client-heavy initial payload on dashboard/product editor screens.
-3) Preload likely next routes in key funnels (home -> login/create-shop; store -> product -> checkout).
-4) Add instrumentation:
+1. Add explicit pending UI for route transitions (skeleton/spinner + disabled re-click).
+2. Reduce client-heavy initial payload on dashboard/product editor screens.
+3. Preload likely next routes in key funnels (home -> login/create-shop; store -> product -> checkout).
+4. Add instrumentation:
    - route transition timing,
    - interaction-to-next-paint,
    - checkout step latency.
@@ -227,12 +227,12 @@ Recommendations:
 
 ## What is missing from UX/UI right now
 
-1) Immediate action feedback everywhere (loading/pending/confirmed patterns).
-2) Deterministic completion states in seller flow (“product created and visible at this exact URL”).
-3) Stronger onboarding affordances (named options, helper text, clearer step outcomes).
-4) Unified CTA language and destination logic.
-5) Consistent motion design system (intentional transition timing, easing, and reduced-motion handling).
-6) Better empty-state guidance (especially new store with no products).
+1. Immediate action feedback everywhere (loading/pending/confirmed patterns).
+2. Deterministic completion states in seller flow (“product created and visible at this exact URL”).
+3. Stronger onboarding affordances (named options, helper text, clearer step outcomes).
+4. Unified CTA language and destination logic.
+5. Consistent motion design system (intentional transition timing, easing, and reduced-motion handling).
+6. Better empty-state guidance (especially new store with no products).
 
 ---
 
@@ -274,4 +274,3 @@ Recommendations:
 
 The app is close to usable for internal/beta operations but currently fails “super smooth UX” due to one hard admin crash, inconsistent interaction feedback, and weak seller product-publication clarity.  
 Fixing the P0/P1 set will materially improve trust, conversion flow, and perceived speed.
-

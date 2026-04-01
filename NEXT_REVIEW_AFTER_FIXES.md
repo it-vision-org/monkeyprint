@@ -1,8 +1,8 @@
 # Next Review Checklist (After Fixes)
 
-Date: __________  
-Reviewer: __________  
-Build/Commit: __________
+Date: ****\_\_****  
+Reviewer: ****\_\_****  
+Build/Commit: ****\_\_****
 
 Use this checklist after implementing fixes from `QA_UX_FULL_AUDIT.md`.
 
@@ -18,6 +18,7 @@ Use this checklist after implementing fixes from `QA_UX_FULL_AUDIT.md`.
 ## 2) Route Health Sweep
 
 Public:
+
 - [ ] `/`
 - [ ] `/stores`
 - [ ] `/contact`
@@ -25,6 +26,7 @@ Public:
 - [ ] `/create-shop`
 
 Seller:
+
 - [ ] `/dashboard/apercu`
 - [ ] `/dashboard/produits`
 - [ ] `/dashboard/product-upload`
@@ -32,6 +34,7 @@ Seller:
 - [ ] `/dashboard/compte`
 
 Admin:
+
 - [ ] `/admin`
 - [ ] `/admin/users`
 - [ ] `/admin/stores`
@@ -78,9 +81,11 @@ Admin:
 ## 7) Mobile + Desktop Pass
 
 Desktop (e.g. 1366x768):
+
 - [ ] Key flows complete without layout break.
 
 Mobile (e.g. 390x844):
+
 - [ ] Header/nav remains usable.
 - [ ] Forms remain readable and tappable.
 - [ ] Store/product/checkout flows remain complete.
@@ -94,16 +99,18 @@ Mobile (e.g. 390x844):
 ## 9) Sign-Off Summary
 
 Status:
+
 - [ ] PASS (ready for next stage)
 - [ ] PASS WITH RISKS (minor known issues)
 - [ ] FAIL (blocking issues remain)
 
 Blocking issues found:
-- 1. ______________________________________
-- 2. ______________________________________
-- 3. ______________________________________
+
+- 1. ***
+- 2. ***
+- 3. ***
 
 Recommended next actions:
-- ______________________________________
-- ______________________________________
 
+- ***
+- ***
