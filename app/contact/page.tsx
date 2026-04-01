@@ -124,7 +124,7 @@ export default function ContactPage() {
 
                     <form onSubmit={handleSubmit}>
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{
+                            <label htmlFor="contact-name" style={{
                                 display: 'block',
                                 marginBottom: '8px',
                                 fontSize: '14px',
@@ -134,12 +134,14 @@ export default function ContactPage() {
                                 Nom complet
                             </label>
                             <input
+                                id="contact-name"
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
                                 aria-invalid={!!fieldErrors.name}
+                                aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
@@ -152,11 +154,11 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
-                            {fieldErrors.name && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.name}</p>}
+                            {fieldErrors.name && <p id="contact-name-error" style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.name}</p>}
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{
+                            <label htmlFor="contact-email" style={{
                                 display: 'block',
                                 marginBottom: '8px',
                                 fontSize: '14px',
@@ -166,12 +168,14 @@ export default function ContactPage() {
                                 Email
                             </label>
                             <input
+                                id="contact-email"
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
                                 aria-invalid={!!fieldErrors.email}
+                                aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
@@ -184,11 +188,11 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
-                            {fieldErrors.email && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.email}</p>}
+                            {fieldErrors.email && <p id="contact-email-error" style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.email}</p>}
                         </div>
 
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{
+                            <label htmlFor="contact-subject" style={{
                                 display: 'block',
                                 marginBottom: '8px',
                                 fontSize: '14px',
@@ -198,11 +202,13 @@ export default function ContactPage() {
                                 Sujet
                             </label>
                             <select
+                                id="contact-subject"
                                 name="subject"
                                 value={formData.subject}
                                 onChange={handleChange}
                                 required
                                 aria-invalid={!!fieldErrors.subject}
+                                aria-describedby={fieldErrors.subject ? 'contact-subject-error' : undefined}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
@@ -223,11 +229,11 @@ export default function ContactPage() {
                                 <option value="feedback">Commentaires</option>
                                 <option value="other">Autre</option>
                             </select>
-                            {fieldErrors.subject && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.subject}</p>}
+                            {fieldErrors.subject && <p id="contact-subject-error" style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.subject}</p>}
                         </div>
 
                         <div style={{ marginBottom: '32px' }}>
-                            <label style={{
+                            <label htmlFor="contact-message" style={{
                                 display: 'block',
                                 marginBottom: '8px',
                                 fontSize: '14px',
@@ -237,12 +243,14 @@ export default function ContactPage() {
                                 Message
                             </label>
                             <textarea
+                                id="contact-message"
                                 name="message"
                                 value={formData.message}
                                 onChange={handleChange}
                                 required
                                 rows={6}
                                 aria-invalid={!!fieldErrors.message}
+                                aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
@@ -257,7 +265,7 @@ export default function ContactPage() {
                                 onFocus={(e) => e.target.style.borderColor = '#000'}
                                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                             />
-                            {fieldErrors.message && <p style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.message}</p>}
+                            {fieldErrors.message && <p id="contact-message-error" style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '13px' }}>{fieldErrors.message}</p>}
                         </div>
 
                         <button

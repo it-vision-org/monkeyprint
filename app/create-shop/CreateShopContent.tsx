@@ -369,6 +369,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         }}
                         className={`${styles['cs-pill-input']} ${emailError ? styles.inputError : ''}`}
                         autoComplete="email"
+                        aria-label="Adresse e-mail"
                     />
                     {emailError && <p className={styles.fieldError}>{emailError}</p>}
 
@@ -385,6 +386,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         }}
                         className={`${styles['cs-pill-input']} ${passwordError ? styles.inputError : ''}`}
                         autoComplete="new-password"
+                        aria-label="Mot de passe"
                     />
                     {passwordError && <p className={styles.fieldError}>{passwordError}</p>}
                     <p className={styles.passwordHint}>Le mot de passe doit contenir au moins 6 caractères</p>
@@ -516,6 +518,7 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                     onChange={handleShopNameChange}
                     className={`${styles.storeNameInput} ${shopNameError ? styles.inputError : ''}`}
                     placeholder=""
+                    aria-label="Nom de la boutique"
                 />
                 {shopNameError && <p className={styles.fieldError}>{shopNameError}</p>}
             </div>
@@ -550,12 +553,14 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                                 }
                             }}
                             className={styles.searchInput}
+                            aria-label="Ajouter une catégorie"
                         />
                         <button
                             type="button"
                             onClick={handleAddCategory}
                             className={styles.addCategoryBtn}
                             disabled={!categorySearch.trim()}
+                            aria-label="Ajouter la catégorie"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19" />

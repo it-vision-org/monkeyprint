@@ -70,6 +70,7 @@ export default function DashboardLayout({
     const [commandesDropdownOpen, setCommandesDropdownOpen] = useState(false);
     const [isVisitingStore, setIsVisitingStore] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [visitStoreError, setVisitStoreError] = useState("");
     const storeInfo = initialStoreInfo;
     const nonConfirmedCount = commandesStats?.nonConfirmed ?? 0;
     const confirmedCount = commandesStats?.confirmed ?? 0;
@@ -83,17 +84,19 @@ export default function DashboardLayout({
 
     const handleVisitStore = async () => {
         if (isVisitingStore) return;
+        setVisitStoreError("");
         setIsVisitingStore(true);
         try {
             const response = await fetch('/api/store-info');
             if (!response.ok) {
-                console.error('Failed to fetch store info');
+                setVisitStoreError("Impossible d'ouvrir la boutique pour le moment.");
                 return;
             }
             const data = await response.json();
             router.push(`/shop/${data.slug}`);
         } catch (error) {
             console.error('Error fetching store info:', error);
+            setVisitStoreError("Impossible d'ouvrir la boutique pour le moment.");
         } finally {
             setIsVisitingStore(false);
         }
@@ -477,7 +480,7 @@ export default function DashboardLayout({
                                 Compte
                             </LoadingLink>
 
-                            <Link href="/dashboard/parametres" className={`${styles['dash-mobile-nav-item']} ${styles.bordered}`}>
+                            <Link href="/dashboard/compte" className={`${styles['dash-mobile-nav-item']} ${styles.bordered}`}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                     <path
@@ -521,6 +524,12 @@ export default function DashboardLayout({
                     </div>
                 </div>
             </>
+
+            {visitStoreError && (
+                <p role="status" aria-live="polite" style={{ color: "#b91c1c", margin: "8px 18px 0", fontSize: "13px" }}>
+                    {visitStoreError}
+                </p>
+            )}
             
 
             <main className={`${styles['dash-main']} dash-main`}>
