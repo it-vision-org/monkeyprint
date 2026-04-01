@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Monkey Print SUPPORT" [ref=e6] [cursor=pointer]:
+          - /url: /admin
+          - generic [ref=e8]:
+            - generic [ref=e9]: Monkey Print
+            - generic [ref=e10]: SUPPORT
+        - button "Admin Account" [ref=e12] [cursor=pointer]:
+          - img [ref=e13]
+        - button "Menu" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - heading "Support Tickets" [level=1] [ref=e21]
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]: "1"
+            - generic [ref=e25]: Total Tickets
+          - generic [ref=e26]:
+            - generic [ref=e27]: "0"
+            - generic [ref=e28]: Ouverts
+          - generic [ref=e29]:
+            - generic [ref=e30]: "0"
+            - generic [ref=e31]: En cours
+          - generic [ref=e32]:
+            - generic [ref=e33]: "0"
+            - generic [ref=e34]: Résolus
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - img [ref=e37]
+            - textbox "Rechercher par sujet ou email..." [ref=e40]
+          - generic [ref=e41]:
+            - link "Tous (1)" [ref=e42] [cursor=pointer]:
+              - /url: /admin/support?status=all&priority=all&q=
+            - link "Ouverts (0)" [ref=e43] [cursor=pointer]:
+              - /url: /admin/support?status=open&priority=all&q=
+            - link "En cours (0)" [ref=e44] [cursor=pointer]:
+              - /url: /admin/support?status=in_progress&priority=all&q=
+            - link "Résolus (0)" [ref=e45] [cursor=pointer]:
+              - /url: /admin/support?status=resolved&priority=all&q=
+            - link "Fermés (1)" [ref=e46] [cursor=pointer]:
+              - /url: /admin/support?status=closed&priority=all&q=
+        - table [ref=e48]:
+          - rowgroup [ref=e49]:
+            - row "ID Sujet Utilisateur Priorité Statut Messages Dernière mise à jour Actions" [ref=e50]:
+              - columnheader "ID" [ref=e51]
+              - columnheader "Sujet" [ref=e52]
+              - columnheader "Utilisateur" [ref=e53]
+              - columnheader "Priorité" [ref=e54]
+              - columnheader "Statut" [ref=e55]
+              - columnheader "Messages" [ref=e56]
+              - columnheader "Dernière mise à jour" [ref=e57]
+              - columnheader "Actions" [ref=e58]
+          - rowgroup [ref=e59]:
+            - row "#8fca2def No dra chn,o pi.oussama@gmail.com Normale 🔒 Fermé 6 01/01/2026 18:34 Voir" [ref=e60]:
+              - cell "#8fca2def" [ref=e61]
+              - cell "No dra chn,o" [ref=e62]:
+                - link "No dra chn,o" [ref=e63] [cursor=pointer]:
+                  - /url: /admin/support/8fca2def-707a-444e-bbb8-87a0afec3a36
+              - cell "pi.oussama@gmail.com" [ref=e64]
+              - cell "Normale" [ref=e65]:
+                - button "Normale" [ref=e66] [cursor=pointer]
+              - cell "🔒 Fermé" [ref=e67]:
+                - button "🔒 Fermé" [ref=e68] [cursor=pointer]:
+                  - generic [ref=e69]: 🔒
+                  - generic [ref=e70]: Fermé
+              - cell "6" [ref=e71]
+              - cell "01/01/2026 18:34" [ref=e72]
+              - cell "Voir" [ref=e73]:
+                - link "Voir" [ref=e74] [cursor=pointer]:
+                  - /url: /admin/support/8fca2def-707a-444e-bbb8-87a0afec3a36
+  - alert [ref=e75]

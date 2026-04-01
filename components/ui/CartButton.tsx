@@ -31,7 +31,7 @@ export default function CartButton({
         <button
             className={className}
             onClick={handleCartClick}
-            aria-label={`Cart with ${count} items`}
+            aria-label={`Panier : ${count} article${count !== 1 ? 's' : ''}`}
             disabled={isNavigating}
             style={{ opacity: isNavigating ? 0.8 : 1, cursor: isNavigating ? "not-allowed" : "pointer" }}
         >

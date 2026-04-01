@@ -1,0 +1,100 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img "My main store" [ref=e6]
+      - generic [ref=e9]:
+        - img "Store Logo" [ref=e10]
+        - button "Cart with 0 items" [ref=e12] [cursor=pointer]:
+          - img [ref=e13]
+      - generic [ref=e15]:
+        - generic [ref=e16]: ✦ New Collection · 2025
+        - heading "My main store" [level=1] [ref=e17]
+        - paragraph [ref=e18]: Ya7 bainiii free
+        - button "Discover the collection" [ref=e19] [cursor=pointer]
+    - generic [ref=e20]:
+      - heading "Browse by Category" [level=2] [ref=e22]
+      - generic [ref=e23]:
+        - button "Woman Woman Explore →" [ref=e24] [cursor=pointer]:
+          - img "Woman" [ref=e26]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Woman
+            - generic [ref=e30]: Explore →
+        - button "Man Man Explore →" [ref=e31] [cursor=pointer]:
+          - img "Man" [ref=e33]
+          - generic [ref=e35]:
+            - generic [ref=e36]: Man
+            - generic [ref=e37]: Explore →
+        - button "Kids Kids Explore →" [ref=e38] [cursor=pointer]:
+          - img "Kids" [ref=e40]
+          - generic [ref=e42]:
+            - generic [ref=e43]: Kids
+            - generic [ref=e44]: Explore →
+    - generic [ref=e45]:
+      - heading "Best Seller" [level=2] [ref=e48]
+      - generic [ref=e49]:
+        - link "My wprdo My wprdo 55dt (0)" [ref=e50] [cursor=pointer]:
+          - /url: /shop/samy/product/4d5945fc-135e-4daa-9c9a-e38387c0d80f
+          - generic [ref=e52]:
+            - img "My wprdo" [ref=e54]
+            - generic [ref=e55]:
+              - generic [ref=e56]:
+                - heading "My wprdo" [level=3] [ref=e57]
+                - paragraph [ref=e58]: 55dt
+              - generic [ref=e59]:
+                - img [ref=e60]
+                - img [ref=e62]
+                - img [ref=e64]
+                - img [ref=e66]
+                - img [ref=e68]
+                - generic [ref=e70]: (0)
+        - link "efgaaaaaaa efgaaaaaaa 3333333dt (0)" [ref=e71] [cursor=pointer]:
+          - /url: /shop/samy/product/3f88205d-aa62-4b9e-a062-cb8ff20b37bc
+          - generic [ref=e73]:
+            - img "efgaaaaaaa" [ref=e75]
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - heading "efgaaaaaaa" [level=3] [ref=e78]
+                - paragraph [ref=e79]: 3333333dt
+              - generic [ref=e80]:
+                - img [ref=e81]
+                - img [ref=e83]
+                - img [ref=e85]
+                - img [ref=e87]
+                - img [ref=e89]
+                - generic [ref=e91]: (0)
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - heading "Products" [level=2] [ref=e95]
+        - button "View All Products" [ref=e96] [cursor=pointer]
+      - generic [ref=e97]:
+        - link "My wprdo My wprdo 55dt (0)" [ref=e98] [cursor=pointer]:
+          - /url: /shop/samy/product/4d5945fc-135e-4daa-9c9a-e38387c0d80f
+          - generic [ref=e100]:
+            - img "My wprdo" [ref=e102]
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - heading "My wprdo" [level=3] [ref=e105]
+                - paragraph [ref=e106]: 55dt
+              - generic [ref=e107]:
+                - img [ref=e108]
+                - img [ref=e110]
+                - img [ref=e112]
+                - img [ref=e114]
+                - img [ref=e116]
+                - generic [ref=e118]: (0)
+        - link "efgaaaaaaa efgaaaaaaa 3333333dt (0)" [ref=e119] [cursor=pointer]:
+          - /url: /shop/samy/product/3f88205d-aa62-4b9e-a062-cb8ff20b37bc
+          - generic [ref=e121]:
+            - img "efgaaaaaaa" [ref=e123]
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - heading "efgaaaaaaa" [level=3] [ref=e126]
+                - paragraph [ref=e127]: 3333333dt
+              - generic [ref=e128]:
+                - img [ref=e129]
+                - img [ref=e131]
+                - img [ref=e133]
+                - img [ref=e135]
+                - img [ref=e137]
+                - generic [ref=e139]: (0)
+  - alert [ref=e140]

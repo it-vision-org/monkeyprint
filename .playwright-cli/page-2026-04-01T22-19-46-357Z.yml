@@ -1,0 +1,40 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link "Monkey Print" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - img "Monkey Print" [ref=e9]
+        - button "Open menu" [ref=e11] [cursor=pointer]
+    - main [ref=e15]:
+      - generic [ref=e87]:
+        - heading "Créer un compte" [level=2] [ref=e88]
+        - generic [ref=e89]:
+          - button "Go to step 1" [ref=e90] [cursor=pointer]
+          - button "Go to step 2" [ref=e91] [cursor=pointer]
+          - button "Go to step 3" [ref=e92] [cursor=pointer]
+        - generic [ref=e93]:
+          - img "Profile" [ref=e95]
+          - generic [ref=e96]: QA Test Shop Mobile
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - heading "Entrez votre adresse e-mail Ou numéro de téléphone" [level=3] [ref=e100]:
+                - text: Entrez votre adresse e-mail
+                - text: Ou numéro de téléphone
+              - generic [ref=e101]: Doit être rempli*
+            - textbox "Adresse e-mail" [ref=e102]
+            - generic [ref=e103]:
+              - heading "Créer un mot de passe" [level=3] [ref=e104]
+              - generic [ref=e105]: Doit être rempli*
+            - textbox "Mot de passe" [ref=e106]
+            - paragraph [ref=e107]: Le mot de passe doit contenir au moins 6 caractères
+          - generic [ref=e108]: Ou
+          - button "Sign in with Google" [ref=e109] [cursor=pointer]:
+            - img [ref=e110]
+            - text: Sign in with Google
+          - generic [ref=e115]:
+            - button "RETOUR" [ref=e116] [cursor=pointer]
+            - button "CRÉER LA BOUTIQUE" [ref=e117] [cursor=pointer]:
+              - generic [ref=e119]: CRÉER LA BOUTIQUE
+  - alert [ref=e59]

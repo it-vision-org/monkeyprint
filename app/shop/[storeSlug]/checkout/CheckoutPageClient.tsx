@@ -145,10 +145,10 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
                             <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <h1>Your cart is empty</h1>
-                        <p>Start shopping to add items to your cart</p>
+                        <h1>Votre panier est vide</h1>
+                        <p>Parcourez la boutique pour ajouter des articles</p>
                         <Link href={theme.baseRoute} className="checkout-empty-btn-modern">
-                            Back to Store
+                            Retour à la boutique
                         </Link>
                     </div>
                 </div>
@@ -174,20 +174,21 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <span>Back</span>
+                        <span>Retour</span>
                     </LoadingLink>
-                    <h1 className="checkout-title-modern">Checkout</h1>
+                    <h1 className="checkout-title-modern">Paiement</h1>
                     <div style={{ width: '60px' }}></div>
                 </div>
 
                 <div className="checkout-content-modern">
                     {/* Form Section */}
                     <div className="checkout-form-section-modern">
-                        <h2 className="checkout-section-title-modern">Shipping Information</h2>
+                        <h2 className="checkout-section-title-modern">Informations de livraison</h2>
                         <form onSubmit={handleSubmit} id="checkout-form" className="checkout-form-modern">
                             <div className="checkout-form-group-modern">
-                                <label className="checkout-label-modern">Full Name</label>
+                                <label htmlFor="checkout-name" className="checkout-label-modern">Nom complet</label>
                                 <input
+                                    id="checkout-name"
                                     name="name"
                                     required
                                     className="checkout-input-modern"
@@ -196,8 +197,9 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                             </div>
 
                             <div className="checkout-form-group-modern">
-                                <label className="checkout-label-modern">Phone Number</label>
+                                <label htmlFor="checkout-phone" className="checkout-label-modern">Numéro de téléphone</label>
                                 <input
+                                    id="checkout-phone"
                                     name="phoneNumber"
                                     type="tel"
                                     required
@@ -207,8 +209,9 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                             </div>
 
                             <div className="checkout-form-group-modern">
-                                <label className="checkout-label-modern">Address</label>
+                                <label htmlFor="checkout-address" className="checkout-label-modern">Adresse</label>
                                 <input
+                                    id="checkout-address"
                                     name="address"
                                     required
                                     className="checkout-input-modern"
@@ -217,8 +220,9 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                             </div>
 
                             <div className="checkout-form-group-modern">
-                                <label className="checkout-label-modern">City</label>
+                                <label htmlFor="checkout-city" className="checkout-label-modern">Ville</label>
                                 <select
+                                    id="checkout-city"
                                     name="city"
                                     required
                                     className="checkout-input-modern"
@@ -233,7 +237,7 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
 
                     {/* Summary Section */}
                     <div className="checkout-summary-section-modern">
-                        <h2 className="checkout-section-title-modern">Order Summary</h2>
+                        <h2 className="checkout-section-title-modern">Récapitulatif</h2>
                         <div className="checkout-items-modern">
                             {items.map(item => (
                                 <div key={item.id} className="checkout-item-modern">
@@ -271,7 +275,7 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                                         type="button"
                                         onClick={() => removeFromCart(item.id)}
                                         className="checkout-item-remove-modern"
-                                        aria-label="Remove item"
+                                        aria-label="Supprimer l'article"
                                     >
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                                             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -283,11 +287,11 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
 
                         <div className="checkout-totals-modern">
                             <div className="checkout-total-row-modern">
-                                <span>Subtotal</span>
+                                <span>Sous-total</span>
                                 <span>{cartTotal} DT</span>
                             </div>
                             <div className="checkout-total-row-modern">
-                                <span>Shipping</span>
+                                <span>Livraison</span>
                                 <span>{shippingCost} DT</span>
                             </div>
                             <div className="checkout-total-row-modern checkout-total-final-modern">
@@ -305,7 +309,7 @@ export default function CheckoutPageClient({ storeSlug, theme, customization }: 
                             className="checkout-submit-btn-modern"
                             style={{ width: '100%' }}
                         >
-                            Place Order
+                            Passer la commande
                         </LoadingButton>
                     </div>
                 </div>

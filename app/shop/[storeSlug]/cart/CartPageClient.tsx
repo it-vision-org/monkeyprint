@@ -81,10 +81,10 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
                             <path d="M20 7H4M20 7L18 5M20 7L18 9M4 7L6 5M4 7L6 9M6 5L5 3H19L18 5M6 9L7 21H17L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <h1>Your cart is empty</h1>
-                        <p>Start shopping to add items to your cart</p>
+                        <h1>Votre panier est vide</h1>
+                        <p>Parcourez la boutique pour ajouter des articles</p>
                         <Link href={theme.baseRoute} className="cart-empty-btn-modern">
-                            Continue Shopping
+                            Continuer les achats
                         </Link>
                     </div>
                 </div>
@@ -110,9 +110,9 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <span>Back</span>
+                        <span>Retour</span>
                     </LoadingLink>
-                    <h1 className="cart-title-modern">Shopping Cart</h1>
+                    <h1 className="cart-title-modern">Panier</h1>
                     <div style={{ width: '60px' }}></div>
                 </div>
 
@@ -155,8 +155,8 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                                                 onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                                 className="cart-quantity-btn-modern"
                                                 disabled={item.quantity <= 1}
-                                                aria-label={`Decrease quantity for ${item.name}`}
-                                                title="Decrease quantity"
+                                                aria-label={`Diminuer la quantité de ${item.name}`}
+                                                title="Diminuer la quantité"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -167,8 +167,8 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                                                 type="button"
                                                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                 className="cart-quantity-btn-modern"
-                                                aria-label={`Increase quantity for ${item.name}`}
-                                                title="Increase quantity"
+                                                aria-label={`Augmenter la quantité de ${item.name}`}
+                                                title="Augmenter la quantité"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -178,12 +178,12 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                                         <button
                                             onClick={() => removeFromCart(item.id)}
                                             className="cart-item-remove-modern"
-                                            aria-label="Remove item"
+                                            aria-label="Supprimer l'article"
                                         >
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
-                                            Remove
+                                            Supprimer
                                         </button>
                                     </div>
                                 </div>
@@ -196,14 +196,14 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
 
                     {/* Order Summary */}
                     <div className="cart-summary-modern">
-                        <h2 className="cart-summary-title-modern">Order Summary</h2>
+                        <h2 className="cart-summary-title-modern">Récapitulatif</h2>
                         <div className="cart-summary-rows-modern">
                             <div className="cart-summary-row-modern">
-                                <span>Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})</span>
+                                <span>Sous-total ({items.length} {items.length === 1 ? 'article' : 'articles'})</span>
                                 <span>{subtotal.toFixed(2)} DT</span>
                             </div>
                             <div className="cart-summary-row-modern">
-                                <span>Shipping</span>
+                                <span>Livraison</span>
                                 <span>{shippingCost} DT</span>
                             </div>
                             <div className="cart-summary-row-modern cart-summary-total-modern">
@@ -218,7 +218,7 @@ export default function CartPageClient({ storeSlug, theme, customization }: { st
                             size="lg"
                             style={{ width: '100%' }}
                         >
-                            Proceed to Checkout
+                            Passer à la caisse
                         </LoadingButton>
                     </div>
                 </div>

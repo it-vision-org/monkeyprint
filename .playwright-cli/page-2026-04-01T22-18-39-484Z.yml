@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Monkey Print" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Monkey Print" [ref=e8]
+        - button "Open menu" [ref=e10] [cursor=pointer]
+    - main [ref=e15]:
+      - generic [ref=e17]:
+        - heading "Se connecter" [level=2] [ref=e18]
+        - generic [ref=e19]:
+          - img "Monkey Print" [ref=e21]
+          - generic [ref=e22]: Monkey Print
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - heading "Adresse e-mail" [level=3] [ref=e26]
+              - generic [ref=e27]: Doit être rempli*
+            - textbox [ref=e28]
+            - generic [ref=e29]:
+              - heading "Mot de passe" [level=3] [ref=e30]
+              - generic [ref=e31]: Doit être rempli*
+            - textbox [ref=e32]
+          - button "SE CONNECTER" [ref=e33] [cursor=pointer]
+        - link "Pas encore de compte ? Créer une boutique" [ref=e35] [cursor=pointer]:
+          - /url: /create-shop
+          - generic [ref=e36]: Pas encore de compte ? Créer une boutique
+  - alert [ref=e37]

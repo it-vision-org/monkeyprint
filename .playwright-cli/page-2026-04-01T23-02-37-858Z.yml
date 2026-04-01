@@ -1,0 +1,40 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Monkey Print" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "Monkey Print" [ref=e8]
+      - button "Open menu" [ref=e10] [cursor=pointer]
+  - generic [ref=e15]:
+    - heading "Contactez-nous" [level=1] [ref=e16]
+    - paragraph [ref=e17]: Avez-vous une question ou besoin d'aide ? N'hésitez pas à nous contacter. Nous sommes là pour vous aider.
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Nom complet
+        - textbox "Nom complet" [ref=e21]
+      - generic [ref=e22]:
+        - generic [ref=e23]: Email
+        - textbox "Email" [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]: Sujet
+        - combobox "Sujet" [ref=e27]:
+          - option "Sélectionnez un sujet" [selected]
+          - option "Question générale"
+          - option "Support technique"
+          - option "Partenariat"
+          - option "Commentaires"
+          - option "Autre"
+      - generic [ref=e28]:
+        - generic [ref=e29]: Message
+        - textbox "Message" [ref=e30]
+      - button "Envoyer le message" [ref=e31] [cursor=pointer]
+    - generic [ref=e32]:
+      - heading "Autres moyens de nous contacter" [level=2] [ref=e33]
+      - generic [ref=e34]:
+        - paragraph [ref=e35]:
+          - strong [ref=e36]: "Email:"
+          - text: contact@monkeyprint.com
+        - paragraph [ref=e37]:
+          - strong [ref=e38]: "Support:"
+          - text: support@monkeyprint.com
+        - paragraph [ref=e39]: Nous répondons généralement dans les 24 heures.

@@ -1,0 +1,4 @@
+[      72ms] [ERROR] J: Failed to fetch. Read more at https://errors.authjs.dev#autherror
+    at q (http://localhost:3000/_next/static/chunks/6199-ff92b06599789d0b.js:1:2685)
+    at async er (http://localhost:3000/_next/static/chunks/6199-ff92b06599789d0b.js:1:4335)
+    at async Y._getSession (http://localhost:3000/_next/static/chunks/6199-ff92b06599789d0b.js:1:6919) @ http://localhost:3000/_next/static/chunks/6199-ff92b06599789d0b.js:0

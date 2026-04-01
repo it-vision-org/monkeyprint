@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Monkey Print ADMIN" [ref=e6] [cursor=pointer]:
+          - /url: /admin
+          - generic [ref=e8]:
+            - generic [ref=e9]: Monkey Print
+            - generic [ref=e10]: ADMIN
+        - button "Admin Account" [ref=e12] [cursor=pointer]:
+          - img [ref=e13]
+        - button "Menu" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - heading "Tableau de bord Admin" [level=1] [ref=e21]
+        - generic [ref=e22]:
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - generic [ref=e26]: Total des Magasins
+              - generic [ref=e27]: "12"
+              - generic [ref=e28]:
+                - img [ref=e29]
+                - text: Actifs
+            - img [ref=e32]
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Total des Utilisateurs
+              - generic [ref=e39]: "18"
+              - generic [ref=e40]:
+                - img [ref=e41]
+                - text: 17 Vendeurs
+            - img [ref=e44]
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]: Commandes Totales
+              - generic [ref=e51]: "8"
+              - generic [ref=e52]:
+                - img [ref=e53]
+                - text: Global
+            - img [ref=e56]
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Revenus Totaux
+              - generic [ref=e63]: "110.00"
+              - generic [ref=e64]: DT
+              - generic [ref=e65]:
+                - img [ref=e66]
+                - text: Encaissé
+            - img [ref=e69]
+        - generic [ref=e71]:
+          - heading "Activité récente" [level=2] [ref=e72]
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - heading "Nouveaux Magasins" [level=3] [ref=e76]
+                - link "Voir tout →" [ref=e77] [cursor=pointer]:
+                  - /url: /admin/stores
+              - generic [ref=e78]:
+                - generic [ref=e79]:
+                  - generic [ref=e80]:
+                    - generic [ref=e81]: QA Test Shop Mobile
+                    - generic [ref=e82]: qa.mobile.test@example.com
+                    - generic [ref=e83]: 01/04/2026
+                  - generic [ref=e84]: Actif
+                - generic [ref=e85]:
+                  - generic [ref=e86]:
+                    - generic [ref=e87]: Speed Flow Studio
+                    - generic [ref=e88]: qa.seller.20260401.1@example.com
+                    - generic [ref=e89]: 01/04/2026
+                  - generic [ref=e90]: Actif
+                - generic [ref=e91]:
+                  - generic [ref=e92]:
+                    - generic [ref=e93]: Ora
+                    - generic [ref=e94]: sayemsaroura@gmail.com
+                    - generic [ref=e95]: 06/03/2026
+                  - generic [ref=e96]: Actif
+                - generic [ref=e97]:
+                  - generic [ref=e98]:
+                    - generic [ref=e99]: faef
+                    - generic [ref=e100]: aegae@aer.fr
+                    - generic [ref=e101]: 27/02/2026
+                  - generic [ref=e102]: Actif
+                - generic [ref=e103]:
+                  - generic [ref=e104]:
+                    - generic [ref=e105]: mahdi chaari
+                    - generic [ref=e106]: jbb@gmail.com
+                    - generic [ref=e107]: 27/02/2026
+                  - generic [ref=e108]: Actif
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - heading "Commandes Récentes" [level=3] [ref=e111]
+                - link "Voir tout →" [ref=e112] [cursor=pointer]:
+                  - /url: /admin/orders
+              - generic [ref=e113]:
+                - generic [ref=e114]:
+                  - generic [ref=e115]:
+                    - generic [ref=e116]:
+                      - generic [ref=e117]: 42871a5b
+                      - generic [ref=e118]: Suppression demandée
+                    - generic [ref=e119]: salamik
+                    - generic [ref=e120]: 19/03/2026
+                  - generic [ref=e121]: 55 DT
+                - generic [ref=e122]:
+                  - generic [ref=e123]:
+                    - generic [ref=e125]: 58feac96
+                    - generic [ref=e126]: salamik
+                    - generic [ref=e127]: 22/02/2026
+                  - generic [ref=e128]: 9999999 DT
+                - generic [ref=e129]:
+                  - generic [ref=e130]:
+                    - generic [ref=e132]: c6174670
+                    - generic [ref=e133]: salamik
+                    - generic [ref=e134]: 04/01/2026
+                  - generic [ref=e135]: 3333333 DT
+                - generic [ref=e136]:
+                  - generic [ref=e137]:
+                    - generic [ref=e139]: 63cce655
+                    - generic [ref=e140]: salamik
+                    - generic [ref=e141]: 04/01/2026
+                  - generic [ref=e142]: 3333333 DT
+                - generic [ref=e143]:
+                  - generic [ref=e144]:
+                    - generic [ref=e146]: f634a406
+                    - generic [ref=e147]: salamik
+                    - generic [ref=e148]: 04/01/2026
+                  - generic [ref=e149]: 6666666 DT
+  - alert [ref=e150]

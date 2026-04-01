@@ -29,7 +29,7 @@ export default function StoreHeader({
             <div className={containerClassName}>
                 <Image
                     src="/logo.png"
-                    alt="Store Logo"
+                    alt="Monkey Print"
                     width={110}
                     height={36}
                     style={{

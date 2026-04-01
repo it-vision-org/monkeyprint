@@ -89,10 +89,11 @@ function LoginContent() {
                         <form onSubmit={handleSubmit}>
                             <div className={styles['cs-card']}>
                                 <div className={styles['cs-card-heading']}>
-                                    <h3>Adresse e-mail</h3>
-                                    <span>Doit être rempli<span>*</span></span>
+                                    <label htmlFor="login-email"><h3>Adresse e-mail</h3></label>
+                                    <span>Doit être rempli<span aria-hidden="true">*</span></span>
                                 </div>
                                 <input
+                                    id="login-email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -100,13 +101,16 @@ function LoginContent() {
                                     required
                                     autoComplete="email"
                                     disabled={isLoading}
+                                    aria-required="true"
+                                    aria-describedby={error ? "login-error" : undefined}
                                 />
 
                                 <div className={styles['cs-card-heading']} style={{ marginTop: '16px' }}>
-                                    <h3>Mot de passe</h3>
-                                    <span>Doit être rempli<span>*</span></span>
+                                    <label htmlFor="login-password"><h3>Mot de passe</h3></label>
+                                    <span>Doit être rempli<span aria-hidden="true">*</span></span>
                                 </div>
                                 <input
+                                    id="login-password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -114,8 +118,10 @@ function LoginContent() {
                                     required
                                     autoComplete="current-password"
                                     disabled={isLoading}
+                                    aria-required="true"
+                                    aria-describedby={error ? "login-error" : undefined}
                                 />
-                                {error && <p style={{ color: '#ff4444', marginTop: '16px', fontSize: '14px' }}>{error}</p>}
+                                {error && <p id="login-error" role="alert" style={{ color: '#ff4444', marginTop: '16px', fontSize: '14px' }}>{error}</p>}
                             </div>
 
                             <button

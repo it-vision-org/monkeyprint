@@ -19,7 +19,16 @@
       "Bash(node -e \"const {GoogleGenAI} = require\\(''@google/genai''\\); console.log\\(''OK'', typeof GoogleGenAI\\);\")",
       "Bash(node -e \"const g = require\\(''@google/genai''\\); console.log\\(Object.keys\\(g\\).join\\('', ''\\)\\);\")",
       "Bash(file /c/Users/Dainor/Downloads/Mo/monkeyprint/mockupproject/templates/male_1/*)",
-      "Bash(du -h /c/Users/Dainor/Downloads/Mo/monkeyprint/mockupproject/templates/male_1/*)"
+      "Bash(du -h /c/Users/Dainor/Downloads/Mo/monkeyprint/mockupproject/templates/male_1/*)",
+      "Skill(playwright-cli)",
+      "Skill(playwright-cli:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(xargs ls:*)",
+      "Bash(ls -la playwright.config.*)",
+      "Bash(find /c/Users/Dainor/Downloads/Mo/monkeyprint -name \"*.tsx\" -exec grep -l \"Paramètres\" {} \\\\;)",
+      "Bash(ls -la /c/Users/Dainor/Downloads/Mo/monkeyprint/.playwright*)",
+      "Bash(npm run:*)",
+      "Bash(grep -l \"password\\\\|credentials\\\\|test.*user\\\\|seed\" prisma/*.ts prisma/*.js)"
     ]
   }
 }

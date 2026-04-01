@@ -81,6 +81,7 @@ export default async function StoresPage() {
                             <Link
                                 key={store.id}
                                 href={`/shop/${store.slug}`}
+                                aria-label={`Voir la boutique ${store.name}`}
                                 style={{
                                     background: 'white',
                                     borderRadius: '20px',
@@ -145,7 +146,7 @@ export default async function StoresPage() {
                                         color: '#6b7280',
                                         marginBottom: '16px'
                                     }}>
-                                        Par {store.owner.name || store.owner.email}
+                                        Par {store.owner.name || 'Vendeur'}
                                     </p>
 
                                     {/* Stats */}
@@ -180,7 +181,7 @@ export default async function StoresPage() {
                                             fontWeight: 600
                                         }}>
                                             Visiter la boutique
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                                 <path d="M5 12H19M19 12L12 5M19 12L12 19" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         </div>

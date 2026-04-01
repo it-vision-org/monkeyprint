@@ -1,0 +1,77 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e7]: QA Test Shop Mobile
+        - button "Menu" [ref=e8] [cursor=pointer]:
+          - img [ref=e9]
+    - generic:
+      - generic:
+        - button "VISITER LE MAGASIN"
+        - button "Fermer":
+          - img
+      - navigation:
+        - link "Aperçu":
+          - /url: /dashboard/apercu
+          - generic:
+            - img
+            - text: Aperçu
+        - link "Produits":
+          - /url: /dashboard/produits
+          - generic:
+            - img
+            - text: Produits
+        - generic:
+          - button "Commandes 0":
+            - generic:
+              - img
+              - text: Commandes
+              - generic: "0"
+            - img
+        - link "Portefeuille":
+          - /url: /dashboard/portefeuille
+          - generic:
+            - img
+            - text: Portefeuille
+        - link "Support":
+          - /url: /dashboard/support
+          - generic:
+            - img
+            - text: Support
+        - link "Thème":
+          - /url: /dashboard/theme
+          - generic:
+            - img
+            - text: Thème
+        - link "Compte":
+          - /url: /dashboard/compte
+          - generic:
+            - img
+            - text: Compte
+        - link "Paramètres":
+          - /url: /dashboard/compte
+          - img
+          - text: Paramètres
+        - button "Se déconnecter":
+          - img
+          - text: Se déconnecter
+      - generic:
+        - img "Monkey Print"
+    - main [ref=e11]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - link "Non confirmé" [ref=e17] [cursor=pointer]:
+            - /url: /dashboard/commandes?status=non-confirme
+            - text: Non confirmé
+          - link "Confirmé" [ref=e19] [cursor=pointer]:
+            - /url: /dashboard/commandes?status=confirme
+            - text: Confirmé
+          - link "Retours" [ref=e21] [cursor=pointer]:
+            - /url: /dashboard/commandes?status=retours
+            - text: Retours
+        - heading "Liste de commandes non confirmé" [level=1] [ref=e24]
+        - generic [ref=e26]:
+          - img
+          - textbox "Rechercher par ID, nom, téléphone ou adresse..." [ref=e27]
+        - generic [ref=e29]: Aucune commande trouvée.
+  - alert [ref=e30]

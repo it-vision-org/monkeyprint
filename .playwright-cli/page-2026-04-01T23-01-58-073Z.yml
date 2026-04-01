@@ -1,0 +1,203 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Monkey Print" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "Monkey Print" [ref=e8]
+      - button "Open menu" [ref=e10] [cursor=pointer]
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Découvrez les boutiques" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Explorez toutes nos boutiques et découvrez des produits uniques créés par nos vendeurs
+    - generic [ref=e18]:
+      - link "Voir la boutique QA Test Shop Mobile" [ref=e19] [cursor=pointer]:
+        - /url: /shop/qa-test-shop-mobile-827
+        - generic [ref=e21]: Q
+        - generic [ref=e22]:
+          - heading "QA Test Shop Mobile" [level=3] [ref=e23]
+          - paragraph [ref=e24]: Par Vendeur
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: "0"
+              - generic [ref=e28]: Produits
+            - generic [ref=e29]:
+              - generic [ref=e30]: "0"
+              - generic [ref=e31]: Commandes
+          - generic [ref=e33]:
+            - text: Visiter la boutique
+            - img [ref=e34]
+      - link "Voir la boutique Speed Flow Studio" [ref=e36] [cursor=pointer]:
+        - /url: /shop/speed-flow-studio-910
+        - generic [ref=e38]: S
+        - generic [ref=e39]:
+          - heading "Speed Flow Studio" [level=3] [ref=e40]
+          - paragraph [ref=e41]: Par Vendeur
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: "0"
+              - generic [ref=e45]: Produits
+            - generic [ref=e46]:
+              - generic [ref=e47]: "0"
+              - generic [ref=e48]: Commandes
+          - generic [ref=e50]:
+            - text: Visiter la boutique
+            - img [ref=e51]
+      - link "Voir la boutique Ora" [ref=e53] [cursor=pointer]:
+        - /url: /shop/ora-770
+        - img "Ora" [ref=e55]
+        - generic [ref=e56]:
+          - heading "Ora" [level=3] [ref=e57]
+          - paragraph [ref=e58]: Par Vendeur
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: "0"
+              - generic [ref=e62]: Produits
+            - generic [ref=e63]:
+              - generic [ref=e64]: "0"
+              - generic [ref=e65]: Commandes
+          - generic [ref=e67]:
+            - text: Visiter la boutique
+            - img [ref=e68]
+      - link "Voir la boutique faef" [ref=e70] [cursor=pointer]:
+        - /url: /shop/faef-29
+        - generic [ref=e72]: F
+        - generic [ref=e73]:
+          - heading "faef" [level=3] [ref=e74]
+          - paragraph [ref=e75]: Par Vendeur
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]: "0"
+              - generic [ref=e79]: Produits
+            - generic [ref=e80]:
+              - generic [ref=e81]: "0"
+              - generic [ref=e82]: Commandes
+          - generic [ref=e84]:
+            - text: Visiter la boutique
+            - img [ref=e85]
+      - link "Voir la boutique mahdi chaari" [ref=e87] [cursor=pointer]:
+        - /url: /shop/mahdi-chaari-884
+        - generic [ref=e89]: M
+        - generic [ref=e90]:
+          - heading "mahdi chaari" [level=3] [ref=e91]
+          - paragraph [ref=e92]: Par Vendeur
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e95]: "1"
+              - generic [ref=e96]: Produits
+            - generic [ref=e97]:
+              - generic [ref=e98]: "0"
+              - generic [ref=e99]: Commandes
+          - generic [ref=e101]:
+            - text: Visiter la boutique
+            - img [ref=e102]
+      - link "Voir la boutique usieid" [ref=e104] [cursor=pointer]:
+        - /url: /shop/usieid-92
+        - generic [ref=e106]: U
+        - generic [ref=e107]:
+          - heading "usieid" [level=3] [ref=e108]
+          - paragraph [ref=e109]: Par Vendeur
+          - generic [ref=e110]:
+            - generic [ref=e111]:
+              - generic [ref=e112]: "0"
+              - generic [ref=e113]: Produits
+            - generic [ref=e114]:
+              - generic [ref=e115]: "0"
+              - generic [ref=e116]: Commandes
+          - generic [ref=e118]:
+            - text: Visiter la boutique
+            - img [ref=e119]
+      - link "Voir la boutique" [ref=e121] [cursor=pointer]:
+        - /url: /shop/samir
+        - generic [ref=e124]:
+          - heading [level=3]
+          - paragraph [ref=e125]: Par Vendeur
+          - generic [ref=e126]:
+            - generic [ref=e127]:
+              - generic [ref=e128]: "2"
+              - generic [ref=e129]: Produits
+            - generic [ref=e130]:
+              - generic [ref=e131]: "0"
+              - generic [ref=e132]: Commandes
+          - generic [ref=e134]:
+            - text: Visiter la boutique
+            - img [ref=e135]
+      - link "Voir la boutique cugg" [ref=e137] [cursor=pointer]:
+        - /url: /shop/cugg-748
+        - generic [ref=e139]: C
+        - generic [ref=e140]:
+          - heading "cugg" [level=3] [ref=e141]
+          - paragraph [ref=e142]: Par Vendeur
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]: "0"
+              - generic [ref=e146]: Produits
+            - generic [ref=e147]:
+              - generic [ref=e148]: "0"
+              - generic [ref=e149]: Commandes
+          - generic [ref=e151]:
+            - text: Visiter la boutique
+            - img [ref=e152]
+      - link "Voir la boutique hfhj" [ref=e154] [cursor=pointer]:
+        - /url: /shop/hfhj-257
+        - generic [ref=e156]: H
+        - generic [ref=e157]:
+          - heading "hfhj" [level=3] [ref=e158]
+          - paragraph [ref=e159]: Par Vendeur
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: "2"
+              - generic [ref=e163]: Produits
+            - generic [ref=e164]:
+              - generic [ref=e165]: "0"
+              - generic [ref=e166]: Commandes
+          - generic [ref=e168]:
+            - text: Visiter la boutique
+            - img [ref=e169]
+      - link "Voir la boutique Samir shop" [ref=e171] [cursor=pointer]:
+        - /url: /shop/samir-shop-118
+        - img "Samir shop" [ref=e173]
+        - generic [ref=e174]:
+          - heading "Samir shop" [level=3] [ref=e175]
+          - paragraph [ref=e176]: Par Vendeur
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - generic [ref=e179]: "1"
+              - generic [ref=e180]: Produits
+            - generic [ref=e181]:
+              - generic [ref=e182]: "0"
+              - generic [ref=e183]: Commandes
+          - generic [ref=e185]:
+            - text: Visiter la boutique
+            - img [ref=e186]
+      - link "Voir la boutique salamik" [ref=e188] [cursor=pointer]:
+        - /url: /shop/samy
+        - img "salamik" [ref=e190]
+        - generic [ref=e191]:
+          - heading "salamik" [level=3] [ref=e192]
+          - paragraph [ref=e193]: Par Vendeur
+          - generic [ref=e194]:
+            - generic [ref=e195]:
+              - generic [ref=e196]: "2"
+              - generic [ref=e197]: Produits
+            - generic [ref=e198]:
+              - generic [ref=e199]: "8"
+              - generic [ref=e200]: Commandes
+          - generic [ref=e202]:
+            - text: Visiter la boutique
+            - img [ref=e203]
+      - link "Voir la boutique Samy stoire" [ref=e205] [cursor=pointer]:
+        - /url: /shop/samy-stoire-509
+        - generic [ref=e207]: S
+        - generic [ref=e208]:
+          - heading "Samy stoire" [level=3] [ref=e209]
+          - paragraph [ref=e210]: Par Vendeur
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]: "2"
+              - generic [ref=e214]: Produits
+            - generic [ref=e215]:
+              - generic [ref=e216]: "0"
+              - generic [ref=e217]: Commandes
+          - generic [ref=e219]:
+            - text: Visiter la boutique
+            - img [ref=e220]
