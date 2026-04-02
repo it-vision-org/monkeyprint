@@ -379,7 +379,8 @@
 .product-detail-image-modern {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
 }
 .product-detail-image-placeholder-modern {
     width: 100%;
@@ -433,6 +434,37 @@
     margin: 0;
 }
 .product-detail-add-to-cart-modern { margin-top: 8px; }
+
+/* Theme-aware product detail buttons — override Framer Motion inline styles */
+.product-detail-add-to-cart-modern button {
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    padding: 14px 24px !important;
+    cursor: pointer !important;
+    transition: opacity 0.2s, transform 0.15s !important;
+    min-height: 48px !important;
+}
+.product-detail-add-to-cart-modern button:first-child {
+    background: transparent !important;
+    color: var(--theme-primary, #000) !important;
+    border: 2px solid var(--theme-primary, #000) !important;
+}
+.product-detail-add-to-cart-modern button:first-child:hover {
+    background: var(--theme-primary, #000) !important;
+    color: #fff !important;
+}
+.product-detail-add-to-cart-modern button:last-of-type {
+    background: var(--theme-primary, #000) !important;
+    color: #fff !important;
+    border: none !important;
+}
+.product-detail-add-to-cart-modern button:last-of-type:hover {
+    opacity: 0.9;
+}
+.product-detail-add-to-cart-modern button:active {
+    transform: scale(0.97) !important;
+}
 
 /* --------------------------------------------------------------------------
    ORDER CONFIRMATION PAGE

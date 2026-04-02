@@ -57,11 +57,28 @@ export default async function StoreAllProductsPage({ params }: { params: Promise
         })
     );
 
+    const themeDefaults: Record<string, { primary: string; heading: string }> = {
+        'theme-1': { primary: '#1B6CA8', heading: '#1A1612' },
+        'theme-2': { primary: '#C2724F', heading: '#2C1F14' },
+        'theme-3': { primary: '#1A8A6E', heading: '#1A2B25' },
+    };
+    const defaults = themeDefaults[themeId] || themeDefaults['theme-1'];
+
     return (
-        <AllProductsPage
-            theme={themeWithStoreRoute}
-            products={productsWithImages}
-        />
+        <>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                    :root {
+                        --theme-primary: ${defaults.primary};
+                        --theme-heading: ${defaults.heading};
+                    }
+                `
+            }} />
+            <AllProductsPage
+                theme={themeWithStoreRoute}
+                products={productsWithImages}
+            />
+        </>
     );
 }
 

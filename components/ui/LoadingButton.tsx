@@ -48,26 +48,26 @@ export default function LoadingButton({
         xl: { padding: '20px 40px', fontSize: '20px', height: '64px' },
     };
 
-    // Variant color mappings
+    // Variant color mappings — uses CSS custom properties for theme integration
     const getVariantStyles = () => {
         switch (variant) {
             case 'primary':
                 return {
-                    background: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
+                    background: 'var(--theme-primary, #000000)',
                     color: '#ffffff',
                     border: 'none',
                 };
             case 'secondary':
                 return {
                     background: 'rgba(0, 0, 0, 0.05)',
-                    color: '#000000',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                    color: 'var(--theme-heading, #000000)',
+                    border: '1px solid var(--theme-primary, rgba(0, 0, 0, 0.2))',
                 };
             case 'outline':
                 return {
                     background: 'transparent',
-                    color: '#000000',
-                    border: '2px solid #000000',
+                    color: 'var(--theme-primary, #000000)',
+                    border: '2px solid var(--theme-primary, #000000)',
                 };
             case 'danger':
                 return {
@@ -78,7 +78,7 @@ export default function LoadingButton({
             case 'ghost':
                 return {
                     background: 'transparent',
-                    color: '#000000',
+                    color: 'var(--theme-heading, #000000)',
                     border: 'none',
                 };
             case 'success':
@@ -89,7 +89,7 @@ export default function LoadingButton({
                 };
             default:
                 return {
-                    background: '#000000',
+                    background: 'var(--theme-primary, #000000)',
                     color: '#ffffff',
                     border: 'none',
                 };

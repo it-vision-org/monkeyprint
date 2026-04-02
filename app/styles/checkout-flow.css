@@ -543,13 +543,15 @@
     border-radius: 10px;
     overflow: hidden;
     flex-shrink: 0;
-    background: rgba(0, 0, 0, 0.04);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .checkout-item-img-modern {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
 }
 
 .checkout-item-placeholder-modern {

@@ -45,7 +45,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         categoryLabelClassName: 'theme-1-category-label',
         viewAllClassName: 'theme-1-view-all',
         scrollButtonClassName: 'theme-1-scroll-btn',
-        cartStrokeColor: '#000000',
+        cartStrokeColor: '#1B6CA8',
     },
     'theme-2': {
         id: 'theme-2',
@@ -68,7 +68,7 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         categoryLabelClassName: 'theme-2-category-label',
         viewAllClassName: 'theme-2-view-all',
         scrollButtonClassName: 'theme-2-scroll-btn',
-        cartStrokeColor: '#000000',
+        cartStrokeColor: '#C2724F',
     },
     'theme-3': {
         id: 'theme-3',
@@ -92,6 +92,6 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         viewAllClassName: 'theme-3-view-all',
         scrollButtonClassName: 'theme-3-scroll-btn',
         logoFilter: 'brightness(0) invert(1)',
-        cartStrokeColor: '#C5A059',
+        cartStrokeColor: '#FFFFFF',
     },
 };

@@ -14,6 +14,12 @@
 # testing
 /coverage
 
+# Playwright CLI / local screenshot artifacts
+.playwright-cli/
+screenshots-after/
+
+# screenshots
+screenshots-before/
 # next.js
 /.next/
 /out/
