@@ -190,7 +190,7 @@ export default function MainHeader({
             <motion.button
               className={styles.mobileMenuToggle}
               onClick={() => handleMenuToggle(!isMenuOpen)}
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               type="button"
               whileTap={{ scale: 0.9 }}
               whileHover={{ scale: 1.05 }}

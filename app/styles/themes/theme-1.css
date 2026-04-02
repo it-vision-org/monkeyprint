@@ -576,7 +576,7 @@
     .t1-hero-visual { height: 50vw; min-height: 240px; }
     .theme-1-hero::before { display: none; }
     .t1-cats-section { padding: 40px 20px; }
-    .t1-cats-grid { grid-template-columns: repeat(3, 1fr); }
+    .t1-cats-grid { grid-template-columns: repeat(2, 1fr); }
     .theme-1-section { padding: 40px 20px; }
     .t1-section-header { grid-template-columns: 48px 1fr auto; }
     .t1-products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -591,6 +591,19 @@
         gap: 12px;
     }
     .t1-section-index { display: none; }
+}
+
+@media (max-width: 768px) {
+    .theme-1-header {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .theme-1-product-card:hover,
+    .theme-1-category:hover .t1-cat-img img,
+    .theme-1-product-card:hover .theme-1-product-image img {
+        transform: none;
+    }
 }
 
 /* ── Sub-pages ────────────────────────────────────────────────────────── */

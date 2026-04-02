@@ -163,7 +163,7 @@ export default function MobileMenu({
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
                             <motion.button
                                 onClick={onClose}
-                                aria-label="Close menu"
+                                aria-label="Fermer le menu"
                                 type="button"
                                 className={closeButtonClassName}
                                 variants={closeButtonVariants}

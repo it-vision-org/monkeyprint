@@ -7,6 +7,7 @@ import ProductCard from '../ui/ProductCard';
 import type { Product } from '../types';
 import type { ThemeConfig } from '../themes/themeConfig';
 import { useCart } from '../providers/CartContext';
+import { useState, type ComponentProps } from 'react';
 
 /* ============================================================
    Types
@@ -57,6 +58,21 @@ type InternalProps = {
     cartCount: number;
 };
 
+type SafeThemeImageProps = ComponentProps<typeof Image> & { fallbackSrc?: string };
+
+function SafeThemeImage({ src, fallbackSrc = '/logo.png', ...props }: SafeThemeImageProps) {
+    const [imgSrc, setImgSrc] = useState(src);
+    return (
+        <Image
+            {...props}
+            src={imgSrc}
+            onError={() => {
+                if (imgSrc !== fallbackSrc) setImgSrc(fallbackSrc);
+            }}
+        />
+    );
+}
+
 /* ============================================================
    THEME 1 — "Canvas"
    Swiss-design editorial magazine. Oversized typography is the
@@ -106,13 +122,13 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                         <div className="t1-hero-footer">
                             <p className="t1-hero-sub">{heroContent.subtitle}</p>
                             <button className="t1-hero-cta" onClick={() => go(`${baseRoute}/all-products`)}>
-                                Shop the collection <span className="t1-arrow">→</span>
+                                Voir la collection <span className="t1-arrow">→</span>
                             </button>
                         </div>
                     </div>
                     {image && (
                         <div className="t1-hero-visual">
-                            <Image
+                            <SafeThemeImage
                                 src={image}
                                 alt={heroContent.title}
                                 width={heroContent.imageWidth || 320}
@@ -129,7 +145,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
             {/* ─── Ticker strip with fade edges ─── */}
             <div className="t1-ticker" aria-hidden="true">
                 <div className="t1-ticker-track">
-                    {Array(8).fill('— NEW COLLECTION — FASHION — STYLE — DISCOVER ').join('')}
+                    {Array(8).fill('— NOUVELLE COLLECTION — MODE — STYLE — DÉCOUVRIR ').join('')}
                 </div>
             </div>
 
@@ -137,7 +153,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
             {categories.length > 0 && (
                 <section className="t1-cats-section">
                     <div className="t1-cats-label">
-                        <span>Shop by Category</span>
+                        <span>Par catégorie</span>
                         <div className="t1-cats-line" />
                     </div>
                     <div className="t1-cats-grid">
@@ -148,9 +164,9 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                                 onClick={() => go(`${baseRoute}/all-products`)}
                             >
                                 <div className="t1-cat-img">
-                                    <Image
+                                    <SafeThemeImage
                                         src={cat.image}
-                                        alt={cat.alt}
+                                        alt=""
                                         width={cat.imageWidth}
                                         height={cat.imageHeight}
                                         style={{ objectFit: 'cover', width: '100%', height: '100%' }}
@@ -179,7 +195,7 @@ function Theme1({ theme, heroContent, categories, sections, baseRoute, cartCount
                                     className="theme-1-view-all"
                                     onClick={() => go(`${baseRoute}/all-products`)}
                                 >
-                                    <span>All Products ↗</span>
+                                    <span>Tous les produits ↗</span>
                                 </button>
                             )}
                         </div>
@@ -238,7 +254,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
             <section className="theme-2-hero">
                 <div className="t2-hero-img-side">
                     {image ? (
-                        <Image
+                        <SafeThemeImage
                             src={image}
                             alt={heroContent.title}
                             fill
@@ -253,7 +269,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                     <div className="t2-hero-img-overlay" />
                 </div>
                 <div className="t2-hero-text-side">
-                    <div className="t2-hero-badge">NEW DROP</div>
+                    <div className="t2-hero-badge">NOUVELLE COLLECTION</div>
                     <h1 className="t2-hero-headline">
                         {heroContent.title.split(' ').join('\n').split('\n').map((w, i) => (
                             <span key={i} className="t2-hero-word">{w}</span>
@@ -262,12 +278,12 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                     <p className="t2-hero-sub">{heroContent.subtitle}</p>
                     <div className="t2-hero-actions">
                         <button className="t2-hero-cta-primary" onClick={() => go(`${baseRoute}/all-products`)}>
-                            <span>SHOP NOW</span>
+                            <span>ACHETER MAINTENANT</span>
                             <span>→</span>
                         </button>
                     </div>
                     <div className="t2-hero-bottom-label">
-                        <span>SCROLL TO EXPLORE</span>
+                        <span>DÉFILER POUR DÉCOUVRIR</span>
                         <div className="t2-scroll-line" />
                     </div>
                 </div>
@@ -282,9 +298,9 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                             className="theme-2-category"
                             onClick={() => go(`${baseRoute}/all-products`)}
                         >
-                            <Image
+                            <SafeThemeImage
                                 src={cat.image}
-                                alt={cat.alt}
+                                alt=""
                                 fill
                                 style={{ objectFit: 'cover' }}
                                 sizes="33vw"
@@ -316,7 +332,7 @@ function Theme2({ theme, heroContent, categories, sections, baseRoute, cartCount
                                     className="theme-2-view-all"
                                     onClick={() => go(`${baseRoute}/all-products`)}
                                 >
-                                    <span>VIEW ALL →</span>
+                                    <span>VOIR TOUT →</span>
                                 </button>
                             )}
                         </div>
@@ -364,7 +380,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
             <section className="theme-3-hero">
                 {bgImage && (
                     <div className="t3-hero-bg">
-                        <Image
+                        <SafeThemeImage
                             src={bgImage}
                             alt={heroContent.title}
                             fill
@@ -391,11 +407,11 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
 
                 {/* Content at bottom of hero */}
                 <div className="t3-hero-content">
-                    <span className="t3-hero-tag">✦ New Collection · 2025</span>
+                    <span className="t3-hero-tag">✦ Nouvelle collection · 2025</span>
                     <h1 className="t3-hero-headline">{heroContent.title}</h1>
                     <p className="t3-hero-sub">{heroContent.subtitle}</p>
                     <button className="t3-hero-cta" onClick={() => go(`${baseRoute}/all-products`)}>
-                        Discover the collection
+                        Découvrir la collection
                     </button>
                 </div>
             </section>
@@ -404,7 +420,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
             {categories.length > 0 && (
                 <section className="t3-cats-section">
                     <div className="t3-cats-intro">
-                        <h2 className="t3-cats-heading">Browse by Category</h2>
+                        <h2 className="t3-cats-heading">Parcourir par catégorie</h2>
                     </div>
                     <div className="t3-cats-grid">
                         {categories.map((cat, i) => (
@@ -414,9 +430,9 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
                                 onClick={() => go(`${baseRoute}/all-products`)}
                             >
                                 <div className="t3-cat-img">
-                                    <Image
+                                    <SafeThemeImage
                                         src={cat.image}
-                                        alt={cat.alt}
+                                        alt=""
                                         fill
                                         style={{ objectFit: 'cover' }}
                                         sizes="(max-width:768px) 100vw, 50vw"
@@ -425,7 +441,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
                                 <div className="t3-cat-overlay" />
                                 <div className="t3-cat-info">
                                     <span className="theme-3-category-label">{cat.label}</span>
-                                    <span className="t3-cat-cta">Explore →</span>
+                                    <span className="t3-cat-cta">Explorer →</span>
                                 </div>
                             </button>
                         ))}
@@ -446,7 +462,7 @@ function Theme3({ theme, heroContent, categories, sections, baseRoute, cartCount
                                     className="theme-3-view-all"
                                     onClick={() => go(`${baseRoute}/all-products`)}
                                 >
-                                    View All Products
+                                    Voir tous les produits
                                 </button>
                             )}
                         </div>
@@ -477,7 +493,7 @@ export default function ThemeStorePage({
     sections,
 }: ThemeStorePageProps) {
     const { items } = useCart();
-    const cartCount = items.length;
+    const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
     const baseRoute = theme.baseRoute;
 
     const internal: InternalProps = {

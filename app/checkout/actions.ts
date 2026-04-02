@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    phoneNumber: z.string().min(6, 'Phone number must be at least 6 digits'),
-    address: z.string().min(2, 'Address is required'),
-    city: z.string().min(1, 'City is required'),
-    items: z.string().min(1, 'Items are required'),
+    name: z.string().min(1, 'Le nom est requis'),
+    phoneNumber: z.string().min(6, 'Le numéro de téléphone doit contenir au moins 6 chiffres'),
+    address: z.string().min(2, "L'adresse est requise"),
+    city: z.string().min(1, 'La ville est requise'),
+    items: z.string().min(1, 'Les articles sont requis'),
 });
 
 export async function placeOrder(formData: FormData) {
@@ -25,14 +25,14 @@ export async function placeOrder(formData: FormData) {
     if (!validatedFields.success) {
         console.error('Checkout validation failed:', validatedFields.error.flatten());
         const firstError = Object.values(validatedFields.error.flatten().fieldErrors)[0]?.[0];
-        return { error: firstError || 'Invalid form data. Please check all fields.' };
+        return { error: firstError || 'Données invalides. Veuillez vérifier tous les champs.' };
     }
 
     const { name, phoneNumber, address, city, items } = validatedFields.data;
     const cartItems = JSON.parse(items);
 
     if (!cartItems.length) {
-        return { error: 'Cart is empty' };
+        return { error: 'Le panier est vide' };
     }
 
     // Group items by store
@@ -103,6 +103,6 @@ export async function placeOrder(formData: FormData) {
 
     } catch (e) {
         console.error('Checkout error:', e);
-        return { error: 'Failed to place order' };
+        return { error: 'Impossible de passer la commande' };
     }
 }

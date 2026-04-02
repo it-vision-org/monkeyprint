@@ -128,7 +128,7 @@ export default function ConfirmModal({
                             className={styles.closeButton}
                             type="button"
                             onClick={onCancel}
-                            aria-label="Close"
+                            aria-label="Fermer"
                         >
                             ×
                         </button>

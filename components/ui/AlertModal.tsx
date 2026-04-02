@@ -89,7 +89,7 @@ export default function AlertModal({ isOpen, message, onClose, type = 'info' }: 
                     className="alert-modal-close"
                     type="button"
                     onClick={onClose}
-                    aria-label="Close"
+                    aria-label="Fermer"
                 >
                     ×
                 </button>
@@ -143,7 +143,7 @@ export default function AlertModal({ isOpen, message, onClose, type = 'info' }: 
                             color: '#ffffff',
                         }}
                     >
-                        OK
+                        D'accord
                     </button>
                 </div>
             </div>

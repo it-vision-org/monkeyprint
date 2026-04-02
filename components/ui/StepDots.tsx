@@ -29,7 +29,7 @@ export default function StepDots({
                         className={`${dotClassName} ${isFilled ? filledClassName : ''}`}
                         onClick={() => isClickable && onStepClick(step)}
                         disabled={!isClickable}
-                        aria-label={`Go to step ${step}`}
+                        aria-label={`Aller à l'étape ${step}`}
                         type="button"
                         style={{
                             width: '11px',

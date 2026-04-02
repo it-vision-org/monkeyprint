@@ -60,9 +60,9 @@ const Step2Theme = ({ shopName, selectedTheme, setSelectedTheme, setStep, logo }
             <div className={`${styles['cs-card']} ${styles['cs-card-summary']}`}>
                 <div className={styles['cs-shop-badge']}>
                     {logo ? (
-                        <Image src={logo} alt="Shop Logo" width={56} height={56} style={{ objectFit: 'contain', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                        <Image src={logo} alt="Logo de la boutique" width={56} height={56} style={{ objectFit: 'contain', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
                     ) : (
-                        <Image src="/logo.png" alt="Shop Logo" width={56} height={56} />
+                        <Image src="/logo.png" alt="Logo de la boutique" width={56} height={56} />
                     )}
                 </div>
                 <span>{shopName}</span>
@@ -167,7 +167,7 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
                 return;
             }
             console.error('Store creation error:', storeError);
-            setError(storeError?.message || 'Failed to create store');
+            setError(storeError?.message || 'Impossible de créer la boutique');
         } finally {
             // Only reset loading if not redirecting
             if (!isRedirect) {
@@ -194,9 +194,9 @@ const Step3StoreCreation = ({ shopName, logo, setStep, onCreateShop }: any) => {
             <div className={`${styles['cs-card']} ${styles['cs-card-profile']}`}>
                 <div className={styles['cs-profile-picture']}>
                     {logo ? (
-                        <Image src={logo} alt="Profile" width={96} height={96} style={{ objectFit: 'contain', borderRadius: '50%', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
+                        <Image src={logo} alt="Profil" width={96} height={96} style={{ objectFit: 'contain', borderRadius: '50%', width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }} />
                     ) : (
-                        <Image src="/logo.png" alt="Profile" width={96} height={96} />
+                        <Image src="/logo.png" alt="Profil" width={96} height={96} />
                     )}
                 </div>
                 <span className={styles['cs-profile-username']}>{shopName}</span>
@@ -315,11 +315,11 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                     return;
                 }
                 console.error('Store creation error:', storeError);
-                setError(storeError?.message || 'Failed to create store');
+                setError(storeError?.message || 'Impossible de créer la boutique');
             }
         } catch (e: any) {
             console.error('Registration error:', e);
-            setError('Something went wrong');
+            setError('Une erreur est survenue');
         } finally {
             // Only reset loading if not redirecting
             if (!isRedirect) {
@@ -404,7 +404,7 @@ const Step3AccountFull = ({ shopName, logo, setStep, router, email, setEmail, pa
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                     </svg>
-                    Sign in with Google
+                    Se connecter avec Google
                 </button>
 
                 <div className={styles.buttonGroup}>
@@ -480,7 +480,7 @@ const Step1StoreDetails = ({ shopName, setShopName, categories, selectedCategori
                     {logo ? (
                         <Image
                             src={logo}
-                            alt="Logo"
+                            alt="Logo de la boutique"
                             width={98}
                             height={98}
                             style={{
@@ -619,7 +619,7 @@ export default function CreateShopContent({ initialSession, hasStore = false }: 
     const [password, setPassword] = useState("");
 
     const [categories, setCategories] = useState([
-        "Sport", "Travel", "Kids", "Streetwear", "Hip hop", "Music", "Brands"
+        "Sport", "Voyage", "Enfants", "Streetwear", "Hip-hop", "Musique", "Marques"
     ]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [categorySearch, setCategorySearch] = useState("");

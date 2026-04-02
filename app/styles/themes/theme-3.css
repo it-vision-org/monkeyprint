@@ -727,6 +727,25 @@
     .theme-3-product-info { padding: 12px 14px 16px; }
 }
 
+@media (max-width: 768px) {
+    .theme-3-page::before,
+    .theme-3-page::after {
+        display: none;
+    }
+
+    .theme-3-cart-btn {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .theme-3-category:hover,
+    .theme-3-product-card:hover,
+    .theme-3-product-card:hover .theme-3-product-image img {
+        transform: none;
+        box-shadow: none;
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    SUB-PAGE SCOPE: All Products
    ═══════════════════════════════════════════════════════════════════════ */

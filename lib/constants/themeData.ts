@@ -42,25 +42,25 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
             title: "Boutique",
-            subtitle: "Explore the finest clothes chez notre boutique",
+            subtitle: "Découvrez les meilleurs vêtements de notre boutique",
             image: "/hero1.png",
             imageWidth: 280,
             imageHeight: 280,
             variant: 'simple'
         },
         categories: [
-            { image: "/woman.png", alt: "Woman", label: "Woman", imageWidth: 400, imageHeight: 533 },
-            { image: "/man.png", alt: "Man", label: "Man", imageWidth: 400, imageHeight: 533 },
-            { image: "/kids.png", alt: "Kids", label: "Kids", imageWidth: 400, imageHeight: 533 }
+            { image: "/woman.png", alt: "Femme", label: "Femme", imageWidth: 400, imageHeight: 533 },
+            { image: "/man.png", alt: "Homme", label: "Homme", imageWidth: 400, imageHeight: 533 },
+            { image: "/kids.png", alt: "Enfants", label: "Enfants", imageWidth: 400, imageHeight: 533 }
         ],
         sections: [
-            { title: "Best Seller", type: 'best-seller', products: Array(3).fill({
+            { title: "Meilleures ventes", type: 'best-seller', products: Array(3).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 5,
                 reviews: 131
             }).map((p, idx) => ({ ...p, id: idx })) },
-            { title: "Products", type: 'products', products: Array(6).fill({
+            { title: "Produits", type: 'products', products: Array(6).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 5,
@@ -77,7 +77,7 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
             title: "Boutique",
-            subtitle: "Explore the finest clothes for kids, chez notre boutique",
+            subtitle: "Découvrez les meilleurs vêtements pour enfants, chez notre boutique",
             variant: 'circles',
             circles: [
                 { src: "/hero2.png", className: "theme-2-hero-image-circle theme-2-hero-img-1" },
@@ -87,17 +87,17 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
             image: "/hero2.png"
         },
         categories: [
-            { image: "/T-Shirt-Design.png", alt: "Girl", label: "Girl", imageWidth: 200, imageHeight: 280, className: "theme-2-cat-yellow" },
-            { image: "/T-Shirt-Design.png", alt: "Boy", label: "Boy", imageWidth: 200, imageHeight: 280, className: "theme-2-cat-blue" }
+            { image: "/T-Shirt-Design.png", alt: "Fille", label: "Fille", imageWidth: 200, imageHeight: 280, className: "theme-2-cat-yellow" },
+            { image: "/T-Shirt-Design.png", alt: "Garçon", label: "Garçon", imageWidth: 200, imageHeight: 280, className: "theme-2-cat-blue" }
         ],
         sections: [
-            { title: "Best Seller", type: 'best-seller', products: Array(3).fill({
+            { title: "Meilleures ventes", type: 'best-seller', products: Array(3).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 4,
                 reviews: 130
             }).map((p, idx) => ({ ...p, id: idx })) },
-            { title: "Products", type: 'products', products: Array(6).fill({
+            { title: "Produits", type: 'products', products: Array(6).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 4,
@@ -114,23 +114,23 @@ export const themeHomePageData: Record<string, ThemeHomePageData> = {
         }).map((p, idx) => ({ ...p, id: idx })),
         heroContent: {
             title: "Boutique",
-            subtitle: "Explore the finest clothes\nchez notre boutique",
+            subtitle: "Découvrez les meilleurs vêtements\nchez notre boutique",
             variant: 'background',
             backgroundImage: "/hero3.png"
         },
         categories: [
-            { image: "/T-Shirt-Design.png", alt: "Woman", label: "Woman", imageWidth: 140, imageHeight: 220 },
-            { image: "/T-Shirt-Design.png", alt: "Man", label: "Man", imageWidth: 140, imageHeight: 220 },
-            { image: "/T-Shirt-Design.png", alt: "Kids", label: "Kids", imageWidth: 140, imageHeight: 220 }
+            { image: "/T-Shirt-Design.png", alt: "Femme", label: "Femme", imageWidth: 140, imageHeight: 220 },
+            { image: "/T-Shirt-Design.png", alt: "Homme", label: "Homme", imageWidth: 140, imageHeight: 220 },
+            { image: "/T-Shirt-Design.png", alt: "Enfants", label: "Enfants", imageWidth: 140, imageHeight: 220 }
         ],
         sections: [
-            { title: "Best Seller", type: 'best-seller', products: Array(3).fill({
+            { title: "Meilleures ventes", type: 'best-seller', products: Array(3).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 5,
                 reviews: 131
             }).map((p, idx) => ({ ...p, id: idx })) },
-            { title: "Products", type: 'products', products: Array(6).fill({
+            { title: "Produits", type: 'products', products: Array(6).fill({
                 name: "T-Shirt Circles",
                 price: "50dt",
                 rating: 5,

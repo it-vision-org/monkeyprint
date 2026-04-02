@@ -28,7 +28,8 @@
       "Bash(find /c/Users/Dainor/Downloads/Mo/monkeyprint -name \"*.tsx\" -exec grep -l \"Paramètres\" {} \\\\;)",
       "Bash(ls -la /c/Users/Dainor/Downloads/Mo/monkeyprint/.playwright*)",
       "Bash(npm run:*)",
-      "Bash(grep -l \"password\\\\|credentials\\\\|test.*user\\\\|seed\" prisma/*.ts prisma/*.js)"
+      "Bash(grep -l \"password\\\\|credentials\\\\|test.*user\\\\|seed\" prisma/*.ts prisma/*.js)",
+      "Bash(node -e ':*)"
     ]
   }
 }

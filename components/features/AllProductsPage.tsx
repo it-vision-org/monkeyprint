@@ -79,8 +79,8 @@ export default function AllProductsPage({
 
             <main className="all-products-main-modern">
                 <div className="all-products-header-modern">
-                    <h1 className="all-products-title-modern">All Products</h1>
-                    <p className="all-products-subtitle-modern">{products.length} products available</p>
+                    <h1 className="all-products-title-modern">Tous les produits</h1>
+                    <p className="all-products-subtitle-modern">{products.length} produits disponibles</p>
                 </div>
 
                 <div className="all-products-toolbar-modern">
@@ -95,7 +95,7 @@ export default function AllProductsPage({
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <path d="M3 4H21L13 14V20L11 22V14L3 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <span>Filters</span>
+                            <span>Filtres</span>
                         </motion.button>
                     </div>
                     <div style={{ position: 'relative' }}>
@@ -106,7 +106,7 @@ export default function AllProductsPage({
                             className="all-products-sort-btn-modern"
                             onClick={() => setSortOpen(!sortOpen)}
                         >
-                            <span>Sort</span>
+                            <span>Trier</span>
                             <svg
                                 width="16"
                                 height="16"
@@ -125,25 +125,25 @@ export default function AllProductsPage({
                                         className={`sort-dropdown-item-modern ${selectedSort === 'default' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('default'); setSortOpen(false); }}
                                     >
-                                        Default
+                                        Par défaut
                                     </button>
                                     <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'price-asc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-asc'); setSortOpen(false); }}
                                     >
-                                        Price: Low to High
+                                        Prix : croissant
                                     </button>
                                     <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'price-desc' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('price-desc'); setSortOpen(false); }}
                                     >
-                                        Price: High to Low
+                                        Prix : décroissant
                                     </button>
                                     <button
                                         className={`sort-dropdown-item-modern ${selectedSort === 'rating' ? 'selected' : ''}`}
                                         onClick={() => { setSelectedSort('rating'); setSortOpen(false); }}
                                     >
-                                        Highest Rated
+                                        Mieux notés
                                     </button>
                                 </div>
                             </>
@@ -160,7 +160,6 @@ export default function AllProductsPage({
                         <p>Cette boutique est en cours de préparation.</p>
                         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center" }}>
                             <LoadingLink href={theme.baseRoute}>Retour à la boutique</LoadingLink>
-                            <LoadingLink href="/dashboard/product-upload">Ajouter un produit</LoadingLink>
                         </div>
                     </div>
                 ) : (
@@ -186,7 +185,7 @@ export default function AllProductsPage({
                 <div className="filter-modal-overlay-modern" onClick={() => setFilterOpen(false)}>
                     <div className="filter-modal-modern" onClick={(e) => e.stopPropagation()}>
                         <div className="filter-modal-header-modern">
-                            <h2>Filters</h2>
+                            <h2>Filtres</h2>
                             <button className="filter-modal-close-modern" onClick={() => setFilterOpen(false)}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -212,7 +211,7 @@ export default function AllProductsPage({
                                     className="filter-section-header-modern"
                                     onClick={() => setTailleExpanded(!tailleExpanded)}
                                 >
-                                    <span>Size</span>
+                                    <span>Taille</span>
                                     <svg
                                         width="16"
                                         height="16"
@@ -245,7 +244,7 @@ export default function AllProductsPage({
                                     className="filter-section-header-modern"
                                     onClick={() => setCouleurExpanded(!couleurExpanded)}
                                 >
-                                    <span>Color</span>
+                                    <span>Couleur</span>
                                     <svg
                                         width="16"
                                         height="16"
@@ -282,10 +281,10 @@ export default function AllProductsPage({
 
                         <div className="filter-modal-footer-modern">
                             <button className="filter-reset-btn-modern" onClick={resetFilters}>
-                                Reset Filters
+                                Réinitialiser
                             </button>
                             <button className="filter-apply-btn-modern" onClick={() => setFilterOpen(false)}>
-                                Apply Filters
+                                Appliquer
                             </button>
                         </div>
                     </div>

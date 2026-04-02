@@ -1054,8 +1054,19 @@ export default function ProductDetailsPage() {
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
+  const submitWatchdogRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (submitWatchdogRef.current) {
+        clearTimeout(submitWatchdogRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async () => {
+    if (submitInFlightRef.current) return;
     const sellingPrice = parseFloat(productPrice) || 0;
     const costPrice = totalPrice || 0;
 
@@ -1088,7 +1099,16 @@ export default function ProductDetailsPage() {
       return;
     }
 
+    submitInFlightRef.current = true;
     setIsSubmitting(true);
+    submitWatchdogRef.current = setTimeout(() => {
+      submitInFlightRef.current = false;
+      setIsSubmitting(false);
+      showAlert(
+        "La publication prend plus de temps que prévu. Vérifiez votre connexion et réessayez.",
+        "warning",
+      );
+    }, 20000);
 
     try {
       const formData = new FormData();
@@ -1116,7 +1136,12 @@ export default function ProductDetailsPage() {
       // Check if there's an error returned (not a redirect)
       if (result?.error) {
         showAlert(`Erreur: ${result.error}`, "error");
+        submitInFlightRef.current = false;
         setIsSubmitting(false);
+        if (submitWatchdogRef.current) {
+          clearTimeout(submitWatchdogRef.current);
+          submitWatchdogRef.current = null;
+        }
       }
       // If no error and no result, redirect happened (which throws)
     } catch (error: any) {
@@ -1128,6 +1153,10 @@ export default function ProductDetailsPage() {
         sessionStorage.removeItem("editingProductName");
         sessionStorage.removeItem("editingProductDescription");
         sessionStorage.removeItem("editingProductPrice");
+        if (submitWatchdogRef.current) {
+          clearTimeout(submitWatchdogRef.current);
+          submitWatchdogRef.current = null;
+        }
         return;
       }
       // Only show error for actual errors
@@ -1136,7 +1165,12 @@ export default function ProductDetailsPage() {
         "Une erreur est survenue lors de l'enregistrement du produit.",
         "error",
       );
+      submitInFlightRef.current = false;
       setIsSubmitting(false);
+      if (submitWatchdogRef.current) {
+        clearTimeout(submitWatchdogRef.current);
+        submitWatchdogRef.current = null;
+      }
     }
   };
 

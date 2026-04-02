@@ -42,9 +42,20 @@ export async function uploadImageToR2(
 }
 
 export async function getR2Url(key: string) {
+    if (!key) return key;
+    if (key.startsWith("http://") || key.startsWith("https://")) {
+        return key;
+    }
+    // Local public assets should remain local paths.
+    if (key.startsWith("/")) {
+        return key;
+    }
+
     const publicDomain = process.env.R2_PUBLIC_DOMAIN;
     if (publicDomain) {
-        return `${publicDomain}/${key}`;
+        const normalizedDomain = publicDomain.replace(/\/+$/, "");
+        const normalizedKey = key.replace(/^\/+/, "");
+        return `${normalizedDomain}/${normalizedKey}`;
     }
     return key;
 }

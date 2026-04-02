@@ -55,42 +55,45 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
     // Get customization or use defaults
     const customization = store.themeCustomization;
 
+    const normalizeLegacyFrCopy = (value: string | null | undefined, fallback: string) => {
+        const trimmed = (value || "").trim();
+        if (!trimmed) return fallback;
+
+        const lowered = trimmed.toLowerCase();
+        if (lowered === "best seller" || lowered === "best sellers") return "Meilleures ventes";
+        if (lowered === "products" || lowered === "product") return "Produits";
+        if (lowered.includes("explore the finest clothes")) {
+            return `Découvrez les meilleurs vêtements chez ${store.name || "notre boutique"}`;
+        }
+
+        return trimmed;
+    };
+
     // Resolve hero image URLs - prioritize customization, then store logo, then default hero images
     let customHeroImage: string | undefined;
     let customHeroBackground: string | undefined;
 
     // Default hero images for each theme
     const defaultHeroImages: Record<string, string> = {
-        'theme-1': '/hero1.png',
-        'theme-2': '/hero2.png',
-        'theme-3': '/hero3.png'
+        'theme-1': '/logo.png',
+        'theme-2': '/logo.png',
+        'theme-3': '/logo.png'
     };
 
     // First check customization
     if (customization?.heroImageUrl) {
-        // If it's already a full URL, use it directly; otherwise resolve it
-        customHeroImage = customization.heroImageUrl.startsWith('http://') || customization.heroImageUrl.startsWith('https://')
-            ? customization.heroImageUrl
-            : await getR2Url(customization.heroImageUrl);
+        customHeroImage = await getR2Url(customization.heroImageUrl);
     } else if (store.logoUrl) {
-        // Fallback to store logo if no custom hero image
-        customHeroImage = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
-            ? store.logoUrl
-            : await getR2Url(store.logoUrl);
+        customHeroImage = await getR2Url(store.logoUrl);
     } else {
         // Use default hero image for the theme
         customHeroImage = defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
     }
 
     if (customization?.heroBackgroundUrl) {
-        customHeroBackground = customization.heroBackgroundUrl.startsWith('http://') || customization.heroBackgroundUrl.startsWith('https://')
-            ? customization.heroBackgroundUrl
-            : await getR2Url(customization.heroBackgroundUrl);
+        customHeroBackground = await getR2Url(customization.heroBackgroundUrl);
     } else if (store.logoUrl) {
-        // Fallback to store logo if no custom background
-        customHeroBackground = store.logoUrl.startsWith('http://') || store.logoUrl.startsWith('https://')
-            ? store.logoUrl
-            : await getR2Url(store.logoUrl);
+        customHeroBackground = await getR2Url(store.logoUrl);
     } else {
         // Use default hero image for the theme
         customHeroBackground = defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
@@ -113,8 +116,11 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
 
     if (heroVariant === 'simple') {
         heroContent = {
-            title: customization?.heroTitle || store.name || 'My Store',
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes chez ${store.name || 'our boutique'}`,
+            title: customization?.heroTitle || store.name || 'Ma boutique',
+            subtitle: normalizeLegacyFrCopy(
+                customization?.heroSubtitle,
+                `Découvrez les meilleurs vêtements chez ${store.name || "notre boutique"}`,
+            ),
             image: customHeroImage,
             imageWidth: 280,
             imageHeight: 280,
@@ -124,8 +130,11 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
         // Ensure we always have a hero image for circles variant
         const heroImageForCircles = customHeroImage || defaultHeroImages[themeId] || defaultHeroImages['theme-1'];
         heroContent = {
-            title: customization?.heroTitle || store.name || 'My Store',
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes for kids, chez ${store.name || 'us'}`,
+            title: customization?.heroTitle || store.name || 'Ma boutique',
+            subtitle: normalizeLegacyFrCopy(
+                customization?.heroSubtitle,
+                `Découvrez les meilleurs vêtements pour enfants, chez ${store.name || "notre boutique"}`,
+            ),
             variant: 'circles',
             circles: heroImageForCircles ? [
                 { src: heroImageForCircles, className: "theme-2-hero-image-circle theme-2-hero-img-1" },
@@ -137,8 +146,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
     } else {
         // background variant
         heroContent = {
-            title: customization?.heroTitle || store.name || 'My Store',
-            subtitle: customization?.heroSubtitle || `Explore the finest clothes\nchez ${store.name || 'our boutique'}`,
+            title: customization?.heroTitle || store.name || 'Ma boutique',
+            subtitle: customization?.heroSubtitle || `Découvrez les meilleurs vêtements\nchez ${store.name || 'notre boutique'}`,
             variant: 'background',
             backgroundImage: customHeroBackground
         };
@@ -150,26 +159,19 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
     let categoryKidsImage = "/kids.png";
 
     if (customization?.categoryWomanImageUrl) {
-        // If it's already a full URL, use it directly; otherwise resolve it
-        categoryWomanImage = customization.categoryWomanImageUrl.startsWith('http://') || customization.categoryWomanImageUrl.startsWith('https://')
-            ? customization.categoryWomanImageUrl
-            : await getR2Url(customization.categoryWomanImageUrl);
+        categoryWomanImage = await getR2Url(customization.categoryWomanImageUrl);
     }
     if (customization?.categoryManImageUrl) {
-        categoryManImage = customization.categoryManImageUrl.startsWith('http://') || customization.categoryManImageUrl.startsWith('https://')
-            ? customization.categoryManImageUrl
-            : await getR2Url(customization.categoryManImageUrl);
+        categoryManImage = await getR2Url(customization.categoryManImageUrl);
     }
     if (customization?.categoryKidsImageUrl) {
-        categoryKidsImage = customization.categoryKidsImageUrl.startsWith('http://') || customization.categoryKidsImageUrl.startsWith('https://')
-            ? customization.categoryKidsImageUrl
-            : await getR2Url(customization.categoryKidsImageUrl);
+        categoryKidsImage = await getR2Url(customization.categoryKidsImageUrl);
     }
 
     const categories = [
-        { image: categoryWomanImage, alt: "Woman", label: "Woman", imageWidth: 400, imageHeight: 533 },
-        { image: categoryManImage, alt: "Man", label: "Man", imageWidth: 400, imageHeight: 533 },
-        { image: categoryKidsImage, alt: "Kids", label: "Kids", imageWidth: 400, imageHeight: 533 }
+        { image: categoryWomanImage, alt: "Femme", label: "Femme", imageWidth: 400, imageHeight: 533 },
+        { image: categoryManImage, alt: "Homme", label: "Homme", imageWidth: 400, imageHeight: 533 },
+        { image: categoryKidsImage, alt: "Enfants", label: "Enfants", imageWidth: 400, imageHeight: 533 }
     ];
 
     // Create sections with real products
@@ -178,12 +180,12 @@ export default async function StorePage({ params }: { params: Promise<{ storeSlu
 
     const sections = [
         {
-            title: customization?.bestSellerTitle || "Best Seller",
+            title: normalizeLegacyFrCopy(customization?.bestSellerTitle, "Meilleures ventes"),
             type: 'best-seller' as const,
             products: bestSellerProducts.length > 0 ? bestSellerProducts : undefined
         },
         {
-            title: customization?.productsTitle || "Products",
+            title: normalizeLegacyFrCopy(customization?.productsTitle, "Produits"),
             type: 'products' as const,
             products: allProducts.length > 0 ? allProducts : undefined,
             showViewAll: true

@@ -3,6 +3,28 @@ import { prisma } from '@/lib/prisma';
 import type { ThemeCustomization } from '@/lib/types/theme';
 import { NextRequest, NextResponse } from 'next/server';
 
+function normalizeFrContentFields(input: Partial<ThemeCustomization>): Partial<ThemeCustomization> {
+  const normalized = { ...input };
+  const fix = (value: string | null | undefined, fallback?: string) => {
+    const trimmed = (value || '').trim();
+    if (!trimmed) return fallback ?? value ?? null;
+    const lowered = trimmed.toLowerCase();
+    if (lowered === 'best seller' || lowered === 'best sellers') return 'Meilleures ventes';
+    if (lowered === 'products' || lowered === 'product') return 'Produits';
+    if (lowered === 'categories' || lowered === 'category') return 'Catégories';
+    if (lowered.includes('explore the finest clothes')) {
+      return 'Découvrez les meilleurs vêtements de notre boutique';
+    }
+    return trimmed;
+  };
+
+  normalized.bestSellerTitle = fix(input.bestSellerTitle) as string | undefined;
+  normalized.productsTitle = fix(input.productsTitle) as string | undefined;
+  normalized.categoriesTitle = fix(input.categoriesTitle) as string | undefined;
+  normalized.heroSubtitle = fix(input.heroSubtitle) as string | undefined;
+  return normalized;
+}
+
 // GET - Fetch theme customization for current user's store
 export async function GET(request: NextRequest) {
   try {
@@ -92,7 +114,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 });
     }
 
-    const body = await request.json() as Partial<ThemeCustomization>;
+    const rawBody = await request.json() as Partial<ThemeCustomization>;
+    const body = normalizeFrContentFields(rawBody);
     const storeId = user.store.id;
 
     // Upsert customization (create if doesn't exist, update if exists)

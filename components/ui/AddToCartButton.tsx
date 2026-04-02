@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from "../providers/CartContext";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import LoadingButton from "./LoadingButton";
 
@@ -12,9 +12,14 @@ export default function AddToCartButton({ product, frontUrl, storeName, storeSlu
     const [isAdded, setIsAdded] = useState(false);
     const [isBuying, setIsBuying] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
+    const lastActionAtRef = useRef(0);
+    const MIN_ACTION_INTERVAL_MS = 700;
 
     const handleAddToCart = async () => {
         if (isAdding || isBuying) return;
+        const now = Date.now();
+        if (now - lastActionAtRef.current < MIN_ACTION_INTERVAL_MS) return;
+        lastActionAtRef.current = now;
         setIsAdding(true);
 
         addToCart({
@@ -39,6 +44,9 @@ export default function AddToCartButton({ product, frontUrl, storeName, storeSlu
 
     const handleBuyNow = async () => {
         if (isBuying || isAdding) return;
+        const now = Date.now();
+        if (now - lastActionAtRef.current < MIN_ACTION_INTERVAL_MS) return;
+        lastActionAtRef.current = now;
         setIsBuying(true);
 
         addToCart({

@@ -273,7 +273,7 @@ export default function ThemeCustomizationEditor() {
     },
     {
       id: 'hero',
-      label: 'Section Hero',
+      label: 'Section héros',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="3" y="4" width="18" height="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -511,15 +511,15 @@ function OverviewTab({
   onReset: () => void;
 }) {
   const themeDescriptions: Record<ThemeId, string> = {
-    'theme-1': 'Minimalist, clean, modern typography',
-    'theme-2': 'Bold colors, high contrast, dynamic',
-    'theme-3': 'Sophisticated, premium, luxurious',
+    'theme-1': 'Minimaliste, épuré, typographie moderne',
+    'theme-2': 'Couleurs vives, contraste élevé, dynamique',
+    'theme-3': 'Sophistiqué, premium, luxueux',
   };
 
   const themes: Array<{ id: ThemeId; label: string; image: string }> = [
-    { id: 'theme-1', label: 'Modern Minimal', image: '/theme-1.png' },
-    { id: 'theme-2', label: 'Bold & Vibrant', image: '/theme-2.png' },
-    { id: 'theme-3', label: 'Elegant Dark', image: '/theme-3.png' },
+    { id: 'theme-1', label: 'Moderne minimal', image: '/theme-1.png' },
+    { id: 'theme-2', label: 'Audacieux et vibrant', image: '/theme-2.png' },
+    { id: 'theme-3', label: 'Élégant sombre', image: '/theme-3.png' },
   ];
 
   return (
@@ -802,7 +802,7 @@ function HeroTab({
           </svg>
         </div>
         <div>
-          <h3 className={styles.themeSectionTitle}>Section Hero</h3>
+          <h3 className={styles.themeSectionTitle}>Section héros</h3>
           <p className={styles.themeSectionDesc}>Personnalisez la section principale de votre boutique</p>
         </div>
         <button type="button" onClick={onReset} className={styles.themeSectionResetBtn} style={{ marginLeft: 'auto' }}>
@@ -927,33 +927,33 @@ function ContentTab({
       </div>
       <div className={styles.themeBody}>
         <div className={styles.themeInputWrapper}>
-          <label className={styles.themeInputLabel}>Titre "Best Seller"</label>
+          <label className={styles.themeInputLabel}>Titre "Meilleures ventes"</label>
           <input
             type="text"
             className={styles.themeInput}
             value={customization.bestSellerTitle || ''}
             onChange={(e) => updateField('bestSellerTitle', e.target.value)}
-            placeholder="Best Seller"
+            placeholder="Meilleures ventes"
           />
         </div>
         <div className={styles.themeInputWrapper}>
-          <label className={styles.themeInputLabel}>Titre "Products"</label>
+          <label className={styles.themeInputLabel}>Titre "Produits"</label>
           <input
             type="text"
             className={styles.themeInput}
             value={customization.productsTitle || ''}
             onChange={(e) => updateField('productsTitle', e.target.value)}
-            placeholder="Products"
+            placeholder="Produits"
           />
         </div>
         <div className={styles.themeInputWrapper}>
-          <label className={styles.themeInputLabel}>Titre "Categories"</label>
+          <label className={styles.themeInputLabel}>Titre "Catégories"</label>
           <input
             type="text"
             className={styles.themeInput}
             value={customization.categoriesTitle || ''}
             onChange={(e) => updateField('categoriesTitle', e.target.value)}
-            placeholder="Categories"
+            placeholder="Catégories"
           />
         </div>
       </div>

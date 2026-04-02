@@ -56,7 +56,7 @@ export default function Navbar({
         <button
           className={menuButtonClassName}
           onClick={() => handleMenuToggle(true)}
-          aria-label="Open menu"
+          aria-label="Ouvrir le menu"
           type="button"
         >
           <span className={menuButtonLineClassName} />

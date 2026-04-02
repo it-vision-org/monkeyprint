@@ -203,8 +203,20 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
 
                     <div className={styles.commandesList}>
                         {orders.length === 0 ? (
-                            <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-                                Aucune commande trouvée.
+                            <div style={{ padding: '28px', textAlign: 'center', color: '#4b5563', background: '#ffffff', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+                                <p style={{ margin: 0, fontWeight: 700, color: '#111827' }}>Aucune commande pour le moment</p>
+                                <p style={{ margin: '8px 0 16px', fontSize: '14px' }}>
+                                    Ajoutez des produits et partagez votre boutique pour recevoir vos premières commandes.
+                                </p>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                    <Link href="/dashboard/produits" style={{ textDecoration: 'none', color: '#0d9488', fontWeight: 700 }}>
+                                        Gérer mes produits
+                                    </Link>
+                                    <span aria-hidden="true">•</span>
+                                    <Link href="/dashboard/apercu" style={{ textDecoration: 'none', color: '#0d9488', fontWeight: 700 }}>
+                                        Ouvrir l'aperçu
+                                    </Link>
+                                </div>
                             </div>
                         ) : (
                             orders.map((order: typeof orders[number]) => (

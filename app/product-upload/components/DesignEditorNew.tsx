@@ -130,7 +130,7 @@ const ColorPicker = memo(function ColorPicker({
             onClick={() => onColorChange(color)}
             title={color}
             type="button"
-            aria-label={`Select color ${color}`}
+            aria-label={`Sélectionner la couleur ${color}`}
           />
         ))}
       </div>
@@ -200,7 +200,7 @@ const DesignEditor = memo(function DesignEditor({
   const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
 
   // Text props
-  const [textContent, setTextContent] = useState("Your text");
+  const [textContent, setTextContent] = useState("Votre texte");
   const [fontFamily, setFontFamily] = useState("Arial");
   const [fontSize, setFontSize] = useState(32);
   const [currentColor, setCurrentColor] = useState(() =>
@@ -1601,7 +1601,7 @@ const DesignEditor = memo(function DesignEditor({
       {isLoading && (
         <div className={styles.loading}>
           <div className={styles.spinner} />
-          <p>Loading editor...</p>
+          <p>Chargement de l'éditeur...</p>
         </div>
       )}
 
@@ -1612,13 +1612,13 @@ const DesignEditor = memo(function DesignEditor({
             className={`${styles.sideTab} ${currentSide === "front" ? styles.active : ""}`}
             onClick={() => switchSide("front")}
           >
-            <span>👕</span> Front
+            <span>👕</span> Avant
           </button>
           <button
             className={`${styles.sideTab} ${currentSide === "back" ? styles.active : ""}`}
             onClick={() => switchSide("back")}
           >
-            <span>🔄</span> Back
+            <span>🔄</span> Arrière
           </button>
         </div>
         <div className={styles.headerActions}>
@@ -1626,7 +1626,8 @@ const DesignEditor = memo(function DesignEditor({
             className={styles.undoBtn}
             onClick={undo}
             disabled={!canUndo}
-            title="Undo (Ctrl+Z)"
+            title="Annuler (Ctrl+Z)"
+            aria-label="Annuler"
           >
             <svg
               viewBox="0 0 24 24"
@@ -1642,7 +1643,8 @@ const DesignEditor = memo(function DesignEditor({
             className={styles.undoBtn}
             onClick={redo}
             disabled={!canRedo}
-            title="Redo (Ctrl+Y)"
+            title="Rétablir (Ctrl+Y)"
+            aria-label="Rétablir"
           >
             <svg
               viewBox="0 0 24 24"
@@ -1657,7 +1659,8 @@ const DesignEditor = memo(function DesignEditor({
           <button
             className={styles.fullscreenBtn}
             onClick={toggleFullscreen}
-            title="Fullscreen"
+            title="Plein écran"
+            aria-label="Plein écran"
           >
             {isFullscreen ? (
               <svg
@@ -1698,7 +1701,8 @@ const DesignEditor = memo(function DesignEditor({
             <button
               className={`${styles.tool} ${activeTool === "select" ? styles.active : ""}`}
               onClick={() => setActiveTool("select")}
-              title="Select"
+              title="Sélectionner"
+              aria-label="Sélectionner"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1715,7 +1719,8 @@ const DesignEditor = memo(function DesignEditor({
                 setActiveTool("text");
                 addText();
               }}
-              title="Add Text"
+              title="Ajouter du texte"
+              aria-label="Ajouter du texte"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1734,7 +1739,8 @@ const DesignEditor = memo(function DesignEditor({
                 setActiveTool("image");
                 setShowImageOptions(true);
               }}
-              title="Add Images"
+              title="Ajouter des images"
+              aria-label="Ajouter des images"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1750,7 +1756,8 @@ const DesignEditor = memo(function DesignEditor({
             <button
               className={`${styles.tool} ${activeTool === "draw" ? styles.active : ""}`}
               onClick={() => setActiveTool("draw")}
-              title="Draw"
+              title="Dessiner"
+              aria-label="Dessiner"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -1769,7 +1776,8 @@ const DesignEditor = memo(function DesignEditor({
               <button
                 className={styles.tool}
                 onClick={duplicateSelected}
-                title="Duplicate (Ctrl+D)"
+                title="Dupliquer (Ctrl+D)"
+                aria-label="Dupliquer l'élément sélectionné"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1784,7 +1792,8 @@ const DesignEditor = memo(function DesignEditor({
               <button
                 className={`${styles.tool} ${styles.delete}`}
                 onClick={deleteSelected}
-                title="Delete"
+                title="Supprimer"
+                aria-label="Supprimer l'élément sélectionné"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1815,7 +1824,7 @@ const DesignEditor = memo(function DesignEditor({
 
           <div className={styles.preview}>
             <span className={styles.previewLabel}>
-              {currentSide === "front" ? "Back" : "Front"}
+              {currentSide === "front" ? "Arrière" : "Avant"}
             </span>
             <canvas ref={previewRef} />
           </div>
@@ -1828,10 +1837,10 @@ const DesignEditor = memo(function DesignEditor({
           <div className={styles.panelHeader}>
             <h3>
               {activeTool === "draw"
-                ? "Draw Settings"
+                ? "Réglages du dessin"
                 : selected?.type === "i-text"
-                  ? "Text Properties"
-                  : "Properties"}
+                  ? "Propriétés du texte"
+                  : "Propriétés"}
             </h3>
             <button
               onClick={() => {
@@ -1848,7 +1857,7 @@ const DesignEditor = memo(function DesignEditor({
           <div className={styles.panelBody}>
             {activeTool === "draw" && (
               <>
-                <label>Brush Size: {brushSize}px</label>
+                <label>Taille du pinceau : {brushSize}px</label>
                 <input
                   type="range"
                   min="2"
@@ -1856,7 +1865,7 @@ const DesignEditor = memo(function DesignEditor({
                   value={brushSize}
                   onChange={(e) => setBrushSize(+e.target.value)}
                 />
-                <label>Brush Color</label>
+                <label>Couleur du pinceau</label>
                 <ColorPicker
                   currentColor={currentColor}
                   onColorChange={(color) => {
@@ -1871,7 +1880,7 @@ const DesignEditor = memo(function DesignEditor({
 
             {selected?.type === "i-text" && (
               <>
-                <label>Your Text</label>
+                <label>Votre texte</label>
                 <textarea
                   className={styles.textArea}
                   value={textContent}
@@ -1879,11 +1888,11 @@ const DesignEditor = memo(function DesignEditor({
                     setTextContent(e.target.value);
                     updateTextProp("text", e.target.value);
                   }}
-                  placeholder="Enter your text here..."
+                  placeholder="Entrez votre texte ici..."
                   rows={3}
                 />
 
-                <label>Font Family</label>
+                <label>Police</label>
                 <div className={styles.fontDropdown}>
                   <button
                     className={styles.fontDropdownTrigger}
@@ -2199,7 +2208,7 @@ const DesignEditor = memo(function DesignEditor({
                           );
                           alert(
                             error.message ||
-                              "Failed to remove background. Please try again.",
+                              "Impossible de supprimer l'arrière-plan. Veuillez réessayer.",
                           );
                           setIsRemovingBg(false);
                         }
@@ -2209,10 +2218,10 @@ const DesignEditor = memo(function DesignEditor({
                       {isRemovingBg ? (
                         <>
                           <span className={styles.miniSpinner}></span>
-                          Removing...
+                          Suppression...
                         </>
                       ) : (
-                        <>✨ Remove Background</>
+                        <>✨ Supprimer l'arrière-plan</>
                       )}
                     </button>
                   </div>
@@ -2242,7 +2251,7 @@ const DesignEditor = memo(function DesignEditor({
                         >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        Background Removed
+                        Arrière-plan supprimé
                       </div>
                       {originalImages[(selected as any).id] && (
                         <button
@@ -2255,7 +2264,7 @@ const DesignEditor = memo(function DesignEditor({
                             const originalDataUrl = originalImages[id];
 
                             if (!originalDataUrl) {
-                              alert("Original image not found");
+                              alert("Image d'origine introuvable");
                               return;
                             }
 
@@ -2301,7 +2310,7 @@ const DesignEditor = memo(function DesignEditor({
                                     "Error restoring original image:",
                                     err,
                                   );
-                                  alert("Failed to restore original image");
+                                  alert("Impossible de restaurer l'image d'origine");
                                 });
                             } catch (error: any) {
                               console.error(
@@ -2310,12 +2319,12 @@ const DesignEditor = memo(function DesignEditor({
                               );
                               alert(
                                 error.message ||
-                                  "Failed to undo background removal",
+                                  "Impossible d'annuler la suppression de l'arrière-plan",
                               );
                             }
                           }}
                         >
-                          ↶ Undo Background Removal
+                          ↶ Annuler la suppression de l'arrière-plan
                         </button>
                       )}
                     </div>
@@ -2376,7 +2385,7 @@ const DesignEditor = memo(function DesignEditor({
 
                   {!showAIPrompt && generatedImages.length === 0 && (
                     <>
-                      <h3 className={styles.modalTitle}>Add Image</h3>
+                      <h3 className={styles.modalTitle}>Ajouter une image</h3>
                       <div
                         className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ""}`}
                         onClick={() => fileInputRef.current?.click()}
@@ -2668,7 +2677,7 @@ const DesignEditor = memo(function DesignEditor({
 
                 {!showAIPrompt && generatedImages.length === 0 && (
                   <>
-                    <h3 className={styles.modalTitle}>Add Image</h3>
+                    <h3 className={styles.modalTitle}>Ajouter une image</h3>
                     <div
                       className={`${styles.dragDropArea} ${isDraggingOver ? styles.dragOver : ""}`}
                       onClick={() => fileInputRef.current?.click()}
