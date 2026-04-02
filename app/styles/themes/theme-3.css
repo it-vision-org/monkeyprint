@@ -63,6 +63,17 @@
     border-bottom: 1px solid var(--t3-rule);
     animation: t3-fadeIn 0.4s ease both;
 }
+
+/* Use the floating/absolute header only on the homepage hero.
+   Theme 3 sub-pages should match Theme 1/2 behavior (sticky header). */
+.all-products-theme-3 .theme-3-header,
+.cart-theme-3 .theme-3-header,
+.checkout-theme-3 .theme-3-header,
+.product-detail-theme-3 .theme-3-header,
+.order-confirmation-theme-3 .theme-3-header {
+    position: sticky;
+    left: auto;
+}
 .theme-3-container {
     max-width: 1200px;
     width: 100%;
@@ -326,17 +337,20 @@
 /* Product grid */
 .t3-products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 210px));
     gap: 16px;
     max-width: 100%;
+    justify-content: start;
 }
 .t3-products-grid .theme-3-product-card {
-    max-width: 320px;
+    width: 100%;
+    max-width: 210px;
 }
 .theme-3-product-card {
     background: var(--t3-white);
     border: 1px solid var(--t3-rule);
     display: block;
+    width: 100%;
     overflow: hidden;
     border-radius: var(--t3-radius);
     box-shadow: var(--t3-shadow);
@@ -352,14 +366,18 @@
     width: 100%;
     overflow: hidden;
     background: linear-gradient(160deg, #f7fbf9 0%, #edf4f1 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
+}
+.theme-3-product-image > span {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
 }
 .theme-3-product-image img {
-    object-fit: cover !important;
-    object-position: 58% center !important;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    padding: 4px;
     display: block;
     transition: transform 0.3s;
 }

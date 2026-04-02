@@ -171,6 +171,7 @@ export default function AllProductsPage({
                                 href={`${theme.baseRoute}/product/${product.id}`}
                                 className={theme.productCardClassName}
                                 imageClassName={theme.productImageClassName}
+                                infoClassName={theme.productInfoClassName}
                                 nameClassName={theme.productNameClassName}
                                 priceClassName={theme.productPriceClassName}
                                 ratingClassName={theme.productRatingClassName}

@@ -6,8 +6,13 @@ import ProductPageClient from "./ProductPageClient";
 
 export default async function ProductPage({ params }: { params: Promise<{ storeSlug: string, productId: string }> }) {
     const { storeSlug, productId } = await params;
-    const product = await prisma.product.findUnique({
-        where: { id: productId },
+    const product = await prisma.product.findFirst({
+        where: {
+            id: productId,
+            store: {
+                slug: storeSlug
+            }
+        },
         include: {
             store: {
                 include: {

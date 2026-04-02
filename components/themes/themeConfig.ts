@@ -91,7 +91,6 @@ export const themeConfigs: Record<string, ThemeConfig> = {
         categoryLabelClassName: 'theme-3-category-label',
         viewAllClassName: 'theme-3-view-all',
         scrollButtonClassName: 'theme-3-scroll-btn',
-        logoFilter: 'brightness(0) invert(1)',
         cartStrokeColor: '#FFFFFF',
     },
 };

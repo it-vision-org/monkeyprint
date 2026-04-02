@@ -11,6 +11,10 @@ interface LoadingLinkProps extends React.ComponentProps<'a'> {
     className?: string;
     /** If true, shows a spinner. If false, just fades opacity */
     showSpinner?: boolean;
+    /** If true, disables link hover/tap motion variants */
+    disableAnimation?: boolean;
+    /** If true, render child wrapper as block (full width) instead of inline flex */
+    blockContent?: boolean;
 }
 
 export default function LoadingLink({
@@ -19,6 +23,8 @@ export default function LoadingLink({
     className,
     onClick,
     showSpinner = true,
+    disableAnimation = false,
+    blockContent = false,
     ...props
 }: LoadingLinkProps) {
     const router = useRouter();
@@ -77,16 +83,16 @@ export default function LoadingLink({
             href={href}
             onClick={handleClick}
             className={className}
-            initial="idle"
-            whileHover={!isLoading ? "hover" : undefined}
-            whileTap={!isLoading ? "tap" : undefined}
-            variants={navLinkVariants}
+            initial={disableAnimation ? undefined : "idle"}
+            whileHover={!isLoading && !disableAnimation ? "hover" : undefined}
+            whileTap={!isLoading && !disableAnimation ? "tap" : undefined}
+            variants={disableAnimation ? undefined : navLinkVariants}
             animate={isLoading ? { opacity: 0.7, x: 2 } : "idle"}
             transition={springResponsive}
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
+                display: blockContent ? 'block' : 'inline-flex',
+                alignItems: blockContent ? undefined : 'center',
+                gap: blockContent ? undefined : '8px',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 textDecoration: 'none',
                 color: 'inherit',
@@ -102,7 +108,12 @@ export default function LoadingLink({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    style={{
+                        display: blockContent ? 'block' : 'inline-flex',
+                        width: blockContent ? '100%' : undefined,
+                        alignItems: blockContent ? undefined : 'center',
+                        gap: blockContent ? undefined : '8px',
+                    }}
                 >
                     {children}
                     {isLoading && showSpinner && (

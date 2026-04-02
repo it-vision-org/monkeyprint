@@ -2,12 +2,12 @@
 
 import {
     useCart,
-    LoadingLink,
     AddToCartButton,
     StoreHeader,
     type ThemeConfig
 } from "@/components";
 import Image from "next/image";
+import Link from "next/link";
 import type { Product, Store } from '@prisma/client';
 
 type Customization = {
@@ -85,12 +85,12 @@ export default function ProductPageClient({
             />
 
             <div className="product-detail-container-modern">
-                <LoadingLink href={`/shop/${storeSlug}`} className="product-detail-back-modern">
+                <Link href={`/shop/${storeSlug}`} className="product-detail-back-modern">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <span>Retour à la boutique</span>
-                </LoadingLink>
+                </Link>
 
                 <div className="product-detail-content-modern">
                     {/* Image Gallery */}

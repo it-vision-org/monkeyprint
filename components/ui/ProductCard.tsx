@@ -42,13 +42,20 @@ export default function ProductCard({
     const finalReviewsClassName = reviewsClassName || (ratingClassName ? `${ratingClassName}-reviews` : '');
 
     return (
-        <LoadingLink href={href} className={className} style={{ display: 'block', textDecoration: 'none' }} showSpinner={false}>
+        <LoadingLink
+            href={href}
+            className={className}
+            style={{ display: 'block', textDecoration: 'none' }}
+            showSpinner={false}
+            disableAnimation
+            blockContent
+        >
             <motion.div
                 variants={disableAnimation ? undefined : (customVariants || productCardVariants)}
                 initial={disableAnimation ? undefined : "idle"}
                 whileHover={disableAnimation ? undefined : "hover"}
                 whileTap={disableAnimation ? undefined : "tap"}
-                style={{ cursor: 'pointer', height: '100%' }}
+                style={{ cursor: 'pointer', height: '100%', width: '100%' }}
             >
                 <div className={imageClassName}>
                     <Image
