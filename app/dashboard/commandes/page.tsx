@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import OrderActions from "./OrderActions";
+import CommandesSearch from "./CommandesSearch";
 import styles from "../../styles/commandes.module.css";
 
 export default async function CommandesPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string }> }) {
@@ -18,6 +19,17 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
 
     if (!user || !user.store) redirect("/create-shop");
     const store = user.store;
+
+    const [countNonConfirme, countConfirme, countRetours] = await Promise.all([
+        prisma.order.count({ where: { storeId: store.id, status: 'PENDING' } }),
+        prisma.order.count({
+            where: {
+                storeId: store.id,
+                status: { in: ['CONFIRMED', 'IN_TREATMENT', 'IN_DELIVERY', 'DELIVERED_AND_PAID'] },
+            },
+        }),
+        prisma.order.count({ where: { storeId: store.id, status: 'RETURN' } }),
+    ]);
 
     const resolvedParams = await searchParams;
     const statusParam = resolvedParams.status || 'non-confirme';
@@ -150,6 +162,11 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                         >
                             <span className={`${styles.dashSubmenuDot} ${styles.orange}`}></span>
                             Non confirmé
+                            <span
+                                className={`${styles.commandesStatusTabCount} ${statusParam === 'non-confirme' ? styles.commandesStatusTabCountActive : ''}`}
+                            >
+                                {countNonConfirme}
+                            </span>
                         </Link>
                         <Link
                             href={`/dashboard/commandes?status=confirme${query ? `&q=${encodeURIComponent(query)}` : ''}`}
@@ -157,6 +174,11 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                         >
                             <span className={`${styles.dashSubmenuDot} ${styles.green}`}></span>
                             Confirmé
+                            <span
+                                className={`${styles.commandesStatusTabCount} ${statusParam === 'confirme' ? styles.commandesStatusTabCountActive : ''}`}
+                            >
+                                {countConfirme}
+                            </span>
                         </Link>
                         <Link
                             href={`/dashboard/commandes?status=retours${query ? `&q=${encodeURIComponent(query)}` : ''}`}
@@ -164,6 +186,11 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                         >
                             <span className={`${styles.dashSubmenuDot} ${styles.red}`}></span>
                             Retours
+                            <span
+                                className={`${styles.commandesStatusTabCount} ${statusParam === 'retours' ? styles.commandesStatusTabCountActive : ''}`}
+                            >
+                                {countRetours}
+                            </span>
                         </Link>
                     </div>
 
@@ -184,22 +211,7 @@ export default async function CommandesPage({ searchParams }: { searchParams: Pr
                         </div>
                     )}
 
-                    <div className={styles.commandesSearchBar}>
-                        <form action="/dashboard/commandes" method="get" className={styles.commandesSearch} style={{ width: '100%', display: 'flex' }}>
-                            <input type="hidden" name="status" value={statusParam} />
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: '12px', position: 'absolute', pointerEvents: 'none' }}>
-                                <circle cx="11" cy="11" r="8" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M21 21L16.65 16.65" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <input
-                                type="text"
-                                name="q"
-                                placeholder="Rechercher par ID, nom, téléphone ou adresse..."
-                                defaultValue={query}
-                                style={{ width: '100%', paddingLeft: '40px' }}
-                            />
-                        </form>
-                    </div>
+                    <CommandesSearch key={statusParam} statusParam={statusParam} initialQuery={query} />
 
                     <div className={styles.commandesList}>
                         {orders.length === 0 ? (
