@@ -152,11 +152,11 @@ function Theme1({
               <SafeThemeImage
                 src={image}
                 alt={heroContent.title}
-                width={heroContent.imageWidth || 320}
-                height={heroContent.imageHeight || 420}
-                quality={75}
+                width={heroContent.imageWidth || 400}
+                height={heroContent.imageHeight || 480}
+                quality={80}
                 priority
-                style={{ objectFit: "contain", width: "100%", height: "100%" }}
+                style={{ objectFit: "contain" }}
               />
             </div>
           )}

@@ -70,7 +70,10 @@
       "Bash(npx --no-install playwright-cli screenshot --filename=screenshots-after/issue-products.png)",
       "Bash(npx --no-install playwright-cli goto http://localhost:3000/shop/mahdi-chaari-884/product/c32bf334-d636-489a-b5ef-d62e3d2bfaa4)",
       "Bash(npx --no-install playwright-cli screenshot --filename=screenshots-after/issue-product-detail.png)",
-      "Bash(npx --no-install playwright-cli snapshot)"
+      "Bash(npx --no-install playwright-cli snapshot)",
+      "Bash(cd \"C:\\\\Users\\\\Dainor\\\\Downloads\\\\Mo\\\\monkeyprint\" && python skills/ui-ux-pro-max/scripts/search.py \"mobile ecommerce tshirt fashion streetwear youth\" --design-system -p \"T-Shirt Store\" 2>&1 | head -120)",
+      "Bash(cd \"C:\\\\Users\\\\Dainor\\\\Downloads\\\\Mo\\\\monkeyprint\" && python .claude/skills/ui-ux-pro-max/scripts/search.py \"mobile ecommerce tshirt fashion streetwear\" --design-system -p \"T-Shirt Store\" 2>&1 | head -120)",
+      "Bash(cd \"C:\\\\Users\\\\Dainor\\\\Downloads\\\\Mo\\\\monkeyprint\" && python .claude/skills/ui-ux-pro-max/scripts/search.py \"casual ecommerce fashion warm friendly mediterranean youth\" --design-system -p \"Tunisia Tshirt Store\" 2>&1)"
     ]
   }
 }
