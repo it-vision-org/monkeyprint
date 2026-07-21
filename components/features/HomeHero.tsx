@@ -1,7 +1,7 @@
 'use client';
 
-import Image from "next/image";
-import LoadingLink from "../ui/LoadingLink";
+import Image from 'next/image';
+import LoadingLink from '../ui/LoadingLink';
 import styles from './HomeHero.module.css';
 import desktopStyles from './HomeHero.desktop.module.css';
 
@@ -14,76 +14,176 @@ export default function HomeHero({
 }: HomeHeroProps) {
     return (
         <>
-            {/* Mobile / Default View */}
-            <section className={`${styles.hero} ${className}`} aria-label="Hero">
-                <div className={styles.heroRect} aria-hidden="true" />
-                <div className={styles.monkey}>
-                    <Image src="/Monkey.svg" alt="" width={800} height={800} priority />
-                </div>
-                <div className={styles.coins}>
-                    <Image src="/Coins.png" alt="" width={800} height={247} priority />
-                </div>
-                <div className={styles.shopAdd}>
-                    <Image src="/shop-add.svg" alt="" width={80} height={80} priority />
+            {/* Mobile Hero */}
+            <section
+                className={`${styles.hero} ${className}`}
+                aria-labelledby="mobile-hero-title"
+            >
+                <div className={styles.backgroundShape} aria-hidden="true" />
+
+                <div className={styles.monkey} aria-hidden="true">
+                    <Image
+                        src="/Monkey.svg"
+                        alt=""
+                        fill
+                        sizes="90vw"
+                        priority
+                    />
                 </div>
 
-                <h1 className={styles.title}>
-                    GAGNEZ DE <span style={{ color: "#f3ff00" }}>L&apos;ARGENT GRATUITEMENT</span>, EN VENDANT SIMPLEMENT DES PRODUITS
-                    MARCHANDS <span style={{ color: "black" }}>EN TUNISIE.</span>
-                </h1>
-                <p className={styles.subtitle}>
-                    Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre
-                    boutique en ligne.
-                </p>
-                <LoadingLink href="/create-shop" className={styles.cta}>
-                    <span className={styles.ctaText}>COMMENCEZ GRATUITEMENT !</span>
-                </LoadingLink>
+                <div className={styles.shopAdd} aria-hidden="true">
+                    <Image
+                        src="/shop-add.svg"
+                        alt=""
+                        fill
+                        sizes="72px"
+                        priority
+                    />
+                </div>
+
+                <div className={styles.content}>
+                    <p className={styles.eyebrow}>
+                        CRÉE. VENDS. GAGNE.
+                    </p>
+
+                    <h1
+                        id="mobile-hero-title"
+                        className={styles.title}
+                    >
+                        UN DESIGN,
+                        <br />
+                        UNE BOUTIQUE,
+                        <br />
+                        <span>UN BUSINESS.</span>
+                    </h1>
+
+                    <p className={styles.subtitle}>
+                        Créez vos produits, lancez votre boutique et développez
+                        votre marque en Tunisie.
+                    </p>
+
+                    <LoadingLink
+                        href="/create-shop"
+                        className={styles.cta}
+                        disableAnimation
+                    >
+                        <span className={styles.ctaText}>
+                            CRÉER VOTRE BOUTIQUE
+                        </span>
+                    </LoadingLink>
+
+                    <p className={styles.ctaNote}>
+                        Gratuit pour commencer
+                    </p>
+                </div>
             </section>
 
-            {/* Desktop View (Restored from OldMonkey) */}
-            <section className={desktopStyles.desktopHeroSection}>
-                {/* Background Monkey SVG */}
-                <div className={desktopStyles.desktopHeroMonkey}>
-                    <Image src="/Monkey.svg" alt="" width={800} height={800} style={{ objectFit: 'contain' }} />
-                </div>
+            {/* Desktop Hero */}
+            <section
+                className={desktopStyles.desktopHeroSection}
+                aria-labelledby="desktop-hero-title"
+            >
+                <div
+                    className={desktopStyles.desktopHeroDecoration}
+                    aria-hidden="true"
+                />
 
-                {/* Coins decorations */}
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins1}`}>
-                    <Image src="/Coins.png" alt="" width={140} height={140} />
-                </div>
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins2}`}>
-                    <Image src="/Coins.png" alt="" width={160} height={160} />
-                </div>
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins3}`}>
-                    <Image src="/Coins.png" alt="" width={150} height={150} />
-                </div>
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins4}`}>
-                    <Image src="/Coins.png" alt="" width={130} height={130} />
-                </div>
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins5}`}>
-                    <Image src="/Coins.png" alt="" width={170} height={170} />
-                </div>
-                <div className={`${desktopStyles.desktopHeroCoins} ${desktopStyles.desktopHeroCoins6}`}>
-                    <Image src="/Coins.png" alt="" width={145} height={145} />
-                </div>
-
-                {/* Shopping Cart Icon */}
-                <div className={desktopStyles.desktopHeroShopAdd}>
-                    <Image src="/shop-add.svg" alt="" width={200} height={200} />
-                </div>
-
-                {/* Hero Content */}
                 <div className={desktopStyles.desktopHeroContent}>
-                    <h1 className={desktopStyles.desktopHeroTitle}>
-                        GAGNEZ DE <span className={desktopStyles.desktopHeroTitleHighlight}>L&apos;ARGENT GRATUITEMENT</span>, EN VENDANT SIMPLEMENT DES PRODUITS
-                        MARCHANDS <span className={desktopStyles.desktopHeroTitleBlack}>EN TUNISIE.</span>
-                    </h1>
-                    <p className={desktopStyles.desktopHeroSubtitle}>
-                        Téléchargez vos œuvres d&apos;art, personnalisez vos produits et démarrez votre propre boutique en ligne.
-                    </p>
-                    <LoadingLink href="/create-shop" className={desktopStyles.desktopHeroCta}>
-                        COMMENCEZ GRATUITEMENT !
-                    </LoadingLink>
+                    <div className={desktopStyles.desktopHeroText}>
+                        <p className={desktopStyles.desktopHeroEyebrow}>
+                            CRÉE. VENDS. GAGNE.
+                        </p>
+
+                       <h1
+                            id="desktop-hero-title"
+                            className={desktopStyles.desktopHeroTitle}
+                        >
+                            <span className={desktopStyles.desktopHeroTitleLine}>
+                                UN DESIGN,
+                            </span>
+
+                            <span className={desktopStyles.desktopHeroTitleLine}>
+                                UNE BOUTIQUE,
+                            </span>
+
+                            <span
+                                className={`${desktopStyles.desktopHeroTitleLine} ${desktopStyles.desktopHeroTitleBlue}`}
+                            >
+                                UN BUSINESS.
+                            </span>
+                        </h1>
+
+                        <p className={desktopStyles.desktopHeroSubtitle}>
+                            Transformez vos créations en produits, ouvrez votre
+                            boutique et lancez votre marque en Tunisie.
+                        </p>
+
+                        <div className={desktopStyles.desktopHeroActions}>
+                            <LoadingLink
+                                href="/create-shop"
+                                className={desktopStyles.desktopHeroCta}
+                                disableAnimation
+                            >
+                                CRÉER VOTRE BOUTIQUE
+                            </LoadingLink>
+
+                            <span className={desktopStyles.desktopHeroCtaNote}>
+                                Gratuit pour commencer
+                            </span>
+                        </div>
+                    </div>
+
+                    <div
+    className={desktopStyles.desktopHeroVisual}
+    aria-hidden="true"
+>
+    <div className={desktopStyles.desktopHeroVisualCard}>
+        <div className={desktopStyles.desktopHeroBrowserBar}>
+            <span />
+            <span />
+            <span />
+        </div>
+
+        <div className={desktopStyles.desktopHeroProductArea}>
+            <div className={desktopStyles.desktopHeroVisualMonkey}>
+                <Image
+                    src="/Monkey.svg"
+                    alt=""
+                    fill
+                    sizes="(max-width: 1200px) 380px, 500px"
+                    priority
+                />
+            </div>
+
+            <div className={desktopStyles.desktopHeroProductLabel}>
+                VOTRE DESIGN
+            </div>
+        </div>
+
+        <div className={desktopStyles.desktopHeroStoreCard}>
+            <div className={desktopStyles.desktopHeroStoreIcon}>
+                <Image
+                    src="/shop-add.svg"
+                    alt=""
+                    fill
+                    sizes="42px"
+                />
+            </div>
+
+            <div>
+                <strong>Votre boutique</strong>
+                <span>Prête à vendre</span>
+            </div>
+
+            <div className={desktopStyles.desktopHeroStatusDot} />
+        </div>
+
+        <div className={desktopStyles.desktopHeroVisualBadge}>
+            <span>100%</span>
+            <small>CRÉATIF</small>
+        </div>
+    </div>
+</div>
                 </div>
             </section>
         </>
