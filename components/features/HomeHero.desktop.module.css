@@ -1,318 +1,442 @@
-/* Desktop Styles - Premium Design for Large Screens */
-
-/* Enhanced Hero Section Desktop */
 .desktopHeroSection {
-  position: relative;
-  width: 100%;
-  padding: 120px 80px;
-  min-height: 700px;
-  display: flex; /* Default to flex, but we will toggle it */
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    135deg,
-    #69a5ff 0%,
-    #5c8eff 25%,
-    #4d7aff 50%,
-    #6b5cff 75%,
-    #8b3dff 100%
-  );
-  background-size: 200% 200%;
-  animation: gradientShift 15s ease infinite;
-  overflow: hidden;
-  box-sizing: border-box;
-  margin: 40px 80px;
-  border-radius: 40px;
-  max-width: calc(100% - 160px);
-  box-shadow: 0px 20px 60px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: none;
+    width: calc(100% - 160px);
+    max-width: 1440px;
+    min-height: 660px;
+    margin: 40px auto;
+    padding: 72px 80px;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid #e4e7ec;
+    border-radius: 32px;
+    background: #f7f8fa;
+    box-shadow: 0 16px 45px rgba(18, 24, 40, 0.08);
 }
 
-@media (max-width: 1400px) {
-  .desktopHeroSection {
-    margin: 40px 60px;
-    max-width: calc(100% - 120px);
-    padding-left: 60px;
-    padding-right: 60px;
-  }
+@media (min-width: 769px) {
+    .desktopHeroSection {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.desktopHeroDecoration {
+    position: absolute;
+    top: -180px;
+    right: -160px;
+    width: 580px;
+    height: 580px;
+    border-radius: 50%;
+    background: #e7f0ff;
+    pointer-events: none;
+}
+
+.desktopHeroDecoration::after {
+    content: "";
+    position: absolute;
+    right: 190px;
+    bottom: -380px;
+    width: 480px;
+    height: 480px;
+    border: 1px solid #dce8f9;
+    border-radius: 50%;
+}
+
+.desktopHeroContent {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+    align-items: center;
+    gap: 80px;
+    width: 100%;
+}
+
+.desktopHeroText {
+    max-width: 720px;
+}
+
+.desktopHeroEyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    margin: 0 0 28px;
+    padding: 0 16px;
+    border: 1px solid #cbdcf6;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #2468d9;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.14em;
+}
+
+.desktopHeroTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    margin: 0;
+    color: #16181d;
+    font-family: "Segoe UI", Inter, system-ui, sans-serif;
+    font-size: clamp(54px, 5.3vw, 82px);
+    font-style: normal;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.065em;
+    text-align: left;
+}
+
+.desktopHeroTitleLine {
+    display: block;
+}
+
+.desktopHeroTitleBlue {
+    color: #2468d9;
+}
+
+.desktopHeroSubtitle {
+    max-width: 610px;
+    margin: 32px 0 0;
+    color: #5e6571;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: clamp(17px, 1.5vw, 21px);
+    font-weight: 400;
+    line-height: 1.65;
+    text-align: left;
+}
+
+.desktopHeroActions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 38px;
+}
+
+.desktopHeroCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 290px;
+    min-height: 58px;
+    padding: 0 34px;
+    box-sizing: border-box;
+    border: 1px solid #2468d9;
+    border-radius: 12px;
+    background: #2468d9;
+    box-shadow: 0 10px 24px rgba(36, 104, 217, 0.2);
+    color: #ffffff !important;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.015em;
+    text-align: center;
+    text-decoration: none !important;
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        transform 180ms ease;
+}
+
+.desktopHeroCta:hover {
+    background: #1959bd;
+    border-color: #1959bd;
+    box-shadow: 0 14px 30px rgba(36, 104, 217, 0.27);
+    transform: translateY(-3px);
+}
+
+.desktopHeroCta:active {
+    box-shadow: 0 6px 14px rgba(36, 104, 217, 0.18);
+    transform: translateY(0);
+}
+
+.desktopHeroCtaNote {
+    margin-top: 12px;
+    margin-left: 4px;
+    color: #7a818d;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.desktopHeroVisual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktopHeroVisualCard {
+    position: relative;
+    width: min(100%, 470px);
+    aspect-ratio: 1 / 1;
+    padding: 64px 28px 28px;
+    box-sizing: border-box;
+    border: 1px solid #dce1e8;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 22px 55px rgba(25, 36, 55, 0.1);
+}
+
+.desktopHeroBrowserBar {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.desktopHeroBrowserBar span {
+    display: block;
+    width: 42px;
+    height: 7px;
+    border-radius: 999px;
+    background: #e7edf5;
+}
+
+.desktopHeroBrowserBar span:first-child {
+    background: #2f6edb;
+}
+
+.desktopHeroBrowserBar span:nth-child(2) {
+    width: 43px;
+    background: #dbe7f8;
+}
+
+.desktopHeroProductArea {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #edf4ff;
+}
+
+.desktopHeroProductArea::before {
+    content: "";
+    position: absolute;
+    top: -80px;
+    right: -70px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: #dceaff;
+}
+
+.desktopHeroVisualMonkey {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 255px;
+    height: 255px;
+    opacity: 0.72;
+    transform: translate(-50%, -50%);
+}
+
+.desktopHeroVisualMonkey img {
+    object-fit: contain;
+}
+
+.desktopHeroProductLabel {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    padding: 9px 13px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 7px 18px rgba(22, 24, 29, 0.08);
+    color: #2468d9;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+
+.desktopHeroStoreCard {
+    position: absolute;
+    right: -34px;
+    bottom: 45px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 210px;
+    min-height: 74px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    border: 1px solid #e2e6ec;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 16px 35px rgba(25, 36, 55, 0.14);
+}
+
+.desktopHeroStoreIcon {
+    position: relative;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: #edf4ff;
+}
+
+.desktopHeroStoreIcon img {
+    object-fit: contain;
+}
+
+.desktopHeroStoreCard strong,
+.desktopHeroStoreCard span {
+    display: block;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+.desktopHeroStoreCard strong {
+    color: #16181d;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.desktopHeroStoreCard span {
+    margin-top: 4px;
+    color: #7a818d;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.desktopHeroStatusDot {
+    width: 9px;
+    height: 9px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+.desktopHeroVisualBadge {
+    position: absolute;
+    left: -25px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 105px;
+    height: 105px;
+    padding: 18px;
+    box-sizing: border-box;
+    border-radius: 22px;
+    background: #16181d;
+    box-shadow: 0 14px 28px rgba(22, 24, 29, 0.16);
+    color: #ffffff;
+}
+
+.desktopHeroVisualBadge span {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 27px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.desktopHeroVisualBadge small {
+    margin-top: 8px;
+    color: #b9cff2;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.1em;
 }
 
 @media (max-width: 1200px) {
-  .desktopHeroSection {
-    padding: 100px 40px;
-    min-height: 600px;
-    margin: 40px 40px;
-    max-width: calc(100% - 80px);
-  }
+    .desktopHeroStoreCard {
+        right: -15px;
+    }
+
+    .desktopHeroVisualBadge {
+        left: -15px;
+    }
 }
 
-/* Hide on mobile by default, show on desktop */
+@media (max-width: 1400px) {
+    .desktopHeroSection {
+        width: calc(100% - 120px);
+        padding-right: 60px;
+        padding-left: 60px;
+    }
+
+    .desktopHeroContent {
+        gap: 55px;
+    }
+}
+
+@media (max-width: 1150px) {
+    .desktopHeroSection {
+        width: calc(100% - 80px);
+        min-height: 600px;
+        padding: 60px 45px;
+    }
+
+    .desktopHeroContent {
+        grid-template-columns: minmax(0, 1.1fr) minmax(330px, 0.9fr);
+        gap: 40px;
+    }
+
+    .desktopHeroTitle {
+        font-size: clamp(50px, 5.2vw, 65px);
+    }
+
+    .desktopHeroVisualCard {
+        max-width: 390px;
+    }
+
+    .desktopHeroVisualShop {
+        width: 105px;
+        height: 105px;
+    }
+
+    .desktopHeroVisualBadge {
+        width: 98px;
+        height: 98px;
+    }
+
+    .desktopHeroVisualBadge span {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 900px) {
+    .desktopHeroSection {
+        width: calc(100% - 48px);
+        padding: 54px 32px;
+    }
+
+    .desktopHeroContent {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 28px;
+    }
+
+    .desktopHeroTitle {
+        font-size: 48px;
+    }
+
+    .desktopHeroSubtitle {
+        font-size: 17px;
+    }
+}
+
 @media (max-width: 768px) {
     .desktopHeroSection {
         display: none !important;
     }
 }
 
-@media (min-width: 769px) {
-    .desktopHeroSection {
-        display: flex !important;
+@media (prefers-reduced-motion: reduce) {
+    .desktopHeroCta {
+        transition: none;
     }
-}
-
-
-@keyframes gradientShift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-.desktopHeroSection::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-      circle at 20% 30%,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 70%,
-      rgba(255, 255, 255, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.desktopHeroContent {
-  position: relative;
-  z-index: 4;
-  max-width: 1100px;
-  text-align: center;
-  width: 100%;
-}
-
-.desktopHeroMonkey {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 800px;
-  height: 800px;
-  opacity: 0.08;
-  z-index: 1;
-  pointer-events: none;
-  animation: floatMonkey 20s ease-in-out infinite;
-}
-
-@keyframes floatMonkey {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  25% {
-    transform: translate(-50%, -52%) rotate(2deg);
-  }
-  50% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  75% {
-    transform: translate(-50%, -48%) rotate(-2deg);
-  }
-}
-
-.desktopHeroCoins {
-  position: absolute;
-  z-index: 2;
-  pointer-events: none;
-  animation: floatCoin 8s ease-in-out infinite;
-  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.1));
-}
-
-@keyframes floatCoin {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
-
-.desktopHeroCoins1 {
-  top: 8%;
-  left: 10%;
-  width: 140px;
-  height: 140px;
-  transform: rotate(-10deg);
-  animation-delay: 0s;
-}
-
-.desktopHeroCoins2 {
-  top: 10%;
-  right: 8%;
-  width: 160px;
-  height: 160px;
-  transform: rotate(15deg);
-  animation-delay: 1s;
-}
-
-.desktopHeroCoins3 {
-  top: 45%;
-  left: 4%;
-  width: 150px;
-  height: 150px;
-  transform: rotate(-20deg);
-  animation-delay: 2s;
-}
-
-.desktopHeroCoins4 {
-  top: 48%;
-  right: 4%;
-  width: 130px;
-  height: 130px;
-  transform: rotate(30deg);
-  animation-delay: 1.5s;
-}
-
-.desktopHeroCoins5 {
-  bottom: 12%;
-  left: 8%;
-  width: 170px;
-  height: 170px;
-  transform: rotate(5deg);
-  animation-delay: 0.5s;
-}
-
-.desktopHeroCoins6 {
-  bottom: 15%;
-  right: 15%;
-  width: 145px;
-  height: 145px;
-  transform: rotate(-15deg);
-  animation-delay: 2.5s;
-}
-
-.desktopHeroShopAdd {
-  position: absolute;
-  bottom: -30px;
-  right: 60px;
-  width: 200px;
-  height: 200px;
-  z-index: 3;
-  pointer-events: none;
-  animation: bounceShop 3s ease-in-out infinite;
-  filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.2));
-}
-
-@keyframes bounceShop {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-15px) scale(1.05);
-  }
-}
-
-.desktopHeroTitle {
-  font-family: "Segoe UI", system-ui, sans-serif;
-  font-style: italic;
-  font-weight: 900;
-  font-size: clamp(42px, 6vw, 72px);
-  line-height: 1.15;
-  text-align: center;
-  color: #ffffff;
-  margin-bottom: 32px;
-  letter-spacing: -0.03em;
-  text-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
-  animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.desktopHeroTitleHighlight {
-  color: #f3ff00;
-  text-shadow: 0px 0px 20px rgba(243, 255, 0, 0.5);
-  display: inline-block;
-}
-
-.desktopHeroTitleBlack {
-  color: #000000;
-  text-shadow: 0px 2px 10px rgba(255, 255, 255, 0.3);
-}
-
-.desktopHeroSubtitle {
-  font-family: "Inter", system-ui, sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: clamp(18px, 2vw, 24px);
-  line-height: 1.7;
-  text-align: center;
-  color: #ffffff;
-  margin-bottom: 48px;
-  opacity: 0.98;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
-  animation: fadeInUp 1s ease-out 0.2s both;
-}
-
-.desktopHeroCta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  min-width: 380px;
-  height: 64px;
-  background: linear-gradient(90deg, #008cff 0%, #6f00f9 50%, #ff29c3 100%);
-  background-size: 200% 100%;
-  border: 1px solid #ffffff;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
-  border-radius: 32px;
-  text-decoration: none !important;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-              box-shadow 0.3s ease, 
-              background-position 0.5s ease;
-  font-family: "Inter", system-ui, sans-serif;
-  font-style: normal;
-  font-weight: 900;
-  font-size: 18px;
-  line-height: 22px;
-  text-align: center;
-  color: #ffffff !important;
-  text-transform: uppercase;
-  padding: 0 48px;
-  position: relative;
-  overflow: hidden;
-  animation: fadeInUp 1.2s ease-out 0.4s both;
-}
-
-.desktopHeroCta:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.25);
-  background-position: 100% 0;
-}
-
-.desktopHeroCta:active {
-  transform: translateY(1px) scale(0.97);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  transition-duration: 0.1s;
 }
